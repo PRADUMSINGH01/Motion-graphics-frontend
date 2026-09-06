@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import BackButton from "../components/BackButton";
 import {
   FiArrowLeft,
   FiInfo,
@@ -25,13 +26,7 @@ export default function AboutPage() {
       <div className="max-w-4xl mx-auto relative z-10">
         {/* Back navigation */}
         <div className="mb-6">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-xs font-medium text-slate-400 hover:text-white transition-colors bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] backdrop-blur-md px-3.5 py-1.5 rounded-xl"
-          >
-            <FiArrowLeft className="w-3.5 h-3.5 text-cyan-400" />
-            <span>Back to Studio</span>
-          </Link>
+          <BackButton fallbackUrl="/workspace" label="Back to Studio" />
         </div>
 
         {/* Page Header */}

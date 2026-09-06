@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import BackButton from "../components/BackButton";
 import {
   FiZap,
   FiCheck,
@@ -265,14 +266,16 @@ export default function BillingPage() {
       <div className="border-b border-white/[0.08] bg-[#090a0f]/90 backdrop-blur-xl sticky top-0 z-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
+            <BackButton fallbackUrl="/workspace" label="Back" />
+            <span className="text-slate-600 hidden sm:inline">•</span>
             <Link
               href="/workspace"
-              className="flex items-center gap-2 text-xs text-slate-400 hover:text-white transition-colors"
+              className="hidden sm:flex items-center gap-2 text-xs text-slate-400 hover:text-white transition-colors"
             >
               <FiLayers className="text-cyan-400" />
               <span>Studio Workspace</span>
             </Link>
-            <span className="text-slate-600">/</span>
+            <span className="text-slate-600 hidden sm:inline">/</span>
             <span className="text-xs font-semibold text-white font-mono">
               PLANS &amp; BILLING
             </span>

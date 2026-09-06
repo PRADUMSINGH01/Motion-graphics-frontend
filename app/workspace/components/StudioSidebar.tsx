@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   FiZap,
   FiType,
@@ -12,6 +13,7 @@ import {
   FiPlus,
   FiCpu,
   FiLogOut,
+  FiArrowLeft,
 } from "react-icons/fi";
 import Logo from "../../components/Logo";
 import { WorkspaceView, PlanTier, ProjectItem } from "../types";
@@ -47,14 +49,24 @@ export default function StudioSidebar({
   userEmail,
   onLogout,
 }: StudioSidebarProps) {
+  const router = useRouter();
+
+  const handleGoBack = () => {
+    if (typeof window !== "undefined" && window.history.length > 1) {
+      router.back();
+    } else {
+      router.push("/");
+    }
+  };
+
   return (
     <aside className="w-[240px] shrink-0 border-r border-white/[0.08] bg-[#0c0c11]/95 backdrop-blur-2xl flex flex-col justify-between h-full z-20 select-none">
       {/* Top Brand & Nav */}
       <div className="flex flex-col flex-1 overflow-y-auto scrollbar-none">
-        {/* Brand Header */}
-        <div className="h-14 flex items-center px-4 border-b border-white/[0.08]">
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <Logo size={32} />
+        {/* Brand Header with Back Button */}
+        <div className="h-14 flex items-center justify-between px-3.5 border-b border-white/[0.08]">
+          <Link href="/" className="flex items-center gap-2 group">
+            <Logo size={28} />
             <div className="flex flex-col">
               <span className="font-bold text-xs tracking-tight text-white leading-tight">
                 Animagent
@@ -64,6 +76,14 @@ export default function StudioSidebar({
               </span>
             </div>
           </Link>
+          <button
+            type="button"
+            onClick={handleGoBack}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] transition-colors cursor-pointer"
+            title="Back to Previous Route"
+          >
+            <FiArrowLeft className="w-3.5 h-3.5" />
+          </button>
         </div>
 
         {/* Primary Navigation Links */}

@@ -33,6 +33,7 @@ import {
 } from "react-icons/fi";
 import { useAlert } from "../context/AlertContext";
 import SpiderNetBackground from "../components/SpiderNetBackground";
+import BackButton from "../components/BackButton";
 
 export type TemplateCategory =
   | "Kinetic Typography"
@@ -1458,7 +1459,12 @@ export default function ExplorePage() {
 
       {/* Hero Header Section with Dynamic Spotlight */}
       <section className="relative z-10 pt-28 pb-8 px-4 sm:px-6 lg:px-8 border-b border-white/[0.06] bg-gradient-to-b from-[#0e1017]/90 via-[#0c0d14]/70 to-transparent backdrop-blur-xs">
-        <div className="max-w-7xl mx-auto space-y-8">
+        <div className="max-w-7xl mx-auto space-y-6">
+          {/* Back Navigation */}
+          <div>
+            <BackButton fallbackUrl="/workspace" label="Back to Studio" />
+          </div>
+
           {/* Header Title & Metrics */}
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
             <div className="space-y-3 max-w-3xl">

@@ -15,6 +15,7 @@ import {
 } from "react-icons/fi";
 import SpiderNetBackground from "../components/SpiderNetBackground";
 import GoogleAuthButton from "../components/GoogleAuthButton";
+import BackButton from "../components/BackButton";
 import Logo from "../components/Logo";
 import { useAuth } from "../context/AuthContext";
 import { useAlert } from "../context/AlertContext";
@@ -73,15 +74,9 @@ function LoginForm() {
         aria-hidden="true"
       />
 
-      {/* Back to Home Button */}
+      {/* Back Button */}
       <div className="relative z-10 w-full max-w-md mb-6">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 text-xs font-medium text-slate-400 hover:text-white transition-colors bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] backdrop-blur-md px-3.5 py-1.5 rounded-xl"
-        >
-          <FiArrowLeft className="w-3.5 h-3.5 text-cyan-400" />
-          <span>Back to Home</span>
-        </Link>
+        <BackButton fallbackUrl="/" label="Back" />
       </div>
 
       {/* Login Card */}

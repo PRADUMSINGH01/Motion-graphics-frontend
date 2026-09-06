@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useRouter } from "next/navigation";
 import {
   FiDownload,
   FiCopy,
@@ -37,11 +38,29 @@ export default function StudioHeader({
   isRefreshingQuotas,
   onRefreshQuotas,
 }: StudioHeaderProps) {
+  const router = useRouter();
+
+  const handleGoBack = () => {
+    if (typeof window !== "undefined" && window.history.length > 1) {
+      router.back();
+    } else {
+      router.push("/");
+    }
+  };
+
   return (
     <header className="relative z-10 h-14 shrink-0 border-b border-white/[0.08] bg-[#121013]/85 backdrop-blur-xl px-5 flex items-center justify-between">
       {workspaceMode === "prompt" ? (
         <>
           <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={handleGoBack}
+              className="p-1.5 rounded-lg text-slate-400 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] transition-colors cursor-pointer"
+              title="Back to Previous Route"
+            >
+              <FiArrowLeft className="w-3.5 h-3.5" />
+            </button>
             <span className="text-xs font-semibold text-white tracking-wide">
               {activeProject.name}
             </span>
@@ -102,6 +121,14 @@ export default function StudioHeader({
       ) : workspaceMode === "vectorizer" ? (
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-2.5">
+            <button
+              type="button"
+              onClick={handleGoBack}
+              className="p-1.5 rounded-lg text-slate-400 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] transition-colors cursor-pointer"
+              title="Back to Previous Route"
+            >
+              <FiArrowLeft className="w-3.5 h-3.5" />
+            </button>
             <span className="text-xs font-semibold text-white">
               Character Vectorizer Engine
             </span>
@@ -115,13 +142,20 @@ export default function StudioHeader({
             onClick={() => setWorkspaceMode("prompt")}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:text-white bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 transition-all cursor-pointer"
           >
-            <FiArrowLeft className="w-3.5 h-3.5" />
-            <span>Back to Motion Studio</span>
+            <span>Motion Studio</span>
           </button>
         </div>
       ) : workspaceMode === "usage" ? (
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-2.5">
+            <button
+              type="button"
+              onClick={handleGoBack}
+              className="p-1.5 rounded-lg text-slate-400 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] transition-colors cursor-pointer"
+              title="Back to Previous Route"
+            >
+              <FiArrowLeft className="w-3.5 h-3.5" />
+            </button>
             <span className="text-xs font-semibold text-white">
               Usages &amp; Compute Quotas
             </span>
@@ -154,7 +188,6 @@ export default function StudioHeader({
               onClick={() => setWorkspaceMode("prompt")}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:text-white bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 transition-all cursor-pointer"
             >
-              <FiArrowLeft className="w-3.5 h-3.5" />
               <span>Studio</span>
             </button>
           </div>
@@ -162,6 +195,14 @@ export default function StudioHeader({
       ) : (
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-2.5">
+            <button
+              type="button"
+              onClick={handleGoBack}
+              className="p-1.5 rounded-lg text-slate-400 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] transition-colors cursor-pointer"
+              title="Back to Previous Route"
+            >
+              <FiArrowLeft className="w-3.5 h-3.5" />
+            </button>
             <span className="text-xs font-semibold text-white">
               Plans &amp; Pricing Management
             </span>
@@ -176,8 +217,7 @@ export default function StudioHeader({
               onClick={() => setWorkspaceMode("prompt")}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:text-white bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 transition-all cursor-pointer"
             >
-              <FiArrowLeft className="w-3.5 h-3.5" />
-              <span>Back to Studio</span>
+              <span>Studio</span>
             </button>
           </div>
         </div>
