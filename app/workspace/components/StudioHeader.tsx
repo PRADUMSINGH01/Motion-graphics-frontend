@@ -23,6 +23,7 @@ interface StudioHeaderProps {
   onExport: (format: string) => void;
   isRefreshingQuotas: boolean;
   onRefreshQuotas: () => void;
+  hasActiveAnimation?: boolean;
 }
 
 export default function StudioHeader({
@@ -37,6 +38,7 @@ export default function StudioHeader({
   onExport,
   isRefreshingQuotas,
   onRefreshQuotas,
+  hasActiveAnimation = false,
 }: StudioHeaderProps) {
   const router = useRouter();
 
@@ -62,61 +64,67 @@ export default function StudioHeader({
               <FiArrowLeft className="w-3.5 h-3.5" />
             </button>
             <span className="text-xs font-semibold text-white tracking-wide">
-              {activeProject.name}
+              {hasActiveAnimation ? activeProject.name : "Motion Studio"}
             </span>
-            <span className="text-slate-600">•</span>
-            <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-white/10 text-cyan-300 border border-white/10">
-              {activeStyle}
-            </span>
-            <div className="hidden sm:flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span>60 FPS GPU Sync</span>
-            </div>
+            {hasActiveAnimation && (
+              <>
+                <span className="text-slate-600">•</span>
+                <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-white/10 text-cyan-300 border border-white/10">
+                  {activeStyle}
+                </span>
+                <div className="hidden sm:flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>60 FPS GPU Sync</span>
+                </div>
+              </>
+            )}
           </div>
 
-          <div className="flex items-center gap-2.5">
-            {/* Aspect Ratio Switcher */}
-            <div className="hidden sm:flex items-center bg-black/40 border border-white/[0.08] p-0.5 rounded-lg">
-              {(["16:9", "9:16", "1:1"] as AspectRatio[]).map((aspect) => (
-                <button
-                  key={aspect}
-                  type="button"
-                  onClick={() => setAspectRatio(aspect)}
-                  className={`px-2.5 py-1 rounded-md text-[11px] font-mono font-medium transition-all cursor-pointer ${
-                    aspectRatio === aspect
-                      ? "bg-white/15 text-cyan-300 font-semibold shadow-xs"
-                      : "text-slate-400 hover:text-white"
-                  }`}
-                >
-                  {aspect}
-                </button>
-              ))}
+          {hasActiveAnimation && (
+            <div className="flex items-center gap-2.5">
+              {/* Aspect Ratio Switcher */}
+              <div className="hidden sm:flex items-center bg-black/40 border border-white/[0.08] p-0.5 rounded-lg">
+                {(["16:9", "9:16", "1:1"] as AspectRatio[]).map((aspect) => (
+                  <button
+                    key={aspect}
+                    type="button"
+                    onClick={() => setAspectRatio(aspect)}
+                    className={`px-2.5 py-1 rounded-md text-[11px] font-mono font-medium transition-all cursor-pointer ${
+                      aspectRatio === aspect
+                        ? "bg-white/15 text-cyan-300 font-semibold shadow-xs"
+                        : "text-slate-400 hover:text-white"
+                    }`}
+                  >
+                    {aspect}
+                  </button>
+                ))}
+              </div>
+
+              {/* Quick Prompt Copy */}
+              <button
+                type="button"
+                onClick={onCopyPrompt}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] transition-colors cursor-pointer"
+                title="Copy Prompt"
+              >
+                {copiedPrompt ? (
+                  <FiCheck className="w-3.5 h-3.5 text-emerald-400" />
+                ) : (
+                  <FiCopy className="w-3.5 h-3.5" />
+                )}
+              </button>
+
+              {/* Export Action */}
+              <button
+                type="button"
+                onClick={() => onExport("MP4 60FPS")}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-950 bg-white hover:bg-slate-200 transition-all shadow-sm cursor-pointer"
+              >
+                <FiDownload className="w-3.5 h-3.5" />
+                <span>Export Video</span>
+              </button>
             </div>
-
-            {/* Quick Prompt Copy */}
-            <button
-              type="button"
-              onClick={onCopyPrompt}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] transition-colors cursor-pointer"
-              title="Copy Prompt"
-            >
-              {copiedPrompt ? (
-                <FiCheck className="w-3.5 h-3.5 text-emerald-400" />
-              ) : (
-                <FiCopy className="w-3.5 h-3.5" />
-              )}
-            </button>
-
-            {/* Export Action */}
-            <button
-              type="button"
-              onClick={() => onExport("MP4 60FPS")}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-950 bg-white hover:bg-slate-200 transition-all shadow-sm cursor-pointer"
-            >
-              <FiDownload className="w-3.5 h-3.5" />
-              <span>Export Video</span>
-            </button>
-          </div>
+          )}
         </>
       ) : workspaceMode === "vectorizer" ? (
         <div className="flex items-center justify-between w-full">

@@ -59,6 +59,7 @@ export default function WorkspacePage() {
           onExport={ws.handleExport}
           isRefreshingQuotas={ws.isRefreshingQuotas}
           onRefreshQuotas={ws.handleRefreshQuotas}
+          hasActiveAnimation={ws.hasActiveAnimation}
         />
 
         <div className="relative z-10 flex-1 overflow-y-auto scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden p-3 sm:p-4 max-w-5xl mx-auto w-full flex flex-col items-center">
@@ -90,6 +91,7 @@ export default function WorkspacePage() {
               motionSpeed={ws.motionSpeed}
               setMotionSpeed={ws.setMotionSpeed}
               onGenerate={ws.handleGenerate}
+              hasActiveAnimation={ws.hasActiveAnimation}
             />
           )}
 

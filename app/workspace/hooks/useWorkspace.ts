@@ -84,6 +84,9 @@ export function useWorkspace() {
     };
   }, [projects, activeProjectId, activeStyle, promptText, liveText, colorPalette]);
 
+  // Active animation flag: true ONLY when a motion graphic is generated or being generated
+  const hasActiveAnimation = Boolean(liveText.trim() || isGenerating || (projects.length > 0 && activeProjectId));
+
   // Billing & Usage States
   const [billingInterval, setBillingInterval] = useState<BillingInterval>("annual");
   const [isUpdatingPlan, setIsUpdatingPlan] = useState(false);
@@ -541,25 +544,13 @@ export function useWorkspace() {
   };
 
   // Create Project
-  // Create clean new composition
+  // Reset to clean prompt creation (no dummy projects)
   const handleCreateProject = () => {
-    const newId = `p-${Date.now()}`;
-    const newProj: ProjectItem = {
-      id: newId,
-      name: `Project ${projects.length + 1}`,
-      category: "Kinetic Typography",
-      duration: 5,
-      prompt: "",
-      text: "",
-      updatedAt: "Just now",
-      palette: "cyan",
-    };
-    setProjects((prev) => [newProj, ...prev]);
-    setActiveProjectId(newId);
+    setActiveProjectId("");
     setPromptText("");
     setLiveText("");
-    setColorPalette("cyan");
-    success("Project Created", `Created "${newProj.name}".`);
+    setCurrentTime(0);
+    setIsPlaying(false);
   };
 
   // Select inspiration preset
@@ -634,6 +625,7 @@ export function useWorkspace() {
     logout,
     workspaceMode,
     setWorkspaceMode,
+    hasActiveAnimation,
     projects,
     activeProjectId,
     setActiveProjectId,
