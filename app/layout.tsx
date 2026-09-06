@@ -26,9 +26,10 @@ export const metadata: Metadata = {
   },
 };
 
+import React, { Suspense } from "react";
 import { AlertProvider } from "./context/AlertContext";
 import { AuthProvider } from "./context/AuthContext";
-
+import RouteProgressBar from "./components/RouteProgressBar";
 import Footer from "./components/Footer";
 
 export default function RootLayout({
@@ -54,6 +55,9 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col" style={{ backgroundColor: "rgba(18, 16, 19, 1)" }}>
+        <Suspense fallback={null}>
+          <RouteProgressBar />
+        </Suspense>
         <AlertProvider>
           <AuthProvider>
             <Navbar />

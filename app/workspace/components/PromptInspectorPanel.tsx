@@ -169,12 +169,20 @@ export default function PromptInspectorPanel({
       {/* 2. BIGGER & CLEAN STUDIO PROMPT BOX */}
       <form
         onSubmit={onGenerate}
-        className={`relative flex flex-col rounded-2xl bg-[#090b13]/95 backdrop-blur-2xl border transition-all duration-200 shadow-2xl p-4 sm:p-5 ${
-          isFocused
+        className={`relative flex flex-col rounded-2xl bg-[#090b13]/95 backdrop-blur-2xl border transition-all duration-300 shadow-2xl p-4 sm:p-5 overflow-hidden ${
+          isGenerating
+            ? "border-cyan-400 shadow-[0_0_40px_rgba(0,240,255,0.3)] ring-1 ring-cyan-400/50"
+            : isFocused
             ? "border-cyan-400/80 shadow-[0_0_35px_rgba(0,240,255,0.22)]"
             : "border-white/[0.12] hover:border-white/[0.22]"
         }`}
       >
+        {/* Animated laser shimmer beam while waiting for server response */}
+        {isGenerating && (
+          <div className="absolute top-0 left-0 right-0 h-1 bg-white/10 overflow-hidden z-20">
+            <div className="h-full bg-gradient-to-r from-transparent via-cyan-400 to-transparent animate-shimmer-laser" />
+          </div>
+        )}
         {/* Main Spacious Textarea */}
         <div className="flex items-start gap-3.5">
           <div className="pt-1.5 text-cyan-400 shrink-0">
@@ -231,12 +239,16 @@ export default function PromptInspectorPanel({
           <button
             type="submit"
             disabled={isGenerating || !promptText.trim()}
-            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-cyan-400 via-sky-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-slate-950 font-bold text-xs shadow-lg shadow-cyan-500/25 transition-all duration-200 active:scale-[0.98] shrink-0 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+            className={`inline-flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold text-xs transition-all duration-200 active:scale-[0.98] shrink-0 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
+              isGenerating
+                ? "bg-gradient-to-r from-cyan-400 via-indigo-500 to-purple-500 text-white shadow-[0_0_20px_#00f0ff] animate-pulse"
+                : "bg-gradient-to-r from-cyan-400 via-sky-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-slate-950 shadow-lg shadow-cyan-500/25"
+            }`}
           >
             {isGenerating ? (
               <>
-                <div className="w-3.5 h-3.5 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
-                <span>Synthesizing...</span>
+                <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <span className="tracking-wide">Synthesizing 60 FPS Motion...</span>
               </>
             ) : (
               <>

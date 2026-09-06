@@ -52,3 +52,85 @@ h2, h3, h4, h5, h6 {
     width: 0%;
   }
 }
+
+/* Rotating orbital HUD rings */
+@keyframes spinSlow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes spinReverseSlow {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+/* Vertical holographic laser scanline */
+@keyframes scanlineSweep {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.85;
+  }
+  85% {
+    opacity: 0.85;
+  }
+  100% {
+    transform: translateY(600%);
+    opacity: 0;
+  }
+}
+
+/* Radial quantum orb glow pulse */
+@keyframes quantumPulse {
+  0%, 100% {
+    transform: scale(0.96);
+    opacity: 0.85;
+    box-shadow: 0 0 24px rgba(0, 240, 255, 0.45), 0 0 60px rgba(99, 102, 241, 0.25);
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+    box-shadow: 0 0 40px rgba(0, 240, 255, 0.8), 0 0 90px rgba(168, 85, 247, 0.45);
+  }
+}
+
+/* Gradient shimmer laser for progress bars */
+@keyframes shimmerLaser {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(250%);
+  }
+}
+
+.animate-spin-slow {
+  animation: spinSlow 12s linear infinite;
+}
+
+.animate-spin-reverse-slow {
+  animation: spinReverseSlow 8s linear infinite;
+}
+
+.animate-scanline {
+  animation: scanlineSweep 2.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.animate-quantum-pulse {
+  animation: quantumPulse 2.2s ease-in-out infinite;
+}
+
+.animate-shimmer-laser {
+  animation: shimmerLaser 1.6s ease-in-out infinite;
+}
+

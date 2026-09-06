@@ -8,6 +8,7 @@ import MotionStudioView from "./components/MotionStudioView";
 import VectorizerTab from "./components/VectorizerTab";
 import UsageTab from "./components/UsageTab";
 import BillingTab from "./components/BillingTab";
+import StudioLoadingScreen from "../components/StudioLoadingScreen";
 import { useWorkspace } from "./hooks/useWorkspace";
 
 export default function WorkspacePage() {
@@ -15,12 +16,10 @@ export default function WorkspacePage() {
 
   if (ws.isRedirecting) {
     return (
-      <div className="min-h-screen bg-[#090a0f] flex flex-col items-center justify-center text-slate-400 space-y-4">
-        <div className="w-8 h-8 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
-        <p className="text-xs font-mono uppercase tracking-widest text-slate-500">
-          Redirecting to authentication...
-        </p>
-      </div>
+      <StudioLoadingScreen
+        message="AUTHENTICATING SESSION..."
+        subMessage="Validating credentials and studio environment"
+      />
     );
   }
 

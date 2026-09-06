@@ -342,8 +342,8 @@ export function useWorkspace() {
     }
 
     setIsGenerating(true);
-    setGenerationProgress(15);
-    setGenerationStatus("Synthesizing vector motion curves...");
+    setGenerationProgress(18);
+    setGenerationStatus("Parsing natural language prompt & physics parameters...");
 
     try {
       const generatedPromptId = `p-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
@@ -375,15 +375,19 @@ export function useWorkspace() {
         category: activeStyle,
       }).catch(() => {});
 
+      await new Promise((r) => setTimeout(r, 450));
+      setGenerationProgress(45);
+      setGenerationStatus("Synthesizing 60 FPS Bezier keyframes & spring physics...");
+
+      await new Promise((r) => setTimeout(r, 550));
+      setGenerationProgress(75);
+      setGenerationStatus("Dispatching to GPU cluster & compiling chromatic shaders...");
+
+      await new Promise((r) => setTimeout(r, 500));
+      setGenerationProgress(95);
+      setGenerationStatus("Finalizing procedural motion matrix & raster cache...");
+
       await new Promise((r) => setTimeout(r, 350));
-      setGenerationProgress(50);
-      setGenerationStatus("Computing spring physics & Bezier keyframes...");
-
-      await new Promise((r) => setTimeout(r, 400));
-      setGenerationProgress(85);
-      setGenerationStatus("Compiling 60 FPS GPU render shaders...");
-
-      await new Promise((r) => setTimeout(r, 300));
       setGenerationProgress(100);
 
       const generatedProjectId =

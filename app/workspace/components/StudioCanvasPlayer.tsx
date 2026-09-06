@@ -3,6 +3,7 @@
 import React, { RefObject } from "react";
 import { FiPlay, FiPause, FiRepeat } from "react-icons/fi";
 import { AspectRatio } from "../types";
+import FuturisticSynthesisOverlay from "./FuturisticSynthesisOverlay";
 
 interface StudioCanvasPlayerProps {
   canvasRef: RefObject<HTMLCanvasElement | null>;
@@ -71,18 +72,12 @@ export default function StudioCanvasPlayer({
           </div>
         )}
 
-        {/* Generation Progress Overlay */}
+        {/* Futuristic Synthesis Waiting Animation */}
         {isGenerating && (
-          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm flex flex-col items-center justify-center p-4 space-y-2.5 z-30">
-            <div className="w-7 h-7 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
-            <span className="text-xs font-semibold text-white">{generationStatus}</span>
-            <div className="w-56 h-1 bg-white/10 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-cyan-400 transition-all duration-300 shadow-[0_0_8px_#00f0ff]"
-                style={{ width: `${generationProgress}%` }}
-              />
-            </div>
-          </div>
+          <FuturisticSynthesisOverlay
+            generationStatus={generationStatus}
+            generationProgress={generationProgress}
+          />
         )}
       </div>
 
