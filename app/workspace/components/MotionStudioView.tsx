@@ -77,6 +77,8 @@ export default function MotionStudioView({
         generationStatus={generationStatus}
         generationProgress={generationProgress}
         onScrub={onScrub}
+        promptText={promptText}
+        activeStyle={activeStyle}
       />
 
       <PromptInspectorPanel

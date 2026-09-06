@@ -20,6 +20,8 @@ interface StudioCanvasPlayerProps {
   generationStatus: string;
   generationProgress: number;
   onScrub: (val: number) => void;
+  promptText?: string;
+  activeStyle?: string;
 }
 
 export default function StudioCanvasPlayer({
@@ -36,6 +38,8 @@ export default function StudioCanvasPlayer({
   generationStatus,
   generationProgress,
   onScrub,
+  promptText,
+  activeStyle,
 }: StudioCanvasPlayerProps) {
   return (
     <div
@@ -77,6 +81,8 @@ export default function StudioCanvasPlayer({
           <FuturisticSynthesisOverlay
             generationStatus={generationStatus}
             generationProgress={generationProgress}
+            promptText={promptText}
+            activeStyle={activeStyle}
           />
         )}
       </div>
