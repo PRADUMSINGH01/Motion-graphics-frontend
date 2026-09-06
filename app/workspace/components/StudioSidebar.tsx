@@ -167,30 +167,47 @@ export default function StudioSidebar({
             </button>
           </div>
 
-          <div className="space-y-0.5">
-            {projects.map((proj) => {
-              const isActive = proj.id === activeProjectId && workspaceMode === "prompt";
-              return (
-                <button
-                  key={proj.id}
-                  type="button"
-                  onClick={() => onSelectProject(proj.id)}
-                  className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs flex items-center justify-between transition-all cursor-pointer ${
-                    isActive
-                      ? "bg-white/10 text-white font-medium border border-white/10"
-                      : "text-slate-400 hover:text-white hover:bg-white/[0.03]"
-                  }`}
-                >
-                  <span className="truncate flex-1 text-[11px]">{proj.name}</span>
-                  <span
-                    className={`w-1.5 h-1.5 rounded-full shrink-0 ml-2 ${
-                      isActive ? "bg-cyan-400 shadow-[0_0_6px_#00f0ff]" : "bg-slate-600"
+          {projects.length === 0 ? (
+            <div className="py-6 px-2 text-center rounded-xl bg-white/[0.015] border border-dashed border-white/[0.08] my-2">
+              <p className="text-[11px] text-slate-400 font-medium">No projects in DB</p>
+              <p className="text-[9px] text-slate-500 mt-0.5 leading-tight">
+                Enter a prompt or create a new composition
+              </p>
+              <button
+                type="button"
+                onClick={onCreateProject}
+                className="mt-2.5 inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-semibold text-cyan-400 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-400/30 transition-all cursor-pointer"
+              >
+                <FiPlus className="w-3 h-3" />
+                <span>New Project</span>
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-0.5">
+              {projects.map((proj) => {
+                const isActive = proj.id === activeProjectId && workspaceMode === "prompt";
+                return (
+                  <button
+                    key={proj.id}
+                    type="button"
+                    onClick={() => onSelectProject(proj.id)}
+                    className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs flex items-center justify-between transition-all cursor-pointer ${
+                      isActive
+                        ? "bg-white/10 text-white font-medium border border-white/10"
+                        : "text-slate-400 hover:text-white hover:bg-white/[0.03]"
                     }`}
-                  />
-                </button>
-              );
-            })}
-          </div>
+                  >
+                    <span className="truncate flex-1 text-[11px]">{proj.name}</span>
+                    <span
+                      className={`w-1.5 h-1.5 rounded-full shrink-0 ml-2 ${
+                        isActive ? "bg-cyan-400 shadow-[0_0_6px_#00f0ff]" : "bg-slate-600"
+                      }`}
+                    />
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 

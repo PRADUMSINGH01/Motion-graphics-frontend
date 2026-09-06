@@ -45,6 +45,14 @@ export default function UsageTab({
   extraCredits,
   onTopUpCredits,
 }: UsageTabProps) {
+  const now = new Date();
+  const currentMonth = now.toLocaleString("default", { month: "short" });
+  const nextMonthDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  const nextMonth = nextMonthDate.toLocaleString("default", { month: "short" });
+  const year = now.getFullYear();
+  const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  const daysLeft = Math.max(1, daysInMonth - now.getDate());
+
   return (
     <div className="space-y-5 max-w-4xl mx-auto w-full my-auto py-2">
       {/* Status Header */}
@@ -55,7 +63,7 @@ export default function UsageTab({
               Tier: {userPlan}
             </span>
             <span className="text-xs text-slate-400 font-mono">
-              Cycle: Sep 01 – Oct 01, 2026
+              Cycle: {currentMonth} 01 – {nextMonth} 01, {year}
             </span>
           </div>
           <h2 className="text-xl font-bold text-white tracking-tight">
@@ -65,7 +73,7 @@ export default function UsageTab({
 
         <div className="flex items-center gap-2 text-xs text-emerald-400 font-mono font-semibold bg-emerald-500/10 px-3 py-1.5 rounded-xl border border-emerald-500/20">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-          <span>Next reset in 24 days</span>
+          <span>Next reset in {daysLeft} days</span>
         </div>
       </div>
 
@@ -99,7 +107,7 @@ export default function UsageTab({
           </div>
 
           <div className="flex items-center justify-between text-[10px] text-slate-400 pt-0.5">
-            <span>Daily: 3 / 50</span>
+            <span>Used: {genUsed}</span>
             <span>Left: {Math.max(0, genLimit - genUsed)}</span>
           </div>
         </div>

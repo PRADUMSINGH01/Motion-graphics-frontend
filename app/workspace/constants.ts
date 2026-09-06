@@ -1,51 +1,6 @@
 import { InspirationPreset, PricingTier, ProjectItem } from "./types";
 
-export const DEFAULT_PROJECTS: ProjectItem[] = [
-  {
-    id: "p-1",
-    name: "Cyber Kinetic Velocity",
-    category: "Kinetic Typography",
-    duration: 5,
-    prompt:
-      "Kinetic typography sliding across staggered axes with glowing cyan edges and spring-damper easing",
-    text: "VELOCITY",
-    updatedAt: "Just now",
-    palette: "cyan",
-  },
-  {
-    id: "p-2",
-    name: "Prism Glass Refraction",
-    category: "3D Isometric",
-    duration: 6,
-    prompt:
-      "Interlocking frosted glass cubes rotating on a 45-degree isometric gimbal with chromatic dispersion",
-    text: "REFRACTION",
-    updatedAt: "15m ago",
-    palette: "purple",
-  },
-  {
-    id: "p-3",
-    name: "Quantum Logo Arc",
-    category: "Logo Reveal",
-    duration: 4,
-    prompt:
-      "Dual vector arcs rotating synchronously with high-voltage neon pulse and particle corona",
-    text: "ORBITAL",
-    updatedAt: "1h ago",
-    palette: "blue",
-  },
-  {
-    id: "p-4",
-    name: "Molten Plasma VFX",
-    category: "Abstract VFX",
-    duration: 5,
-    prompt:
-      "Undulating plasma sphere with organic harmonic frequency and liquid surface turbulence",
-    text: "NEBULA",
-    updatedAt: "3h ago",
-    palette: "crimson",
-  },
-];
+export const DEFAULT_PROJECTS: ProjectItem[] = [];
 
 export const INSPIRATION_PRESETS: InspirationPreset[] = [
   {

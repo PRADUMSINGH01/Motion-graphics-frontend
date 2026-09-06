@@ -153,11 +153,11 @@ export default function BillingTab({
               <FiCreditCard className="text-cyan-400" />
               Payment Method
             </span>
-            <span className="text-[10px] font-mono text-emerald-400">VISA 4242</span>
+            <span className="text-[10px] font-mono text-slate-500">None linked</span>
           </div>
-          <div className="text-xs text-slate-400 flex justify-between pt-1">
-            <span>Next charge (Oct 01):</span>
-            <strong className="text-white">${userPlan === "pro" ? 59 : userPlan === "creator" ? 22 : 0}.00 USD</strong>
+          <div className="text-xs text-slate-400 flex justify-between pt-1 items-center">
+            <span>{userPlan === "free" ? "Free Community Tier" : `${userPlan.toUpperCase()} Plan`}</span>
+            <span className="text-slate-500 font-mono text-[11px]">{userPlan === "free" ? "No billing required" : "Via Stripe"}</span>
           </div>
         </div>
 
@@ -167,17 +167,11 @@ export default function BillingTab({
               <FiFileText className="text-cyan-400" />
               Recent Receipt
             </span>
-            <button
-              type="button"
-              onClick={onDownloadReceipt}
-              className="text-xs text-cyan-400 hover:underline cursor-pointer"
-            >
-              Download PDF
-            </button>
+            <span className="text-[10px] font-mono text-slate-500">0 Invoices</span>
           </div>
           <div className="text-xs text-slate-400 flex justify-between pt-1">
-            <span>INV-2026-0901 (Sep 01)</span>
-            <span className="text-emerald-400 font-mono">Paid</span>
+            <span>Invoice History</span>
+            <span className="text-slate-500 font-mono text-[11px]">No charges yet</span>
           </div>
         </div>
       </div>

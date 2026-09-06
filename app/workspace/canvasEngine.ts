@@ -75,7 +75,8 @@ export function drawCanvasFrame(
   const animTime = t * (motionSpeed || 1);
   const cx = w / 2;
   const cy = h / 2;
-  const cleanText = (liveText || "VELOCITY").trim().toUpperCase();
+  const isStandby = !liveText || !liveText.trim();
+  const cleanText = isStandby ? "" : liveText.trim().toUpperCase();
 
   // 1. Deep Midnight Studio Backdrop
   const bgGrad = ctx.createRadialGradient(cx, cy, 30, cx, cy, Math.max(w, h));
@@ -118,54 +119,66 @@ export function drawCanvasFrame(
 
   // 4. Render Active Motion Graphic by Style
   if (activeStyle === "Kinetic Typography") {
-    // Dynamic text size based on character count so it never overflows
-    const baseFontSize = Math.min(
-      Math.max(28, Math.floor(w / Math.max(7, cleanText.length * 0.75))),
-      58
-    );
-    ctx.font = `900 ${baseFontSize}px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif`;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
+    if (isStandby) {
+      ctx.font = "bold 26px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
+      ctx.fillText("READY TO SYNTHESIZE", cx, cy);
 
-    const offset = isPlaying ? Math.sin(animTime * 2.8) * 24 : 0;
-    const bounce = isPlaying ? Math.cos(animTime * 3.4) * 6 : 0;
+      ctx.font = "600 11px monospace";
+      ctx.fillStyle = theme.accent;
+      ctx.fillText("60.0 FPS • HARDWARE ACCELERATED • ENTER PROMPT", cx, cy + 40);
+    } else {
+      // Dynamic text size based on character count so it never overflows
+      const baseFontSize = Math.min(
+        Math.max(28, Math.floor(w / Math.max(7, cleanText.length * 0.75))),
+        58
+      );
+      ctx.font = `900 ${baseFontSize}px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
 
-    if (isPlaying && offset !== 0) {
-      // Secondary chromatic split shadow
-      ctx.fillStyle = theme.secondary;
-      ctx.globalAlpha = 0.45;
-      ctx.fillText(cleanText, cx - offset, cy - 7 + bounce);
+      const offset = isPlaying ? Math.sin(animTime * 2.8) * 24 : 0;
+      const bounce = isPlaying ? Math.cos(animTime * 3.4) * 6 : 0;
 
-      // Primary chromatic split shadow
-      ctx.fillStyle = theme.primary;
-      ctx.globalAlpha = 0.55;
-      ctx.fillText(cleanText, cx + offset, cy + 7 - bounce);
-      ctx.globalAlpha = 1.0;
+      if (isPlaying && offset !== 0) {
+        // Secondary chromatic split shadow
+        ctx.fillStyle = theme.secondary;
+        ctx.globalAlpha = 0.45;
+        ctx.fillText(cleanText, cx - offset, cy - 7 + bounce);
+
+        // Primary chromatic split shadow
+        ctx.fillStyle = theme.primary;
+        ctx.globalAlpha = 0.55;
+        ctx.fillText(cleanText, cx + offset, cy + 7 - bounce);
+        ctx.globalAlpha = 1.0;
+      }
+
+      // Core crisp foreground with theme glow
+      ctx.fillStyle = "#ffffff";
+      ctx.shadowColor = theme.glow;
+      ctx.shadowBlur = isPlaying ? 24 : 16;
+      ctx.fillText(cleanText, cx, cy);
+      ctx.shadowBlur = 0;
+
+      // Trajectory guide line
+      if (isPlaying) {
+        const lineLen = Math.min(w * 0.6, 260);
+        const lineOffset = Math.sin(animTime * 3) * 30;
+        ctx.beginPath();
+        ctx.moveTo(cx - lineLen / 2 + lineOffset, cy + baseFontSize * 0.75);
+        ctx.lineTo(cx + lineLen / 2 + lineOffset, cy + baseFontSize * 0.75);
+        ctx.strokeStyle = theme.accent;
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
+
+      // Subtitle technical tag
+      ctx.font = "600 11px monospace";
+      ctx.fillStyle = theme.accent;
+      ctx.fillText(`60.0 FPS • ${theme.name} • SPRING PHYSICS`, cx, cy + baseFontSize * 0.75 + 24);
     }
-
-    // Core crisp foreground with theme glow
-    ctx.fillStyle = "#ffffff";
-    ctx.shadowColor = theme.glow;
-    ctx.shadowBlur = isPlaying ? 24 : 16;
-    ctx.fillText(cleanText, cx, cy);
-    ctx.shadowBlur = 0;
-
-    // Trajectory guide line
-    if (isPlaying) {
-      const lineLen = Math.min(w * 0.6, 260);
-      const lineOffset = Math.sin(animTime * 3) * 30;
-      ctx.beginPath();
-      ctx.moveTo(cx - lineLen / 2 + lineOffset, cy + baseFontSize * 0.75);
-      ctx.lineTo(cx + lineLen / 2 + lineOffset, cy + baseFontSize * 0.75);
-      ctx.strokeStyle = theme.accent;
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
-    }
-
-    // Subtitle technical tag
-    ctx.font = "600 11px monospace";
-    ctx.fillStyle = theme.accent;
-    ctx.fillText(`60.0 FPS • ${theme.name} • SPRING PHYSICS`, cx, cy + baseFontSize * 0.75 + 24);
   } else if (activeStyle === "3D Isometric") {
     ctx.save();
     ctx.translate(cx, cy - 10);
@@ -194,13 +207,17 @@ export function drawCanvasFrame(
     ctx.fillStyle = "#0a0c14";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText(cleanText.charAt(0) || "A", 0, 1);
+    ctx.fillText(cleanText ? cleanText.charAt(0) : "3D", 0, 1);
     ctx.restore();
 
     ctx.font = "600 11px monospace";
     ctx.fillStyle = theme.accent;
     ctx.textAlign = "center";
-    ctx.fillText(`ISOMETRIC 3D MATRIX // ${cleanText}`, cx, cy + 100);
+    ctx.fillText(
+      cleanText ? `ISOMETRIC 3D MATRIX // ${cleanText}` : "ISOMETRIC 3D MATRIX // READY",
+      cx,
+      cy + 100
+    );
   } else if (activeStyle === "Logo Reveal") {
     const radius = 64;
     const progress = isPlaying ? (animTime * 0.75) % 1 : 1;
@@ -232,16 +249,22 @@ export function drawCanvasFrame(
     ctx.fillStyle = "#ffffff";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText(cleanText.slice(0, 3) || "AG", cx, cy - 12);
+    ctx.fillText(cleanText ? cleanText.slice(0, 3) : "AG", cx, cy - 12);
 
-    // Full Brand Title Below
-    ctx.font = "bold 14px -apple-system, sans-serif";
-    ctx.fillStyle = "#ffffff";
-    ctx.fillText(cleanText, cx, cy + 74);
+    if (cleanText) {
+      // Full Brand Title Below
+      ctx.font = "bold 14px -apple-system, sans-serif";
+      ctx.fillStyle = "#ffffff";
+      ctx.fillText(cleanText, cx, cy + 74);
+    }
 
     ctx.font = "600 11px monospace";
     ctx.fillStyle = theme.accent;
-    ctx.fillText(`VECTOR LOGO REVEAL // ${theme.name}`, cx, cy + 96);
+    ctx.fillText(
+      cleanText ? `VECTOR LOGO REVEAL // ${theme.name}` : `VECTOR LOGO REVEAL // STANDBY`,
+      cx,
+      cy + (cleanText ? 96 : 74)
+    );
   } else if (activeStyle === "Abstract VFX") {
     const points = 50;
     const baseRadius = 56;
@@ -269,16 +292,22 @@ export function drawCanvasFrame(
     ctx.fill();
     ctx.shadowBlur = 0;
 
-    // Glowing overlay text
-    ctx.font = "bold 16px -apple-system, sans-serif";
-    ctx.fillStyle = "#ffffff";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(cleanText, cx, cy - 10);
+    if (cleanText) {
+      // Glowing overlay text
+      ctx.font = "bold 16px -apple-system, sans-serif";
+      ctx.fillStyle = "#ffffff";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(cleanText, cx, cy - 10);
+    }
 
     ctx.font = "600 11px monospace";
     ctx.fillStyle = theme.accent;
-    ctx.fillText(`HARMONIC PLASMA DYNAMICS // ${theme.name}`, cx, cy + 100);
+    ctx.fillText(
+      cleanText ? `HARMONIC PLASMA DYNAMICS // ${theme.name}` : `HARMONIC PLASMA DYNAMICS // STANDBY`,
+      cx,
+      cy + 100
+    );
   } else {
     // UI & Lottie Motion
     const barWidth = 26;
@@ -308,10 +337,14 @@ export function drawCanvasFrame(
     ctx.font = "bold 13px monospace";
     ctx.fillStyle = "#ffffff";
     ctx.textAlign = "center";
-    ctx.fillText(`[ ${cleanText} ]`, cx, cy + 72);
+    ctx.fillText(cleanText ? `[ ${cleanText} ]` : "[ STANDBY RUNTIME ]", cx, cy + 72);
 
     ctx.font = "600 11px monospace";
     ctx.fillStyle = theme.accent;
-    ctx.fillText(`PROCEDURAL LOTTIE RUNTIME // 60 FPS`, cx, cy + 94);
+    ctx.fillText(
+      cleanText ? `PROCEDURAL LOTTIE RUNTIME // 60 FPS` : `PROCEDURAL LOTTIE RUNTIME // IDLE`,
+      cx,
+      cy + 94
+    );
   }
 }

@@ -46,30 +46,43 @@ export function useWorkspace() {
     }
   }, [user, isLoading]);
 
-  // Projects state
+  // Projects state: pure database-driven state, initialized empty (no mock/dummy data)
   const [projects, setProjects] = useState<ProjectItem[]>(DEFAULT_PROJECTS);
-  const [activeProjectId, setActiveProjectId] = useState(DEFAULT_PROJECTS[0].id);
-  const activeProject = useMemo(
-    () => projects.find((p) => p.id === activeProjectId) || projects[0],
-    [projects, activeProjectId]
-  );
+  const [activeProjectId, setActiveProjectId] = useState<string>("");
 
-  // Active generation parameters
-  const [promptText, setPromptText] = useState(activeProject.prompt);
-  const [activeStyle, setActiveStyle] = useState<StylePreset>(activeProject.category);
+  // Active generation parameters (start empty, no dummy text/prompt)
+  const [promptText, setPromptText] = useState("");
+  const [activeStyle, setActiveStyle] = useState<StylePreset>("Kinetic Typography");
   const [aspectRatio, setAspectRatio] = useState<AspectRatio>("16:9");
-  const [liveText, setLiveText] = useState(activeProject.text);
-  const [colorPalette, setColorPalette] = useState<ColorPalette>(activeProject.palette || "cyan");
+  const [liveText, setLiveText] = useState("");
+  const [colorPalette, setColorPalette] = useState<ColorPalette>("cyan");
   const [motionSpeed, setMotionSpeed] = useState<MotionSpeed>(1);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationProgress, setGenerationProgress] = useState(0);
   const [generationStatus, setGenerationStatus] = useState("");
   const [copiedPrompt, setCopiedPrompt] = useState(false);
 
-  // Character Vectorizer Dedicated State
-  const [charInput, setCharInput] = useState("ANIMAGENT");
+  // Character Vectorizer Dedicated State (clean initial empty string)
+  const [charInput, setCharInput] = useState("");
   const [charEffect, setCharEffect] = useState<CharEffect>("kinetic_split");
   const [isConvertingChar, setIsConvertingChar] = useState(false);
+
+  // Dynamic activeProject resolution: returns actual project or clean new composition
+  const activeProject = useMemo<ProjectItem>(() => {
+    if (projects.length > 0) {
+      return projects.find((p) => p.id === activeProjectId) || projects[0];
+    }
+    return {
+      id: "new-composition",
+      name: "New Composition",
+      category: activeStyle,
+      duration: 5,
+      prompt: promptText,
+      text: liveText,
+      updatedAt: "Ready",
+      palette: colorPalette,
+    };
+  }, [projects, activeProjectId, activeStyle, promptText, liveText, colorPalette]);
 
   // Billing & Usage States
   const [billingInterval, setBillingInterval] = useState<BillingInterval>("annual");
@@ -85,6 +98,40 @@ export function useWorkspace() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const canvasContainerRef = useRef<HTMLDivElement | null>(null);
   const startTimeRef = useRef<number>(Date.now());
+
+  // Fetch real user projects/conversations from backend DB on mount
+  useEffect(() => {
+    let isMounted = true;
+    async function loadDbProjects() {
+      try {
+        const res = await api.conversation.list();
+        if (isMounted && res?.conversations && Array.isArray(res.conversations) && res.conversations.length > 0) {
+          const loaded: ProjectItem[] = res.conversations.map((c) => ({
+            id: c.id,
+            name: c.title || "Untitled Motion",
+            category: "Kinetic Typography",
+            duration: 5,
+            prompt: c.title || "",
+            text: (c.title || "").toUpperCase().slice(0, 18),
+            updatedAt: c.updatedAt ? new Date(c.updatedAt).toLocaleDateString() : "Recent",
+            palette: "cyan",
+          }));
+          setProjects(loaded);
+          setActiveProjectId(loaded[0].id);
+          setPromptText(loaded[0].prompt);
+          setLiveText(loaded[0].text);
+        }
+      } catch {
+        // Backend DB has no conversations or offline: keep projects empty []
+      }
+    }
+    if (user) {
+      loadDbProjects();
+    }
+    return () => {
+      isMounted = false;
+    };
+  }, [user]);
 
   // Check URL query param on mount (?tab=billing or ?tab=usage or ?prompt=...&style=...&text=...)
   useEffect(() => {
@@ -118,16 +165,21 @@ export function useWorkspace() {
 
   // Synchronize when active project changes
   useEffect(() => {
-    setPromptText(activeProject.prompt);
-    setActiveStyle(activeProject.category);
-    setLiveText(activeProject.text);
-    if (activeProject.palette) {
-      setColorPalette(activeProject.palette);
+    if (projects.length > 0 && activeProjectId) {
+      const proj = projects.find((p) => p.id === activeProjectId);
+      if (proj) {
+        setPromptText(proj.prompt);
+        setActiveStyle(proj.category);
+        setLiveText(proj.text);
+        if (proj.palette) {
+          setColorPalette(proj.palette);
+        }
+        startTimeRef.current = Date.now();
+        setCurrentTime(0);
+        setIsPlaying(false);
+      }
     }
-    startTimeRef.current = Date.now();
-    setCurrentTime(0);
-    setIsPlaying(false);
-  }, [activeProject.id]);
+  }, [activeProjectId, projects]);
 
   // 60FPS High-Definition Canvas Render Engine
   const renderEngine = useCallback(
@@ -334,20 +386,30 @@ export function useWorkspace() {
       await new Promise((r) => setTimeout(r, 300));
       setGenerationProgress(100);
 
-      setProjects((prev) =>
-        prev.map((p) =>
-          p.id === activeProject.id
-            ? {
-                ...p,
-                prompt: trimmed,
-                category: activeStyle,
-                text: targetText,
-                palette: targetPalette,
-                updatedAt: "Just now",
-              }
-            : p
-        )
-      );
+      const generatedProjectId =
+        activeProject?.id && activeProject.id !== "new-composition"
+          ? activeProject.id
+          : `p-${Date.now()}`;
+
+      const savedProject: ProjectItem = {
+        id: generatedProjectId,
+        name: trimmed.length > 28 ? `${trimmed.slice(0, 28)}...` : trimmed,
+        category: activeStyle,
+        duration: 5,
+        prompt: trimmed,
+        text: targetText,
+        palette: targetPalette,
+        updatedAt: "Just now",
+      };
+
+      setProjects((prev) => {
+        const index = prev.findIndex((p) => p.id === generatedProjectId);
+        if (index !== -1) {
+          return prev.map((p) => (p.id === generatedProjectId ? savedProject : p));
+        }
+        return [savedProject, ...prev];
+      });
+      setActiveProjectId(generatedProjectId);
 
       startTimeRef.current = Date.now();
       setCurrentTime(0);
@@ -465,19 +527,24 @@ export function useWorkspace() {
   };
 
   // Create Project
+  // Create clean new composition
   const handleCreateProject = () => {
     const newId = `p-${Date.now()}`;
     const newProj: ProjectItem = {
       id: newId,
-      name: `Untitled Project ${projects.length + 1}`,
+      name: `Project ${projects.length + 1}`,
       category: "Kinetic Typography",
       duration: 5,
-      prompt: "Kinetic typography sliding across staggered axes with glowing cyan edges",
-      text: "NEW PROJECT",
+      prompt: "",
+      text: "",
       updatedAt: "Just now",
+      palette: "cyan",
     };
-    setProjects([newProj, ...projects]);
+    setProjects((prev) => [newProj, ...prev]);
     setActiveProjectId(newId);
+    setPromptText("");
+    setLiveText("");
+    setColorPalette("cyan");
     success("Project Created", `Created "${newProj.name}".`);
   };
 
@@ -497,48 +564,53 @@ export function useWorkspace() {
 
   // Download receipt
   const handleDownloadReceipt = () => {
-    success("Receipt Downloaded", "Downloaded receipt for INV-2026-0901.");
+    failure("No Receipts", "No billing receipts found in database for this account.");
   };
 
-  // User Plan & Usage Details
-  const userPlan: PlanTier = (user?.plan?.tier as PlanTier) || "pro";
+  // User Plan & Usage Details: strictly DB-backed, no mock/dummy fallbacks
+  const userPlan: PlanTier = (user?.plan?.tier as PlanTier) || "free";
   const userPlanInterval: BillingInterval =
-    (user?.plan?.billingInterval as BillingInterval) || "annual";
-  const userDisplayName = user?.name || "Pro Creator";
-  const userEmail = user?.email || "studio@animagent.ai";
+    (user?.plan?.billingInterval as BillingInterval) || "monthly";
+  const userDisplayName =
+    user?.name ||
+    user?.raw?.profile?.displayName ||
+    user?.username ||
+    user?.email?.split("@")[0] ||
+    "Creator";
+  const userEmail = user?.email || "";
 
-  // Real-time usage calculation
-  const genUsed = (user?.usage?.generations?.monthly ?? 42) + extraCredits;
+  // Real-time usage calculation: fallback to 0 if not provided in DB
+  const genUsed = (user?.usage?.generations?.monthly ?? 0) + extraCredits;
   const genLimit =
     user?.usage?.generations?.limit ??
-    (userPlan === "free" ? 10 : userPlan === "creator" ? 150 : userPlan === "enterprise" ? 10000 : 600);
-  const genPercent = Math.min(100, Math.round((genUsed / genLimit) * 100));
+    (userPlan === "creator" ? 150 : userPlan === "pro" ? 600 : userPlan === "enterprise" ? 10000 : 10);
+  const genPercent = genLimit > 0 ? Math.min(100, Math.round((genUsed / genLimit) * 100)) : 0;
 
-  const rendersUsed = user?.usage?.renders?.monthly ?? 8;
+  const rendersUsed = user?.usage?.renders?.monthly ?? 0;
   const rendersLimit =
     user?.usage?.renders?.limit ??
-    (userPlan === "free" ? 2 : userPlan === "creator" ? 20 : userPlan === "enterprise" ? 500 : 50);
-  const rendersPercent = Math.min(100, Math.round((rendersUsed / rendersLimit) * 100));
+    (userPlan === "creator" ? 20 : userPlan === "pro" ? 50 : userPlan === "enterprise" ? 500 : 2);
+  const rendersPercent = rendersLimit > 0 ? Math.min(100, Math.round((rendersUsed / rendersLimit) * 100)) : 0;
 
-  const apiUsed = user?.usage?.apiCalls?.monthly ?? 1420;
+  const apiUsed = user?.usage?.apiCalls?.monthly ?? 0;
   const apiLimit =
     user?.usage?.apiCalls?.limit ??
-    (userPlan === "free" ? 100 : userPlan === "creator" ? 2500 : userPlan === "enterprise" ? 100000 : 10000);
-  const apiPercent = Math.min(100, Math.round((apiUsed / apiLimit) * 100));
+    (userPlan === "creator" ? 2500 : userPlan === "pro" ? 10000 : userPlan === "enterprise" ? 100000 : 100);
+  const apiPercent = apiLimit > 0 ? Math.min(100, Math.round((apiUsed / apiLimit) * 100)) : 0;
 
-  const storageUsedBytes = user?.usage?.storage?.usedBytes ?? 1.4 * 1024 * 1024 * 1024;
+  const storageUsedBytes = user?.usage?.storage?.usedBytes ?? 0;
   const storageLimitBytes =
     user?.usage?.storage?.limitBytes ??
-    (userPlan === "free"
-      ? 500 * 1024 * 1024
-      : userPlan === "creator"
+    (userPlan === "creator"
       ? 10 * 1024 * 1024 * 1024
+      : userPlan === "pro"
+      ? 50 * 1024 * 1024 * 1024
       : userPlan === "enterprise"
       ? 500 * 1024 * 1024 * 1024
-      : 50 * 1024 * 1024 * 1024);
+      : 500 * 1024 * 1024);
   const storageUsedGB = (storageUsedBytes / (1024 * 1024 * 1024)).toFixed(1);
   const storageLimitGB = Math.round(storageLimitBytes / (1024 * 1024 * 1024));
-  const storagePercent = Math.min(100, Math.round((storageUsedBytes / storageLimitBytes) * 100));
+  const storagePercent = storageLimitBytes > 0 ? Math.min(100, Math.round((storageUsedBytes / storageLimitBytes) * 100)) : 0;
 
   return {
     isRedirecting: !user && !isLoading,

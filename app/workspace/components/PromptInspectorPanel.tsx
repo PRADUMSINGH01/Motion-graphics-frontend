@@ -201,7 +201,7 @@ export default function PromptInspectorPanel({
               type="text"
               value={liveText}
               onChange={(e) => setLiveText(e.target.value)}
-              placeholder="VELOCITY"
+              placeholder="TEXT"
               maxLength={22}
               className="w-20 sm:w-24 bg-transparent text-xs font-bold text-white placeholder-slate-500 focus:outline-none uppercase font-mono tracking-wider"
               title="On-screen Rendered Text"
