@@ -4,7 +4,7 @@
  */
 
 export const HOSTED_API_URL = "https://motion-backend--background-ab0ec.us-east4.hosted.app";
-export const LOCAL_API_URL = "http://localhost:3001";
+export const LOCAL_API_URL = "http://localhost:8080";
 
 export function getApiBaseUrl(): string {
   if (typeof window !== "undefined") {
