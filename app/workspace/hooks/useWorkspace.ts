@@ -84,8 +84,8 @@ export function useWorkspace() {
     };
   }, [projects, activeProjectId, activeStyle, promptText, liveText, colorPalette]);
 
-  // Active animation flag: true ONLY when a motion graphic is generated or being generated
-  const hasActiveAnimation = Boolean(liveText.trim() || isGenerating || (projects.length > 0 && activeProjectId));
+  // Active animation flag: true ONLY when a motion graphic has actually been generated
+  const hasActiveAnimation = Boolean(liveText.trim() || (projects.length > 0 && activeProjectId));
 
   // Billing & Usage States
   const [billingInterval, setBillingInterval] = useState<BillingInterval>("annual");
@@ -291,7 +291,7 @@ export function useWorkspace() {
     startTimeRef.current = Date.now() - val * 1000;
   };
 
-  // Handle Prompt-to-Motion Generation
+  // Handle Prompt-to-Motion Generation: Strictly awaits server response from /api/prompt
   const handleGenerate = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     const trimmed = promptText.trim();
@@ -300,63 +300,10 @@ export function useWorkspace() {
       return;
     }
 
-    // 1. Text Extraction: Always use prompt text directly so whatever user enters animates immediately!
-    let targetText = "";
-    const quoteMatch = trimmed.match(/["']([^"']{1,32})["']/);
-    if (quoteMatch && quoteMatch[1]?.trim()) {
-      targetText = quoteMatch[1].trim().toUpperCase();
-    } else {
-      const kwMatch = trimmed.match(/\b(?:text|title|word|for|brand|named|saying):\s*([a-zA-Z0-9_-]{1,32})\b/i);
-      if (kwMatch && kwMatch[1]?.trim()) {
-        targetText = kwMatch[1].trim().toUpperCase();
-      } else {
-        // Direct prompt text (clean slice up to 24 chars for maximum visual impact)
-        targetText = trimmed.toUpperCase().slice(0, 24);
-      }
-    }
-    setLiveText(targetText);
-
-    // 2. Intelligent Style Detection from Prompt:
-    const lower = trimmed.toLowerCase();
-    let detectedStyle: StylePreset = "Kinetic Typography";
-    if (lower.includes("3d") || lower.includes("cube") || lower.includes("isometric") || lower.includes("prism")) {
-      detectedStyle = "3D Isometric";
-    } else if (lower.includes("logo") || lower.includes("reveal") || lower.includes("badge") || lower.includes("emblem") || lower.includes("brand")) {
-      detectedStyle = "Logo Reveal";
-    } else if (lower.includes("vfx") || lower.includes("plasma") || lower.includes("abstract") || lower.includes("fluid") || lower.includes("liquid") || lower.includes("smoke")) {
-      detectedStyle = "Abstract VFX";
-    } else if (lower.includes("ui") || lower.includes("lottie") || lower.includes("audio") || lower.includes("equalizer") || lower.includes("sound") || lower.includes("bars")) {
-      detectedStyle = "UI & Lottie";
-    }
-    setActiveStyle(detectedStyle);
-
-    // 3. Intelligent Color Palette Detection from Prompt:
-    let targetPalette: ColorPalette = "cyan";
-    if (lower.includes("purple") || lower.includes("violet") || lower.includes("magenta") || lower.includes("pink")) {
-      targetPalette = "purple";
-    } else if (lower.includes("amber") || lower.includes("gold") || lower.includes("yellow") || lower.includes("solar") || lower.includes("orange")) {
-      targetPalette = "amber";
-    } else if (lower.includes("matrix") || lower.includes("emerald") || lower.includes("green")) {
-      targetPalette = "matrix";
-    } else if (lower.includes("crimson") || lower.includes("flame") || lower.includes("fire") || lower.includes("ruby") || lower.includes("red")) {
-      targetPalette = "crimson";
-    } else if (lower.includes("blue") || lower.includes("ocean") || lower.includes("sky")) {
-      targetPalette = "blue";
-    }
-    setColorPalette(targetPalette);
-
-    // 4. Motion Speed Detection:
-    if (lower.includes("fast") || lower.includes("hyper") || lower.includes("rapid") || lower.includes("rush")) {
-      setMotionSpeed(1.5);
-    } else if (lower.includes("slow") || lower.includes("cinematic") || lower.includes("smooth") || lower.includes("calm")) {
-      setMotionSpeed(0.5);
-    } else {
-      setMotionSpeed(1);
-    }
-
+    // Enter waiting / generating state (do NOT prematurely render canvas before server responds)
     setIsGenerating(true);
-    setGenerationProgress(18);
-    setGenerationStatus("Parsing natural language prompt & physics parameters...");
+    setGenerationProgress(20);
+    setGenerationStatus("Connecting to /api/prompt & dispatching prompt to GPU queue...");
 
     try {
       const generatedPromptId = `p-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
@@ -366,42 +313,45 @@ export function useWorkspace() {
           ? localStorage.getItem("animagent_user_id") || "guest_user"
           : "guest_user");
 
-      // Submit prompt job to backend BullMQ queue (/api/prompt)
-      let backendJobId: string | null = null;
-      try {
-        const queueRes = await api.prompt.submit({
-          prompt: trimmed,
-          userId: activeUserId,
-          promptId: generatedPromptId,
-          template: activeStyle,
-        });
-        if (queueRes?.job?.id) {
-          backendJobId = String(queueRes.job.id);
-        }
-      } catch (queueErr) {
-        console.warn("[Workspace] Prompt queue background notice:", queueErr);
-      }
+      setGenerationProgress(45);
+      setGenerationStatus("Synthesizing 60 FPS motion on GPU cluster...");
 
+      // Await real server response from prompt API
+      const serverRes = await api.prompt.submit({
+        prompt: trimmed,
+        userId: activeUserId,
+        promptId: generatedPromptId,
+        template: activeStyle,
+      });
+
+      setGenerationProgress(80);
+      setGenerationStatus("Receiving synthesized motion parameters from server...");
+
+      // Small 300ms visual buffer so user sees that server generation succeeded smoothly
+      await new Promise((resolve) => setTimeout(resolve, 300));
+      setGenerationProgress(100);
+
+      // Extract and preview the response returned by prompt API
+      const motionData = serverRes?.motion;
+      const finalRenderText =
+        motionData?.renderedText ||
+        trimmed.slice(0, 24).toUpperCase();
+      const finalStyle = (motionData?.style as StylePreset) || "Kinetic Typography";
+      const finalPalette = (motionData?.palette as ColorPalette) || "cyan";
+      const finalDuration = motionData?.duration || 5;
+
+      // Update canvas engine state with the server response
+      setLiveText(finalRenderText);
+      setActiveStyle(finalStyle);
+      setColorPalette(finalPalette);
+      setMotionSpeed(1);
+
+      // Save conversation in DB
       addChatConversation({
         title: trimmed.slice(0, 32),
         prompt: trimmed,
-        category: activeStyle,
+        category: finalStyle,
       }).catch(() => {});
-
-      await new Promise((r) => setTimeout(r, 450));
-      setGenerationProgress(45);
-      setGenerationStatus("Synthesizing 60 FPS Bezier keyframes & spring physics...");
-
-      await new Promise((r) => setTimeout(r, 550));
-      setGenerationProgress(75);
-      setGenerationStatus("Dispatching to GPU cluster & compiling chromatic shaders...");
-
-      await new Promise((r) => setTimeout(r, 500));
-      setGenerationProgress(95);
-      setGenerationStatus("Finalizing procedural motion matrix & raster cache...");
-
-      await new Promise((r) => setTimeout(r, 350));
-      setGenerationProgress(100);
 
       const generatedProjectId =
         activeProject?.id && activeProject.id !== "new-composition"
@@ -411,11 +361,11 @@ export function useWorkspace() {
       const savedProject: ProjectItem = {
         id: generatedProjectId,
         name: trimmed.length > 28 ? `${trimmed.slice(0, 28)}...` : trimmed,
-        category: activeStyle,
-        duration: 5,
+        category: finalStyle,
+        duration: finalDuration,
         prompt: trimmed,
-        text: targetText,
-        palette: targetPalette,
+        text: finalRenderText,
+        palette: finalPalette,
         updatedAt: "Just now",
       };
 
@@ -428,17 +378,20 @@ export function useWorkspace() {
       });
       setActiveProjectId(generatedProjectId);
 
+      // Reset transport and start playback with the new server-generated motion
       startTimeRef.current = Date.now();
       setCurrentTime(0);
       setIsPlaying(true);
+
       success(
         "Motion Generated",
-        backendJobId
-          ? `Queued job #${backendJobId} • Rendered 60FPS ${activeStyle} (${targetPalette}).`
-          : `Rendered 60FPS ${activeStyle} (${targetPalette}).`
+        serverRes?.job?.id
+          ? `Queued job #${serverRes.job.id} • Previewing 60FPS ${finalStyle}.`
+          : `Previewing 60FPS ${finalStyle} from server.`
       );
-    } catch {
-      failure("Error", "Could not generate motion.");
+    } catch (err: any) {
+      console.error("[Workspace] Prompt API error:", err);
+      failure("Generation Error", err?.message || "Could not reach prompt server.");
     } finally {
       setIsGenerating(false);
       setGenerationProgress(0);

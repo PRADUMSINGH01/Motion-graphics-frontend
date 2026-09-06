@@ -1464,7 +1464,6 @@ export default function ExplorePage() {
           <div>
             <BackButton fallbackUrl="/workspace" label="Back to Studio" />
           </div>
-
           {/* Header Title & Metrics */}
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
             <div className="space-y-3 max-w-3xl">

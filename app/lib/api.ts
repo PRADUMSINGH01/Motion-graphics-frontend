@@ -100,10 +100,36 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
     try {
       res = await executeFetch(fallbackUrl);
     } catch {
-      throw new ApiError(
-        `Unable to reach backend server. Please check your connection or start the backend at ${LOCAL_API_URL}.`,
-        0
-      );
+      // If hosted/local backends fail, try local Next.js route if in browser
+      if (typeof window !== "undefined") {
+        const nextUrl = `${window.location.origin}/${cleanEndpoint}`;
+        try {
+          res = await executeFetch(nextUrl);
+        } catch {
+          throw new ApiError(
+            `Unable to reach backend server. Please check your connection or start the backend at ${LOCAL_API_URL}.`,
+            0
+          );
+        }
+      } else {
+        throw new ApiError(
+          `Unable to reach backend server. Please check your connection or start the backend at ${LOCAL_API_URL}.`,
+          0
+        );
+      }
+    }
+  }
+
+  // If response returned 404 (or server error on prompt) and in browser, attempt Next.js route fallback
+  if (!res.ok && (res.status === 404 || cleanEndpoint.startsWith("api/prompt")) && typeof window !== "undefined") {
+    const nextUrl = `${window.location.origin}/${cleanEndpoint}`;
+    if (primaryUrl !== nextUrl) {
+      try {
+        const nextRes = await executeFetch(nextUrl);
+        if (nextRes.ok) {
+          res = nextRes;
+        }
+      } catch {}
     }
   }
 
@@ -444,7 +470,21 @@ export const api = {
       promptId: string;
       template?: string;
     }) =>
-      request<{ message: string; job?: any }>("/api/prompt", {
+      request<{
+        success: boolean;
+        message: string;
+        job?: any;
+        motion?: {
+          promptId: string;
+          prompt: string;
+          renderedText: string;
+          style: string;
+          palette: string;
+          fps: number;
+          duration: number;
+          status: string;
+        };
+      }>("/api/prompt", {
         method: "POST",
         body: JSON.stringify(payload),
       }),
