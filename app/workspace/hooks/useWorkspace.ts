@@ -109,7 +109,7 @@ export function useWorkspace() {
       try {
         const res = await api.conversation.list();
         if (isMounted && res?.conversations && Array.isArray(res.conversations) && res.conversations.length > 0) {
-          const loaded: ProjectItem[] = res.conversations.map((c) => ({
+          const loaded: ProjectItem[] = res.conversations.map((c: any) => ({
             id: c.id,
             name: c.title || "Untitled Motion",
             category: "Kinetic Typography",

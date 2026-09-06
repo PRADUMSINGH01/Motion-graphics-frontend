@@ -13,6 +13,33 @@ export async function POST(req: Request) {
     }
 
     const trimmed = prompt.trim();
+
+    // 1. Attempt to delegate to backend BullMQ queue if backend is online
+    try {
+      const backendUrl =
+        process.env.BACKEND_INTERNAL_URL ||
+        process.env.NEXT_PUBLIC_API_URL ||
+        "http://localhost:8080";
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2000);
+
+      const backendRes = await fetch(`${backendUrl.replace(/\/$/, "")}/api/prompt`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+
+      if (backendRes.ok) {
+        const backendData = await backendRes.json();
+        return NextResponse.json(backendData);
+      }
+    } catch {
+      // Backend unreachable or timed out: proceed with procedural motion synthesis
+    }
+
     const lower = trimmed.toLowerCase();
 
     // Intelligent Style Detection from Prompt

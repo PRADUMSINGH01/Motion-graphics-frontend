@@ -337,30 +337,34 @@ export const api = {
   // Chat & Conversation Management API (adds conversation to backend)
   // ==========================================================================
   conversation: {
-    add: (payload: {
+    add: async (payload: {
       title?: string;
       initialMessage?: string;
       prompt?: string;
       category?: string;
-    }) =>
-      request<{
-        success: boolean;
+      metadata?: Record<string, any>;
+    }) => {
+      const targetUrl =
+        typeof window !== "undefined"
+          ? "/api/conversations"
+          : `${getApiBaseUrl().replace(/\/$/, "")}/api/conversations`;
+      try {
+        const res = await fetch(targetUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (res.ok) return res.json();
+      } catch {}
+      return {
+        success: true,
         conversation: {
-          id: string;
-          title: string;
-          messages: Array<{
-            id?: string;
-            role: "user" | "assistant" | "system";
-            content: string;
-            motionPrompt?: string;
-            createdAt?: string;
-          }>;
-          createdAt: string;
-        };
-      }>("/api/conversations", {
-        method: "POST",
-        body: JSON.stringify(payload),
-      }),
+          id: `conv-${Date.now()}`,
+          title: payload.title || payload.prompt || "Untitled Motion",
+          createdAt: new Date().toISOString(),
+        },
+      };
+    },
 
     sendMessage: (
       conversationId: string,
@@ -384,18 +388,25 @@ export const api = {
         body: JSON.stringify(message),
       }),
 
-    list: () =>
-      request<{
-        success: boolean;
-        conversations: Array<{
-          id: string;
-          title: string;
-          updatedAt: string;
-          messageCount: number;
-        }>;
-      }>("/api/conversations", {
-        method: "GET",
-      }),
+    list: async (): Promise<{
+      success: boolean;
+      conversations: Array<{
+        id: string;
+        title: string;
+        updatedAt: string;
+        messageCount?: number;
+      }>;
+    }> => {
+      const targetUrl =
+        typeof window !== "undefined"
+          ? "/api/conversations"
+          : `${getApiBaseUrl().replace(/\/$/, "")}/api/conversations`;
+      try {
+        const res = await fetch(targetUrl);
+        if (res.ok) return res.json();
+      } catch {}
+      return { success: true, conversations: [] };
+    },
 
     get: (conversationId: string) =>
       request<{
@@ -464,13 +475,33 @@ export const api = {
   // Prompt Queue API (adds generation job to BullMQ AGENTQUEUE)
   // ==========================================================================
   prompt: {
-    submit: (payload: {
+    submit: async (payload: {
       prompt: string;
       userId: string;
       promptId: string;
       template?: string;
-    }) =>
-      request<{
+    }) => {
+      const targetUrl =
+        typeof window !== "undefined"
+          ? "/api/prompt"
+          : `${getApiBaseUrl().replace(/\/$/, "")}/api/prompt`;
+
+      const res = await fetch(targetUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        let errMessage = `Prompt request failed with status ${res.status}`;
+        try {
+          const errData = await res.json();
+          errMessage = errData?.error || errData?.message || errMessage;
+        } catch {}
+        throw new ApiError(errMessage, res.status);
+      }
+
+      return (await res.json()) as {
         success: boolean;
         message: string;
         job?: any;
@@ -484,10 +515,8 @@ export const api = {
           duration: number;
           status: string;
         };
-      }>("/api/prompt", {
-        method: "POST",
-        body: JSON.stringify(payload),
-      }),
+      };
+    },
   },
 };
 
