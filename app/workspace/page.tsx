@@ -62,7 +62,7 @@ export default function WorkspacePage() {
           onRefreshQuotas={ws.handleRefreshQuotas}
         />
 
-        <div className="relative z-10 flex-1 overflow-y-auto scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden p-4 max-w-5xl mx-auto w-full flex flex-col justify-center">
+        <div className="relative z-10 flex-1 overflow-y-auto scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden p-3 sm:p-4 max-w-5xl mx-auto w-full flex flex-col items-center">
           {/* TAB A: MOTION STUDIO */}
           {ws.workspaceMode === "prompt" && (
             <MotionStudioView
@@ -86,6 +86,10 @@ export default function WorkspacePage() {
               setActiveStyle={ws.setActiveStyle}
               liveText={ws.liveText}
               setLiveText={ws.setLiveText}
+              colorPalette={ws.colorPalette}
+              setColorPalette={ws.setColorPalette}
+              motionSpeed={ws.motionSpeed}
+              setMotionSpeed={ws.setMotionSpeed}
               onGenerate={ws.handleGenerate}
               inspirationPresets={ws.inspirationPresets}
               onSelectPreset={ws.handleSelectPreset}

@@ -13,6 +13,8 @@ import {
   CharEffect,
   ProjectItem,
   InspirationPreset,
+  ColorPalette,
+  MotionSpeed,
 } from "../types";
 import {
   DEFAULT_PROJECTS,
@@ -57,6 +59,8 @@ export function useWorkspace() {
   const [activeStyle, setActiveStyle] = useState<StylePreset>(activeProject.category);
   const [aspectRatio, setAspectRatio] = useState<AspectRatio>("16:9");
   const [liveText, setLiveText] = useState(activeProject.text);
+  const [colorPalette, setColorPalette] = useState<ColorPalette>(activeProject.palette || "cyan");
+  const [motionSpeed, setMotionSpeed] = useState<MotionSpeed>(1);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationProgress, setGenerationProgress] = useState(0);
   const [generationStatus, setGenerationStatus] = useState("");
@@ -117,6 +121,9 @@ export function useWorkspace() {
     setPromptText(activeProject.prompt);
     setActiveStyle(activeProject.category);
     setLiveText(activeProject.text);
+    if (activeProject.palette) {
+      setColorPalette(activeProject.palette);
+    }
     startTimeRef.current = Date.now();
     setCurrentTime(0);
     setIsPlaying(false);
@@ -125,9 +132,19 @@ export function useWorkspace() {
   // 60FPS High-Definition Canvas Render Engine
   const renderEngine = useCallback(
     (ctx: CanvasRenderingContext2D, w: number, h: number, t: number) => {
-      drawCanvasFrame(ctx, w, h, t, activeStyle, liveText, isPlaying);
+      drawCanvasFrame(
+        ctx,
+        w,
+        h,
+        t,
+        activeStyle,
+        liveText,
+        isPlaying,
+        colorPalette,
+        motionSpeed
+      );
     },
-    [activeStyle, liveText, isPlaying]
+    [activeStyle, liveText, isPlaying, colorPalette, motionSpeed]
   );
 
   // 60FPS Animation Loop: Respects play state and stops at duration end
@@ -222,9 +239,54 @@ export function useWorkspace() {
   // Handle Prompt-to-Motion Generation
   const handleGenerate = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!promptText.trim()) {
+    const trimmed = promptText.trim();
+    if (!trimmed) {
       failure("Prompt Required", "Please enter a descriptive prompt.");
       return;
+    }
+
+    // 1. Intelligent Text Extraction from Prompt:
+    let targetText = liveText;
+    const quoteMatch = trimmed.match(/["']([^"']{1,24})["']/);
+    if (quoteMatch && quoteMatch[1]?.trim()) {
+      targetText = quoteMatch[1].trim().toUpperCase();
+      setLiveText(targetText);
+    } else {
+      const kwMatch = trimmed.match(/\b(?:text|title|word|for|brand):\s*([a-zA-Z0-9_-]{2,20})\b/i);
+      if (kwMatch && kwMatch[1]?.trim()) {
+        targetText = kwMatch[1].trim().toUpperCase();
+        setLiveText(targetText);
+      }
+    }
+
+    // 2. Intelligent Color Palette Detection from Prompt:
+    const lower = trimmed.toLowerCase();
+    let targetPalette = colorPalette;
+    if (lower.includes("purple") || lower.includes("violet") || lower.includes("magenta")) {
+      targetPalette = "purple";
+      setColorPalette("purple");
+    } else if (lower.includes("amber") || lower.includes("gold") || lower.includes("yellow") || lower.includes("solar")) {
+      targetPalette = "amber";
+      setColorPalette("amber");
+    } else if (lower.includes("matrix") || lower.includes("emerald") || (lower.includes("green") && !lower.includes("screens"))) {
+      targetPalette = "matrix";
+      setColorPalette("matrix");
+    } else if (lower.includes("crimson") || lower.includes("flame") || lower.includes("fire") || lower.includes("ruby") || lower.includes("red")) {
+      targetPalette = "crimson";
+      setColorPalette("crimson");
+    } else if (lower.includes("blue") || lower.includes("ocean") || lower.includes("sky")) {
+      targetPalette = "blue";
+      setColorPalette("blue");
+    } else if (lower.includes("cyan") || lower.includes("neon")) {
+      targetPalette = "cyan";
+      setColorPalette("cyan");
+    }
+
+    // 3. Motion Speed Detection:
+    if (lower.includes("fast") || lower.includes("hyper") || lower.includes("rapid") || lower.includes("rush")) {
+      setMotionSpeed(1.5);
+    } else if (lower.includes("slow") || lower.includes("cinematic") || lower.includes("smooth") || lower.includes("calm")) {
+      setMotionSpeed(0.5);
     }
 
     setIsGenerating(true);
@@ -243,7 +305,7 @@ export function useWorkspace() {
       let backendJobId: string | null = null;
       try {
         const queueRes = await api.prompt.submit({
-          prompt: promptText.trim(),
+          prompt: trimmed,
           userId: activeUserId,
           promptId: generatedPromptId,
           template: activeStyle,
@@ -256,20 +318,20 @@ export function useWorkspace() {
       }
 
       addChatConversation({
-        title: promptText.slice(0, 32),
-        prompt: promptText.trim(),
+        title: trimmed.slice(0, 32),
+        prompt: trimmed,
         category: activeStyle,
       }).catch(() => {});
 
-      await new Promise((r) => setTimeout(r, 400));
+      await new Promise((r) => setTimeout(r, 350));
       setGenerationProgress(50);
       setGenerationStatus("Computing spring physics & Bezier keyframes...");
 
-      await new Promise((r) => setTimeout(r, 450));
+      await new Promise((r) => setTimeout(r, 400));
       setGenerationProgress(85);
       setGenerationStatus("Compiling 60 FPS GPU render shaders...");
 
-      await new Promise((r) => setTimeout(r, 350));
+      await new Promise((r) => setTimeout(r, 300));
       setGenerationProgress(100);
 
       setProjects((prev) =>
@@ -277,9 +339,10 @@ export function useWorkspace() {
           p.id === activeProject.id
             ? {
                 ...p,
-                prompt: promptText.trim(),
+                prompt: trimmed,
                 category: activeStyle,
-                text: liveText,
+                text: targetText,
+                palette: targetPalette,
                 updatedAt: "Just now",
               }
             : p
@@ -292,8 +355,8 @@ export function useWorkspace() {
       success(
         "Motion Generated",
         backendJobId
-          ? `Queued job #${backendJobId} • Rendered 60FPS ${activeStyle} composition.`
-          : `Rendered 60FPS ${activeStyle} composition.`
+          ? `Queued job #${backendJobId} • Rendered 60FPS ${activeStyle} (${targetPalette}).`
+          : `Rendered 60FPS ${activeStyle} (${targetPalette}).`
       );
     } catch {
       failure("Error", "Could not generate motion.");
@@ -423,6 +486,12 @@ export function useWorkspace() {
     setPromptText(preset.prompt);
     setActiveStyle(preset.category);
     setLiveText(preset.text);
+    if (preset.palette) {
+      setColorPalette(preset.palette);
+    }
+    startTimeRef.current = Date.now();
+    setCurrentTime(0);
+    setIsPlaying(true);
     success("Preset Loaded", `Loaded "${preset.title}".`);
   };
 
@@ -491,6 +560,10 @@ export function useWorkspace() {
     setAspectRatio,
     liveText,
     setLiveText,
+    colorPalette,
+    setColorPalette,
+    motionSpeed,
+    setMotionSpeed,
     isGenerating,
     generationProgress,
     generationStatus,

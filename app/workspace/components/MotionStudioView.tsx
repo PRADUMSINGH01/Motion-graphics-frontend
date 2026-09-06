@@ -3,7 +3,7 @@
 import React, { RefObject } from "react";
 import StudioCanvasPlayer from "./StudioCanvasPlayer";
 import PromptInspectorPanel from "./PromptInspectorPanel";
-import { AspectRatio, InspirationPreset, StylePreset } from "../types";
+import { AspectRatio, InspirationPreset, StylePreset, ColorPalette, MotionSpeed } from "../types";
 
 interface MotionStudioViewProps {
   canvasRef: RefObject<HTMLCanvasElement | null>;
@@ -26,6 +26,10 @@ interface MotionStudioViewProps {
   setActiveStyle: (style: StylePreset) => void;
   liveText: string;
   setLiveText: (text: string) => void;
+  colorPalette: ColorPalette;
+  setColorPalette: (palette: ColorPalette) => void;
+  motionSpeed: MotionSpeed;
+  setMotionSpeed: (speed: MotionSpeed) => void;
   onGenerate: (e?: React.FormEvent) => void;
   inspirationPresets: InspirationPreset[];
   onSelectPreset: (preset: InspirationPreset) => void;
@@ -52,12 +56,16 @@ export default function MotionStudioView({
   setActiveStyle,
   liveText,
   setLiveText,
+  colorPalette,
+  setColorPalette,
+  motionSpeed,
+  setMotionSpeed,
   onGenerate,
   inspirationPresets,
   onSelectPreset,
 }: MotionStudioViewProps) {
   return (
-    <div className="flex flex-col items-center justify-center w-full space-y-3.5 my-auto">
+    <div className="flex flex-col items-center justify-center w-full max-w-3xl mx-auto space-y-3 py-1">
       <StudioCanvasPlayer
         canvasRef={canvasRef}
         canvasContainerRef={canvasContainerRef}
@@ -82,6 +90,10 @@ export default function MotionStudioView({
         setActiveStyle={setActiveStyle}
         liveText={liveText}
         setLiveText={setLiveText}
+        colorPalette={colorPalette}
+        setColorPalette={setColorPalette}
+        motionSpeed={motionSpeed}
+        setMotionSpeed={setMotionSpeed}
         isGenerating={isGenerating}
         onGenerate={onGenerate}
         inspirationPresets={inspirationPresets}

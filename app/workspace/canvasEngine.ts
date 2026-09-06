@@ -1,4 +1,64 @@
-import { StylePreset } from "./types";
+import { StylePreset, ColorPalette } from "./types";
+
+export interface PaletteTheme {
+  name: string;
+  primary: string;
+  secondary: string;
+  glow: string;
+  accent: string;
+  lightGlow: string;
+}
+
+export const PALETTE_THEMES: Record<ColorPalette, PaletteTheme> = {
+  cyan: {
+    name: "CYBER NEON",
+    primary: "#00f0ff",
+    secondary: "#f43f5e",
+    glow: "#00f0ff",
+    accent: "rgba(0, 240, 255, 0.9)",
+    lightGlow: "rgba(0, 240, 255, 0.15)",
+  },
+  purple: {
+    name: "NEON VIOLET",
+    primary: "#c084fc",
+    secondary: "#f472b6",
+    glow: "#a855f7",
+    accent: "rgba(192, 132, 252, 0.9)",
+    lightGlow: "rgba(168, 85, 247, 0.15)",
+  },
+  amber: {
+    name: "SOLAR AMBER",
+    primary: "#fbbf24",
+    secondary: "#f97316",
+    glow: "#f59e0b",
+    accent: "rgba(251, 191, 36, 0.9)",
+    lightGlow: "rgba(245, 158, 11, 0.15)",
+  },
+  matrix: {
+    name: "EMERALD MATRIX",
+    primary: "#34d399",
+    secondary: "#06b6d4",
+    glow: "#10b981",
+    accent: "rgba(52, 211, 153, 0.9)",
+    lightGlow: "rgba(16, 185, 129, 0.15)",
+  },
+  crimson: {
+    name: "CRIMSON FLAME",
+    primary: "#f87171",
+    secondary: "#fb923c",
+    glow: "#ef4444",
+    accent: "rgba(248, 113, 113, 0.9)",
+    lightGlow: "rgba(239, 68, 68, 0.15)",
+  },
+  blue: {
+    name: "ELECTRIC BLUE",
+    primary: "#60a5fa",
+    secondary: "#38bdf8",
+    glow: "#3b82f6",
+    accent: "rgba(96, 165, 250, 0.9)",
+    lightGlow: "rgba(59, 130, 246, 0.15)",
+  },
+};
 
 export function drawCanvasFrame(
   ctx: CanvasRenderingContext2D,
@@ -7,19 +67,28 @@ export function drawCanvasFrame(
   t: number,
   activeStyle: StylePreset,
   liveText: string,
-  isPlaying: boolean
+  isPlaying: boolean,
+  colorPalette: ColorPalette = "cyan",
+  motionSpeed: number = 1
 ) {
+  const theme = PALETTE_THEMES[colorPalette] || PALETTE_THEMES.cyan;
+  const animTime = t * (motionSpeed || 1);
+  const cx = w / 2;
+  const cy = h / 2;
+  const cleanText = (liveText || "VELOCITY").trim().toUpperCase();
+
   // 1. Deep Midnight Studio Backdrop
-  const bgGrad = ctx.createRadialGradient(w / 2, h / 2, 40, w / 2, h / 2, Math.max(w, h));
+  const bgGrad = ctx.createRadialGradient(cx, cy, 30, cx, cy, Math.max(w, h));
   bgGrad.addColorStop(0, "#0e111a");
-  bgGrad.addColorStop(1, "#050608");
+  bgGrad.addColorStop(0.7, "#06080e");
+  bgGrad.addColorStop(1, "#020305");
   ctx.fillStyle = bgGrad;
   ctx.fillRect(0, 0, w, h);
 
-  // Subtle tech background grid
+  // 2. Technical studio grid
   ctx.strokeStyle = "rgba(255, 255, 255, 0.025)";
   ctx.lineWidth = 1;
-  const step = 48;
+  const step = 44;
   for (let x = 0; x < w; x += step) {
     ctx.beginPath();
     ctx.moveTo(x, 0);
@@ -33,82 +102,118 @@ export function drawCanvasFrame(
     ctx.stroke();
   }
 
-  const cx = w / 2;
-  const cy = h / 2;
+  // 3. Ambient floating bokeh particles
+  const particleCount = 14;
+  for (let i = 0; i < particleCount; i++) {
+    const px = (Math.sin(i * 123 + animTime * 0.15) * 0.45 + 0.5) * w;
+    const py = (Math.cos(i * 321 + animTime * 0.12) * 0.45 + 0.5) * h;
+    const pRadius = 1.2 + (i % 3) * 0.8;
+    ctx.beginPath();
+    ctx.arc(px, py, pRadius, 0, Math.PI * 2);
+    ctx.fillStyle = i % 2 === 0 ? theme.primary : theme.secondary;
+    ctx.globalAlpha = 0.25 + Math.sin(animTime + i) * 0.15;
+    ctx.fill();
+    ctx.globalAlpha = 1.0;
+  }
 
-  // 2. Render Motion Graphics by Selected Style
+  // 4. Render Active Motion Graphic by Style
   if (activeStyle === "Kinetic Typography") {
-    const text = (liveText || "VELOCITY").toUpperCase();
-    ctx.font = "bold 50px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+    // Dynamic text size based on character count so it never overflows
+    const baseFontSize = Math.min(
+      Math.max(28, Math.floor(w / Math.max(7, cleanText.length * 0.75))),
+      58
+    );
+    ctx.font = `900 ${baseFontSize}px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
 
-    // Kinetic offset only when playing or time > 0
-    const offset = isPlaying ? Math.sin(t * 2.5) * 28 : 0;
-    const bounce = isPlaying ? Math.cos(t * 3.2) * 5 : 0;
+    const offset = isPlaying ? Math.sin(animTime * 2.8) * 24 : 0;
+    const bounce = isPlaying ? Math.cos(animTime * 3.4) * 6 : 0;
 
     if (isPlaying && offset !== 0) {
-      // Chromatic split red/pink trail
-      ctx.fillStyle = "rgba(244, 63, 94, 0.4)";
-      ctx.fillText(text, cx - offset, cy - 8 + bounce);
+      // Secondary chromatic split shadow
+      ctx.fillStyle = theme.secondary;
+      ctx.globalAlpha = 0.45;
+      ctx.fillText(cleanText, cx - offset, cy - 7 + bounce);
 
-      // Chromatic split cyan trail
-      ctx.fillStyle = "rgba(56, 189, 248, 0.45)";
-      ctx.fillText(text, cx + offset, cy + 8 - bounce);
+      // Primary chromatic split shadow
+      ctx.fillStyle = theme.primary;
+      ctx.globalAlpha = 0.55;
+      ctx.fillText(cleanText, cx + offset, cy + 7 - bounce);
+      ctx.globalAlpha = 1.0;
     }
 
-    // Core crisp foreground with cyan glow
+    // Core crisp foreground with theme glow
     ctx.fillStyle = "#ffffff";
-    ctx.shadowColor = "#00f0ff";
-    ctx.shadowBlur = isPlaying ? 22 : 16;
-    ctx.fillText(text, cx, cy);
+    ctx.shadowColor = theme.glow;
+    ctx.shadowBlur = isPlaying ? 24 : 16;
+    ctx.fillText(cleanText, cx, cy);
     ctx.shadowBlur = 0;
 
-    // Subtitle tag
+    // Trajectory guide line
+    if (isPlaying) {
+      const lineLen = Math.min(w * 0.6, 260);
+      const lineOffset = Math.sin(animTime * 3) * 30;
+      ctx.beginPath();
+      ctx.moveTo(cx - lineLen / 2 + lineOffset, cy + baseFontSize * 0.75);
+      ctx.lineTo(cx + lineLen / 2 + lineOffset, cy + baseFontSize * 0.75);
+      ctx.strokeStyle = theme.accent;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
+
+    // Subtitle technical tag
     ctx.font = "600 11px monospace";
-    ctx.fillStyle = "rgba(0, 240, 255, 0.85)";
-    ctx.fillText("60.0 FPS • HARDWARE ACCELERATED RENDER", cx, cy + 58);
+    ctx.fillStyle = theme.accent;
+    ctx.fillText(`60.0 FPS • ${theme.name} • SPRING PHYSICS`, cx, cy + baseFontSize * 0.75 + 24);
   } else if (activeStyle === "3D Isometric") {
     ctx.save();
-    ctx.translate(cx, cy);
-    ctx.rotate(isPlaying ? t * 0.6 : 0.2);
+    ctx.translate(cx, cy - 10);
+    ctx.rotate(isPlaying ? animTime * 0.55 : 0.2);
 
-    const size = 66;
+    const size = 68;
     for (let i = 0; i < 4; i++) {
       ctx.beginPath();
-      ctx.strokeStyle = i % 2 === 0 ? "#00f0ff" : "#818cf8";
+      ctx.strokeStyle = i % 2 === 0 ? theme.primary : theme.secondary;
       ctx.lineWidth = 2;
       const s = size - i * 15;
       ctx.strokeRect(-s, -s, s * 2, s * 2);
     }
 
-    const pulse = isPlaying ? (Math.sin(t * 3) + 1) * 0.5 : 0.5;
+    const pulse = isPlaying ? (Math.sin(animTime * 3) + 1) * 0.5 : 0.5;
     ctx.beginPath();
     ctx.arc(0, 0, 14 + pulse * 7, 0, Math.PI * 2);
     ctx.fillStyle = "#ffffff";
-    ctx.shadowColor = "#818cf8";
-    ctx.shadowBlur = 22;
+    ctx.shadowColor = theme.glow;
+    ctx.shadowBlur = 24;
     ctx.fill();
     ctx.shadowBlur = 0;
+
+    // Central Monogram
+    ctx.font = "bold 15px -apple-system, sans-serif";
+    ctx.fillStyle = "#0a0c14";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(cleanText.charAt(0) || "A", 0, 1);
     ctx.restore();
 
     ctx.font = "600 11px monospace";
-    ctx.fillStyle = "rgba(129, 140, 248, 0.9)";
+    ctx.fillStyle = theme.accent;
     ctx.textAlign = "center";
-    ctx.fillText("ISOMETRIC PROJECTION MATRIX", cx, cy + 105);
+    ctx.fillText(`ISOMETRIC 3D MATRIX // ${cleanText}`, cx, cy + 100);
   } else if (activeStyle === "Logo Reveal") {
     const radius = 64;
-    const progress = isPlaying ? (t * 0.75) % 1 : 1;
+    const progress = isPlaying ? (animTime * 0.75) % 1 : 1;
     const startAngle = -Math.PI / 2;
     const endAngle = startAngle + progress * Math.PI * 2;
 
     // Outer neon glow arc
     ctx.beginPath();
-    ctx.arc(cx, cy, radius, startAngle, endAngle);
-    ctx.strokeStyle = "#00f0ff";
+    ctx.arc(cx, cy - 12, radius, startAngle, endAngle);
+    ctx.strokeStyle = theme.primary;
     ctx.lineWidth = 3.5;
     ctx.lineCap = "round";
-    ctx.shadowColor = "#00f0ff";
+    ctx.shadowColor = theme.glow;
     ctx.shadowBlur = 22;
     ctx.stroke();
     ctx.shadowBlur = 0;
@@ -116,22 +221,27 @@ export function drawCanvasFrame(
     // Counter-rotating inner ring
     const innerProgress = 1 - progress;
     ctx.beginPath();
-    ctx.arc(cx, cy, radius * 0.75, Math.PI / 2, Math.PI / 2 + innerProgress * Math.PI * 2);
-    ctx.strokeStyle = "#a855f7";
+    ctx.arc(cx, cy - 12, radius * 0.75, Math.PI / 2, Math.PI / 2 + innerProgress * Math.PI * 2);
+    ctx.strokeStyle = theme.secondary;
     ctx.lineWidth = 2;
     ctx.lineCap = "round";
     ctx.stroke();
 
-    // Inner monogram
+    // Inner monogram badge
     ctx.font = "bold 26px -apple-system, sans-serif";
     ctx.fillStyle = "#ffffff";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText(liveText?.charAt(0) || "A", cx, cy);
+    ctx.fillText(cleanText.slice(0, 3) || "AG", cx, cy - 12);
+
+    // Full Brand Title Below
+    ctx.font = "bold 14px -apple-system, sans-serif";
+    ctx.fillStyle = "#ffffff";
+    ctx.fillText(cleanText, cx, cy + 74);
 
     ctx.font = "600 11px monospace";
-    ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
-    ctx.fillText("VECTOR MONOGRAM REVEAL", cx, cy + 100);
+    ctx.fillStyle = theme.accent;
+    ctx.fillText(`VECTOR LOGO REVEAL // ${theme.name}`, cx, cy + 96);
   } else if (activeStyle === "Abstract VFX") {
     const points = 50;
     const baseRadius = 56;
@@ -139,51 +249,69 @@ export function drawCanvasFrame(
     for (let i = 0; i <= points; i++) {
       const theta = (i / points) * Math.PI * 2;
       const noise = isPlaying
-        ? Math.sin(theta * 3 + t * 4) * 12 + Math.cos(theta * 5 - t * 2) * 7
+        ? Math.sin(theta * 3 + animTime * 4) * 12 + Math.cos(theta * 5 - animTime * 2) * 7
         : Math.sin(theta * 3) * 8;
       const r = baseRadius + noise;
       const x = cx + Math.cos(theta) * r;
-      const y = cy + Math.sin(theta) * r;
+      const y = cy - 10 + Math.sin(theta) * r;
       if (i === 0) ctx.moveTo(x, y);
       else ctx.lineTo(x, y);
     }
     ctx.closePath();
 
-    const fluidGrad = ctx.createLinearGradient(cx - 60, cy - 60, cx + 60, cy + 60);
-    fluidGrad.addColorStop(0, "#f43f5e");
-    fluidGrad.addColorStop(0.5, "#a855f7");
-    fluidGrad.addColorStop(1, "#06b6d4");
+    const fluidGrad = ctx.createLinearGradient(cx - 60, cy - 70, cx + 60, cy + 50);
+    fluidGrad.addColorStop(0, theme.secondary);
+    fluidGrad.addColorStop(0.5, theme.glow);
+    fluidGrad.addColorStop(1, theme.primary);
     ctx.fillStyle = fluidGrad;
-    ctx.shadowColor = "#a855f7";
-    ctx.shadowBlur = 30;
+    ctx.shadowColor = theme.glow;
+    ctx.shadowBlur = 32;
     ctx.fill();
     ctx.shadowBlur = 0;
 
-    ctx.font = "600 11px monospace";
-    ctx.fillStyle = "rgba(244, 63, 94, 0.9)";
+    // Glowing overlay text
+    ctx.font = "bold 16px -apple-system, sans-serif";
+    ctx.fillStyle = "#ffffff";
     ctx.textAlign = "center";
-    ctx.fillText("HARMONIC PLASMA DYNAMICS", cx, cy + 105);
+    ctx.textBaseline = "middle";
+    ctx.fillText(cleanText, cx, cy - 10);
+
+    ctx.font = "600 11px monospace";
+    ctx.fillStyle = theme.accent;
+    ctx.fillText(`HARMONIC PLASMA DYNAMICS // ${theme.name}`, cx, cy + 100);
   } else {
     // UI & Lottie Motion
-    const barWidth = 30;
-    const totalBars = 5;
-    const startX = cx - (totalBars * (barWidth + 10)) / 2;
+    const barWidth = 26;
+    const totalBars = 7;
+    const spacing = 8;
+    const totalW = totalBars * barWidth + (totalBars - 1) * spacing;
+    const startX = cx - totalW / 2;
 
     for (let i = 0; i < totalBars; i++) {
-      const hOffset = isPlaying ? Math.sin(t * 3.5 + i * 0.8) * 32 : (i % 2 === 0 ? 20 : -10);
-      const barH = 48 + hOffset;
-      const x = startX + i * (barWidth + 10);
-      const y = cy - barH / 2;
+      const hOffset = isPlaying
+        ? Math.sin(animTime * 3.8 + i * 0.7) * 34 + Math.cos(animTime * 2.2 + i) * 12
+        : (i % 2 === 0 ? 18 : -14);
+      const barH = Math.max(14, 52 + hOffset);
+      const x = startX + i * (barWidth + spacing);
+      const y = cy - 12 - barH / 2;
 
-      ctx.fillStyle = i % 2 === 0 ? "#00f0ff" : "#3b82f6";
+      const barGrad = ctx.createLinearGradient(x, y, x, y + barH);
+      barGrad.addColorStop(0, theme.primary);
+      barGrad.addColorStop(1, theme.secondary);
+      ctx.fillStyle = barGrad;
       ctx.beginPath();
-      ctx.roundRect(x, y, barWidth, barH, 6);
+      ctx.roundRect(x, y, barWidth, barH, 5);
       ctx.fill();
     }
 
-    ctx.font = "600 11px monospace";
-    ctx.fillStyle = "rgba(59, 130, 246, 0.9)";
+    // Centered status chip
+    ctx.font = "bold 13px monospace";
+    ctx.fillStyle = "#ffffff";
     ctx.textAlign = "center";
-    ctx.fillText("INTERACTIVE LOTTIE RUNTIME", cx, cy + 86);
+    ctx.fillText(`[ ${cleanText} ]`, cx, cy + 72);
+
+    ctx.font = "600 11px monospace";
+    ctx.fillStyle = theme.accent;
+    ctx.fillText(`PROCEDURAL LOTTIE RUNTIME // 60 FPS`, cx, cy + 94);
   }
 }

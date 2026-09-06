@@ -10,6 +10,8 @@ export type WorkspaceView = "prompt" | "vectorizer" | "usage" | "billing";
 export type BillingInterval = "monthly" | "annual";
 export type PlanTier = "free" | "creator" | "pro" | "enterprise";
 export type CharEffect = "kinetic_split" | "neon_glow" | "wave" | "glitch" | "isometric";
+export type ColorPalette = "cyan" | "purple" | "amber" | "matrix" | "crimson" | "blue";
+export type MotionSpeed = 0.5 | 1 | 1.5 | 2;
 
 export interface ProjectItem {
   id: string;
@@ -19,6 +21,7 @@ export interface ProjectItem {
   prompt: string;
   text: string;
   updatedAt: string;
+  palette?: ColorPalette;
 }
 
 export interface PricingTier {
@@ -46,4 +49,5 @@ export interface InspirationPreset {
   text: string;
   prompt: string;
   icon: string;
+  palette?: ColorPalette;
 }
