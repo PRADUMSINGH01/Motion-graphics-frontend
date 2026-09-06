@@ -39,7 +39,7 @@ export default function WorkspacePage() {
         genLimit={ws.genLimit}
         projects={ws.projects}
         activeProjectId={ws.activeProjectId}
-        onSelectProject={ws.setActiveProjectId}
+        onSelectProject={ws.handleSelectProject}
         onCreateProject={ws.handleCreateProject}
         userDisplayName={ws.userDisplayName}
         userEmail={ws.userEmail}
@@ -91,8 +91,6 @@ export default function WorkspacePage() {
               motionSpeed={ws.motionSpeed}
               setMotionSpeed={ws.setMotionSpeed}
               onGenerate={ws.handleGenerate}
-              inspirationPresets={ws.inspirationPresets}
-              onSelectPreset={ws.handleSelectPreset}
             />
           )}
 

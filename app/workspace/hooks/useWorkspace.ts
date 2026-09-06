@@ -118,8 +118,6 @@ export function useWorkspace() {
           }));
           setProjects(loaded);
           setActiveProjectId(loaded[0].id);
-          setPromptText(loaded[0].prompt);
-          setLiveText(loaded[0].text);
         }
       } catch {
         // Backend DB has no conversations or offline: keep projects empty []
@@ -163,10 +161,11 @@ export function useWorkspace() {
     }
   }, [success]);
 
-  // Synchronize when active project changes
-  useEffect(() => {
-    if (projects.length > 0 && activeProjectId) {
-      const proj = projects.find((p) => p.id === activeProjectId);
+  // Explicit project selection handler
+  const handleSelectProject = useCallback(
+    (id: string) => {
+      setActiveProjectId(id);
+      const proj = projects.find((p) => p.id === id);
       if (proj) {
         setPromptText(proj.prompt);
         setActiveStyle(proj.category);
@@ -178,8 +177,9 @@ export function useWorkspace() {
         setCurrentTime(0);
         setIsPlaying(false);
       }
-    }
-  }, [activeProjectId, projects]);
+    },
+    [projects]
+  );
 
   // 60FPS High-Definition Canvas Render Engine
   const renderEngine = useCallback(
@@ -668,6 +668,7 @@ export function useWorkspace() {
     handleScrub,
     handleGenerate,
     handleCreateProject,
+    handleSelectProject,
     handleSelectPreset,
     handleDownloadReceipt,
     pricingTiers: PRICING_TIERS,

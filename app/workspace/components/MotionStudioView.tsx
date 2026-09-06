@@ -3,7 +3,7 @@
 import React, { RefObject } from "react";
 import StudioCanvasPlayer from "./StudioCanvasPlayer";
 import PromptInspectorPanel from "./PromptInspectorPanel";
-import { AspectRatio, InspirationPreset, StylePreset, ColorPalette, MotionSpeed } from "../types";
+import { AspectRatio, StylePreset, ColorPalette, MotionSpeed } from "../types";
 
 interface MotionStudioViewProps {
   canvasRef: RefObject<HTMLCanvasElement | null>;
@@ -31,8 +31,6 @@ interface MotionStudioViewProps {
   motionSpeed: MotionSpeed;
   setMotionSpeed: (speed: MotionSpeed) => void;
   onGenerate: (e?: React.FormEvent) => void;
-  inspirationPresets: InspirationPreset[];
-  onSelectPreset: (preset: InspirationPreset) => void;
 }
 
 export default function MotionStudioView({
@@ -61,11 +59,9 @@ export default function MotionStudioView({
   motionSpeed,
   setMotionSpeed,
   onGenerate,
-  inspirationPresets,
-  onSelectPreset,
 }: MotionStudioViewProps) {
   return (
-    <div className="flex flex-col items-center justify-center w-full max-w-3xl mx-auto space-y-3 py-1">
+    <div className="flex flex-col items-center justify-center w-full max-w-4xl mx-auto space-y-4 py-1">
       <StudioCanvasPlayer
         canvasRef={canvasRef}
         canvasContainerRef={canvasContainerRef}
@@ -96,8 +92,6 @@ export default function MotionStudioView({
         setMotionSpeed={setMotionSpeed}
         isGenerating={isGenerating}
         onGenerate={onGenerate}
-        inspirationPresets={inspirationPresets}
-        onSelectPreset={onSelectPreset}
       />
     </div>
   );
