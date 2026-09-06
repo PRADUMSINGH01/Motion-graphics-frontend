@@ -40,8 +40,17 @@ interface InvoiceItem {
 }
 
 export default function BillingPage() {
-  const { user, refreshUser } = useAuth();
+  const { user, isLoading, refreshUser } = useAuth();
   const { success, failure } = useAlert();
+
+  // Client-side auth guard: immediately redirect to login if session ends
+  React.useEffect(() => {
+    if (!isLoading && !user) {
+      if (typeof window !== "undefined") {
+        window.location.href = "/login?redirect=/billing";
+      }
+    }
+  }, [user, isLoading]);
 
   // Billing Cycle toggle
   const [billingInterval, setBillingInterval] = useState<BillingInterval>("annual");
@@ -237,6 +246,18 @@ export default function BillingPage() {
       a: "Yes. Simply input your company name and VAT/Tax ID in the Billing Information section above, and all past and future invoice receipts will automatically include your tax details.",
     },
   ];
+
+  // Prevent rendering billing dashboard if unauthenticated
+  if (!user && !isLoading) {
+    return (
+      <div className="min-h-screen bg-[#07080b] flex flex-col items-center justify-center text-slate-400 space-y-4">
+        <div className="w-8 h-8 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
+        <p className="text-xs font-mono uppercase tracking-widest text-slate-500">
+          Redirecting to authentication...
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#07080b] text-slate-100 font-poppins selection:bg-cyan-500 selection:text-black">

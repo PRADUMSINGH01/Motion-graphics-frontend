@@ -22,6 +22,7 @@ import {
   FiSliders,
 } from "react-icons/fi";
 import { useAuth } from "../context/AuthContext";
+import Logo from "../components/Logo";
 
 // Routes where the global public navbar should NOT be rendered (workspace has its own dedicated studio sidebar)
 const EXCLUDED_ROUTES = ["/login", "/register", "/workspace"];
@@ -113,17 +114,7 @@ export default function Navbar() {
             {/* 1. Brand Logo */}
             <div className="flex items-center gap-8">
               <Link href="/" className="flex items-center gap-2.5 group">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-cyan-400 to-indigo-600 text-slate-950 font-bold shadow-md shadow-cyan-500/20 group-hover:scale-105 transition-transform">
-                  <FiZap className="w-5 h-5 text-slate-950" />
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="font-bold text-base tracking-tight text-white group-hover:text-cyan-300 transition-colors font-sans">
-                    Animagent
-                  </span>
-                  <span className="px-1.5 py-0.2 rounded text-[9px] font-mono uppercase bg-cyan-500/15 text-cyan-300 font-bold border border-cyan-400/30">
-                    AI
-                  </span>
-                </div>
+                <Logo size={34} showText={true} />
               </Link>
 
               {/* 2. Desktop Navigation Bar */}

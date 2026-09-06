@@ -16,21 +16,44 @@ const PROTECTED_ROUTES = [
  */
 const AUTH_ROUTES = ["/login", "/register"];
 
+function isValidToken(token?: string | null): boolean {
+  if (!token) return false;
+  const trimmed = token.trim();
+  if (
+    !trimmed ||
+    trimmed === "undefined" ||
+    trimmed === "null" ||
+    trimmed === "deleted" ||
+    trimmed === '""'
+  ) {
+    return false;
+  }
+  return trimmed.length > 3;
+}
+
 export function middleware(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl;
 
+  // Allow API routes to pass through freely (e.g. /api/auth/logout)
+  if (pathname.startsWith("/api/")) {
+    return NextResponse.next();
+  }
+
   // Retrieve auth token from cookies (supports standard token or animagent_token)
-  const tokenFromCookie =
-    request.cookies.get("token")?.value ||
-    request.cookies.get("animagent_token")?.value;
+  const tokenCookie = request.cookies.get("token")?.value;
+  const animagentCookie = request.cookies.get("animagent_token")?.value;
+
+  const validCookieToken = isValidToken(tokenCookie)
+    ? tokenCookie
+    : isValidToken(animagentCookie)
+    ? animagentCookie
+    : null;
 
   // Support incoming OAuth token callback query param if landing on a protected route directly
-  const tokenFromQuery = searchParams.get("token");
+  const rawQueryToken = searchParams.get("token");
+  const tokenFromQuery = isValidToken(rawQueryToken) ? rawQueryToken : null;
 
-  const isAuthenticated = Boolean(
-    (tokenFromCookie && tokenFromCookie.trim().length > 0) ||
-    (tokenFromQuery && tokenFromQuery.trim().length > 0)
-  );
+  const isAuthenticated = Boolean(validCookieToken || tokenFromQuery);
 
   // Check if current path matches any protected routes
   const isProtectedRoute = PROTECTED_ROUTES.some(
@@ -46,7 +69,25 @@ export function middleware(request: NextRequest) {
   if (isProtectedRoute && !isAuthenticated) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("redirect", pathname);
-    return NextResponse.redirect(loginUrl);
+    const response = NextResponse.redirect(loginUrl);
+    // Purge any leftover or stale cookies across browsers
+    response.cookies.delete("token");
+    response.cookies.delete("animagent_token");
+    response.cookies.set({
+      name: "token",
+      value: "",
+      path: "/",
+      expires: new Date(0),
+      maxAge: 0,
+    });
+    response.cookies.set({
+      name: "animagent_token",
+      value: "",
+      path: "/",
+      expires: new Date(0),
+      maxAge: 0,
+    });
+    return response;
   }
 
   // Case 2: Authenticated user attempting to visit login/register -> redirect to /workspace
@@ -58,7 +99,7 @@ export function middleware(request: NextRequest) {
   const response = NextResponse.next();
 
   // If token was present in URL query (e.g. OAuth callback), seed the cookie on the response
-  if (tokenFromQuery && !tokenFromCookie) {
+  if (tokenFromQuery && !validCookieToken) {
     response.cookies.set({
       name: "token",
       value: tokenFromQuery,

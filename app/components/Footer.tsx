@@ -16,6 +16,7 @@ import {
   FiYoutube,
   FiCheckCircle,
 } from "react-icons/fi";
+import Logo from "./Logo";
 
 const EXCLUDED_ROUTES = ["/login", "/register", "/workspace"];
 
@@ -97,17 +98,7 @@ export default function Footer() {
           {/* Brand & Mission column */}
           <div className="col-span-2 space-y-4">
             <Link href="/" className="inline-flex items-center gap-2.5 group">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-cyan-400 to-indigo-600 flex items-center justify-center text-slate-950 font-bold shadow-md shadow-cyan-500/20 group-hover:scale-105 transition-transform">
-                <FiZap className="w-4 h-4 text-slate-950" />
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-base font-bold text-white font-sans tracking-tight">
-                  Animagent
-                </span>
-                <span className="px-1.5 py-0.2 rounded text-[8px] font-mono font-bold uppercase bg-cyan-500/15 text-cyan-300 border border-cyan-400/30">
-                  AI
-                </span>
-              </div>
+              <Logo size={32} showText={true} />
             </Link>
 
             <p className="text-xs sm:text-sm text-slate-400 max-w-sm leading-relaxed">

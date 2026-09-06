@@ -18,10 +18,11 @@ export const metadata: Metadata = {
   description: "Generate broadcast-grade 60FPS motion graphics, procedural physics, and SVG animations from natural language prompts with Animagent AI.",
   icons: {
     icon: [
-      { url: "/animagent-logo.png", sizes: "any" },
       { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/logo.svg", type: "image/svg+xml" },
     ],
-    apple: "/animagent-logo.png",
+    shortcut: "/icon.svg",
+    apple: "/icon.svg",
   },
 };
 

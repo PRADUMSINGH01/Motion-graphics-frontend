@@ -134,6 +134,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           localStorage.setItem("animagent_token", res.token);
           if (typeof document !== "undefined") {
             document.cookie = `token=${res.token}; path=/; max-age=604800; SameSite=Lax`;
+            document.cookie = `animagent_token=${res.token}; path=/; max-age=604800; SameSite=Lax`;
           }
         }
       } catch {
@@ -208,6 +209,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           localStorage.setItem("animagent_token", res.token);
           if (typeof document !== "undefined") {
             document.cookie = `token=${res.token}; path=/; max-age=604800; SameSite=Lax`;
+            document.cookie = `animagent_token=${res.token}; path=/; max-age=604800; SameSite=Lax`;
           }
         }
       } catch {
@@ -242,7 +244,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const loggedUser = mapBackendUserToUser(res.user, res.token);
         setUser(loggedUser);
         localStorage.setItem("animagent_user", JSON.stringify(loggedUser));
-        if (res.token) localStorage.setItem("animagent_token", res.token);
+        if (res.token) {
+          localStorage.setItem("animagent_token", res.token);
+          if (typeof document !== "undefined") {
+            document.cookie = `token=${res.token}; path=/; max-age=604800; SameSite=Lax`;
+            document.cookie = `animagent_token=${res.token}; path=/; max-age=604800; SameSite=Lax`;
+          }
+        }
         success("Google Sign-In Successful", `Welcome back, ${loggedUser.name}!`);
         setTimeout(() => router.push("/workspace"), 700);
         return true;
@@ -261,7 +269,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const newUser = mapBackendUserToUser(res.user, res.token);
         setUser(newUser);
         localStorage.setItem("animagent_user", JSON.stringify(newUser));
-        if (res.token) localStorage.setItem("animagent_token", res.token);
+        if (res.token) {
+          localStorage.setItem("animagent_token", res.token);
+          if (typeof document !== "undefined") {
+            document.cookie = `token=${res.token}; path=/; max-age=604800; SameSite=Lax`;
+            document.cookie = `animagent_token=${res.token}; path=/; max-age=604800; SameSite=Lax`;
+          }
+        }
         success("Google Registration Successful", `Welcome to Animagent AI, ${newUser.name}!`);
         setTimeout(() => router.push("/workspace"), 700);
         return true;
@@ -281,6 +295,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem("animagent_token", token);
       if (typeof document !== "undefined") {
         document.cookie = `token=${token}; path=/; max-age=604800; SameSite=Lax`;
+        document.cookie = `animagent_token=${token}; path=/; max-age=604800; SameSite=Lax`;
       }
     } catch {
       // ignore
@@ -288,26 +303,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     refreshUser().catch(() => {});
   }, [refreshUser]);
 
-  const logout = () => {
-    if (!user) {
-      failure("No Active Session", "You are not currently logged into any account.");
-      return;
-    }
-
-    const prevName = user.name;
+  const logout = async () => {
+    const prevName = user?.name || "User";
     setUser(null);
+
     try {
       localStorage.removeItem("animagent_user");
       localStorage.removeItem("animagent_token");
+
       if (typeof document !== "undefined") {
-        document.cookie = "token=; path=/; max-age=0; SameSite=Lax";
+        const expiredCookies = ["token", "animagent_token"];
+        expiredCookies.forEach((c) => {
+          document.cookie = `${c}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; max-age=0; SameSite=Lax`;
+          document.cookie = `${c}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; max-age=0; SameSite=Lax`;
+        });
       }
+
+      // Call local Next.js logout route to invalidate server-side cookies
+      fetch("/api/auth/logout", { method: "POST" }).catch(() => {});
       api.auth.logout().catch(() => {});
     } catch {
       // ignore
     }
 
     success("Logged Out Successfully", `Session for ${prevName} closed safely.`);
+
+    // Hard navigate to purge React memory & trigger server middleware
+    if (typeof window !== "undefined") {
+      window.location.href = "/login?logout=true";
+    }
   };
 
   const triggerDemoAlert = (type: "success" | "failure" | "error") => {

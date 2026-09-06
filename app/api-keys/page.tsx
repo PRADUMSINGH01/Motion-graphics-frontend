@@ -36,6 +36,15 @@ export default function ApiKeysPage() {
     secretKey: string;
   } | null>(null);
 
+  // Client-side auth guard: immediately redirect to login if session ends
+  useEffect(() => {
+    if (!authLoading && !user) {
+      if (typeof window !== "undefined") {
+        window.location.href = "/login?redirect=/api-keys";
+      }
+    }
+  }, [user, authLoading]);
+
   // Fetch keys from live backend
   const fetchKeys = useCallback(async () => {
     if (!user) return;
@@ -119,6 +128,18 @@ export default function ApiKeysPage() {
   };
 
   const firstActiveKeyPrefix = keys.find((k) => k.status === "active")?.prefix || "anim_live_your_key";
+
+  // Prevent rendering API keys console if unauthenticated
+  if (!user && !authLoading) {
+    return (
+      <div className="min-h-screen bg-[#090a0f] flex flex-col items-center justify-center text-slate-400 space-y-4">
+        <div className="w-8 h-8 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
+        <p className="text-xs font-mono uppercase tracking-widest text-slate-500">
+          Redirecting to authentication...
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="relative min-h-screen bg-[#090a0f] text-slate-300 font-poppins pt-24 pb-20 px-4 sm:px-6 lg:px-8">

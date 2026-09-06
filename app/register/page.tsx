@@ -18,6 +18,7 @@ import {
 } from "react-icons/fi";
 import SpiderNetBackground from "../components/SpiderNetBackground";
 import GoogleAuthButton from "../components/GoogleAuthButton";
+import Logo from "../components/Logo";
 import { useAuth } from "../context/AuthContext";
 import { useAlert } from "../context/AlertContext";
 
@@ -109,9 +110,7 @@ function RegisterForm() {
         {/* Brand Header */}
         <div className="text-center space-y-2">
           <Link href="/" className="inline-flex items-center gap-2.5 group">
-            <div className="w-10 h-10 rounded-xl bg-white/10 border border-white/15 backdrop-blur-md text-white flex items-center justify-center shadow-lg group-hover:bg-white/15 transition-all">
-              <FiLayers className="w-5 h-5 text-white" />
-            </div>
+            <Logo size={42} />
           </Link>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white font-comic">
             Create Your Account

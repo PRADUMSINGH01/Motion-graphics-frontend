@@ -41,6 +41,7 @@ import { useAuth } from "../context/AuthContext";
 import { useAlert } from "../context/AlertContext";
 import { api, addCharConversion, addChatConversation } from "../lib/api";
 import SpiderNetBackground from "../components/SpiderNetBackground";
+import Logo from "../components/Logo";
 
 export type StylePreset =
   | "Kinetic Typography"
@@ -65,11 +66,20 @@ export interface ProjectItem {
 }
 
 export default function WorkspacePage() {
-  const { user, logout, refreshUser } = useAuth();
+  const { user, isLoading, logout, refreshUser } = useAuth();
   const { success, failure } = useAlert();
 
   // Mode: standard prompt to motion OR character vectorizer OR usage OR billing
   const [workspaceMode, setWorkspaceMode] = useState<WorkspaceView>("prompt");
+
+  // Client-side auth guard: immediately redirect to login if session ends
+  useEffect(() => {
+    if (!isLoading && !user) {
+      if (typeof window !== "undefined") {
+        window.location.href = "/login?redirect=/workspace";
+      }
+    }
+  }, [user, isLoading]);
 
   // Check URL query param on mount (?tab=billing or ?tab=usage or ?prompt=...&style=...&text=...)
   useEffect(() => {
@@ -795,6 +805,18 @@ export default function WorkspacePage() {
     },
   ];
 
+  // Prevent rendering workspace DOM if unauthenticated
+  if (!user && !isLoading) {
+    return (
+      <div className="min-h-screen bg-[#090a0f] flex flex-col items-center justify-center text-slate-400 space-y-4">
+        <div className="w-8 h-8 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
+        <p className="text-xs font-mono uppercase tracking-widest text-slate-500">
+          Redirecting to authentication...
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-[#121013] text-slate-100 font-sans selection:bg-cyan-500 selection:text-black">
       {/* ==================================================================== */}
@@ -806,9 +828,7 @@ export default function WorkspacePage() {
           {/* Brand Header */}
           <div className="h-14 flex items-center px-4 border-b border-white/[0.08]">
             <Link href="/" className="flex items-center gap-2.5 group">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-tr from-cyan-400 to-indigo-600 text-slate-950 font-bold shadow-md shadow-cyan-500/20 group-hover:scale-105 transition-transform">
-                <FiZap className="w-4 h-4 text-slate-950" />
-              </div>
+              <Logo size={32} />
               <div className="flex flex-col">
                 <span className="font-bold text-xs tracking-tight text-white leading-tight">
                   Animagent
