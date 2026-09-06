@@ -84,14 +84,6 @@ export default function MotionStudioView({
       <PromptInspectorPanel
         promptText={promptText}
         setPromptText={setPromptText}
-        activeStyle={activeStyle}
-        setActiveStyle={setActiveStyle}
-        liveText={liveText}
-        setLiveText={setLiveText}
-        colorPalette={colorPalette}
-        setColorPalette={setColorPalette}
-        motionSpeed={motionSpeed}
-        setMotionSpeed={setMotionSpeed}
         isGenerating={isGenerating}
         onGenerate={onGenerate}
       />

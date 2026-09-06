@@ -118,19 +118,13 @@ export function drawCanvasFrame(
   }
 
   // 4. Render Active Motion Graphic by Style
-  if (activeStyle === "Kinetic Typography") {
-    if (isStandby) {
-      ctx.font = "bold 26px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
-      ctx.fillText("READY TO SYNTHESIZE", cx, cy);
+  if (isStandby) {
+    // Clean empty standby canvas: no dummy placeholder text
+    return;
+  }
 
-      ctx.font = "600 11px monospace";
-      ctx.fillStyle = theme.accent;
-      ctx.fillText("60.0 FPS • HARDWARE ACCELERATED • ENTER PROMPT", cx, cy + 40);
-    } else {
-      // Dynamic text size based on character count so it never overflows
+  if (activeStyle === "Kinetic Typography") {
+    // Dynamic text size based on character count so it never overflows
       const baseFontSize = Math.min(
         Math.max(28, Math.floor(w / Math.max(7, cleanText.length * 0.75))),
         58
@@ -178,7 +172,6 @@ export function drawCanvasFrame(
       ctx.font = "600 11px monospace";
       ctx.fillStyle = theme.accent;
       ctx.fillText(`60.0 FPS • ${theme.name} • SPRING PHYSICS`, cx, cy + baseFontSize * 0.75 + 24);
-    }
   } else if (activeStyle === "3D Isometric") {
     ctx.save();
     ctx.translate(cx, cy - 10);

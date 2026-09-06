@@ -74,7 +74,7 @@ export function useWorkspace() {
     }
     return {
       id: "new-composition",
-      name: "New Composition",
+      name: promptText.trim() ? (promptText.trim().length > 24 ? `${promptText.trim().slice(0, 24)}...` : promptText.trim()) : "Motion Studio",
       category: activeStyle,
       duration: 5,
       prompt: promptText,
@@ -297,48 +297,58 @@ export function useWorkspace() {
       return;
     }
 
-    // 1. Intelligent Text Extraction from Prompt:
-    let targetText = liveText;
-    const quoteMatch = trimmed.match(/["']([^"']{1,24})["']/);
+    // 1. Text Extraction: Always use prompt text directly so whatever user enters animates immediately!
+    let targetText = "";
+    const quoteMatch = trimmed.match(/["']([^"']{1,32})["']/);
     if (quoteMatch && quoteMatch[1]?.trim()) {
       targetText = quoteMatch[1].trim().toUpperCase();
-      setLiveText(targetText);
     } else {
-      const kwMatch = trimmed.match(/\b(?:text|title|word|for|brand):\s*([a-zA-Z0-9_-]{2,20})\b/i);
+      const kwMatch = trimmed.match(/\b(?:text|title|word|for|brand|named|saying):\s*([a-zA-Z0-9_-]{1,32})\b/i);
       if (kwMatch && kwMatch[1]?.trim()) {
         targetText = kwMatch[1].trim().toUpperCase();
-        setLiveText(targetText);
+      } else {
+        // Direct prompt text (clean slice up to 24 chars for maximum visual impact)
+        targetText = trimmed.toUpperCase().slice(0, 24);
       }
     }
+    setLiveText(targetText);
 
-    // 2. Intelligent Color Palette Detection from Prompt:
+    // 2. Intelligent Style Detection from Prompt:
     const lower = trimmed.toLowerCase();
-    let targetPalette = colorPalette;
-    if (lower.includes("purple") || lower.includes("violet") || lower.includes("magenta")) {
+    let detectedStyle: StylePreset = "Kinetic Typography";
+    if (lower.includes("3d") || lower.includes("cube") || lower.includes("isometric") || lower.includes("prism")) {
+      detectedStyle = "3D Isometric";
+    } else if (lower.includes("logo") || lower.includes("reveal") || lower.includes("badge") || lower.includes("emblem") || lower.includes("brand")) {
+      detectedStyle = "Logo Reveal";
+    } else if (lower.includes("vfx") || lower.includes("plasma") || lower.includes("abstract") || lower.includes("fluid") || lower.includes("liquid") || lower.includes("smoke")) {
+      detectedStyle = "Abstract VFX";
+    } else if (lower.includes("ui") || lower.includes("lottie") || lower.includes("audio") || lower.includes("equalizer") || lower.includes("sound") || lower.includes("bars")) {
+      detectedStyle = "UI & Lottie";
+    }
+    setActiveStyle(detectedStyle);
+
+    // 3. Intelligent Color Palette Detection from Prompt:
+    let targetPalette: ColorPalette = "cyan";
+    if (lower.includes("purple") || lower.includes("violet") || lower.includes("magenta") || lower.includes("pink")) {
       targetPalette = "purple";
-      setColorPalette("purple");
-    } else if (lower.includes("amber") || lower.includes("gold") || lower.includes("yellow") || lower.includes("solar")) {
+    } else if (lower.includes("amber") || lower.includes("gold") || lower.includes("yellow") || lower.includes("solar") || lower.includes("orange")) {
       targetPalette = "amber";
-      setColorPalette("amber");
-    } else if (lower.includes("matrix") || lower.includes("emerald") || (lower.includes("green") && !lower.includes("screens"))) {
+    } else if (lower.includes("matrix") || lower.includes("emerald") || lower.includes("green")) {
       targetPalette = "matrix";
-      setColorPalette("matrix");
     } else if (lower.includes("crimson") || lower.includes("flame") || lower.includes("fire") || lower.includes("ruby") || lower.includes("red")) {
       targetPalette = "crimson";
-      setColorPalette("crimson");
     } else if (lower.includes("blue") || lower.includes("ocean") || lower.includes("sky")) {
       targetPalette = "blue";
-      setColorPalette("blue");
-    } else if (lower.includes("cyan") || lower.includes("neon")) {
-      targetPalette = "cyan";
-      setColorPalette("cyan");
     }
+    setColorPalette(targetPalette);
 
-    // 3. Motion Speed Detection:
+    // 4. Motion Speed Detection:
     if (lower.includes("fast") || lower.includes("hyper") || lower.includes("rapid") || lower.includes("rush")) {
       setMotionSpeed(1.5);
     } else if (lower.includes("slow") || lower.includes("cinematic") || lower.includes("smooth") || lower.includes("calm")) {
       setMotionSpeed(0.5);
+    } else {
+      setMotionSpeed(1);
     }
 
     setIsGenerating(true);
