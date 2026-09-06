@@ -67,6 +67,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { success, failure, error } = useAlert();
   const router = useRouter();
 
+  const purgeSession = useCallback(() => {
+    setUser(null);
+    try {
+      localStorage.removeItem("animagent_user");
+      localStorage.removeItem("animagent_token");
+      if (typeof document !== "undefined") {
+        document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; max-age=0; SameSite=Lax";
+        document.cookie = "animagent_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; max-age=0; SameSite=Lax";
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
   // Re-fetch latest user profile and quotas from backend
   const refreshUser = useCallback(async () => {
     try {
@@ -75,30 +89,82 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const storedToken = localStorage.getItem("animagent_token") || undefined;
         const mapped = mapBackendUserToUser(res.user, storedToken);
         setUser(mapped);
-        localStorage.setItem("animagent_user", JSON.stringify(mapped));
+        try {
+          localStorage.setItem("animagent_user", JSON.stringify(mapped));
+        } catch {}
+      } else {
+        purgeSession();
       }
-    } catch {
-      // If token expired or session invalid, keep cached or log out
+    } catch (err: any) {
+      if (err?.statusCode === 401 || err?.statusCode === 403) {
+        purgeSession();
+      }
     }
-  }, []);
+  }, [purgeSession]);
 
   // Load persisted session on mount & sync with server
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem("animagent_user");
-      const storedToken = localStorage.getItem("animagent_token");
-      if (stored) {
-        setUser(JSON.parse(stored));
+    let isMounted = true;
+
+    const initSession = async () => {
+      try {
+        let storedToken = localStorage.getItem("animagent_token");
+        const stored = localStorage.getItem("animagent_user");
+
+        // Sync from cookie if token is present in cookie but absent in localStorage
+        if (!storedToken && typeof document !== "undefined") {
+          const match = document.cookie.match(/(?:^|;\s*)(?:token|animagent_token)=([^;]+)/);
+          if (match && match[1]) {
+            storedToken = decodeURIComponent(match[1]);
+            try {
+              localStorage.setItem("animagent_token", storedToken);
+            } catch {}
+          }
+        }
+
+        if (stored) {
+          try {
+            const parsed = JSON.parse(stored);
+            if (isMounted) setUser(parsed);
+          } catch {}
+        }
+
+        // If a token exists, validate it with the backend before completing loading
+        if (storedToken) {
+          try {
+            const res = await api.user.getMe();
+            if (res.success && res.user && isMounted) {
+              const mapped = mapBackendUserToUser(res.user, storedToken);
+              setUser(mapped);
+              try {
+                localStorage.setItem("animagent_user", JSON.stringify(mapped));
+              } catch {}
+            } else if (isMounted) {
+              purgeSession();
+            }
+          } catch (err: any) {
+            if (isMounted && (err?.statusCode === 401 || err?.statusCode === 403)) {
+              purgeSession();
+            }
+          }
+        } else if (isMounted) {
+          setUser(null);
+        }
+      } catch {
+        // localStorage may fail in restricted mode
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
-      if (storedToken) {
-        refreshUser().catch(() => {});
-      }
-    } catch {
-      // localStorage may fail in restricted mode
-    } finally {
-      setIsLoading(false);
-    }
-  }, [refreshUser]);
+    };
+
+    initSession();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [purgeSession]);
 
   const login = async (emailVal: string, passVal: string): Promise<boolean> => {
     const trimmedEmail = emailVal.trim();

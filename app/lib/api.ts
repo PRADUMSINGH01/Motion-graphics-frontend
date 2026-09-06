@@ -59,10 +59,19 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
     ...(options.headers as Record<string, string>),
   };
 
-  // Attach stored bearer token if available in client localStorage
+  // Attach stored bearer token if available in client localStorage or cookies
   if (typeof window !== "undefined") {
     try {
-      const storedToken = localStorage.getItem("animagent_token");
+      let storedToken = localStorage.getItem("animagent_token");
+      if (!storedToken && typeof document !== "undefined") {
+        const match = document.cookie.match(/(?:^|;\s*)(?:token|animagent_token)=([^;]+)/);
+        if (match && match[1]) {
+          storedToken = decodeURIComponent(match[1]);
+          try {
+            localStorage.setItem("animagent_token", storedToken);
+          } catch {}
+        }
+      }
       if (storedToken && !headers.Authorization) {
         headers.Authorization = `Bearer ${storedToken}`;
       }
@@ -424,6 +433,22 @@ export const api = {
         }
       ),
   },
+
+  // ==========================================================================
+  // Prompt Queue API (adds generation job to BullMQ AGENTQUEUE)
+  // ==========================================================================
+  prompt: {
+    submit: (payload: {
+      prompt: string;
+      userId: string;
+      promptId: string;
+      template?: string;
+    }) =>
+      request<{ message: string; job?: any }>("/api/prompt", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }),
+  },
 };
 
 // ============================================================================
@@ -509,6 +534,18 @@ export async function addCharConversion(payload: CharConversionPayload): Promise
  */
 export async function addChatConversation(payload: ConversationPayload) {
   return api.conversation.add(payload);
+}
+
+/**
+ * Submits a prompt generation job to the backend BullMQ AGENTQUEUE (/api/prompt).
+ */
+export async function submitPromptToQueue(payload: {
+  prompt: string;
+  userId: string;
+  promptId: string;
+  template?: string;
+}) {
+  return api.prompt.submit(payload);
 }
 
 /**

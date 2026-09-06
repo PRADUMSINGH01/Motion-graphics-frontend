@@ -9,7 +9,6 @@ import {
   FiHeart,
   FiBookmark,
   FiX,
-  FiEye,
   FiArrowRight,
   FiDownload,
   FiRepeat,
@@ -21,20 +20,25 @@ import {
   FiZap,
   FiLayers,
   FiClock,
-  FiActivity,
   FiStar,
   FiCode,
-  FiRefreshCw,
   FiShare2,
+  FiSmartphone,
+  FiTv,
+  FiSquare,
+  FiTrendingUp,
+  FiCompass,
+  FiTag,
+  FiRefreshCw,
 } from "react-icons/fi";
 import { useAlert } from "../context/AlertContext";
 import SpiderNetBackground from "../components/SpiderNetBackground";
 
 export type TemplateCategory =
   | "Kinetic Typography"
-  | "3D Animation"
+  | "Social & Reels (9:16)"
+  | "3D & VFX"
   | "Logo Reveals"
-  | "Abstract & VFX"
   | "UI & Lottie"
   | "HUD & Cyberpunk";
 
@@ -43,6 +47,7 @@ export interface TemplateItem {
   title: string;
   category: TemplateCategory;
   duration: string;
+  durationSec: number;
   aspectRatio: "16:9" | "9:16" | "1:1";
   fps: number;
   resolution: string;
@@ -67,7 +72,8 @@ export interface TemplateItem {
     width: number,
     height: number,
     time: number,
-    isHovered: boolean
+    isHovered: boolean,
+    customText?: string
   ) => void;
 }
 
@@ -78,33 +84,103 @@ export default function ExplorePage() {
   const [activeCategory, setActiveCategory] = useState<string>("All");
   const [aspectRatioFilter, setAspectRatioFilter] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<"popular" | "remixes" | "recent" | "duration">("popular");
   const [layoutMode, setLayoutMode] = useState<"grid" | "cinema">("grid");
 
   // Interaction states
   const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [scrubbingId, setScrubbingId] = useState<string | null>(null);
+  const [scrubProgress, setScrubProgress] = useState<Record<string, number>>({});
   const [likedIds, setLikedIds] = useState<Record<string, boolean>>({});
   const [savedIds, setSavedIds] = useState<Record<string, boolean>>({});
   const [selectedItem, setSelectedItem] = useState<TemplateItem | null>(null);
   const [copiedPrompt, setCopiedPrompt] = useState(false);
   const [copiedJson, setCopiedJson] = useState(false);
+  const [copiedShareLink, setCopiedShareLink] = useState(false);
   const [modalTab, setModalTab] = useState<"specs" | "json">("specs");
 
-  // Modal playback control state
+  // Modal playback & custom text state
   const [modalPlaying, setModalPlaying] = useState(true);
   const [modalSpeed, setModalSpeed] = useState<number>(1);
+  const [modalCustomText, setModalCustomText] = useState<string>("");
+  const [modalTime, setModalTime] = useState<number>(0);
+
+  // Load likes and saves from localStorage on mount
+  useEffect(() => {
+    try {
+      const savedLikes = localStorage.getItem("animagent_explore_likes");
+      if (savedLikes) setLikedIds(JSON.parse(savedLikes));
+      const savedBookmarks = localStorage.getItem("animagent_explore_saves");
+      if (savedBookmarks) setSavedIds(JSON.parse(savedBookmarks));
+    } catch {
+      // ignore localStorage errors
+    }
+  }, []);
+
+  // Sync likes to localStorage
+  const handleLikeToggle = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setLikedIds((prev) => {
+      const updated = { ...prev, [id]: !prev[id] };
+      try {
+        localStorage.setItem("animagent_explore_likes", JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+  };
+
+  // Sync saves to localStorage
+  const handleSaveToggle = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const willSave = !savedIds[id];
+    setSavedIds((prev) => {
+      const updated = { ...prev, [id]: willSave };
+      try {
+        localStorage.setItem("animagent_explore_saves", JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+    if (willSave) {
+      success("Saved to Collection", "Motion template bookmarked to your studio library.");
+    }
+  };
+
+  // Check URL query param ?template=... on mount for deep linking
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const tplParam = params.get("template");
+      if (tplParam) {
+        const found = templates.find((t) => t.id === tplParam);
+        if (found) {
+          setSelectedItem(found);
+          setModalCustomText(found.defaultText);
+        }
+      }
+    }
+  }, []);
+
+  // Update modal text when selected item changes
+  useEffect(() => {
+    if (selectedItem) {
+      setModalCustomText(selectedItem.defaultText);
+      setModalPlaying(true);
+      setModalTime(0);
+    }
+  }, [selectedItem]);
 
   const categories = [
     "All",
     "Kinetic Typography",
-    "3D Animation",
+    "Social & Reels (9:16)",
+    "3D & VFX",
     "Logo Reveals",
-    "Abstract & VFX",
     "UI & Lottie",
     "HUD & Cyberpunk",
   ];
 
-  // 12 Curated Production-Grade Procedural Motion Templates
+  // 18 Curated Broadcast-Grade Procedural Motion Templates
   const templates: TemplateItem[] = useMemo(
     () => [
       {
@@ -112,6 +188,7 @@ export default function ExplorePage() {
         title: "Kinetic Velocity Sans",
         category: "Kinetic Typography",
         duration: "0:05",
+        durationSec: 5,
         aspectRatio: "16:9",
         fps: 60,
         resolution: "3840×2160 (4K UHD)",
@@ -127,12 +204,12 @@ export default function ExplorePage() {
         views: "34.2k",
         remixes: 842,
         featured: true,
-        renderAnimation: (ctx, w, h, t, isHovered) => {
-          ctx.fillStyle = "#0a0b10";
+        renderAnimation: (ctx, w, h, t, isHovered, customText) => {
+          ctx.fillStyle = "#090a10";
           ctx.fillRect(0, 0, w, h);
 
           // Grid lines
-          ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
+          ctx.strokeStyle = "rgba(56, 189, 248, 0.08)";
           ctx.lineWidth = 1;
           for (let x = 0; x < w; x += 36) {
             ctx.beginPath();
@@ -147,43 +224,130 @@ export default function ExplorePage() {
             ctx.stroke();
           }
 
-          // Animated text layers
-          const text = "VELOCITY";
-          const fontSize = Math.max(26, Math.min(48, Math.floor(w * 0.09)));
+          const text = (customText || "VELOCITY").toUpperCase();
+          const fontSize = Math.max(22, Math.min(52, Math.floor(w * 0.09)));
           ctx.font = `bold ${fontSize}px monospace`;
           ctx.textAlign = "center";
           ctx.textBaseline = "middle";
 
           const speed = isHovered ? 2.2 : 1.4;
-          const offset1 = Math.sin(t * speed) * (w * 0.05);
-          const offset2 = Math.cos(t * speed) * (w * 0.05);
+          const offset1 = Math.sin(t * speed) * (w * 0.04);
+          const offset2 = Math.cos(t * speed) * (w * 0.04);
 
           // Chromatic Trail Layers
-          ctx.fillStyle = "rgba(56, 189, 248, 0.4)";
-          ctx.fillText(text, w / 2 - offset1, h / 2 - 12);
+          ctx.fillStyle = "rgba(56, 189, 248, 0.45)";
+          ctx.fillText(text, w / 2 - offset1, h / 2 - 10);
 
-          ctx.fillStyle = "rgba(236, 72, 153, 0.4)";
-          ctx.fillText(text, w / 2 + offset2, h / 2 + 12);
+          ctx.fillStyle = "rgba(236, 72, 153, 0.45)";
+          ctx.fillText(text, w / 2 + offset2, h / 2 + 10);
 
           // Foreground White Typography
           ctx.fillStyle = "#ffffff";
           ctx.shadowColor = "#38bdf8";
-          ctx.shadowBlur = 12;
+          ctx.shadowBlur = 14;
           ctx.fillText(text, w / 2, h / 2);
           ctx.shadowBlur = 0;
 
           // Technical vector corner marks
           ctx.strokeStyle = "#38bdf8";
           ctx.lineWidth = 2;
-          ctx.strokeRect(w * 0.15, h * 0.2, 14, 14);
-          ctx.strokeRect(w * 0.85 - 14, h * 0.8 - 14, 14, 14);
+          ctx.strokeRect(w * 0.1, h * 0.15, 12, 12);
+          ctx.strokeRect(w * 0.9 - 12, h * 0.85 - 12, 12, 12);
         },
       },
       {
         id: "tpl-2",
+        title: "Viral Hook Dynamic Subtitles",
+        category: "Social & Reels (9:16)",
+        duration: "0:04",
+        durationSec: 4,
+        aspectRatio: "9:16",
+        fps: 60,
+        resolution: "1080×1920 (9:16 Vertical)",
+        easing: "cubic-bezier(0.34, 1.56, 0.64, 1)",
+        tags: ["Reels", "TikTok", "Word Pop", "Viral Hook"],
+        palette: ["#facc15", "#22d3ee", "#ffffff", "#0f172a"],
+        exportFormats: ["MP4 (H.264)", "ProRes 4444", "WebM"],
+        defaultText: "STOP SCROLLING",
+        prompt:
+          "High-energy viral social media hook captions with popping bouncy word reveal, bright yellow accent stroke, and audio-reactive particle sparks.",
+        author: { name: "Kai Rivera", avatar: "KR", pro: true, role: "Content Creator" },
+        likes: 3120,
+        views: "42.8k",
+        remixes: 1120,
+        featured: true,
+        renderAnimation: (ctx, w, h, t, isHovered, customText) => {
+          ctx.fillStyle = "#08090f";
+          ctx.fillRect(0, 0, w, h);
+
+          // Central vertical glowing flare
+          const grad = ctx.createRadialGradient(w / 2, h / 2, 10, w / 2, h / 2, Math.max(w, h) * 0.55);
+          grad.addColorStop(0, "rgba(34, 211, 238, 0.18)");
+          grad.addColorStop(1, "rgba(8, 9, 15, 0)");
+          ctx.fillStyle = grad;
+          ctx.fillRect(0, 0, w, h);
+
+          const text = (customText || "STOP SCROLLING").toUpperCase();
+          const words = text.split(" ");
+          const speed = isHovered ? 2.5 : 1.6;
+          const activeIndex = Math.floor((t * speed) % words.length);
+
+          const fontSize = Math.max(18, Math.min(36, Math.floor(w * 0.085)));
+          ctx.font = `900 ${fontSize}px sans-serif`;
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+
+          // Draw stacked words
+          const totalH = words.length * (fontSize * 1.35);
+          const startY = h / 2 - totalH / 2 + fontSize * 0.7;
+
+          words.forEach((word, idx) => {
+            const y = startY + idx * (fontSize * 1.35);
+            const isHighlight = idx === activeIndex;
+
+            if (isHighlight) {
+              const bounce = Math.sin(t * 8) * 4;
+              ctx.save();
+              ctx.translate(w / 2, y + bounce);
+              ctx.scale(1.08, 1.08);
+
+              // Background highlight pill
+              const textWidth = ctx.measureText(word).width;
+              ctx.fillStyle = "#facc15";
+              ctx.shadowColor = "#facc15";
+              ctx.shadowBlur = 18;
+              ctx.beginPath();
+              ctx.roundRect(-textWidth / 2 - 12, -fontSize * 0.65, textWidth + 24, fontSize * 1.3, 8);
+              ctx.fill();
+              ctx.shadowBlur = 0;
+
+              // Black text inside yellow pill
+              ctx.fillStyle = "#0f172a";
+              ctx.fillText(word, 0, 0);
+              ctx.restore();
+            } else {
+              ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
+              ctx.fillText(word, w / 2, y);
+            }
+          });
+
+          // Floating confetti or fire spark dots
+          for (let i = 0; i < 8; i++) {
+            const px = (w * 0.2 + (i * 37 + t * 40) % (w * 0.6));
+            const py = (h * 0.8 - ((t * 50 + i * 25) % (h * 0.4)));
+            ctx.fillStyle = i % 2 === 0 ? "#facc15" : "#22d3ee";
+            ctx.beginPath();
+            ctx.arc(px, py, 2.5, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        },
+      },
+      {
+        id: "tpl-3",
         title: "Isometric Prism Refraction",
-        category: "3D Animation",
+        category: "3D & VFX",
         duration: "0:06",
+        durationSec: 6,
         aspectRatio: "16:9",
         fps: 60,
         resolution: "3840×2160 (4K UHD)",
@@ -217,13 +381,13 @@ export default function ExplorePage() {
             ctx.beginPath();
             ctx.strokeStyle =
               i === 0
-                ? "rgba(96, 165, 250, 0.7)"
+                ? "rgba(96, 165, 250, 0.75)"
                 : i === 1
-                ? "rgba(192, 132, 252, 0.7)"
+                ? "rgba(192, 132, 252, 0.75)"
                 : i === 2
-                ? "rgba(56, 189, 248, 0.7)"
+                ? "rgba(56, 189, 248, 0.75)"
                 : "rgba(255, 255, 255, 0.5)";
-            ctx.lineWidth = 1.6;
+            ctx.lineWidth = 1.8;
             const size = baseSize - i * 14;
             ctx.strokeRect(-size, -size, size * 2, size * 2);
           }
@@ -252,10 +416,11 @@ export default function ExplorePage() {
         },
       },
       {
-        id: "tpl-3",
+        id: "tpl-4",
         title: "Quantum Cyber Logo Reveal",
         category: "Logo Reveals",
         duration: "0:04",
+        durationSec: 4,
         aspectRatio: "16:9",
         fps: 60,
         resolution: "3840×2160 (4K UHD)",
@@ -263,7 +428,7 @@ export default function ExplorePage() {
         tags: ["Logo Reveal", "Arc Sweep", "Neon Corona", "Particle Aura"],
         palette: ["#22d3ee", "#6366f1", "#a855f7", "#ffffff"],
         exportFormats: ["MP4 (H.264)", "ProRes 4444 (Alpha)", "Lottie JSON"],
-        defaultText: "ORBITAL",
+        defaultText: "ANIMAGENT",
         prompt:
           "Dual vector neon circular arcs rotating synchronously with glowing particle corona, high-voltage plasma flare, and central brand emblem reveal.",
         author: { name: "Kaelen Voss", avatar: "KV", pro: true, role: "Motion Designer" },
@@ -271,7 +436,7 @@ export default function ExplorePage() {
         views: "29.4k",
         remixes: 710,
         featured: false,
-        renderAnimation: (ctx, w, h, t, isHovered) => {
+        renderAnimation: (ctx, w, h, t, isHovered, customText) => {
           ctx.fillStyle = "#07080c";
           ctx.fillRect(0, 0, w, h);
 
@@ -301,34 +466,24 @@ export default function ExplorePage() {
           ctx.stroke();
           ctx.shadowBlur = 0;
 
-          // Sparks orbiting
-          for (let s = 0; s < 6; s++) {
-            const angle = sweep + (s * Math.PI) / 3;
-            const dist = radius + Math.sin(t * 3 + s) * 10;
-            const sx = cx + Math.cos(angle) * dist;
-            const sy = cy + Math.sin(angle) * dist;
-            ctx.fillStyle = "#ffffff";
-            ctx.beginPath();
-            ctx.arc(sx, sy, 2, 0, Math.PI * 2);
-            ctx.fill();
-          }
-
-          // Center Logo Glyph
+          // Center Logo Glyph or Letter
+          const label = customText ? customText.slice(0, 3).toUpperCase() : "A";
           ctx.fillStyle = "#ffffff";
           ctx.font = `bold ${Math.floor(radius * 0.55)}px sans-serif`;
           ctx.textAlign = "center";
           ctx.textBaseline = "middle";
-          ctx.fillText("M", cx, cy);
+          ctx.fillText(label, cx, cy);
         },
       },
       {
-        id: "tpl-4",
+        id: "tpl-5",
         title: "Molten Chrome Liquid",
-        category: "Abstract & VFX",
+        category: "3D & VFX",
         duration: "0:06",
-        aspectRatio: "16:9",
+        durationSec: 6,
+        aspectRatio: "1:1",
         fps: 60,
-        resolution: "3840×2160 (4K UHD)",
+        resolution: "2160×2160 (1:1 Square)",
         easing: "cubic-bezier(0.33, 1, 0.68, 1)",
         tags: ["Metaball", "Liquid Chrome", "Harmonic Waves", "Organic"],
         palette: ["#a855f7", "#3b82f6", "#06b6d4", "#e2e8f0"],
@@ -347,8 +502,8 @@ export default function ExplorePage() {
 
           const cx = w / 2;
           const cy = h / 2;
-          const points = 12;
-          const baseRadius = Math.min(w, h) * 0.24;
+          const points = 14;
+          const baseRadius = Math.min(w, h) * 0.25;
           const speed = isHovered ? 2.2 : 1.4;
 
           ctx.beginPath();
@@ -380,25 +535,18 @@ export default function ExplorePage() {
           ctx.fill();
           ctx.shadowBlur = 0;
 
-          // Inner metallic highlights
+          // Inner metallic specular ring
           ctx.strokeStyle = "rgba(255,255,255,0.45)";
           ctx.lineWidth = 2;
-          ctx.stroke();
-
-          // Liquid ripple rings
-          const ripple = (t * 0.8) % 1;
-          ctx.beginPath();
-          ctx.arc(cx, cy, baseRadius * (1.1 + ripple * 0.5), 0, Math.PI * 2);
-          ctx.strokeStyle = `rgba(56, 189, 248, ${0.4 * (1 - ripple)})`;
-          ctx.lineWidth = 1.5;
           ctx.stroke();
         },
       },
       {
-        id: "tpl-5",
+        id: "tpl-6",
         title: "Elastic Dynamic Island",
         category: "UI & Lottie",
         duration: "0:03",
+        durationSec: 3,
         aspectRatio: "16:9",
         fps: 60,
         resolution: "1920×1080 (FHD)",
@@ -468,10 +616,11 @@ export default function ExplorePage() {
         },
       },
       {
-        id: "tpl-6",
+        id: "tpl-7",
         title: "Holographic HUD Telemetry",
         category: "HUD & Cyberpunk",
         duration: "0:06",
+        durationSec: 6,
         aspectRatio: "16:9",
         fps: 60,
         resolution: "3840×2160 (4K UHD)",
@@ -507,7 +656,6 @@ export default function ExplorePage() {
           ctx.lineWidth = 1;
           ctx.stroke();
 
-          // 12 Degree Ticks
           for (let i = 0; i < 12; i++) {
             const angle = (i * Math.PI) / 6;
             ctx.beginPath();
@@ -535,15 +683,15 @@ export default function ExplorePage() {
           ctx.fillStyle = "#06b6d4";
           ctx.font = "bold 9px monospace";
           ctx.textAlign = "left";
-          ctx.fillText(`LAT 37.77° // ALT 4,200M`, cx - boxSize, cy + boxSize + 16);
-          ctx.fillText(`SYS: LOCKED [60FPS]`, cx - boxSize, cy - boxSize - 8);
+          ctx.fillText(`LAT 37.77° // LOCK 60FPS`, cx - boxSize, cy + boxSize + 16);
         },
       },
       {
-        id: "tpl-7",
+        id: "tpl-8",
         title: "Hyperspace Warp Stream",
-        category: "Abstract & VFX",
+        category: "3D & VFX",
         duration: "0:05",
+        durationSec: 5,
         aspectRatio: "16:9",
         fps: 60,
         resolution: "3840×2160 (4K UHD)",
@@ -600,10 +748,71 @@ export default function ExplorePage() {
         },
       },
       {
-        id: "tpl-8",
+        id: "tpl-9",
+        title: "Podcast Waveform Stinger (9:16)",
+        category: "Social & Reels (9:16)",
+        duration: "0:05",
+        durationSec: 5,
+        aspectRatio: "9:16",
+        fps: 60,
+        resolution: "1080×1920 (9:16 Vertical)",
+        easing: "ease-in-out",
+        tags: ["Podcast", "Soundwave", "Reels", "Audio Visualizer"],
+        palette: ["#ec4899", "#8b5cf6", "#38bdf8", "#ffffff"],
+        exportFormats: ["MP4 (H.264)", "ProRes 4444", "WebM"],
+        defaultText: "EPISODE 42",
+        prompt:
+          "Vertical social reel soundwave audiogram with dynamic frequency ribbons, episode title reveal, and pulsing ambient audio rings.",
+        author: { name: "Elena Rostova", avatar: "ER", pro: true, role: "Sound & Social" },
+        likes: 2430,
+        views: "31.8k",
+        remixes: 820,
+        featured: false,
+        renderAnimation: (ctx, w, h, t, isHovered, customText) => {
+          ctx.fillStyle = "#090a12";
+          ctx.fillRect(0, 0, w, h);
+
+          const cx = w / 2;
+          const cy = h * 0.48;
+          const bars = 28;
+          const barW = Math.max(3, w * 0.016);
+          const spacing = barW * 1.8;
+          const totalW = bars * spacing;
+          const startX = cx - totalW / 2;
+          const speed = isHovered ? 2.5 : 1.5;
+
+          // Soundwave bars
+          for (let i = 0; i < bars; i++) {
+            const hVal = Math.sin(t * speed + i * 0.4) * (h * 0.12) + Math.cos(t * 1.2 + i * 0.8) * (h * 0.05) + h * 0.03;
+            const x = startX + i * spacing;
+            const grad = ctx.createLinearGradient(0, cy - hVal, 0, cy + hVal);
+            grad.addColorStop(0, "#ec4899");
+            grad.addColorStop(1, "#38bdf8");
+
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.roundRect(x, cy - Math.abs(hVal), barW, Math.abs(hVal) * 2, barW / 2);
+            ctx.fill();
+          }
+
+          // Title & Episode Label
+          const text = (customText || "EPISODE 42").toUpperCase();
+          ctx.fillStyle = "#ffffff";
+          ctx.font = `bold ${Math.floor(w * 0.075)}px sans-serif`;
+          ctx.textAlign = "center";
+          ctx.fillText(text, cx, h * 0.72);
+
+          ctx.fillStyle = "#8b5cf6";
+          ctx.font = "bold 11px monospace";
+          ctx.fillText("LISTEN NOW // SPOTIFY & APPLE", cx, h * 0.78);
+        },
+      },
+      {
+        id: "tpl-10",
         title: "Bioluminescent Aurora Ribbon",
-        category: "Abstract & VFX",
+        category: "3D & VFX",
         duration: "0:06",
+        durationSec: 6,
         aspectRatio: "16:9",
         fps: 60,
         resolution: "3840×2160 (4K UHD)",
@@ -614,7 +823,7 @@ export default function ExplorePage() {
         defaultText: "AURORA",
         prompt:
           "Harmonic undulating bioluminescent ribbon waves sweeping across canvas with violet-to-cyan gradient glows and floating ambient luminescent particles.",
-        author: { name: "Elena Rostova", avatar: "ER", pro: false, role: "Visual Effects" },
+        author: { name: "Julian Meyer", avatar: "JM", pro: true, role: "Visual Effects" },
         likes: 2740,
         views: "36.5k",
         remixes: 810,
@@ -650,23 +859,14 @@ export default function ExplorePage() {
             ctx.stroke();
             ctx.shadowBlur = 0;
           }
-
-          // Floating Spore Dust
-          for (let p = 0; p < 10; p++) {
-            const px = ((p * 45 + t * 20) % w);
-            const py = (h * 0.3 + Math.sin(t + p) * (h * 0.25));
-            ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
-            ctx.beginPath();
-            ctx.arc(px, py, 1.5, 0, Math.PI * 2);
-            ctx.fill();
-          }
         },
       },
       {
-        id: "tpl-9",
+        id: "tpl-11",
         title: "Cyber Glitch Frame Offset",
-        category: "Kinetic Typography",
+        category: "HUD & Cyberpunk",
         duration: "0:04",
+        durationSec: 4,
         aspectRatio: "16:9",
         fps: 60,
         resolution: "3840×2160 (4K UHD)",
@@ -682,7 +882,7 @@ export default function ExplorePage() {
         views: "28.0k",
         remixes: 690,
         featured: false,
-        renderAnimation: (ctx, w, h, t, isHovered) => {
+        renderAnimation: (ctx, w, h, t, isHovered, customText) => {
           ctx.fillStyle = "#08090d";
           ctx.fillRect(0, 0, w, h);
 
@@ -701,35 +901,26 @@ export default function ExplorePage() {
             }
           }
 
-          // Center Monospace Typography
+          const text = (customText || "CORRUPT").toUpperCase();
           ctx.fillStyle = "#ffffff";
-          ctx.font = `bold ${Math.floor(w * 0.05)}px monospace`;
+          ctx.font = `bold ${Math.floor(w * 0.06)}px monospace`;
           ctx.textAlign = "center";
           ctx.textBaseline = "middle";
           ctx.shadowColor = "#10b981";
           ctx.shadowBlur = 12;
-          ctx.fillText("// GLITCH_FRAME //", w / 2, h / 2);
+          ctx.fillText(`// ${text} //`, w / 2, h / 2);
           ctx.shadowBlur = 0;
-
-          // Scanline bars
-          ctx.strokeStyle = "rgba(0, 0, 0, 0.4)";
-          ctx.lineWidth = 1;
-          for (let y = 0; y < h; y += 4) {
-            ctx.beginPath();
-            ctx.moveTo(0, y);
-            ctx.lineTo(w, y);
-            ctx.stroke();
-          }
         },
       },
       {
-        id: "tpl-10",
+        id: "tpl-12",
         title: "Lottie Elastic Check Burst",
         category: "UI & Lottie",
         duration: "0:03",
-        aspectRatio: "16:9",
+        durationSec: 3,
+        aspectRatio: "1:1",
         fps: 60,
-        resolution: "1920×1080 (FHD)",
+        resolution: "1920×1920 (1:1 Square)",
         easing: "cubic-bezier(0.175, 0.885, 0.32, 1.275)",
         tags: ["Micro-interaction", "Lottie", "Checkmark", "Confetti Burst"],
         palette: ["#10b981", "#fbbf24", "#f43f5e", "#38bdf8"],
@@ -751,8 +942,7 @@ export default function ExplorePage() {
           const speed = isHovered ? 2.5 : 1.4;
           const cycle = (t * speed) % 2;
 
-          // Main circle spring
-          const circleR = Math.min(w, h) * 0.22;
+          const circleR = Math.min(w, h) * 0.24;
           ctx.beginPath();
           ctx.arc(cx, cy, circleR, 0, Math.PI * 2);
           ctx.fillStyle = "#10b981";
@@ -771,7 +961,7 @@ export default function ExplorePage() {
           ctx.lineCap = "round";
           ctx.stroke();
 
-          // Confetti particles exploding radially
+          // Confetti particles
           const particleCount = 10;
           for (let i = 0; i < particleCount; i++) {
             const angle = (i / particleCount) * Math.PI * 2;
@@ -788,10 +978,11 @@ export default function ExplorePage() {
         },
       },
       {
-        id: "tpl-11",
+        id: "tpl-13",
         title: "Swiss Architectural Title Card",
         category: "Kinetic Typography",
         duration: "0:05",
+        durationSec: 5,
         aspectRatio: "16:9",
         fps: 60,
         resolution: "3840×2160 (4K UHD)",
@@ -807,44 +998,93 @@ export default function ExplorePage() {
         views: "21.2k",
         remixes: 510,
         featured: false,
-        renderAnimation: (ctx, w, h, t, isHovered) => {
+        renderAnimation: (ctx, w, h, t, isHovered, customText) => {
           ctx.fillStyle = "#0c0d13";
           ctx.fillRect(0, 0, w, h);
 
           const speed = isHovered ? 1.8 : 1.0;
           const slide = (Math.sin(t * speed) + 1) * 0.5;
 
-          // Crimson Architectural Block
           ctx.fillStyle = "#f43f5e";
           ctx.fillRect(w * 0.12, h * 0.22, 6, h * 0.56);
 
-          // Top Subtitle
           ctx.fillStyle = "#94a3b8";
           ctx.font = "bold 10px monospace";
           ctx.textAlign = "left";
           ctx.fillText("INTERNATIONAL TYPOGRAPHIC STYLE", w * 0.16, h * 0.3);
 
-          // Bold Title
+          const text = (customText || "ARCHITECTURAL").toUpperCase();
           ctx.fillStyle = "#ffffff";
-          const titleSize = Math.max(22, Math.floor(w * 0.075));
+          const titleSize = Math.max(20, Math.floor(w * 0.07));
           ctx.font = `bold ${titleSize}px sans-serif`;
-          ctx.fillText("ARCHITECTURAL", w * 0.16, h * 0.48);
+          ctx.fillText(text, w * 0.16, h * 0.48);
 
-          // Moving bottom accent bar
           ctx.fillStyle = "rgba(255,255,255,0.15)";
           ctx.fillRect(w * 0.16, h * 0.58, w * 0.68 * slide, 2);
-
-          // Bottom Metric
-          ctx.fillStyle = "#64748b";
-          ctx.font = "9px monospace";
-          ctx.fillText("SCALE: 1:1.618 // GRID-LOCKED", w * 0.16, h * 0.68);
         },
       },
       {
-        id: "tpl-12",
+        id: "tpl-14",
+        title: "Neon Wireframe Logo Trace",
+        category: "Logo Reveals",
+        duration: "0:05",
+        durationSec: 5,
+        aspectRatio: "1:1",
+        fps: 60,
+        resolution: "2160×2160 (1:1 Square)",
+        easing: "cubic-bezier(0.2, 0.8, 0.2, 1)",
+        tags: ["Logo Stinger", "Neon Trace", "Wireframe", "Plasma Line"],
+        palette: ["#22d3ee", "#a855f7", "#ffffff", "#0e0f15"],
+        exportFormats: ["MP4 (H.264)", "ProRes 4444 (Alpha)", "WebM"],
+        defaultText: "NEXUS",
+        prompt:
+          "High-voltage neon plasma line tracing an isometric diamond hexagon shield with electric arc pulses and central brand stinger.",
+        author: { name: "Kaelen Voss", avatar: "KV", pro: true, role: "Motion Designer" },
+        likes: 2890,
+        views: "37.1k",
+        remixes: 940,
+        featured: false,
+        renderAnimation: (ctx, w, h, t, isHovered, customText) => {
+          ctx.fillStyle = "#07080d";
+          ctx.fillRect(0, 0, w, h);
+
+          const cx = w / 2;
+          const cy = h / 2;
+          const r = Math.min(w, h) * 0.28;
+          const speed = isHovered ? 2.0 : 1.2;
+          const sides = 6;
+
+          // Hexagon outline
+          ctx.beginPath();
+          for (let i = 0; i <= sides; i++) {
+            const angle = (i * Math.PI * 2) / sides + t * (speed * 0.5);
+            const x = cx + Math.cos(angle) * r;
+            const y = cy + Math.sin(angle) * r;
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          }
+          ctx.strokeStyle = "#22d3ee";
+          ctx.lineWidth = 3;
+          ctx.shadowColor = "#22d3ee";
+          ctx.shadowBlur = 18;
+          ctx.stroke();
+          ctx.shadowBlur = 0;
+
+          // Center Text
+          const label = (customText || "NEXUS").toUpperCase();
+          ctx.fillStyle = "#ffffff";
+          ctx.font = `bold ${Math.floor(r * 0.4)}px sans-serif`;
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(label, cx, cy);
+        },
+      },
+      {
+        id: "tpl-15",
         title: "Audio Reactive Spectrum Ring",
-        category: "Abstract & VFX",
+        category: "3D & VFX",
         duration: "0:06",
+        durationSec: 6,
         aspectRatio: "16:9",
         fps: 60,
         resolution: "3840×2160 (4K UHD)",
@@ -859,7 +1099,7 @@ export default function ExplorePage() {
         likes: 3180,
         views: "44.6k",
         remixes: 1040,
-        featured: true,
+        featured: false,
         renderAnimation: (ctx, w, h, t, isHovered) => {
           ctx.fillStyle = "#07080d";
           ctx.fillRect(0, 0, w, h);
@@ -901,9 +1141,233 @@ export default function ExplorePage() {
           ctx.shadowBlur = 0;
         },
       },
+      {
+        id: "tpl-16",
+        title: "Tactical Drone Targeting HUD",
+        category: "HUD & Cyberpunk",
+        duration: "0:05",
+        durationSec: 5,
+        aspectRatio: "16:9",
+        fps: 60,
+        resolution: "3840×2160 (4K UHD)",
+        easing: "linear",
+        tags: ["Tactical HUD", "Drone Bounding", "Lock-on", "Cyberpunk"],
+        palette: ["#10b981", "#ef4444", "#38bdf8", "#064e3b"],
+        exportFormats: ["MP4 (H.264)", "ProRes 4444", "WebM"],
+        defaultText: "TARGET ACQUIRED",
+        prompt:
+          "Autonomous aerial drone target acquisition bounding box with tracking vectors, distance telemetry, laser reticle, and locked target status.",
+        author: { name: "Vance Media", avatar: "VM", pro: true, role: "Game VFX" },
+        likes: 2670,
+        views: "35.2k",
+        remixes: 890,
+        featured: false,
+        renderAnimation: (ctx, w, h, t, isHovered, customText) => {
+          ctx.fillStyle = "#05080c";
+          ctx.fillRect(0, 0, w, h);
+
+          const cx = w / 2;
+          const cy = h / 2;
+          const boxSize = Math.min(w, h) * 0.22;
+          const speed = isHovered ? 2.0 : 1.0;
+
+          // Corner brackets
+          ctx.strokeStyle = "#10b981";
+          ctx.lineWidth = 2.5;
+          const arm = 14;
+
+          // Top Left
+          ctx.beginPath();
+          ctx.moveTo(cx - boxSize, cy - boxSize + arm);
+          ctx.lineTo(cx - boxSize, cy - boxSize);
+          ctx.lineTo(cx - boxSize + arm, cy - boxSize);
+          ctx.stroke();
+
+          // Top Right
+          ctx.beginPath();
+          ctx.moveTo(cx + boxSize - arm, cy - boxSize);
+          ctx.lineTo(cx + boxSize, cy - boxSize);
+          ctx.lineTo(cx + boxSize, cy - boxSize + arm);
+          ctx.stroke();
+
+          // Bottom Left
+          ctx.beginPath();
+          ctx.moveTo(cx - boxSize, cy + boxSize - arm);
+          ctx.lineTo(cx - boxSize, cy + boxSize);
+          ctx.lineTo(cx - boxSize + arm, cy + boxSize);
+          ctx.stroke();
+
+          // Bottom Right
+          ctx.beginPath();
+          ctx.moveTo(cx + boxSize - arm, cy + boxSize);
+          ctx.lineTo(cx + boxSize, cy + boxSize);
+          ctx.lineTo(cx + boxSize, cy + boxSize - arm);
+          ctx.stroke();
+
+          // Target lock text
+          const statusText = (customText || "TARGET LOCKED [99.8%]").toUpperCase();
+          ctx.fillStyle = "#10b981";
+          ctx.font = "bold 10px monospace";
+          ctx.textAlign = "center";
+          ctx.fillText(statusText, cx, cy + boxSize + 16);
+
+          // Center crosshair
+          ctx.beginPath();
+          ctx.arc(cx, cy, 4, 0, Math.PI * 2);
+          ctx.fillStyle = "#ef4444";
+          ctx.fill();
+        },
+      },
+      {
+        id: "tpl-17",
+        title: "Retro Synthwave Grid Sunset",
+        category: "3D & VFX",
+        duration: "0:06",
+        durationSec: 6,
+        aspectRatio: "16:9",
+        fps: 60,
+        resolution: "3840×2160 (4K UHD)",
+        easing: "linear",
+        tags: ["Synthwave", "80s Retro", "Wireframe Grid", "Neon Sun"],
+        palette: ["#f43f5e", "#a855f7", "#38bdf8", "#fbbf24"],
+        exportFormats: ["MP4 (H.264)", "ProRes 4444", "WebM"],
+        defaultText: "OUTRUN",
+        prompt:
+          "80s retro synthwave perspective wireframe terrain rolling endlessly towards a segmented neon sun with magenta-to-cyan horizon glow.",
+        author: { name: "Studio Mono", avatar: "SM", pro: true, role: "Retro VFX" },
+        likes: 3620,
+        views: "49.1k",
+        remixes: 1220,
+        featured: false,
+        renderAnimation: (ctx, w, h, t, isHovered) => {
+          ctx.fillStyle = "#08060f";
+          ctx.fillRect(0, 0, w, h);
+
+          const horizonY = h * 0.55;
+
+          // Segmented Neon Sun
+          const sunR = Math.min(w, h) * 0.2;
+          const sunGrad = ctx.createLinearGradient(w / 2, horizonY - sunR * 2, w / 2, horizonY);
+          sunGrad.addColorStop(0, "#fbbf24");
+          sunGrad.addColorStop(0.6, "#f43f5e");
+          sunGrad.addColorStop(1, "#a855f7");
+
+          ctx.fillStyle = sunGrad;
+          ctx.beginPath();
+          ctx.arc(w / 2, horizonY - 10, sunR, Math.PI, 0);
+          ctx.fill();
+
+          // Sun horizontal slice lines
+          ctx.fillStyle = "#08060f";
+          for (let s = 1; s <= 5; s++) {
+            ctx.fillRect(w / 2 - sunR, horizonY - 10 - s * 10, sunR * 2, s * 1.5);
+          }
+
+          // Perspective Grid below horizon
+          ctx.strokeStyle = "rgba(56, 189, 248, 0.4)";
+          ctx.lineWidth = 1;
+          const speed = isHovered ? 2.5 : 1.2;
+
+          // Perspective converging lines
+          for (let x = -w * 0.5; x <= w * 1.5; x += 36) {
+            ctx.beginPath();
+            ctx.moveTo(w / 2, horizonY);
+            ctx.lineTo(x, h);
+            ctx.stroke();
+          }
+
+          // Horizontal scrolling lines
+          for (let y = horizonY; y < h; y += 12) {
+            const progress = (y - horizonY) / (h - horizonY);
+            const lineY = horizonY + Math.pow(progress, 2) * (h - horizonY);
+            ctx.beginPath();
+            ctx.moveTo(0, lineY);
+            ctx.lineTo(w, lineY);
+            ctx.stroke();
+          }
+        },
+      },
+      {
+        id: "tpl-18",
+        title: "Glassmorphism Micro-Interaction",
+        category: "UI & Lottie",
+        duration: "0:04",
+        durationSec: 4,
+        aspectRatio: "1:1",
+        fps: 60,
+        resolution: "1920×1920 (1:1 Square)",
+        easing: "cubic-bezier(0.25, 1, 0.5, 1)",
+        tags: ["Glassmorphism", "Card Tilt", "Micro-Interaction", "Specular"],
+        palette: ["#38bdf8", "#818cf8", "#ffffff", "#1e293b"],
+        exportFormats: ["Lottie JSON", "MP4", "ProRes 4444"],
+        defaultText: "CARD HOVER",
+        prompt:
+          "Tactile glassmorphic credit card tilt animation with frosted surface refraction, specular edge sheen, and floating ambient glow spheres.",
+        author: { name: "Elena Rostova", avatar: "ER", pro: true, role: "UI Motion" },
+        likes: 2150,
+        views: "27.4k",
+        remixes: 730,
+        featured: false,
+        renderAnimation: (ctx, w, h, t, isHovered) => {
+          ctx.fillStyle = "#080910";
+          ctx.fillRect(0, 0, w, h);
+
+          const cx = w / 2;
+          const cy = h / 2;
+          const cardW = Math.min(w, h) * 0.65;
+          const cardH = cardW * 0.62;
+          const speed = isHovered ? 2.0 : 1.0;
+          const tilt = Math.sin(t * speed) * 0.08;
+
+          ctx.save();
+          ctx.translate(cx, cy);
+          ctx.rotate(tilt);
+
+          // Card Shadow
+          ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+          ctx.shadowColor = "#38bdf8";
+          ctx.shadowBlur = 24;
+          ctx.beginPath();
+          ctx.roundRect(-cardW / 2, -cardH / 2, cardW, cardH, 16);
+          ctx.fill();
+          ctx.shadowBlur = 0;
+
+          // Frosted Card Surface
+          const grad = ctx.createLinearGradient(-cardW / 2, -cardH / 2, cardW / 2, cardH / 2);
+          grad.addColorStop(0, "rgba(255, 255, 255, 0.12)");
+          grad.addColorStop(1, "rgba(255, 255, 255, 0.03)");
+          ctx.fillStyle = grad;
+          ctx.strokeStyle = "rgba(255, 255, 255, 0.25)";
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.roundRect(-cardW / 2, -cardH / 2, cardW, cardH, 16);
+          ctx.fill();
+          ctx.stroke();
+
+          // Chip & Specular highlight
+          ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+          ctx.beginPath();
+          ctx.roundRect(-cardW * 0.35, -cardH * 0.25, 24, 18, 4);
+          ctx.fill();
+
+          ctx.restore();
+        },
+      },
     ],
     []
   );
+
+  // Top Featured Template for the Spotlight Banner
+  const featuredTemplate = useMemo(() => {
+    return templates.find((t) => t.featured) || templates[0];
+  }, [templates]);
+
+  // Extract all unique tags
+  const allTags = useMemo(() => {
+    const tagsSet = new Set<string>();
+    templates.forEach((t) => t.tags.forEach((tag) => tagsSet.add(tag)));
+    return Array.from(tagsSet).slice(0, 8);
+  }, [templates]);
 
   // Filtered & Sorted Templates
   const filteredTemplates = useMemo(() => {
@@ -913,6 +1377,8 @@ export default function ExplorePage() {
           activeCategory === "All" || tpl.category === activeCategory;
         const matchesAspect =
           aspectRatioFilter === "All" || tpl.aspectRatio === aspectRatioFilter;
+        const matchesTag =
+          !selectedTag || tpl.tags.includes(selectedTag);
         const q = searchQuery.toLowerCase().trim();
         const matchesSearch =
           !q ||
@@ -922,31 +1388,17 @@ export default function ExplorePage() {
           tpl.category.toLowerCase().includes(q) ||
           tpl.tags.some((tag) => tag.toLowerCase().includes(q));
 
-        return matchesCat && matchesAspect && matchesSearch;
+        return matchesCat && matchesAspect && matchesTag && matchesSearch;
       })
       .sort((a, b) => {
         if (sortBy === "popular") return b.likes - a.likes;
         if (sortBy === "remixes") return b.remixes - a.remixes;
-        if (sortBy === "duration") return a.duration.localeCompare(b.duration);
+        if (sortBy === "duration") return a.durationSec - b.durationSec;
         return b.id.localeCompare(a.id);
       });
-  }, [templates, activeCategory, aspectRatioFilter, searchQuery, sortBy]);
+  }, [templates, activeCategory, aspectRatioFilter, selectedTag, searchQuery, sortBy]);
 
-  // Social & Bookmark Actions
-  const toggleLike = (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setLikedIds((prev) => ({ ...prev, [id]: !prev[id] }));
-  };
-
-  const toggleSave = (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    const willSave = !savedIds[id];
-    setSavedIds((prev) => ({ ...prev, [id]: willSave }));
-    if (willSave) {
-      success("Template Saved", "Added to your personal collection in Animagent Studio.");
-    }
-  };
-
+  // Copy prompt helper
   const copyPromptText = (text: string) => {
     navigator.clipboard.writeText(text);
     setCopiedPrompt(true);
@@ -954,18 +1406,29 @@ export default function ExplorePage() {
     setTimeout(() => setCopiedPrompt(false), 2200);
   };
 
+  // Share template helper
+  const shareTemplateLink = (item: TemplateItem) => {
+    const shareUrl = `${window.location.origin}/explore?template=${item.id}`;
+    navigator.clipboard.writeText(shareUrl);
+    setCopiedShareLink(true);
+    success("Link Copied", `Direct link to "${item.title}" copied to clipboard.`);
+    setTimeout(() => setCopiedShareLink(false), 2200);
+  };
+
+  // Export JSON preset
   const downloadJsonPreset = (item: TemplateItem) => {
     const presetData = {
       name: item.title,
-      version: "2.0.0",
+      version: "2.5.0",
       generator: "Animagent AI Motion Engine",
       category: item.category,
       duration: item.duration,
+      durationSec: item.durationSec,
       fps: item.fps,
       resolution: item.resolution,
       easing: item.easing,
       prompt: item.prompt,
-      defaultText: item.defaultText,
+      defaultText: modalCustomText || item.defaultText,
       palette: item.palette,
       tags: item.tags,
       author: item.author,
@@ -988,44 +1451,43 @@ export default function ExplorePage() {
 
   return (
     <div className="min-h-screen flex flex-col font-sans text-slate-100 bg-[#090a0f] relative overflow-x-hidden selection:bg-cyan-500/30 selection:text-cyan-200">
-      {/* Background Interactive Spider Net */}
-      <div className="fixed inset-0 pointer-events-none z-0 opacity-60">
+      {/* Interactive Background Canvas */}
+      <div className="fixed inset-0 pointer-events-none z-0 opacity-55">
         <SpiderNetBackground opacity={0.65} />
       </div>
 
-      {/* Hero Header Section */}
-      <section className="relative z-10 pt-28 pb-8 px-4 sm:px-6 lg:px-8 border-b border-white/[0.06] bg-gradient-to-b from-[#0e1017]/80 to-transparent backdrop-blur-xs">
-        <div className="max-w-7xl mx-auto">
-          {/* Badge & Title */}
-          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+      {/* Hero Header Section with Dynamic Spotlight */}
+      <section className="relative z-10 pt-28 pb-8 px-4 sm:px-6 lg:px-8 border-b border-white/[0.06] bg-gradient-to-b from-[#0e1017]/90 via-[#0c0d14]/70 to-transparent backdrop-blur-xs">
+        <div className="max-w-7xl mx-auto space-y-8">
+          {/* Header Title & Metrics */}
+          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
             <div className="space-y-3 max-w-3xl">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-400/25 text-cyan-300 text-xs font-semibold">
-                <FiStar className="w-3.5 h-3.5 text-cyan-400" />
-                <span>Motion Preset Showcase</span>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-400/25 text-cyan-300 text-xs font-semibold shadow-xs">
+                <FiZap className="w-3.5 h-3.5 text-cyan-400 fill-cyan-400" />
+                <span>Next-Gen Motion Gallery</span>
               </div>
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white font-sans">
-                Curated Motion Templates
+                Curated Motion Presets
               </h1>
               <p className="text-sm sm:text-base text-slate-400 leading-relaxed max-w-2xl font-sans">
-                Explore production-grade procedural animations, kinetic typography, 3D
-                refractions, and UI micro-interactions. Inspect code specs and remix
-                instantly in Studio with 1-click.
+                Explore production-grade procedural animations, kinetic typography, 9:16 vertical reels, 3D
+                refractions, and UI micro-interactions. Scrub live timelines and remix directly in Studio.
               </p>
             </div>
 
-            {/* Quick Metrics Bar */}
-            <div className="flex items-center gap-3 sm:gap-4 shrink-0 overflow-x-auto pb-1">
-              <div className="px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08] backdrop-blur-md">
-                <div className="text-[11px] uppercase tracking-wider text-slate-400 font-mono">
-                  Templates
+            {/* Platform Stats Pills */}
+            <div className="flex items-center gap-3 shrink-0 overflow-x-auto pb-1">
+              <div className="px-4 py-2.5 rounded-2xl bg-white/[0.04] border border-white/[0.08] backdrop-blur-md">
+                <div className="text-[10px] uppercase tracking-wider text-slate-400 font-mono">
+                  Active Presets
                 </div>
                 <div className="text-base sm:text-lg font-bold text-white">
-                  12+ Active
+                  {templates.length}+ Ready
                 </div>
               </div>
 
-              <div className="px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08] backdrop-blur-md">
-                <div className="text-[11px] uppercase tracking-wider text-slate-400 font-mono">
+              <div className="px-4 py-2.5 rounded-2xl bg-white/[0.04] border border-white/[0.08] backdrop-blur-md">
+                <div className="text-[10px] uppercase tracking-wider text-slate-400 font-mono">
                   Engine
                 </div>
                 <div className="text-base sm:text-lg font-bold text-cyan-400">
@@ -1033,23 +1495,106 @@ export default function ExplorePage() {
                 </div>
               </div>
 
-              <div className="px-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08] backdrop-blur-md">
-                <div className="text-[11px] uppercase tracking-wider text-slate-400 font-mono">
-                  Format
+              <div className="px-4 py-2.5 rounded-2xl bg-white/[0.04] border border-white/[0.08] backdrop-blur-md">
+                <div className="text-[10px] uppercase tracking-wider text-slate-400 font-mono">
+                  Export
                 </div>
                 <div className="text-base sm:text-lg font-bold text-indigo-400">
-                  4K &amp; ProRes
+                  4K • ProRes • Lottie
                 </div>
               </div>
             </div>
           </div>
+
+          {/* Spotlight Hero Banner: Featured Template of the Day */}
+          {featuredTemplate && (
+            <div className="relative rounded-3xl bg-gradient-to-r from-[#121420] via-[#10121b] to-[#151624] border border-cyan-500/30 p-4 sm:p-6 shadow-2xl shadow-cyan-950/40 overflow-hidden group">
+              <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center relative z-10">
+                {/* Left: Interactive Live Preview */}
+                <div className="lg:col-span-5 relative aspect-video rounded-2xl overflow-hidden bg-black/60 border border-white/10 shadow-lg">
+                  <VirtualCardCanvas
+                    renderAnimation={featuredTemplate.renderAnimation}
+                    isHovered={true}
+                    customText={featuredTemplate.defaultText}
+                  />
+                  <div className="absolute top-3 left-3 px-2.5 py-1 rounded-md bg-black/80 backdrop-blur-md text-[10px] font-bold text-cyan-300 border border-cyan-400/30 flex items-center gap-1.5">
+                    <FiStar className="w-3 h-3 text-cyan-400 fill-cyan-400" />
+                    <span>FEATURED PRESET</span>
+                  </div>
+                  <div className="absolute bottom-3 right-3 px-2.5 py-1 rounded-md bg-black/80 backdrop-blur-md text-[10px] font-mono text-white border border-white/15">
+                    {featuredTemplate.resolution} • {featuredTemplate.fps} FPS
+                  </div>
+                </div>
+
+                {/* Right: Metadata & Instant Remix CTA */}
+                <div className="lg:col-span-7 space-y-4">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="px-3 py-1 rounded-full text-xs font-semibold bg-cyan-500/15 text-cyan-300 border border-cyan-400/25">
+                      {featuredTemplate.category}
+                    </span>
+                    <span className="text-xs text-slate-400 font-mono">
+                      {featuredTemplate.duration} duration
+                    </span>
+                    <span className="text-xs text-slate-500">•</span>
+                    <span className="text-xs text-slate-400">
+                      By {featuredTemplate.author.name}
+                    </span>
+                  </div>
+
+                  <div>
+                    <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+                      {featuredTemplate.title}
+                    </h2>
+                    <p className="text-xs sm:text-sm text-slate-300 mt-1.5 leading-relaxed max-w-2xl font-sans">
+                      &quot;{featuredTemplate.prompt}&quot;
+                    </p>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-3 pt-2">
+                    <Link
+                      href={`/workspace?prompt=${encodeURIComponent(
+                        featuredTemplate.prompt
+                      )}&style=${encodeURIComponent(
+                        featuredTemplate.category
+                      )}&text=${encodeURIComponent(featuredTemplate.defaultText)}`}
+                      className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-400 to-indigo-500 text-slate-950 font-bold text-xs sm:text-sm flex items-center gap-2 shadow-lg shadow-cyan-500/25 hover:brightness-110 active:scale-95 transition-all"
+                    >
+                      <FiZap className="w-4 h-4 fill-slate-950" />
+                      <span>Remix in Studio</span>
+                      <FiArrowRight className="w-4 h-4" />
+                    </Link>
+
+                    <button
+                      type="button"
+                      onClick={() => setSelectedItem(featuredTemplate)}
+                      className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs sm:text-sm font-semibold border border-white/15 transition-all flex items-center gap-2"
+                    >
+                      <FiMaximize2 className="w-4 h-4" />
+                      <span>Inspect Keyframes &amp; Specs</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => copyPromptText(featuredTemplate.prompt)}
+                      className="p-2.5 rounded-xl bg-white/[0.05] hover:bg-white/10 text-slate-300 hover:text-white border border-white/10 transition-colors"
+                      title="Copy Prompt"
+                    >
+                      <FiCopy className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
       {/* Sticky High-Precision Filter & Search Bar */}
-      <div className="sticky top-16 sm:top-20 z-30 border-b border-white/[0.08] bg-[#0c0c11]/85 backdrop-blur-xl transition-all">
+      <div className="sticky top-16 sm:top-20 z-30 border-b border-white/[0.08] bg-[#0c0c11]/90 backdrop-blur-xl transition-all shadow-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 space-y-3">
-          {/* Row 1: Categories & Search Bar */}
+          {/* Row 1: Categories & Search Controls */}
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
             {/* Category Pills */}
             <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-1 lg:pb-0">
@@ -1086,15 +1631,16 @@ export default function ExplorePage() {
               })}
             </div>
 
-            {/* Search Input & Sort Selector */}
-            <div className="flex items-center gap-2.5 shrink-0">
-              <div className="relative flex items-center w-full sm:w-64">
+            {/* Right: Search, Sort & Layout */}
+            <div className="flex items-center gap-2.5 shrink-0 flex-wrap sm:flex-nowrap">
+              {/* Search Input */}
+              <div className="relative flex items-center w-full sm:w-60">
                 <FiSearch className="absolute left-3 w-3.5 h-3.5 text-slate-500 pointer-events-none" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search prompt, style, tag..."
+                  placeholder="Search prompt, tag, style..."
                   className="w-full pl-8 pr-7 py-1.5 text-xs bg-white/[0.04] border border-white/[0.1] hover:border-white/20 focus:border-cyan-400/50 rounded-full text-white placeholder-slate-500 focus:outline-none transition-all shadow-inner"
                 />
                 {searchQuery && (
@@ -1118,13 +1664,13 @@ export default function ExplorePage() {
                   Most Popular
                 </option>
                 <option value="remixes" className="bg-[#121319] text-white">
-                  Most Remixes
-                </option>
-                <option value="recent" className="bg-[#121319] text-white">
-                  Recently Added
+                  Most Remixed
                 </option>
                 <option value="duration" className="bg-[#121319] text-white">
                   Shortest Duration
+                </option>
+                <option value="recent" className="bg-[#121319] text-white">
+                  Recently Added
                 </option>
               </select>
 
@@ -1157,6 +1703,73 @@ export default function ExplorePage() {
               </div>
             </div>
           </div>
+
+          {/* Row 2: Aspect Ratio Filters & Tag Chips */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 pt-1 border-t border-white/[0.05]">
+            {/* Aspect Ratio Buttons */}
+            <div className="flex items-center gap-1.5">
+              <span className="text-[11px] text-slate-500 font-mono mr-1 hidden md:inline">
+                Ratio:
+              </span>
+              {[
+                { id: "All", label: "All Ratios", icon: null },
+                { id: "16:9", label: "16:9 Landscape", icon: FiTv },
+                { id: "9:16", label: "9:16 Vertical (Reels)", icon: FiSmartphone },
+                { id: "1:1", label: "1:1 Square", icon: FiSquare },
+              ].map((item) => {
+                const isActive = aspectRatioFilter === item.id;
+                const Icon = item.icon;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => setAspectRatioFilter(item.id)}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
+                      isActive
+                        ? "bg-cyan-500/20 text-cyan-300 border border-cyan-400/35"
+                        : "text-slate-400 hover:text-white bg-white/[0.02] border border-transparent hover:border-white/10"
+                    }`}
+                  >
+                    {Icon && <Icon className="w-3 h-3" />}
+                    <span>{item.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Quick Tag Pills */}
+            <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-0.5">
+              <span className="text-[11px] text-slate-500 font-mono mr-1 hidden lg:inline">
+                Tags:
+              </span>
+              {allTags.map((tag) => {
+                const isSelected = selectedTag === tag;
+                return (
+                  <button
+                    key={tag}
+                    type="button"
+                    onClick={() => setSelectedTag(isSelected ? null : tag)}
+                    className={`px-2.5 py-0.5 rounded-md text-[11px] font-mono transition-colors whitespace-nowrap ${
+                      isSelected
+                        ? "bg-cyan-400 text-slate-950 font-bold"
+                        : "bg-white/[0.04] text-slate-400 hover:text-white hover:bg-white/[0.08]"
+                    }`}
+                  >
+                    #{tag}
+                  </button>
+                );
+              })}
+              {selectedTag && (
+                <button
+                  type="button"
+                  onClick={() => setSelectedTag(null)}
+                  className="text-[10px] text-slate-500 hover:text-white underline ml-1"
+                >
+                  Clear Tag
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -1168,11 +1781,11 @@ export default function ExplorePage() {
               <FiSearch className="w-5 h-5" />
             </div>
             <h3 className="text-base font-semibold text-white">
-              No matching motion templates
+              No matching motion presets found
             </h3>
             <p className="text-xs text-slate-400 max-w-sm mx-auto">
-              We couldn&apos;t find any templates matching &quot;{searchQuery}&quot;. Try
-              adjusting your search keyword or active category.
+              We couldn&apos;t find any templates matching your current filters. Try
+              clearing your search query, aspect ratio, or category.
             </p>
             <button
               type="button"
@@ -1180,10 +1793,11 @@ export default function ExplorePage() {
                 setSearchQuery("");
                 setActiveCategory("All");
                 setAspectRatioFilter("All");
+                setSelectedTag(null);
               }}
               className="mt-2 px-4 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 text-xs text-white transition-colors"
             >
-              Reset Filters
+              Reset All Filters
             </button>
           </div>
         ) : (
@@ -1196,67 +1810,105 @@ export default function ExplorePage() {
           >
             {filteredTemplates.map((item) => {
               const isHovered = hoveredId === item.id;
+              const isScrubbing = scrubbingId === item.id;
+              const progress = scrubProgress[item.id] ?? (isHovered ? 0.5 : 0);
               const isLiked = !!likedIds[item.id];
               const isSaved = !!savedIds[item.id];
+
+              // Scrubbing calculation
+              const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                const pos = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+                setScrubbingId(item.id);
+                setScrubProgress((prev) => ({ ...prev, [item.id]: pos }));
+              };
+
+              const handleMouseLeave = () => {
+                setHoveredId(null);
+                setScrubbingId(null);
+              };
+
+              // Formatted scrub time code
+              const currentTime = isScrubbing
+                ? (progress * item.durationSec).toFixed(1)
+                : "0.0";
 
               return (
                 <div
                   key={item.id}
-                  className="group flex flex-col rounded-2xl bg-[#111218]/90 border border-white/[0.08] hover:border-cyan-500/40 transition-all duration-300 shadow-lg hover:shadow-cyan-500/5 overflow-hidden"
+                  className="group flex flex-col rounded-3xl bg-[#111218]/90 border border-white/[0.08] hover:border-cyan-500/40 transition-all duration-300 shadow-lg hover:shadow-cyan-500/10 overflow-hidden"
                   onMouseEnter={() => setHoveredId(item.id)}
-                  onMouseLeave={() => setHoveredId(null)}
+                  onMouseLeave={handleMouseLeave}
                 >
-                  {/* Canvas Animation Stage Container */}
+                  {/* Canvas Stage Container with Aspect Ratio */}
                   <div
-                    className="relative w-full aspect-video bg-[#07080c] overflow-hidden cursor-pointer"
+                    className={`relative w-full overflow-hidden cursor-pointer bg-[#07080c] ${
+                      item.aspectRatio === "9:16"
+                        ? "aspect-[4/3] flex items-center justify-center"
+                        : item.aspectRatio === "1:1"
+                        ? "aspect-video flex items-center justify-center"
+                        : "aspect-video"
+                    }`}
                     onClick={() => setSelectedItem(item)}
+                    onMouseMove={handleMouseMove}
                   >
-                    {/* Live Rendering Canvas */}
-                    <CardCanvas
-                      renderAnimation={item.renderAnimation}
-                      isHovered={isHovered}
-                    />
+                    {/* Viewport Virtualized Canvas */}
+                    <div className="w-full h-full">
+                      <VirtualCardCanvas
+                        renderAnimation={item.renderAnimation}
+                        isHovered={isHovered}
+                        scrubProgress={isScrubbing ? progress : undefined}
+                        durationSec={item.durationSec}
+                        customText={item.defaultText}
+                      />
+                    </div>
 
                     {/* Top Badges: Category & Quality */}
-                    <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none">
-                      <span className="px-2.5 py-1 rounded-md bg-black/75 backdrop-blur-md text-[10px] font-semibold text-cyan-300 border border-white/10 flex items-center gap-1 shadow-sm">
+                    <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none z-10">
+                      <span className="px-2.5 py-1 rounded-lg bg-black/80 backdrop-blur-md text-[10px] font-semibold text-cyan-300 border border-white/10 flex items-center gap-1 shadow-sm">
                         <FiLayers className="w-3 h-3 text-cyan-400" />
                         <span>{item.category}</span>
                       </span>
 
                       <div className="flex items-center gap-1.5">
-                        <span className="px-2 py-0.5 rounded-md bg-black/75 backdrop-blur-md text-[10px] font-mono text-slate-300 border border-white/10">
-                          {item.fps} FPS
+                        <span className="px-2 py-0.5 rounded-md bg-black/80 backdrop-blur-md text-[10px] font-mono text-slate-300 border border-white/10">
+                          {item.aspectRatio}
                         </span>
-                        <span className="px-2 py-0.5 rounded-md bg-black/75 backdrop-blur-md text-[10px] font-mono text-slate-300 border border-white/10">
+                        <span className="px-2 py-0.5 rounded-md bg-black/80 backdrop-blur-md text-[10px] font-mono text-slate-300 border border-white/10">
                           {item.duration}
                         </span>
                       </div>
                     </div>
 
-                    {/* Bottom Scrubber Indicator on Hover */}
-                    <div
-                      className={`absolute bottom-0 left-0 right-0 h-1 bg-white/15 transition-opacity duration-200 ${
-                        isHovered ? "opacity-100" : "opacity-0"
-                      }`}
-                    >
-                      <div className="h-full bg-gradient-to-r from-cyan-400 to-indigo-500 w-full animate-pulse" />
+                    {/* Interactive Horizontal Scrub Bar Indicator */}
+                    <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-black/50 z-20">
+                      <div
+                        className="h-full bg-gradient-to-r from-cyan-400 via-indigo-500 to-pink-500 transition-all duration-75"
+                        style={{
+                          width: isScrubbing ? `${progress * 100}%` : isHovered ? "100%" : "0%",
+                        }}
+                      />
                     </div>
 
-                    {/* Professional Hover Overlay Action Bar */}
+                    {/* Scrubbing Timestamp Overlay Pill */}
+                    {isScrubbing && (
+                      <div className="absolute bottom-3 left-3 z-20 px-2 py-0.5 rounded bg-black/85 text-[10px] font-mono text-cyan-300 border border-cyan-400/30">
+                        {currentTime}s / {item.durationSec}s
+                      </div>
+                    )}
+
+                    {/* Hover Action Overlay */}
                     <div
-                      className={`absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-black/40 transition-opacity duration-200 flex flex-col justify-between p-3.5 ${
-                        isHovered
-                          ? "opacity-100"
-                          : "opacity-0 pointer-events-none"
+                      className={`absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-black/40 transition-opacity duration-200 flex flex-col justify-between p-3.5 z-10 ${
+                        isHovered ? "opacity-100" : "opacity-0 pointer-events-none"
                       }`}
                     >
                       {/* Top Right Quick Actions */}
                       <div className="flex items-center justify-end gap-1.5">
                         <button
                           type="button"
-                          onClick={(e) => toggleSave(item.id, e)}
-                          className="p-2 rounded-xl bg-black/70 hover:bg-white text-white hover:text-slate-950 backdrop-blur-md border border-white/15 transition-all active:scale-95"
+                          onClick={(e) => handleSaveToggle(item.id, e)}
+                          className="p-2 rounded-xl bg-black/75 hover:bg-white text-white hover:text-slate-950 backdrop-blur-md border border-white/15 transition-all active:scale-95"
                           title="Save to Collection"
                         >
                           <FiBookmark
@@ -1267,8 +1919,8 @@ export default function ExplorePage() {
                         </button>
                         <button
                           type="button"
-                          onClick={(e) => toggleLike(item.id, e)}
-                          className="p-2 rounded-xl bg-black/70 hover:bg-white text-white hover:text-slate-950 backdrop-blur-md border border-white/15 transition-all active:scale-95"
+                          onClick={(e) => handleLikeToggle(item.id, e)}
+                          className="p-2 rounded-xl bg-black/75 hover:bg-white text-white hover:text-slate-950 backdrop-blur-md border border-white/15 transition-all active:scale-95"
                           title="Like Template"
                         >
                           <FiHeart
@@ -1299,7 +1951,7 @@ export default function ExplorePage() {
                               item.category
                             )}&text=${encodeURIComponent(item.defaultText)}`}
                             onClick={(e) => e.stopPropagation()}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-cyan-400 to-indigo-500 text-slate-950 font-bold text-xs shadow-lg shadow-cyan-500/20 hover:brightness-110 active:scale-95 transition-all"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-cyan-400 to-indigo-500 text-slate-950 font-bold text-xs shadow-lg shadow-cyan-500/25 hover:brightness-110 active:scale-95 transition-all"
                             title="Remix this template in Studio"
                           >
                             <FiZap className="w-3.5 h-3.5 fill-slate-950" />
@@ -1312,7 +1964,7 @@ export default function ExplorePage() {
                               e.stopPropagation();
                               setSelectedItem(item);
                             }}
-                            className="p-2 rounded-xl bg-black/70 hover:bg-white/20 text-white border border-white/20 backdrop-blur-md transition-colors"
+                            className="p-2 rounded-xl bg-black/75 hover:bg-white/20 text-white border border-white/20 backdrop-blur-md transition-colors"
                             title="Inspect specs & keyframes"
                           >
                             <FiMaximize2 className="w-3.5 h-3.5" />
@@ -1386,7 +2038,7 @@ export default function ExplorePage() {
                           </span>
                         </div>
 
-                        {/* Inline Remix Link */}
+                        {/* Inline Quick Remix Link */}
                         <Link
                           href={`/workspace?prompt=${encodeURIComponent(
                             item.prompt
@@ -1408,7 +2060,7 @@ export default function ExplorePage() {
         )}
       </main>
 
-      {/* High-End Studio Template Inspector Modal */}
+      {/* Deep Studio Inspector & Remix Modal */}
       {selectedItem && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-md animate-in fade-in duration-150 overflow-y-auto"
@@ -1419,7 +2071,7 @@ export default function ExplorePage() {
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div className="p-4 sm:p-6 border-b border-white/[0.08] flex items-center justify-between bg-[#12141d]/80">
+            <div className="p-4 sm:p-6 border-b border-white/[0.08] flex items-center justify-between bg-[#12141d]/90">
               <div className="flex items-center gap-3.5">
                 <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-cyan-400 to-indigo-600 text-slate-950 font-bold flex items-center justify-center shadow-md">
                   <FiZap className="w-5 h-5 fill-slate-950" />
@@ -1446,7 +2098,7 @@ export default function ExplorePage() {
                     selectedItem.prompt
                   )}&style=${encodeURIComponent(
                     selectedItem.category
-                  )}&text=${encodeURIComponent(selectedItem.defaultText)}`}
+                  )}&text=${encodeURIComponent(modalCustomText || selectedItem.defaultText)}`}
                   className="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-400 to-indigo-500 text-slate-950 text-xs font-bold hover:brightness-110 transition-all flex items-center gap-1.5 shadow-lg shadow-cyan-500/20 active:scale-95"
                 >
                   <FiZap className="w-3.5 h-3.5 fill-slate-950" />
@@ -1455,12 +2107,21 @@ export default function ExplorePage() {
 
                 <button
                   type="button"
+                  onClick={() => shareTemplateLink(selectedItem)}
+                  className="p-2 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] text-slate-300 hover:text-white transition-colors"
+                  title="Share template link"
+                >
+                  {copiedShareLink ? <FiCheck className="w-4 h-4 text-emerald-400" /> : <FiShare2 className="w-4 h-4" />}
+                </button>
+
+                <button
+                  type="button"
                   onClick={() => downloadJsonPreset(selectedItem)}
                   className="px-3.5 py-2 rounded-xl bg-white/10 text-white text-xs font-semibold hover:bg-white/15 border border-white/15 transition-colors flex items-center gap-1.5"
-                  title="Download preset file"
+                  title="Download preset JSON"
                 >
                   <FiDownload className="w-3.5 h-3.5 text-slate-300" />
-                  <span className="hidden sm:inline">Download JSON</span>
+                  <span className="hidden sm:inline">JSON</span>
                 </button>
 
                 <button
@@ -1479,24 +2140,26 @@ export default function ExplorePage() {
               <div className="lg:col-span-7 bg-[#07080c] flex flex-col border-b lg:border-b-0 lg:border-r border-white/[0.08]">
                 {/* Canvas Container */}
                 <div className="relative w-full aspect-video flex items-center justify-center overflow-hidden bg-radial from-slate-900 to-[#07080c]">
-                  <CardCanvas
+                  <VirtualCardCanvas
                     renderAnimation={selectedItem.renderAnimation}
                     isHovered={modalPlaying}
+                    customText={modalCustomText || selectedItem.defaultText}
+                    playbackSpeed={modalSpeed}
                   />
 
                   {/* Corner Badges */}
-                  <div className="absolute bottom-3 right-3 px-2.5 py-1 rounded-md bg-black/75 backdrop-blur-md text-[11px] font-mono text-cyan-300 border border-white/10">
-                    60 FPS REAL-TIME
+                  <div className="absolute bottom-3 right-3 px-2.5 py-1 rounded-md bg-black/80 backdrop-blur-md text-[10px] font-mono text-cyan-300 border border-white/10">
+                    60 FPS REAL-TIME • {selectedItem.resolution}
                   </div>
                 </div>
 
-                {/* Player Toolbar */}
+                {/* Player Controls Toolbar */}
                 <div className="p-4 bg-[#0a0b10] border-t border-white/[0.08] flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
                       onClick={() => setModalPlaying(!modalPlaying)}
-                      className="p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors flex items-center gap-1.5 font-medium"
+                      className="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors flex items-center gap-1.5 font-medium"
                     >
                       {modalPlaying ? (
                         <>
@@ -1511,7 +2174,7 @@ export default function ExplorePage() {
                       )}
                     </button>
 
-                    <div className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white/[0.05] border border-white/10 text-slate-300 font-mono text-[11px]">
+                    <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white/[0.05] border border-white/10 text-slate-300 font-mono text-[11px]">
                       <FiClock className="w-3 h-3 text-slate-400" />
                       <span>{selectedItem.duration}</span>
                     </div>
@@ -1540,7 +2203,7 @@ export default function ExplorePage() {
                 </div>
               </div>
 
-              {/* Right Column: Prompt, Keyframes & Specs */}
+              {/* Right Column: Prompt, Custom Text & Specs */}
               <div className="lg:col-span-5 p-5 sm:p-6 space-y-5 bg-[#0f1016]">
                 {/* Navigation Tabs */}
                 <div className="flex items-center gap-2 border-b border-white/[0.08] pb-3">
@@ -1572,6 +2235,27 @@ export default function ExplorePage() {
 
                 {modalTab === "specs" ? (
                   <>
+                    {/* Live Custom Text Input */}
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-xs text-slate-400">
+                        <span className="font-semibold uppercase tracking-wider font-mono text-[10px] text-cyan-400">
+                          Live Custom Text Playground
+                        </span>
+                        <span className="text-[10px] text-slate-500">
+                          Updates canvas in real-time
+                        </span>
+                      </div>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={modalCustomText}
+                          onChange={(e) => setModalCustomText(e.target.value)}
+                          placeholder={selectedItem.defaultText}
+                          className="w-full px-3.5 py-2 rounded-xl bg-white/[0.04] border border-white/10 focus:border-cyan-400/50 text-xs text-white placeholder-slate-500 focus:outline-none font-mono"
+                        />
+                      </div>
+                    </div>
+
                     {/* Prompt Box */}
                     <div className="space-y-2">
                       <div className="flex items-center justify-between text-xs text-slate-400">
@@ -1641,7 +2325,7 @@ export default function ExplorePage() {
                       <span className="font-semibold uppercase tracking-wider font-mono text-[10px] text-slate-400">
                         Color Palette
                       </span>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         {selectedItem.palette.map((color, idx) => (
                           <button
                             key={idx}
@@ -1658,23 +2342,6 @@ export default function ExplorePage() {
                             />
                             <span>{color}</span>
                           </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Compatible Export Targets */}
-                    <div className="space-y-2">
-                      <span className="font-semibold uppercase tracking-wider font-mono text-[10px] text-slate-400">
-                        Supported Export Targets
-                      </span>
-                      <div className="flex flex-wrap gap-1.5">
-                        {selectedItem.exportFormats.map((fmt, idx) => (
-                          <span
-                            key={idx}
-                            className="px-2.5 py-1 rounded-md text-[10px] font-semibold bg-white/[0.05] border border-white/10 text-slate-300"
-                          >
-                            {fmt}
-                          </span>
                         ))}
                       </div>
                     </div>
@@ -1698,6 +2365,7 @@ export default function ExplorePage() {
                               fps: selectedItem.fps,
                               easing: selectedItem.easing,
                               palette: selectedItem.palette,
+                              defaultText: modalCustomText || selectedItem.defaultText,
                             },
                             null,
                             2
@@ -1735,7 +2403,7 @@ export default function ExplorePage() {
                           easing: selectedItem.easing,
                           palette: selectedItem.palette,
                           prompt: selectedItem.prompt,
-                          defaultText: selectedItem.defaultText,
+                          defaultText: modalCustomText || selectedItem.defaultText,
                         },
                         null,
                         2
@@ -1751,7 +2419,7 @@ export default function ExplorePage() {
                       selectedItem.prompt
                     )}&style=${encodeURIComponent(
                       selectedItem.category
-                    )}&text=${encodeURIComponent(selectedItem.defaultText)}`}
+                    )}&text=${encodeURIComponent(modalCustomText || selectedItem.defaultText)}`}
                     className="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-400 to-indigo-500 text-slate-950 font-bold text-sm hover:brightness-110 transition-all flex items-center justify-center gap-2 shadow-xl shadow-cyan-500/20 active:scale-[0.99]"
                   >
                     <FiZap className="w-4 h-4 fill-slate-950" />
@@ -1768,21 +2436,48 @@ export default function ExplorePage() {
   );
 }
 
-// 60FPS Procedural Canvas Subcomponent with High-DPI scaling
-function CardCanvas({
+// 60FPS Procedural Virtualized Canvas Subcomponent with IntersectionObserver & Timeline Scrubbing
+function VirtualCardCanvas({
   renderAnimation,
   isHovered,
+  scrubProgress,
+  durationSec = 5,
+  customText,
+  playbackSpeed = 1,
 }: {
   renderAnimation: (
     ctx: CanvasRenderingContext2D,
     width: number,
     height: number,
     time: number,
-    isHovered: boolean
+    isHovered: boolean,
+    customText?: string
   ) => void;
   isHovered: boolean;
+  scrubProgress?: number;
+  durationSec?: number;
+  customText?: string;
+  playbackSpeed?: number;
 }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const isVisibleRef = useRef<boolean>(true);
+
+  // Viewport IntersectionObserver to pause off-screen rendering
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isVisibleRef.current = entry.isIntersecting;
+      },
+      { threshold: 0.05 }
+    );
+
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -1804,15 +2499,30 @@ function CardCanvas({
     ctx.scale(dpr, dpr);
 
     const render = () => {
-      time += isHovered ? 0.03 : 0.015;
-      renderAnimation(ctx, parentWidth, parentHeight, time, isHovered);
+      // If user is actively scrubbing, lock time to scrub progress
+      if (typeof scrubProgress === "number") {
+        time = scrubProgress * durationSec;
+        renderAnimation(ctx, parentWidth, parentHeight, time, true, customText);
+        return;
+      }
+
+      // Only run RAF loop if element is visible in viewport
+      if (isVisibleRef.current) {
+        time += (isHovered ? 0.025 : 0.015) * playbackSpeed;
+        renderAnimation(ctx, parentWidth, parentHeight, time, isHovered, customText);
+      }
+
       frameId = requestAnimationFrame(render);
     };
 
     render();
 
     return () => cancelAnimationFrame(frameId);
-  }, [renderAnimation, isHovered]);
+  }, [renderAnimation, isHovered, scrubProgress, durationSec, customText, playbackSpeed]);
 
-  return <canvas ref={canvasRef} className="w-full h-full object-cover" />;
+  return (
+    <div ref={containerRef} className="w-full h-full">
+      <canvas ref={canvasRef} className="w-full h-full object-cover" />
+    </div>
+  );
 }

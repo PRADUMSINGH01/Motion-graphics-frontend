@@ -44,8 +44,10 @@ interface ShockwaveWave {
 
 export default function SpiderNetBackground({
   opacity = 0.92,
+  className = "",
 }: {
   opacity?: number;
+  className?: string;
 } = {}) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -470,7 +472,7 @@ export default function SpiderNetBackground({
   return (
     <canvas
       ref={canvasRef}
-      className="absolute inset-0 w-full h-full pointer-events-none select-none z-0"
+      className={`absolute inset-0 w-full h-full pointer-events-none select-none z-0 ${className}`}
       style={{ opacity }}
     />
   );

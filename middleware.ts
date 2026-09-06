@@ -91,7 +91,8 @@ export function middleware(request: NextRequest) {
   }
 
   // Case 2: Authenticated user attempting to visit login/register -> redirect to /workspace
-  if (isAuthRoute && isAuthenticated && !searchParams.get("logout")) {
+  // Do NOT redirect if the user was explicitly directed to login (e.g. ?redirect=/workspace)
+  if (isAuthRoute && isAuthenticated && !searchParams.get("logout") && !searchParams.get("redirect")) {
     return NextResponse.redirect(new URL("/workspace", request.url));
   }
 
