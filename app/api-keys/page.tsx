@@ -18,6 +18,7 @@ import {
 import { useAlert } from "../context/AlertContext";
 import { useAuth } from "../context/AuthContext";
 import { api, ApiKeyItem, ApiError } from "../lib/api";
+import ThemeToggle from "../components/ThemeToggle";
 
 export default function ApiKeysPage() {
   const { success, failure, error } = useAlert();
@@ -143,7 +144,7 @@ export default function ApiKeysPage() {
   }
 
   return (
-    <div className="relative min-h-screen bg-[#090a0f] text-slate-300 font-poppins pt-24 pb-20 px-4 sm:px-6 lg:px-8">
+    <div className="relative min-h-screen bg-slate-50 dark:bg-[#090a0f] text-slate-700 dark:text-slate-300 font-poppins pt-24 pb-20 px-4 sm:px-6 lg:px-8">
       {/* Background ambient lighting */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-96 bg-gradient-to-b from-cyan-900/15 via-blue-900/10 to-transparent blur-3xl pointer-events-none" />
 
@@ -152,30 +153,33 @@ export default function ApiKeysPage() {
         <div className="mb-6 flex items-center justify-between">
           <BackButton fallbackUrl="/workspace" label="Back to Studio" />
 
-          {user && (
-            <button
-              type="button"
-              onClick={fetchKeys}
-              disabled={loadingKeys}
-              className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-white bg-white/[0.04] border border-white/[0.08] px-3 py-1.5 rounded-xl cursor-pointer transition-all"
-            >
-              <FiRefreshCw className={`w-3.5 h-3.5 ${loadingKeys ? "animate-spin text-cyan-400" : ""}`} />
-              <span>Refresh Keys</span>
-            </button>
-          )}
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            {user && (
+              <button
+                type="button"
+                onClick={fetchKeys}
+                disabled={loadingKeys}
+                className="inline-flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-white/[0.04] border border-black/10 dark:border-white/[0.08] px-3 py-1.5 rounded-xl cursor-pointer transition-all"
+              >
+                <FiRefreshCw className={`w-3.5 h-3.5 ${loadingKeys ? "animate-spin text-cyan-500 dark:text-cyan-400" : ""}`} />
+                <span>Refresh Keys</span>
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Page Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-8 border-b border-white/10">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-8 border-b border-black/10 dark:border-white/10">
           <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-cyan-500/10 text-cyan-300 border border-cyan-400/25">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 border border-cyan-500/25">
               <FiKey className="w-3.5 h-3.5" />
               <span>Developer Access</span>
             </div>
-            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white font-comic">
-              API Keys & Developer Tokens
+            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-950 dark:text-white font-comic">
+              API Keys &amp; Developer Tokens
             </h1>
-            <p className="text-xs sm:text-sm text-slate-400 max-w-2xl font-poppins">
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-2xl font-poppins">
               Programmatically generate 60FPS motion graphics, render physics loops, and extract SVG paths using the Animagent REST API.
             </p>
           </div>
@@ -184,7 +188,7 @@ export default function ApiKeysPage() {
             <button
               type="button"
               onClick={() => setModalOpen(true)}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-slate-900 bg-white hover:bg-slate-100 transition-all shadow-md shadow-black/30 cursor-pointer shrink-0"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-white bg-slate-900 hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100 transition-all shadow-md cursor-pointer shrink-0"
             >
               <FiPlus className="w-4 h-4" />
               <span>Create New Secret Key</span>
@@ -192,7 +196,7 @@ export default function ApiKeysPage() {
           ) : (
             <Link
               href="/login"
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-slate-900 bg-cyan-400 hover:bg-cyan-300 transition-all shadow-md shadow-black/30 cursor-pointer shrink-0"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-slate-950 bg-cyan-400 hover:bg-cyan-300 transition-all shadow-md cursor-pointer shrink-0"
             >
               <span>Sign In to Manage Keys</span>
             </Link>
@@ -201,19 +205,19 @@ export default function ApiKeysPage() {
 
         {/* Unauthenticated Notice */}
         {!user && !authLoading && (
-          <div className="my-6 p-5 rounded-2xl bg-cyan-950/30 border border-cyan-500/30 backdrop-blur-md flex items-center justify-between gap-4">
+          <div className="my-6 p-5 rounded-2xl bg-cyan-50 dark:bg-cyan-950/30 border border-cyan-200 dark:border-cyan-500/30 backdrop-blur-md flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <FiShield className="w-5 h-5 text-cyan-400 shrink-0" />
+              <FiShield className="w-5 h-5 text-cyan-600 dark:text-cyan-400 shrink-0" />
               <div className="text-xs">
-                <span className="font-semibold text-white">Authentication Required: </span>
-                <span className="text-slate-300">
+                <span className="font-semibold text-slate-900 dark:text-white">Authentication Required: </span>
+                <span className="text-slate-600 dark:text-slate-300">
                   Please log in to your studio account to generate live API keys and connect to the motion engine.
                 </span>
               </div>
             </div>
             <Link
               href="/login"
-              className="px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-900 bg-white hover:bg-slate-100 shrink-0 transition-colors"
+              className="px-3.5 py-1.5 rounded-xl text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100 shrink-0 transition-colors"
             >
               Sign In
             </Link>
@@ -221,42 +225,42 @@ export default function ApiKeysPage() {
         )}
 
         {/* Active Keys Table Card */}
-        <div className="my-8 rounded-3xl bg-[#0e0f14]/90 border border-white/10 backdrop-blur-2xl overflow-hidden shadow-2xl">
-          <div className="p-5 sm:p-6 border-b border-white/[0.08] flex items-center justify-between">
+        <div className="my-8 rounded-3xl bg-white/90 dark:bg-[#0e0f14]/90 border border-black/10 dark:border-white/10 backdrop-blur-2xl overflow-hidden shadow-xl dark:shadow-2xl">
+          <div className="p-5 sm:p-6 border-b border-black/10 dark:border-white/[0.08] flex items-center justify-between">
             <div className="space-y-0.5">
-              <h3 className="text-base font-bold text-white font-comic">
+              <h3 className="text-base font-bold text-slate-900 dark:text-white font-comic">
                 Active Secret Keys
               </h3>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-600 dark:text-slate-400">
                 Keys authenticate your API requests. Do not commit or share them in public repositories.
               </p>
             </div>
-            <span className="text-xs font-mono px-2.5 py-1 rounded-lg bg-white/[0.05] border border-white/10 text-cyan-300">
+            <span className="text-xs font-mono px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-white/[0.05] border border-black/10 dark:border-white/10 text-cyan-700 dark:text-cyan-300">
               {keys.length} {keys.length === 1 ? "Key" : "Keys"}
             </span>
           </div>
 
           {/* Loading State */}
           {loadingKeys ? (
-            <div className="p-12 text-center text-xs text-slate-400 flex flex-col items-center gap-3">
-              <div className="w-6 h-6 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
+            <div className="p-12 text-center text-xs text-slate-500 dark:text-slate-400 flex flex-col items-center gap-3">
+              <div className="w-6 h-6 border-2 border-cyan-500 dark:border-cyan-400 border-t-transparent rounded-full animate-spin" />
               <span>Fetching authenticated API keys from server...</span>
             </div>
           ) : keys.length === 0 ? (
             /* Empty State */
             <div className="p-12 text-center space-y-3">
-              <div className="w-12 h-12 rounded-2xl bg-white/[0.05] border border-white/10 mx-auto flex items-center justify-center text-slate-400">
+              <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-white/[0.05] border border-black/10 dark:border-white/10 mx-auto flex items-center justify-center text-slate-400">
                 <FiKey className="w-6 h-6" />
               </div>
-              <h4 className="text-sm font-semibold text-white">No API Keys Generated Yet</h4>
-              <p className="text-xs text-slate-400 max-w-sm mx-auto">
+              <h4 className="text-sm font-semibold text-slate-900 dark:text-white">No API Keys Generated Yet</h4>
+              <p className="text-xs text-slate-600 dark:text-slate-400 max-w-sm mx-auto">
                 Create a secret key to authenticate your server, script, or mobile pipeline with Animagent AI.
               </p>
               {user && (
                 <button
                   type="button"
                   onClick={() => setModalOpen(true)}
-                  className="mt-2 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-900 bg-white hover:bg-slate-100 transition-colors cursor-pointer"
+                  className="mt-2 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100 transition-colors cursor-pointer"
                 >
                   <FiPlus className="w-3.5 h-3.5" />
                   <span>Create First Key</span>
@@ -265,7 +269,7 @@ export default function ApiKeysPage() {
             </div>
           ) : (
             /* Key Rows */
-            <div className="divide-y divide-white/[0.06]">
+            <div className="divide-y divide-black/5 dark:divide-white/[0.06]">
               {keys.map((k) => {
                 const isCopied = copiedId === k.id;
                 const displayKey = `${k.prefix}••••••••••••••••••••••••`;
@@ -273,18 +277,18 @@ export default function ApiKeysPage() {
                 return (
                   <div
                     key={k.id}
-                    className="p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-white/[0.02] transition-colors"
+                    className="p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors"
                   >
                     <div className="space-y-1.5 min-w-0">
                       <div className="flex items-center gap-2.5">
-                        <span className="text-sm font-semibold text-white font-comic">
+                        <span className="text-sm font-semibold text-slate-900 dark:text-white font-comic">
                           {k.name}
                         </span>
                         <span
                           className={`px-2 py-0.5 rounded-full text-[10px] font-mono uppercase tracking-wider ${
                             k.status === "active"
-                              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                              : "bg-rose-500/10 text-rose-400 border border-rose-500/20"
+                              ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20"
+                              : "bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/20"
                           }`}
                         >
                           {k.status}
@@ -295,20 +299,20 @@ export default function ApiKeysPage() {
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <code className="text-xs font-mono text-cyan-300 bg-white/[0.04] px-2.5 py-1 rounded-lg border border-white/[0.08]">
+                        <code className="text-xs font-mono text-cyan-700 dark:text-cyan-300 bg-slate-100 dark:bg-white/[0.04] px-2.5 py-1 rounded-lg border border-black/10 dark:border-white/[0.08]">
                           {displayKey}
                         </code>
 
                         <button
                           type="button"
                           onClick={() => copyToClipboard(k.prefix, k.id, "Key Prefix")}
-                          className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-white/[0.06] transition-colors cursor-pointer flex items-center gap-1"
+                          className="p-1.5 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors cursor-pointer flex items-center gap-1"
                           title="Copy Key Prefix"
                         >
                           {isCopied ? (
-                            <FiCheck className="w-3.5 h-3.5 text-emerald-400" />
+                            <FiCheck className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" />
                           ) : (
-                            <FiCopy className="w-3.5 h-3.5 text-slate-400" />
+                            <FiCopy className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
                           )}
                         </button>
                       </div>
@@ -329,7 +333,7 @@ export default function ApiKeysPage() {
                       <button
                         type="button"
                         onClick={() => handleDeleteKey(k.id, k.name)}
-                        className="p-2 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-xl transition-colors cursor-pointer"
+                        className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 rounded-xl transition-colors cursor-pointer"
                         title="Revoke Key"
                       >
                         <FiTrash2 className="w-4 h-4" />
@@ -343,22 +347,22 @@ export default function ApiKeysPage() {
         </div>
 
         {/* Quickstart Code Integration Tabs */}
-        <div className="my-10 rounded-3xl bg-[#0e0f14]/90 border border-white/10 backdrop-blur-2xl p-6 sm:p-8 space-y-4 shadow-2xl">
+        <div className="my-10 rounded-3xl bg-white/90 dark:bg-[#0e0f14]/90 border border-black/10 dark:border-white/10 backdrop-blur-2xl p-6 sm:p-8 space-y-4 shadow-xl dark:shadow-2xl">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <FiTerminal className="w-4 h-4 text-cyan-400" />
-                <h3 className="text-base font-bold text-white font-comic">
+                <FiTerminal className="w-4 h-4 text-cyan-500 dark:text-cyan-400" />
+                <h3 className="text-base font-bold text-slate-900 dark:text-white font-comic">
                   Quickstart: Generate Animation via API
                 </h3>
               </div>
-              <p className="text-xs text-slate-400 font-poppins">
+              <p className="text-xs text-slate-600 dark:text-slate-400 font-poppins">
                 Send a prompt to the autonomous agent and receive a rendered WebM video URL and SVG path array.
               </p>
             </div>
 
             {/* Language switch */}
-            <div className="flex items-center gap-1 bg-white/[0.04] p-1 rounded-xl border border-white/10 font-mono text-xs">
+            <div className="flex items-center gap-1 bg-slate-100 dark:bg-white/[0.04] p-1 rounded-xl border border-black/10 dark:border-white/10 font-mono text-xs">
               {(["curl", "node", "python"] as const).map((tab) => (
                 <button
                   key={tab}
@@ -366,8 +370,8 @@ export default function ApiKeysPage() {
                   onClick={() => setActiveCodeTab(tab)}
                   className={`px-3 py-1 rounded-lg uppercase tracking-wider transition-all cursor-pointer ${
                     activeCodeTab === tab
-                      ? "bg-white text-slate-900 font-bold"
-                      : "text-slate-400 hover:text-white"
+                      ? "bg-white text-slate-950 font-bold shadow-xs"
+                      : "text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white"
                   }`}
                 >
                   {tab}
@@ -377,7 +381,7 @@ export default function ApiKeysPage() {
           </div>
 
           {/* Code Block */}
-          <div className="relative rounded-2xl bg-black/60 border border-white/10 p-4 font-mono text-xs text-slate-200 overflow-x-auto leading-relaxed">
+          <div className="relative rounded-2xl bg-slate-950 dark:bg-black/60 border border-black/20 dark:border-white/10 p-4 font-mono text-xs text-slate-200 overflow-x-auto leading-relaxed">
             {activeCodeTab === "curl" && (
               <pre>
 {`curl -X POST https://api.animagent.ai/v1/generate \\
@@ -435,23 +439,23 @@ print("Render output URL:", animation.url)`}
       {/* Modal: Create Key */}
       {modalOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 dark:bg-black/80 backdrop-blur-md animate-in fade-in"
           onClick={() => setModalOpen(false)}
         >
           <div
-            className="w-full max-w-md rounded-3xl bg-[#121319] border border-white/15 p-6 sm:p-8 space-y-5 shadow-2xl text-white"
+            className="w-full max-w-md rounded-3xl bg-white dark:bg-[#121319] border border-black/10 dark:border-white/15 p-6 sm:p-8 space-y-5 shadow-2xl text-slate-900 dark:text-white"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="space-y-1">
-              <h3 className="text-xl font-bold font-comic">Create API Secret Key</h3>
-              <p className="text-xs text-slate-400">
+              <h3 className="text-xl font-bold font-comic text-slate-950 dark:text-white">Create API Secret Key</h3>
+              <p className="text-xs text-slate-600 dark:text-slate-400">
                 Assign a recognizable name to keep track of its environment or service usage.
               </p>
             </div>
 
             <form onSubmit={handleCreateKey} className="space-y-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-slate-300">
+                <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
                   Key Name / Description
                 </label>
                 <input
@@ -461,7 +465,7 @@ print("Render output URL:", animation.url)`}
                   onChange={(e) => setNewKeyName(e.target.value)}
                   placeholder="e.g. Production Mobile App Sync"
                   autoFocus
-                  className="w-full px-4 py-2.5 text-xs sm:text-sm bg-white/[0.04] border border-white/[0.12] rounded-xl focus:outline-none focus:border-cyan-400 text-white placeholder-slate-500 font-poppins"
+                  className="w-full px-4 py-2.5 text-xs sm:text-sm bg-slate-50 dark:bg-white/[0.04] border border-black/15 dark:border-white/[0.12] rounded-xl focus:outline-none focus:border-cyan-500 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 font-poppins"
                 />
               </div>
 
@@ -470,17 +474,17 @@ print("Render output URL:", animation.url)`}
                   type="button"
                   onClick={() => setModalOpen(false)}
                   disabled={creating}
-                  className="px-4 py-2 rounded-xl text-xs font-medium text-slate-300 hover:text-white hover:bg-white/10 transition-colors"
+                  className="px-4 py-2 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={creating}
-                  className="px-5 py-2 rounded-xl text-xs font-semibold text-slate-900 bg-white hover:bg-slate-100 transition-colors cursor-pointer shadow-md flex items-center gap-2"
+                  className="px-5 py-2 rounded-xl text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 dark:text-slate-900 dark:bg-white dark:hover:bg-slate-100 transition-colors cursor-pointer shadow-md flex items-center gap-2"
                 >
                   {creating && (
-                    <div className="w-3.5 h-3.5 border-2 border-slate-900 border-t-transparent rounded-full animate-spin" />
+                    <div className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />
                   )}
                   <span>Generate Secret Key</span>
                 </button>
@@ -492,20 +496,20 @@ print("Render output URL:", animation.url)`}
 
       {/* Modal: Reveal Newly Created Secret Key (One-Time Display) */}
       {newlyCreatedSecret && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in">
-          <div className="w-full max-w-lg rounded-3xl bg-[#121319] border border-emerald-500/30 p-6 sm:p-8 space-y-5 shadow-2xl text-white">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 dark:bg-black/85 backdrop-blur-md animate-in fade-in">
+          <div className="w-full max-w-lg rounded-3xl bg-white dark:bg-[#121319] border border-emerald-500/30 p-6 sm:p-8 space-y-5 shadow-2xl text-slate-900 dark:text-white">
             <div className="space-y-1">
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-mono uppercase tracking-wider bg-emerald-500/15 text-emerald-400 border border-emerald-500/25">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-mono uppercase tracking-wider bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/25">
                 <FiCheck className="w-3 h-3" />
                 <span>Generated Successfully</span>
               </div>
-              <h3 className="text-xl font-bold font-comic">Save Your API Secret Key</h3>
-              <p className="text-xs text-slate-400">
+              <h3 className="text-xl font-bold font-comic text-slate-950 dark:text-white">Save Your API Secret Key</h3>
+              <p className="text-xs text-slate-600 dark:text-slate-400">
                 Please copy your secret key now. For your security, it will not be displayed again.
               </p>
             </div>
 
-            <div className="p-3.5 rounded-2xl bg-black/60 border border-white/10 space-y-2">
+            <div className="p-3.5 rounded-2xl bg-slate-950 dark:bg-black/60 border border-black/20 dark:border-white/10 space-y-2 text-white">
               <span className="text-[11px] font-medium text-slate-400 block font-mono">
                 {newlyCreatedSecret.name}
               </span>
@@ -526,7 +530,7 @@ print("Render output URL:", animation.url)`}
               </div>
             </div>
 
-            <div className="flex items-start gap-2.5 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs">
+            <div className="flex items-start gap-2.5 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-300 text-xs">
               <FiAlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
               <span>
                 Do not share or commit this key. If lost, you will need to revoke it and generate a new one.
@@ -537,7 +541,7 @@ print("Render output URL:", animation.url)`}
               <button
                 type="button"
                 onClick={() => setNewlyCreatedSecret(null)}
-                className="px-5 py-2 rounded-xl text-xs font-semibold text-slate-900 bg-white hover:bg-slate-100 transition-colors cursor-pointer shadow-md"
+                className="px-5 py-2 rounded-xl text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 dark:text-slate-900 dark:bg-white dark:hover:bg-slate-100 transition-colors cursor-pointer shadow-md"
               >
                 I Have Saved My Key
               </button>

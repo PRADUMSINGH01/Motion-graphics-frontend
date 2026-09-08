@@ -333,118 +333,7 @@ export const api = {
       }),
   },
 
-  // ==========================================================================
-  // Chat & Conversation Management API (adds conversation to backend)
-  // ==========================================================================
-  conversation: {
-    add: async (payload: {
-      title?: string;
-      initialMessage?: string;
-      prompt?: string;
-      category?: string;
-      metadata?: Record<string, any>;
-    }) => {
-      const targetUrl =
-        typeof window !== "undefined"
-          ? "/api/conversations"
-          : `${getApiBaseUrl().replace(/\/$/, "")}/api/conversations`;
-      try {
-        const res = await fetch(targetUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-        if (res.ok) return res.json();
-      } catch {}
-      return {
-        success: true,
-        conversation: {
-          id: `conv-${Date.now()}`,
-          title: payload.title || payload.prompt || "Untitled Motion",
-          createdAt: new Date().toISOString(),
-        },
-      };
-    },
 
-    sendMessage: (
-      conversationId: string,
-      message: {
-        role?: "user" | "assistant";
-        content: string;
-        motionPrompt?: string;
-      }
-    ) =>
-      request<{
-        success: boolean;
-        reply: {
-          id: string;
-          role: "assistant";
-          content: string;
-          motionPrompt?: string;
-          createdAt: string;
-        };
-      }>(`/api/conversations/${conversationId}/messages`, {
-        method: "POST",
-        body: JSON.stringify(message),
-      }),
-
-    list: async (): Promise<{
-      success: boolean;
-      conversations: Array<{
-        id: string;
-        title: string;
-        updatedAt: string;
-        messageCount?: number;
-      }>;
-    }> => {
-      const targetUrl =
-        typeof window !== "undefined"
-          ? "/api/conversations"
-          : `${getApiBaseUrl().replace(/\/$/, "")}/api/conversations`;
-      try {
-        const res = await fetch(targetUrl);
-        if (res.ok) return res.json();
-      } catch {}
-      return { success: true, conversations: [] };
-    },
-
-    get: (conversationId: string) =>
-      request<{
-        success: boolean;
-        conversation: {
-          id: string;
-          title: string;
-          messages: Array<{
-            id: string;
-            role: "user" | "assistant";
-            content: string;
-            createdAt: string;
-          }>;
-        };
-      }>(`/api/conversations/${conversationId}`, {
-        method: "GET",
-      }),
-
-    delete: (conversationId: string) =>
-      request<{ success: boolean; message: string }>(`/api/conversations/${conversationId}`, {
-        method: "DELETE",
-      }),
-  },
-
-  // Alias for chat/conversation
-  chat: {
-    addConversation: (payload: { title?: string; initialMessage?: string; prompt?: string }) =>
-      request<{ success: boolean; conversation: any }>("/api/conversations", {
-        method: "POST",
-        body: JSON.stringify(payload),
-      }),
-
-    sendMessage: (conversationId: string, content: string, motionPrompt?: string) =>
-      request<{ success: boolean; reply: any }>(`/api/conversations/${conversationId}/messages`, {
-        method: "POST",
-        body: JSON.stringify({ content, motionPrompt }),
-      }),
-  },
 
   // ==========================================================================
   // Character & Typography Vector Conversion API
@@ -504,6 +393,7 @@ export const api = {
       return (await res.json()) as {
         success: boolean;
         message: string;
+        backendConnected?: boolean;
         job?: any;
         motion?: {
           promptId: string;
@@ -515,13 +405,15 @@ export const api = {
           duration: number;
           status: string;
         };
+        template?: any;
+        templates?: any[];
       };
     },
   },
 };
 
 // ============================================================================
-// Types for Character Conversion & Chat Conversations
+// Types for Character Conversion
 // ============================================================================
 
 export interface CharConversionPayload {
@@ -562,48 +454,7 @@ export interface CharConversionResult {
   createdAt?: string;
 }
 
-export interface ConversationPayload {
-  title?: string;
-  initialMessage?: string;
-  prompt?: string;
-  category?: string;
-  metadata?: Record<string, any>;
-}
 
-export interface ConversationMessage {
-  id?: string;
-  role: "user" | "assistant" | "system";
-  content: string;
-  motionPrompt?: string;
-  createdAt?: string;
-}
-
-export interface ConversationRecord {
-  id: string;
-  title: string;
-  messages: ConversationMessage[];
-  createdAt: string;
-}
-
-// ============================================================================
-// Convenient Standalone Helper Functions
-// ============================================================================
-
-/**
- * Add a character conversion job to the backend.
- * @param payload Character conversion payload containing text, font, effect, physics
- */
-export async function addCharConversion(payload: CharConversionPayload): Promise<CharConversionResult> {
-  return api.charConversion.add(payload);
-}
-
-/**
- * Add a new chat conversation to the backend.
- * @param payload Initial conversation payload containing title, prompt or initial message
- */
-export async function addChatConversation(payload: ConversationPayload) {
-  return api.conversation.add(payload);
-}
 
 /**
  * Submits a prompt generation job to the backend BullMQ AGENTQUEUE (/api/prompt).

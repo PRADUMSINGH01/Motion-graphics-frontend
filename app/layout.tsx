@@ -29,6 +29,7 @@ export const metadata: Metadata = {
 import React, { Suspense } from "react";
 import { AlertProvider } from "./context/AlertContext";
 import { AuthProvider } from "./context/AuthContext";
+import { ThemeProvider } from "./context/ThemeContext";
 import RouteProgressBar from "./components/RouteProgressBar";
 import Footer from "./components/Footer";
 
@@ -40,9 +41,27 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var stored = localStorage.getItem('animagent_theme');
+                  var theme = stored === 'light' || stored === 'dark' ? stored : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                  document.documentElement.classList.add(theme);
+                  document.documentElement.setAttribute('data-theme', theme);
+                  document.documentElement.style.colorScheme = theme;
+                } catch (e) {
+                  document.documentElement.classList.add('dark');
+                }
+              })();
+            `,
+          }}
+        />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
@@ -54,19 +73,21 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="min-h-full flex flex-col" style={{ backgroundColor: "rgba(18, 16, 19, 1)" }}>
+      <body className="min-h-full flex flex-col bg-[var(--background)] text-[var(--foreground)] transition-colors duration-200">
         <Suspense fallback={null}>
           <RouteProgressBar />
         </Suspense>
-        <AlertProvider>
-          <AuthProvider>
-            <Navbar />
-            <main className="flex-1 flex flex-col">
-              {children}
-            </main>
-            <Footer />
-          </AuthProvider>
-        </AlertProvider>
+        <ThemeProvider>
+          <AlertProvider>
+            <AuthProvider>
+              <Navbar />
+              <main className="flex-1 flex flex-col">
+                {children}
+              </main>
+              <Footer />
+            </AuthProvider>
+          </AlertProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

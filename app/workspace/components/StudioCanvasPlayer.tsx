@@ -44,7 +44,7 @@ export default function StudioCanvasPlayer({
   return (
     <div
       ref={canvasContainerRef}
-      className={`relative rounded-2xl bg-[#030406] border border-white/[0.12] shadow-2xl overflow-hidden flex flex-col w-full transition-all duration-300 ${
+      className={`relative rounded-2xl bg-[#030406] border border-black/10 dark:border-white/[0.12] shadow-2xl overflow-hidden flex flex-col w-full transition-all duration-300 ${
         aspectRatio === "16:9"
           ? "max-w-3xl aspect-[16/9] max-h-[50vh]"
           : aspectRatio === "9:16"
@@ -88,7 +88,7 @@ export default function StudioCanvasPlayer({
       </div>
 
       {/* Integrated Transport Control Dock */}
-      <div className="h-11 shrink-0 bg-[#090b10]/95 border-t border-white/[0.08] px-3.5 flex items-center gap-2.5 select-none">
+      <div className="h-11 shrink-0 bg-white/95 dark:bg-[#090b10]/95 border-t border-black/[0.08] dark:border-white/[0.08] px-3.5 flex items-center gap-2.5 select-none transition-colors">
         {/* Play / Pause Toggle */}
         <button
           type="button"
@@ -109,8 +109,8 @@ export default function StudioCanvasPlayer({
           onClick={() => setIsLooping(!isLooping)}
           className={`p-1.5 rounded-lg transition-colors cursor-pointer shrink-0 ${
             isLooping
-              ? "text-cyan-400 bg-cyan-500/15"
-              : "text-slate-500 hover:text-slate-300"
+              ? "text-cyan-600 dark:text-cyan-400 bg-cyan-500/15"
+              : "text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
           }`}
           title={isLooping ? "Loop Enabled" : "Loop Disabled (Plays once)"}
         >
@@ -126,12 +126,12 @@ export default function StudioCanvasPlayer({
             step="0.01"
             value={currentTime}
             onChange={(e) => onScrub(parseFloat(e.target.value))}
-            className="w-full accent-cyan-400 cursor-pointer h-1 bg-white/15 rounded-lg appearance-none"
+            className="w-full accent-cyan-500 dark:accent-cyan-400 cursor-pointer h-1 bg-black/10 dark:bg-white/15 rounded-lg appearance-none"
           />
         </div>
 
         {/* Timecode */}
-        <span className="text-[11px] font-mono text-slate-400 shrink-0">
+        <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400 shrink-0">
           00:0{currentTime.toFixed(1)} / 00:0{duration}.0
         </span>
       </div>

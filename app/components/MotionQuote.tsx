@@ -548,8 +548,12 @@ export default function MotionQuote() {
         items-center
         justify-center
         overflow-hidden
-        bg-black
-        text-white
+        bg-slate-100
+        dark:bg-black
+        text-slate-900
+        dark:text-white
+        transition-colors
+        duration-300
       "
     >
       <div
@@ -582,7 +586,8 @@ export default function MotionQuote() {
                 font-light
                 leading-[0.9]
                 tracking-[-0.065em]
-                text-white
+                text-slate-800
+                dark:text-white
               "
             />
           </div>
@@ -599,7 +604,8 @@ export default function MotionQuote() {
                 font-black
                 leading-[0.78]
                 tracking-[-0.09em]
-                text-white
+                text-slate-950
+                dark:text-white
                 will-change-transform
               "
             />
@@ -612,9 +618,12 @@ export default function MotionQuote() {
               className="
                 whitespace-nowrap
                 bg-gradient-to-r
-                from-cyan-300
-                via-white
-                to-cyan-300
+                from-cyan-600
+                via-indigo-600
+                to-purple-600
+                dark:from-cyan-300
+                dark:via-white
+                dark:to-cyan-300
                 bg-clip-text
                 text-[clamp(3rem,7vw,7rem)]
                 font-black
@@ -633,7 +642,8 @@ export default function MotionQuote() {
               h-[2px]
               w-[min(520px,55vw)]
               rounded-full
-              bg-white
+              bg-slate-900/25
+              dark:bg-white
               opacity-0
             "
           />
@@ -652,7 +662,8 @@ export default function MotionQuote() {
           text-[11px]
           uppercase
           tracking-[0.4em]
-          text-white
+          text-slate-500
+          dark:text-white
         "
       />
     </section>

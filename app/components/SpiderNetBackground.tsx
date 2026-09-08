@@ -288,8 +288,11 @@ export default function SpiderNetBackground({
         }
       }
 
+      // Theme detection for high contrast strokes
+      const isLight = document.documentElement.classList.contains("light");
+
       // 4. Draw Radial Spokes (From Center Hub Outward)
-      ctx.lineWidth = 0.9;
+      ctx.lineWidth = isLight ? 1.0 : 0.9;
       for (let s = 0; s < spokeCount; s++) {
         ctx.beginPath();
         ctx.moveTo(hubX, hubY);
@@ -300,15 +303,17 @@ export default function SpiderNetBackground({
         }
 
         // Color gradient along spoke
-        const spokeAlpha = 0.24 + Math.sin(time + s * 0.2) * 0.06;
-        ctx.strokeStyle = `rgba(165, 180, 252, ${spokeAlpha})`;
+        const spokeAlpha = (isLight ? 0.34 : 0.24) + Math.sin(time + s * 0.2) * 0.06;
+        ctx.strokeStyle = isLight
+          ? `rgba(99, 102, 241, ${spokeAlpha})`
+          : `rgba(165, 180, 252, ${spokeAlpha})`;
         ctx.stroke();
       }
 
       // 5. Draw Concentric Web Rings (With Natural Curved Catenary Sagging)
       for (let r = 0; r < ringCount; r++) {
         const ring = webVertices[r];
-        const ringAlpha = Math.max(0.1, 0.35 - (r / ringCount) * 0.22);
+        const ringAlpha = Math.max(0.1, (isLight ? 0.42 : 0.35) - (r / ringCount) * 0.22);
 
         ctx.beginPath();
         for (let s = 0; s < spokeCount; s++) {
@@ -339,8 +344,10 @@ export default function SpiderNetBackground({
           ctx.quadraticCurveTo(cpX, cpY, next.x, next.y);
         }
 
-        ctx.strokeStyle = `rgba(196, 181, 253, ${ringAlpha})`;
-        ctx.lineWidth = r % 3 === 0 ? 1.0 : 0.65;
+        ctx.strokeStyle = isLight
+          ? `rgba(124, 58, 237, ${ringAlpha})`
+          : `rgba(196, 181, 253, ${ringAlpha})`;
+        ctx.lineWidth = r % 3 === 0 ? (isLight ? 1.15 : 1.0) : (isLight ? 0.75 : 0.65);
         ctx.stroke();
       }
 
@@ -384,8 +391,10 @@ export default function SpiderNetBackground({
 
           ctx.beginPath();
           ctx.arc(v.x, v.y, nodeRadius, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(147, 197, 253, ${0.4 + twinkle * 0.5})`;
-          ctx.shadowColor = "rgba(168, 85, 247, 0.7)";
+          ctx.fillStyle = isLight
+            ? `rgba(79, 70, 229, ${0.45 + twinkle * 0.5})`
+            : `rgba(147, 197, 253, ${0.4 + twinkle * 0.5})`;
+          ctx.shadowColor = isLight ? "rgba(99, 102, 241, 0.45)" : "rgba(168, 85, 247, 0.7)";
           ctx.shadowBlur = 8;
           ctx.fill();
           ctx.shadowBlur = 0;
@@ -405,7 +414,9 @@ export default function SpiderNetBackground({
               ctx.beginPath();
               ctx.moveTo(mouse.x, mouse.y);
               ctx.lineTo(v.x, v.y);
-              ctx.strokeStyle = `rgba(56, 189, 248, ${alpha})`;
+              ctx.strokeStyle = isLight
+                ? `rgba(2, 132, 199, ${alpha * 1.2})`
+                : `rgba(56, 189, 248, ${alpha})`;
               ctx.lineWidth = 1;
               ctx.stroke();
               connectedCount++;
@@ -422,9 +433,11 @@ export default function SpiderNetBackground({
 
         ctx.beginPath();
         ctx.arc(sw.x, sw.y, sw.radius, 0, Math.PI * 2);
-        ctx.strokeStyle = `rgba(56, 189, 248, ${sw.alpha * 0.6})`;
+        ctx.strokeStyle = isLight
+          ? `rgba(2, 132, 199, ${sw.alpha * 0.7})`
+          : `rgba(56, 189, 248, ${sw.alpha * 0.6})`;
         ctx.lineWidth = 2.5 * sw.alpha;
-        ctx.shadowColor = "#38bdf8";
+        ctx.shadowColor = isLight ? "#0284c7" : "#38bdf8";
         ctx.shadowBlur = 18;
         ctx.stroke();
         ctx.shadowBlur = 0;
@@ -450,7 +463,9 @@ export default function SpiderNetBackground({
 
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(224, 231, 255, ${currentAlpha})`;
+        ctx.fillStyle = isLight
+          ? `rgba(99, 102, 241, ${currentAlpha * 0.8})`
+          : `rgba(224, 231, 255, ${currentAlpha})`;
         ctx.fill();
       }
 

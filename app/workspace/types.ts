@@ -13,16 +13,23 @@ export type CharEffect = "kinetic_split" | "neon_glow" | "wave" | "glitch" | "is
 export type ColorPalette = "cyan" | "purple" | "amber" | "matrix" | "crimson" | "blue";
 export type MotionSpeed = 0.5 | 1 | 1.5 | 2;
 
-export interface ProjectItem {
+export interface GeneratedTemplateItem {
   id: string;
   name: string;
   category: StylePreset;
   duration: number;
   prompt: string;
   text: string;
-  updatedAt: string;
-  palette?: ColorPalette;
+  palette: ColorPalette;
+  fps: number;
+  aspectRatio?: AspectRatio;
+  createdAt: string;
+  updatedAt?: string;
+  jobId?: string;
+  isPrimary?: boolean;
 }
+
+export type ProjectItem = GeneratedTemplateItem;
 
 export interface PricingTier {
   id: PlanTier;

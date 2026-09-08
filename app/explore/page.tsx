@@ -34,6 +34,7 @@ import {
 import { useAlert } from "../context/AlertContext";
 import SpiderNetBackground from "../components/SpiderNetBackground";
 import BackButton from "../components/BackButton";
+import ThemeToggle from "../components/ThemeToggle";
 
 export type TemplateCategory =
   | "Kinetic Typography"
@@ -1451,30 +1452,31 @@ export default function ExplorePage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col font-sans text-slate-100 bg-[#090a0f] relative overflow-x-hidden selection:bg-cyan-500/30 selection:text-cyan-200">
+    <div className="min-h-screen flex flex-col font-sans text-slate-900 dark:text-slate-100 bg-slate-50 dark:bg-[#090a0f] relative overflow-x-hidden selection:bg-cyan-500/30 selection:text-cyan-800 dark:selection:text-cyan-200 transition-colors duration-200">
       {/* Interactive Background Canvas */}
       <div className="fixed inset-0 pointer-events-none z-0 opacity-55">
         <SpiderNetBackground opacity={0.65} />
       </div>
 
       {/* Hero Header Section with Dynamic Spotlight */}
-      <section className="relative z-10 pt-28 pb-8 px-4 sm:px-6 lg:px-8 border-b border-white/[0.06] bg-gradient-to-b from-[#0e1017]/90 via-[#0c0d14]/70 to-transparent backdrop-blur-xs">
+      <section className="relative z-10 pt-28 pb-8 px-4 sm:px-6 lg:px-8 border-b border-black/[0.06] dark:border-white/[0.06] bg-gradient-to-b from-slate-100/90 dark:from-[#0e1017]/90 via-slate-50/70 dark:via-[#0c0d14]/70 to-transparent backdrop-blur-xs">
         <div className="max-w-7xl mx-auto space-y-6">
-          {/* Back Navigation */}
-          <div>
+          {/* Back Navigation & Theme Toggle */}
+          <div className="flex items-center justify-between">
             <BackButton fallbackUrl="/workspace" label="Back to Studio" />
+            <ThemeToggle />
           </div>
           {/* Header Title & Metrics */}
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
             <div className="space-y-3 max-w-3xl">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-400/25 text-cyan-300 text-xs font-semibold shadow-xs">
-                <FiZap className="w-3.5 h-3.5 text-cyan-400 fill-cyan-400" />
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/25 dark:border-cyan-400/25 text-cyan-700 dark:text-cyan-300 text-xs font-semibold shadow-xs">
+                <FiZap className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400 fill-cyan-600 dark:fill-cyan-400" />
                 <span>Next-Gen Motion Gallery</span>
               </div>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white font-sans">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-slate-950 dark:text-white font-sans">
                 Curated Motion Presets
               </h1>
-              <p className="text-sm sm:text-base text-slate-400 leading-relaxed max-w-2xl font-sans">
+              <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 leading-relaxed max-w-2xl font-sans">
                 Explore production-grade procedural animations, kinetic typography, 9:16 vertical reels, 3D
                 refractions, and UI micro-interactions. Scrub live timelines and remix directly in Studio.
               </p>
@@ -1482,29 +1484,29 @@ export default function ExplorePage() {
 
             {/* Platform Stats Pills */}
             <div className="flex items-center gap-3 shrink-0 overflow-x-auto pb-1">
-              <div className="px-4 py-2.5 rounded-2xl bg-white/[0.04] border border-white/[0.08] backdrop-blur-md">
-                <div className="text-[10px] uppercase tracking-wider text-slate-400 font-mono">
+              <div className="px-4 py-2.5 rounded-2xl bg-white/80 dark:bg-white/[0.04] border border-black/10 dark:border-white/[0.08] backdrop-blur-md shadow-xs">
+                <div className="text-[10px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono">
                   Active Presets
                 </div>
-                <div className="text-base sm:text-lg font-bold text-white">
+                <div className="text-base sm:text-lg font-bold text-slate-950 dark:text-white">
                   {templates.length}+ Ready
                 </div>
               </div>
 
-              <div className="px-4 py-2.5 rounded-2xl bg-white/[0.04] border border-white/[0.08] backdrop-blur-md">
-                <div className="text-[10px] uppercase tracking-wider text-slate-400 font-mono">
+              <div className="px-4 py-2.5 rounded-2xl bg-white/80 dark:bg-white/[0.04] border border-black/10 dark:border-white/[0.08] backdrop-blur-md shadow-xs">
+                <div className="text-[10px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono">
                   Engine
                 </div>
-                <div className="text-base sm:text-lg font-bold text-cyan-400">
+                <div className="text-base sm:text-lg font-bold text-cyan-600 dark:text-cyan-400">
                   60 FPS Live
                 </div>
               </div>
 
-              <div className="px-4 py-2.5 rounded-2xl bg-white/[0.04] border border-white/[0.08] backdrop-blur-md">
-                <div className="text-[10px] uppercase tracking-wider text-slate-400 font-mono">
+              <div className="px-4 py-2.5 rounded-2xl bg-white/80 dark:bg-white/[0.04] border border-black/10 dark:border-white/[0.08] backdrop-blur-md shadow-xs">
+                <div className="text-[10px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono">
                   Export
                 </div>
-                <div className="text-base sm:text-lg font-bold text-indigo-400">
+                <div className="text-base sm:text-lg font-bold text-indigo-600 dark:text-indigo-400">
                   4K • ProRes • Lottie
                 </div>
               </div>
@@ -1513,12 +1515,12 @@ export default function ExplorePage() {
 
           {/* Spotlight Hero Banner: Featured Template of the Day */}
           {featuredTemplate && (
-            <div className="relative rounded-3xl bg-gradient-to-r from-[#121420] via-[#10121b] to-[#151624] border border-cyan-500/30 p-4 sm:p-6 shadow-2xl shadow-cyan-950/40 overflow-hidden group">
+            <div className="relative rounded-3xl bg-gradient-to-r from-white via-slate-50 to-indigo-50/40 dark:from-[#121420] dark:via-[#10121b] dark:to-[#151624] border border-cyan-500/30 p-4 sm:p-6 shadow-xl dark:shadow-2xl dark:shadow-cyan-950/40 overflow-hidden group">
               <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
 
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center relative z-10">
                 {/* Left: Interactive Live Preview */}
-                <div className="lg:col-span-5 relative aspect-video rounded-2xl overflow-hidden bg-black/60 border border-white/10 shadow-lg">
+                <div className="lg:col-span-5 relative aspect-video rounded-2xl overflow-hidden bg-black/60 border border-black/10 dark:border-white/10 shadow-lg">
                   <VirtualCardCanvas
                     renderAnimation={featuredTemplate.renderAnimation}
                     isHovered={true}
@@ -1536,23 +1538,23 @@ export default function ExplorePage() {
                 {/* Right: Metadata & Instant Remix CTA */}
                 <div className="lg:col-span-7 space-y-4">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="px-3 py-1 rounded-full text-xs font-semibold bg-cyan-500/15 text-cyan-300 border border-cyan-400/25">
+                    <span className="px-3 py-1 rounded-full text-xs font-semibold bg-cyan-500/15 text-cyan-700 dark:text-cyan-300 border border-cyan-500/25 dark:border-cyan-400/25">
                       {featuredTemplate.category}
                     </span>
-                    <span className="text-xs text-slate-400 font-mono">
+                    <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">
                       {featuredTemplate.duration} duration
                     </span>
-                    <span className="text-xs text-slate-500">•</span>
-                    <span className="text-xs text-slate-400">
+                    <span className="text-xs text-slate-400 dark:text-slate-500">•</span>
+                    <span className="text-xs text-slate-600 dark:text-slate-400">
                       By {featuredTemplate.author.name}
                     </span>
                   </div>
 
                   <div>
-                    <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+                    <h2 className="text-xl sm:text-2xl font-bold text-slate-950 dark:text-white tracking-tight">
                       {featuredTemplate.title}
                     </h2>
-                    <p className="text-xs sm:text-sm text-slate-300 mt-1.5 leading-relaxed max-w-2xl font-sans">
+                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1.5 leading-relaxed max-w-2xl font-sans">
                       &quot;{featuredTemplate.prompt}&quot;
                     </p>
                   </div>
@@ -1574,7 +1576,7 @@ export default function ExplorePage() {
                     <button
                       type="button"
                       onClick={() => setSelectedItem(featuredTemplate)}
-                      className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs sm:text-sm font-semibold border border-white/15 transition-all flex items-center gap-2"
+                      className="px-4 py-2.5 rounded-xl bg-black/5 hover:bg-black/10 dark:bg-white/10 dark:hover:bg-white/15 text-slate-800 dark:text-white text-xs sm:text-sm font-semibold border border-black/10 dark:border-white/15 transition-all flex items-center gap-2"
                     >
                       <FiMaximize2 className="w-4 h-4" />
                       <span>Inspect Keyframes &amp; Specs</span>
@@ -1583,7 +1585,7 @@ export default function ExplorePage() {
                     <button
                       type="button"
                       onClick={() => copyPromptText(featuredTemplate.prompt)}
-                      className="p-2.5 rounded-xl bg-white/[0.05] hover:bg-white/10 text-slate-300 hover:text-white border border-white/10 transition-colors"
+                      className="p-2.5 rounded-xl bg-black/5 hover:bg-black/10 dark:bg-white/[0.05] dark:hover:bg-white/10 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border border-black/10 dark:border-white/10 transition-colors"
                       title="Copy Prompt"
                     >
                       <FiCopy className="w-4 h-4" />
@@ -1597,7 +1599,7 @@ export default function ExplorePage() {
       </section>
 
       {/* Sticky High-Precision Filter & Search Bar */}
-      <div className="sticky top-16 sm:top-20 z-30 border-b border-white/[0.08] bg-[#0c0c11]/90 backdrop-blur-xl transition-all shadow-xl">
+      <div className="sticky top-16 sm:top-20 z-30 border-b border-black/[0.08] dark:border-white/[0.08] bg-white/90 dark:bg-[#0c0c11]/90 backdrop-blur-xl transition-all shadow-md dark:shadow-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 space-y-3">
           {/* Row 1: Categories & Search Controls */}
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
@@ -1617,16 +1619,16 @@ export default function ExplorePage() {
                     onClick={() => setActiveCategory(cat)}
                     className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 ${
                       isActive
-                        ? "bg-white text-slate-950 shadow-md shadow-white/10"
-                        : "text-slate-400 hover:text-white hover:bg-white/[0.06] border border-transparent hover:border-white/10"
+                        ? "bg-slate-900 text-white dark:bg-white dark:text-slate-950 shadow-md"
+                        : "text-slate-600 hover:text-slate-950 hover:bg-black/[0.05] dark:text-slate-400 dark:hover:text-white dark:hover:bg-white/[0.06] border border-transparent hover:border-black/10 dark:hover:border-white/10"
                     }`}
                   >
                     <span>{cat}</span>
                     <span
                       className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
                         isActive
-                          ? "bg-slate-900 text-white"
-                          : "bg-white/10 text-slate-400"
+                          ? "bg-white/20 text-white dark:bg-slate-900 dark:text-white"
+                          : "bg-black/[0.06] text-slate-600 dark:bg-white/10 dark:text-slate-400"
                       }`}
                     >
                       {count}
@@ -1640,19 +1642,19 @@ export default function ExplorePage() {
             <div className="flex items-center gap-2.5 shrink-0 flex-wrap sm:flex-nowrap">
               {/* Search Input */}
               <div className="relative flex items-center w-full sm:w-60">
-                <FiSearch className="absolute left-3 w-3.5 h-3.5 text-slate-500 pointer-events-none" />
+                <FiSearch className="absolute left-3 w-3.5 h-3.5 text-slate-400 dark:text-slate-500 pointer-events-none" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search prompt, tag, style..."
-                  className="w-full pl-8 pr-7 py-1.5 text-xs bg-white/[0.04] border border-white/[0.1] hover:border-white/20 focus:border-cyan-400/50 rounded-full text-white placeholder-slate-500 focus:outline-none transition-all shadow-inner"
+                  className="w-full pl-8 pr-7 py-1.5 text-xs bg-black/[0.03] dark:bg-white/[0.04] border border-black/10 dark:border-white/[0.1] hover:border-black/20 dark:hover:border-white/20 focus:border-cyan-500 rounded-full text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none transition-all shadow-inner"
                 />
                 {searchQuery && (
                   <button
                     type="button"
                     onClick={() => setSearchQuery("")}
-                    className="absolute right-2.5 text-slate-500 hover:text-white"
+                    className="absolute right-2.5 text-slate-400 hover:text-slate-900 dark:text-slate-500 dark:hover:text-white"
                   >
                     <FiX className="w-3.5 h-3.5" />
                   </button>
@@ -1663,31 +1665,31 @@ export default function ExplorePage() {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as any)}
-                className="px-3 py-1.5 text-xs bg-white/[0.04] border border-white/[0.1] rounded-full text-slate-300 focus:outline-none hover:border-white/20 cursor-pointer"
+                className="px-3 py-1.5 text-xs bg-white dark:bg-white/[0.04] border border-black/10 dark:border-white/[0.1] rounded-full text-slate-700 dark:text-slate-300 focus:outline-none hover:border-black/20 dark:hover:border-white/20 cursor-pointer"
               >
-                <option value="popular" className="bg-[#121319] text-white">
+                <option value="popular" className="bg-white text-slate-900 dark:bg-[#121319] dark:text-white">
                   Most Popular
                 </option>
-                <option value="remixes" className="bg-[#121319] text-white">
+                <option value="remixes" className="bg-white text-slate-900 dark:bg-[#121319] dark:text-white">
                   Most Remixed
                 </option>
-                <option value="duration" className="bg-[#121319] text-white">
+                <option value="duration" className="bg-white text-slate-900 dark:bg-[#121319] dark:text-white">
                   Shortest Duration
                 </option>
-                <option value="recent" className="bg-[#121319] text-white">
+                <option value="recent" className="bg-white text-slate-900 dark:bg-[#121319] dark:text-white">
                   Recently Added
                 </option>
               </select>
 
               {/* Layout Switcher */}
-              <div className="hidden sm:flex items-center bg-white/[0.04] p-0.5 rounded-full border border-white/[0.08]">
+              <div className="hidden sm:flex items-center bg-black/[0.04] dark:bg-white/[0.04] p-0.5 rounded-full border border-black/[0.08] dark:border-white/[0.08]">
                 <button
                   type="button"
                   onClick={() => setLayoutMode("grid")}
                   className={`p-1.5 rounded-full transition-colors ${
                     layoutMode === "grid"
-                      ? "bg-white text-slate-950"
-                      : "text-slate-400 hover:text-white"
+                      ? "bg-white text-slate-950 shadow-xs"
+                      : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
                   }`}
                   title="Grid View"
                 >
@@ -1698,8 +1700,8 @@ export default function ExplorePage() {
                   onClick={() => setLayoutMode("cinema")}
                   className={`p-1.5 rounded-full transition-colors ${
                     layoutMode === "cinema"
-                      ? "bg-white text-slate-950"
-                      : "text-slate-400 hover:text-white"
+                      ? "bg-white text-slate-950 shadow-xs"
+                      : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
                   }`}
                   title="Cinema View"
                 >
@@ -1710,7 +1712,7 @@ export default function ExplorePage() {
           </div>
 
           {/* Row 2: Aspect Ratio Filters & Tag Chips */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 pt-1 border-t border-white/[0.05]">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 pt-1 border-t border-black/[0.05] dark:border-white/[0.05]">
             {/* Aspect Ratio Buttons */}
             <div className="flex items-center gap-1.5">
               <span className="text-[11px] text-slate-500 font-mono mr-1 hidden md:inline">
@@ -1731,8 +1733,8 @@ export default function ExplorePage() {
                     onClick={() => setAspectRatioFilter(item.id)}
                     className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
                       isActive
-                        ? "bg-cyan-500/20 text-cyan-300 border border-cyan-400/35"
-                        : "text-slate-400 hover:text-white bg-white/[0.02] border border-transparent hover:border-white/10"
+                        ? "bg-cyan-500/15 dark:bg-cyan-500/20 text-cyan-800 dark:text-cyan-300 border border-cyan-500/30 dark:border-cyan-400/35 font-semibold"
+                        : "text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white bg-black/[0.02] dark:bg-white/[0.02] border border-transparent hover:border-black/10 dark:hover:border-white/10"
                     }`}
                   >
                     {Icon && <Icon className="w-3 h-3" />}
@@ -1756,8 +1758,8 @@ export default function ExplorePage() {
                     onClick={() => setSelectedTag(isSelected ? null : tag)}
                     className={`px-2.5 py-0.5 rounded-md text-[11px] font-mono transition-colors whitespace-nowrap ${
                       isSelected
-                        ? "bg-cyan-400 text-slate-950 font-bold"
-                        : "bg-white/[0.04] text-slate-400 hover:text-white hover:bg-white/[0.08]"
+                        ? "bg-cyan-500 text-slate-950 font-bold"
+                        : "bg-black/[0.04] dark:bg-white/[0.04] text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white hover:bg-black/[0.08] dark:hover:bg-white/[0.08]"
                     }`}
                   >
                     #{tag}
@@ -1768,7 +1770,7 @@ export default function ExplorePage() {
                 <button
                   type="button"
                   onClick={() => setSelectedTag(null)}
-                  className="text-[10px] text-slate-500 hover:text-white underline ml-1"
+                  className="text-[10px] text-slate-500 hover:text-slate-900 dark:hover:text-white underline ml-1 cursor-pointer"
                 >
                   Clear Tag
                 </button>
@@ -1782,13 +1784,13 @@ export default function ExplorePage() {
       <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
         {filteredTemplates.length === 0 ? (
           <div className="text-center py-28 space-y-3">
-            <div className="w-12 h-12 mx-auto rounded-full bg-white/[0.05] border border-white/10 flex items-center justify-center text-slate-400">
+            <div className="w-12 h-12 mx-auto rounded-full bg-slate-100 dark:bg-white/[0.05] border border-black/10 dark:border-white/10 flex items-center justify-center text-slate-500 dark:text-slate-400">
               <FiSearch className="w-5 h-5" />
             </div>
-            <h3 className="text-base font-semibold text-white">
+            <h3 className="text-base font-semibold text-slate-900 dark:text-white">
               No matching motion presets found
             </h3>
-            <p className="text-xs text-slate-400 max-w-sm mx-auto">
+            <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
               We couldn&apos;t find any templates matching your current filters. Try
               clearing your search query, aspect ratio, or category.
             </p>
@@ -1800,7 +1802,7 @@ export default function ExplorePage() {
                 setAspectRatioFilter("All");
                 setSelectedTag(null);
               }}
-              className="mt-2 px-4 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 text-xs text-white transition-colors"
+              className="mt-2 px-4 py-1.5 rounded-lg bg-black/5 hover:bg-black/10 dark:bg-white/10 dark:hover:bg-white/15 text-xs text-slate-800 dark:text-white transition-colors cursor-pointer"
             >
               Reset All Filters
             </button>
@@ -1841,7 +1843,7 @@ export default function ExplorePage() {
               return (
                 <div
                   key={item.id}
-                  className="group flex flex-col rounded-3xl bg-[#111218]/90 border border-white/[0.08] hover:border-cyan-500/40 transition-all duration-300 shadow-lg hover:shadow-cyan-500/10 overflow-hidden"
+                  className="group flex flex-col rounded-3xl bg-white dark:bg-[#111218]/90 border border-black/10 dark:border-white/[0.08] hover:border-cyan-500/40 transition-all duration-300 shadow-md hover:shadow-cyan-500/10 overflow-hidden"
                   onMouseEnter={() => setHoveredId(item.id)}
                   onMouseLeave={handleMouseLeave}
                 >
@@ -1986,7 +1988,7 @@ export default function ExplorePage() {
                       <div className="flex items-start justify-between gap-2">
                         <h3
                           onClick={() => setSelectedItem(item)}
-                          className="text-sm font-semibold text-white hover:text-cyan-300 transition-colors cursor-pointer line-clamp-1"
+                          className="text-sm font-semibold text-slate-900 dark:text-white hover:text-cyan-600 dark:hover:text-cyan-300 transition-colors cursor-pointer line-clamp-1"
                         >
                           {item.title}
                         </h3>
@@ -2004,23 +2006,23 @@ export default function ExplorePage() {
                         </div>
                       </div>
 
-                      <p className="text-xs text-slate-400 mt-1 line-clamp-2 leading-relaxed font-sans">
+                      <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 line-clamp-2 leading-relaxed font-sans">
                         {item.prompt}
                       </p>
                     </div>
 
                     {/* Footer Row: Author & Social Metrics */}
-                    <div className="pt-2 border-t border-white/[0.06] flex items-center justify-between text-xs">
+                    <div className="pt-2 border-t border-black/[0.06] dark:border-white/[0.06] flex items-center justify-between text-xs">
                       {/* Author Profile */}
                       <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-cyan-500/20 to-purple-500/20 border border-white/15 text-[10px] font-bold text-white flex items-center justify-center">
+                        <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-cyan-500/20 to-purple-500/20 border border-black/10 dark:border-white/15 text-[10px] font-bold text-slate-800 dark:text-white flex items-center justify-center">
                           {item.author.avatar}
                         </div>
-                        <span className="text-xs font-medium text-slate-300 hover:text-white transition-colors">
+                        <span className="text-xs font-medium text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white transition-colors">
                           {item.author.name}
                         </span>
                         {item.author.pro && (
-                          <span className="px-1.5 py-0.2 rounded text-[9px] font-bold uppercase tracking-wider bg-cyan-500/15 text-cyan-300 border border-cyan-400/25">
+                          <span className="px-1.5 py-0.2 rounded text-[9px] font-bold uppercase tracking-wider bg-cyan-500/15 text-cyan-700 dark:text-cyan-300 border border-cyan-500/25 dark:border-cyan-400/25">
                             PRO
                           </span>
                         )}
@@ -2028,7 +2030,7 @@ export default function ExplorePage() {
 
                       {/* Stats & Quick Actions */}
                       <div className="flex items-center gap-3">
-                        <div className="flex items-center gap-2 text-slate-400 text-[11px] font-mono">
+                        <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-[11px] font-mono">
                           <span className="flex items-center gap-1">
                             <FiHeart
                               className={`w-3 h-3 ${
@@ -2038,7 +2040,7 @@ export default function ExplorePage() {
                             <span>{item.likes + (isLiked ? 1 : 0)}</span>
                           </span>
                           <span className="flex items-center gap-1">
-                            <FiRepeat className="w-3 h-3 text-cyan-400" />
+                            <FiRepeat className="w-3 h-3 text-cyan-600 dark:text-cyan-400" />
                             <span>{item.remixes}</span>
                           </span>
                         </div>
@@ -2050,9 +2052,9 @@ export default function ExplorePage() {
                           )}&style=${encodeURIComponent(
                             item.category
                           )}&text=${encodeURIComponent(item.defaultText)}`}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold text-cyan-400 hover:text-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/20 transition-all"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold text-cyan-700 dark:text-cyan-400 hover:text-cyan-800 dark:hover:text-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/25 transition-all"
                         >
-                          <FiZap className="w-3 h-3 fill-cyan-400" />
+                          <FiZap className="w-3 h-3 fill-cyan-500 dark:fill-cyan-400" />
                           <span>Remix</span>
                         </Link>
                       </div>
@@ -2072,25 +2074,25 @@ export default function ExplorePage() {
           onClick={() => setSelectedItem(null)}
         >
           <div
-            className="relative w-full max-w-5xl rounded-3xl bg-[#0f1016] border border-white/10 shadow-2xl overflow-hidden flex flex-col text-white my-auto max-h-[92vh]"
+            className="relative w-full max-w-5xl rounded-3xl bg-white dark:bg-[#0f1016] border border-black/10 dark:border-white/10 shadow-2xl overflow-hidden flex flex-col text-slate-900 dark:text-white my-auto max-h-[92vh] transition-colors"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div className="p-4 sm:p-6 border-b border-white/[0.08] flex items-center justify-between bg-[#12141d]/90">
+            <div className="p-4 sm:p-6 border-b border-black/[0.08] dark:border-white/[0.08] flex items-center justify-between bg-slate-50 dark:bg-[#12141d]/90">
               <div className="flex items-center gap-3.5">
                 <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-cyan-400 to-indigo-600 text-slate-950 font-bold flex items-center justify-center shadow-md">
                   <FiZap className="w-5 h-5 fill-slate-950" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h2 className="text-base sm:text-lg font-bold text-white font-sans">
+                    <h2 className="text-base sm:text-lg font-bold text-slate-950 dark:text-white font-sans">
                       {selectedItem.title}
                     </h2>
-                    <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-cyan-500/15 text-cyan-300 border border-cyan-400/25">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-cyan-500/15 text-cyan-700 dark:text-cyan-300 border border-cyan-500/25 dark:border-cyan-400/25">
                       {selectedItem.category}
                     </span>
                   </div>
-                  <p className="text-xs text-slate-400 mt-0.5">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                     Authored by {selectedItem.author.name} • {selectedItem.views} views • {selectedItem.remixes} remixes
                   </p>
                 </div>
@@ -2113,26 +2115,26 @@ export default function ExplorePage() {
                 <button
                   type="button"
                   onClick={() => shareTemplateLink(selectedItem)}
-                  className="p-2 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] text-slate-300 hover:text-white transition-colors"
+                  className="p-2 rounded-xl bg-black/5 hover:bg-black/10 dark:bg-white/[0.06] dark:hover:bg-white/[0.12] text-slate-600 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white transition-colors cursor-pointer"
                   title="Share template link"
                 >
-                  {copiedShareLink ? <FiCheck className="w-4 h-4 text-emerald-400" /> : <FiShare2 className="w-4 h-4" />}
+                  {copiedShareLink ? <FiCheck className="w-4 h-4 text-emerald-500 dark:text-emerald-400" /> : <FiShare2 className="w-4 h-4" />}
                 </button>
 
                 <button
                   type="button"
                   onClick={() => downloadJsonPreset(selectedItem)}
-                  className="px-3.5 py-2 rounded-xl bg-white/10 text-white text-xs font-semibold hover:bg-white/15 border border-white/15 transition-colors flex items-center gap-1.5"
+                  className="px-3.5 py-2 rounded-xl bg-black/5 hover:bg-black/10 dark:bg-white/10 dark:hover:bg-white/15 text-slate-800 dark:text-white text-xs font-semibold border border-black/10 dark:border-white/15 transition-colors flex items-center gap-1.5 cursor-pointer"
                   title="Download preset JSON"
                 >
-                  <FiDownload className="w-3.5 h-3.5 text-slate-300" />
+                  <FiDownload className="w-3.5 h-3.5 text-slate-600 dark:text-slate-300" />
                   <span className="hidden sm:inline">JSON</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setSelectedItem(null)}
-                  className="p-2 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] text-slate-400 hover:text-white transition-colors"
+                  className="p-2 rounded-xl bg-black/5 hover:bg-black/10 dark:bg-white/[0.06] dark:hover:bg-white/[0.12] text-slate-500 hover:text-slate-950 dark:text-slate-400 dark:hover:text-white transition-colors cursor-pointer"
                 >
                   <FiX className="w-5 h-5" />
                 </button>
@@ -2142,7 +2144,7 @@ export default function ExplorePage() {
             {/* Modal Body: Split Interactive View */}
             <div className="grid grid-cols-1 lg:grid-cols-12 overflow-y-auto">
               {/* Left Column: Interactive Cinematic Canvas Player */}
-              <div className="lg:col-span-7 bg-[#07080c] flex flex-col border-b lg:border-b-0 lg:border-r border-white/[0.08]">
+              <div className="lg:col-span-7 bg-[#07080c] flex flex-col border-b lg:border-b-0 lg:border-r border-black/[0.08] dark:border-white/[0.08]">
                 {/* Canvas Container */}
                 <div className="relative w-full aspect-video flex items-center justify-center overflow-hidden bg-radial from-slate-900 to-[#07080c]">
                   <VirtualCardCanvas
@@ -2159,12 +2161,12 @@ export default function ExplorePage() {
                 </div>
 
                 {/* Player Controls Toolbar */}
-                <div className="p-4 bg-[#0a0b10] border-t border-white/[0.08] flex items-center justify-between text-xs">
+                <div className="p-4 bg-slate-100 dark:bg-[#0a0b10] border-t border-black/[0.08] dark:border-white/[0.08] flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
                       onClick={() => setModalPlaying(!modalPlaying)}
-                      className="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors flex items-center gap-1.5 font-medium"
+                      className="px-3 py-1.5 rounded-lg bg-black/5 hover:bg-black/10 dark:bg-white/10 dark:hover:bg-white/20 text-slate-800 dark:text-white transition-colors flex items-center gap-1.5 font-medium cursor-pointer"
                     >
                       {modalPlaying ? (
                         <>
@@ -2179,15 +2181,15 @@ export default function ExplorePage() {
                       )}
                     </button>
 
-                    <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white/[0.05] border border-white/10 text-slate-300 font-mono text-[11px]">
-                      <FiClock className="w-3 h-3 text-slate-400" />
+                    <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white dark:bg-white/[0.05] border border-black/10 dark:border-white/10 text-slate-700 dark:text-slate-300 font-mono text-[11px] shadow-xs">
+                      <FiClock className="w-3 h-3 text-slate-500 dark:text-slate-400" />
                       <span>{selectedItem.duration}</span>
                     </div>
                   </div>
 
                   {/* Playback speed toggle */}
                   <div className="flex items-center gap-1">
-                    <span className="text-[11px] text-slate-400 font-mono mr-1">
+                    <span className="text-[11px] text-slate-500 dark:text-slate-400 font-mono mr-1">
                       Speed:
                     </span>
                     {[0.5, 1, 1.5, 2].map((s) => (
@@ -2195,10 +2197,10 @@ export default function ExplorePage() {
                         key={s}
                         type="button"
                         onClick={() => setModalSpeed(s)}
-                        className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold transition-colors ${
+                        className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold transition-colors cursor-pointer ${
                           modalSpeed === s
                             ? "bg-cyan-500 text-slate-950"
-                            : "bg-white/[0.05] text-slate-400 hover:text-white"
+                            : "bg-black/5 dark:bg-white/[0.05] text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white"
                         }`}
                       >
                         {s}x
@@ -2209,16 +2211,16 @@ export default function ExplorePage() {
               </div>
 
               {/* Right Column: Prompt, Custom Text & Specs */}
-              <div className="lg:col-span-5 p-5 sm:p-6 space-y-5 bg-[#0f1016]">
+              <div className="lg:col-span-5 p-5 sm:p-6 space-y-5 bg-white dark:bg-[#0f1016]">
                 {/* Navigation Tabs */}
-                <div className="flex items-center gap-2 border-b border-white/[0.08] pb-3">
+                <div className="flex items-center gap-2 border-b border-black/[0.08] dark:border-white/[0.08] pb-3">
                   <button
                     type="button"
                     onClick={() => setModalTab("specs")}
-                    className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 ${
+                    className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer ${
                       modalTab === "specs"
-                        ? "bg-white/10 text-cyan-300 border border-cyan-400/30"
-                        : "text-slate-400 hover:text-white"
+                        ? "bg-cyan-500/10 dark:bg-white/10 text-cyan-800 dark:text-cyan-300 border border-cyan-500/30 dark:border-cyan-400/30 font-semibold"
+                        : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
                     }`}
                   >
                     <FiSliders className="w-3.5 h-3.5" />
@@ -2227,10 +2229,10 @@ export default function ExplorePage() {
                   <button
                     type="button"
                     onClick={() => setModalTab("json")}
-                    className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 ${
+                    className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer ${
                       modalTab === "json"
-                        ? "bg-white/10 text-cyan-300 border border-cyan-400/30"
-                        : "text-slate-400 hover:text-white"
+                        ? "bg-cyan-500/10 dark:bg-white/10 text-cyan-800 dark:text-cyan-300 border border-cyan-500/30 dark:border-cyan-400/30 font-semibold"
+                        : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
                     }`}
                   >
                     <FiCode className="w-3.5 h-3.5" />
@@ -2242,11 +2244,11 @@ export default function ExplorePage() {
                   <>
                     {/* Live Custom Text Input */}
                     <div className="space-y-2">
-                      <div className="flex items-center justify-between text-xs text-slate-400">
-                        <span className="font-semibold uppercase tracking-wider font-mono text-[10px] text-cyan-400">
+                      <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+                        <span className="font-semibold uppercase tracking-wider font-mono text-[10px] text-cyan-600 dark:text-cyan-400">
                           Live Custom Text Playground
                         </span>
-                        <span className="text-[10px] text-slate-500">
+                        <span className="text-[10px] text-slate-400 dark:text-slate-500">
                           Updates canvas in real-time
                         </span>
                       </div>
@@ -2256,25 +2258,25 @@ export default function ExplorePage() {
                           value={modalCustomText}
                           onChange={(e) => setModalCustomText(e.target.value)}
                           placeholder={selectedItem.defaultText}
-                          className="w-full px-3.5 py-2 rounded-xl bg-white/[0.04] border border-white/10 focus:border-cyan-400/50 text-xs text-white placeholder-slate-500 focus:outline-none font-mono"
+                          className="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-white/[0.04] border border-black/10 dark:border-white/10 focus:border-cyan-500 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none font-mono"
                         />
                       </div>
                     </div>
 
                     {/* Prompt Box */}
                     <div className="space-y-2">
-                      <div className="flex items-center justify-between text-xs text-slate-400">
-                        <span className="font-semibold uppercase tracking-wider font-mono text-[10px] text-cyan-400">
+                      <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+                        <span className="font-semibold uppercase tracking-wider font-mono text-[10px] text-cyan-600 dark:text-cyan-400">
                           Generative Motion Prompt
                         </span>
                         <button
                           type="button"
                           onClick={() => copyPromptText(selectedItem.prompt)}
-                          className="inline-flex items-center gap-1 text-cyan-400 hover:text-cyan-300 font-medium"
+                          className="inline-flex items-center gap-1 text-cyan-600 hover:text-cyan-700 dark:text-cyan-400 dark:hover:text-cyan-300 font-medium cursor-pointer"
                         >
                           {copiedPrompt ? (
                             <>
-                              <FiCheck className="w-3 h-3" />
+                              <FiCheck className="w-3 h-3 text-emerald-500" />
                               <span>Copied</span>
                             </>
                           ) : (
@@ -2285,40 +2287,40 @@ export default function ExplorePage() {
                           )}
                         </button>
                       </div>
-                      <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/10 text-xs font-mono text-slate-200 leading-relaxed">
+                      <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-black/10 dark:border-white/10 text-xs font-mono text-slate-800 dark:text-slate-200 leading-relaxed">
                         &quot;{selectedItem.prompt}&quot;
                       </div>
                     </div>
 
                     {/* Animation Technical Specs */}
                     <div className="space-y-2">
-                      <span className="font-semibold uppercase tracking-wider font-mono text-[10px] text-slate-400">
+                      <span className="font-semibold uppercase tracking-wider font-mono text-[10px] text-slate-500 dark:text-slate-400">
                         Animation Parameters
                       </span>
                       <div className="grid grid-cols-2 gap-2 text-xs">
-                        <div className="p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                        <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/[0.06]">
                           <div className="text-[10px] text-slate-500 font-mono">
                             RESOLUTION
                           </div>
-                          <div className="text-white font-semibold mt-0.5">
+                          <div className="text-slate-900 dark:text-white font-semibold mt-0.5">
                             {selectedItem.resolution}
                           </div>
                         </div>
 
-                        <div className="p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                        <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/[0.06]">
                           <div className="text-[10px] text-slate-500 font-mono">
                             FRAME RATE
                           </div>
-                          <div className="text-cyan-400 font-semibold mt-0.5">
+                          <div className="text-cyan-600 dark:text-cyan-400 font-semibold mt-0.5">
                             {selectedItem.fps} FPS Continuous
                           </div>
                         </div>
 
-                        <div className="p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06] col-span-2">
+                        <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/[0.06] col-span-2">
                           <div className="text-[10px] text-slate-500 font-mono">
                             EASING EQUATION
                           </div>
-                          <div className="text-indigo-300 font-mono text-[11px] mt-0.5">
+                          <div className="text-indigo-600 dark:text-indigo-300 font-mono text-[11px] mt-0.5">
                             {selectedItem.easing}
                           </div>
                         </div>
@@ -2327,7 +2329,7 @@ export default function ExplorePage() {
 
                     {/* Color Scheme Palette Swatches */}
                     <div className="space-y-2">
-                      <span className="font-semibold uppercase tracking-wider font-mono text-[10px] text-slate-400">
+                      <span className="font-semibold uppercase tracking-wider font-mono text-[10px] text-slate-500 dark:text-slate-400">
                         Color Palette
                       </span>
                       <div className="flex items-center gap-2 flex-wrap">
@@ -2339,10 +2341,10 @@ export default function ExplorePage() {
                               navigator.clipboard.writeText(color);
                               success("Copied Color", `Hex code ${color} copied.`);
                             }}
-                            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/10 hover:border-white/20 text-xs font-mono text-slate-300 transition-colors"
+                            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50 dark:bg-white/[0.04] border border-black/10 dark:border-white/10 hover:border-black/20 dark:hover:border-white/20 text-xs font-mono text-slate-700 dark:text-slate-300 transition-colors cursor-pointer"
                           >
                             <span
-                              className="w-3 h-3 rounded-full border border-black/40"
+                              className="w-3 h-3 rounded-full border border-black/20"
                               style={{ backgroundColor: color }}
                             />
                             <span>{color}</span>
@@ -2354,8 +2356,8 @@ export default function ExplorePage() {
                 ) : (
                   /* Keyframe Preset JSON Code View */
                   <div className="space-y-2">
-                    <div className="flex items-center justify-between text-xs text-slate-400">
-                      <span className="font-semibold uppercase tracking-wider font-mono text-[10px] text-cyan-400">
+                    <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+                      <span className="font-semibold uppercase tracking-wider font-mono text-[10px] text-cyan-600 dark:text-cyan-400">
                         Preset JSON Definition
                       </span>
                       <button
@@ -2380,11 +2382,11 @@ export default function ExplorePage() {
                           success("JSON Copied", "Preset configuration copied.");
                           setTimeout(() => setCopiedJson(false), 2000);
                         }}
-                        className="inline-flex items-center gap-1 text-cyan-400 hover:text-cyan-300 font-medium"
+                        className="inline-flex items-center gap-1 text-cyan-600 hover:text-cyan-700 dark:text-cyan-400 dark:hover:text-cyan-300 font-medium cursor-pointer"
                       >
                         {copiedJson ? (
                           <>
-                            <FiCheck className="w-3 h-3" />
+                            <FiCheck className="w-3 h-3 text-emerald-500" />
                             <span>Copied</span>
                           </>
                         ) : (
@@ -2396,7 +2398,7 @@ export default function ExplorePage() {
                       </button>
                     </div>
 
-                    <pre className="p-3.5 rounded-xl bg-black/60 border border-white/10 text-[11px] font-mono text-slate-300 overflow-x-auto max-h-72 leading-relaxed">
+                    <pre className="p-3.5 rounded-xl bg-slate-900 dark:bg-black/60 border border-black/10 dark:border-white/10 text-[11px] font-mono text-slate-200 dark:text-slate-300 overflow-x-auto max-h-72 leading-relaxed">
                       {JSON.stringify(
                         {
                           id: selectedItem.id,

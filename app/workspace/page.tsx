@@ -24,7 +24,7 @@ export default function WorkspacePage() {
   }
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-[#121013] text-slate-100 font-sans selection:bg-cyan-500 selection:text-black">
+    <div className="flex h-screen w-screen overflow-hidden bg-slate-100 dark:bg-[#121013] text-slate-800 dark:text-slate-100 font-sans selection:bg-cyan-500 selection:text-black transition-colors duration-300">
       {/* Dynamic SpiderNet Ambient Background */}
       <SpiderNetBackground opacity={0.3} className="fixed inset-0" />
 
@@ -92,6 +92,12 @@ export default function WorkspacePage() {
               setMotionSpeed={ws.setMotionSpeed}
               onGenerate={ws.handleGenerate}
               hasActiveAnimation={ws.hasActiveAnimation}
+              generatedTemplates={ws.generatedTemplates}
+              activeTemplateId={ws.activeTemplateId}
+              onSelectTemplate={ws.handleSelectTemplate}
+              onDeleteTemplate={ws.handleDeleteTemplate}
+              onRemixTemplate={ws.handleRemixTemplate}
+              onClearTemplates={ws.handleClearTemplates}
             />
           )}
 

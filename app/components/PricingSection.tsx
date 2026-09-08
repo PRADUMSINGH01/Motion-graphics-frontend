@@ -120,27 +120,27 @@ export default function PricingSection() {
             Simple, flexible pricing
           </div>
 
-          <h2 className="font-sans text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl">
+          <h2 className="font-sans text-4xl font-extrabold tracking-tight text-slate-950 dark:text-white sm:text-5xl lg:text-6xl">
             Create motion.
-            <span className="block bg-gradient-to-r from-cyan-300 via-sky-400 to-blue-500 bg-clip-text text-transparent">
+            <span className="block bg-gradient-to-r from-cyan-600 via-sky-600 to-blue-600 dark:from-cyan-300 dark:via-sky-400 dark:to-blue-500 bg-clip-text text-transparent">
               Not keyframes.
             </span>
           </h2>
 
-          <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-slate-400 sm:text-lg">
+          <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-slate-600 dark:text-slate-400 sm:text-lg">
             Generate professional motion graphics in minutes with AI.
             Start with a 14-day Pro trial and upgrade when you need more.
           </p>
 
           {/* Billing Toggle */}
-          <div className="mt-9 inline-flex items-center rounded-2xl border border-white/10 bg-white/[0.04] p-1.5 backdrop-blur-xl">
+          <div className="mt-9 inline-flex items-center rounded-2xl border border-black/10 dark:border-white/10 bg-black/[0.03] dark:bg-white/[0.04] p-1.5 backdrop-blur-xl">
             <button
               type="button"
               onClick={() => setAnnualBilling(false)}
               className={`rounded-xl px-5 py-2.5 text-sm font-medium transition-all ${
                 !annualBilling
-                  ? "bg-white text-slate-950 shadow-lg"
-                  : "text-slate-400 hover:text-white"
+                  ? "bg-slate-950 text-white dark:bg-white dark:text-slate-950 shadow-lg"
+                  : "text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white"
               }`}
             >
               Monthly
@@ -151,13 +151,13 @@ export default function PricingSection() {
               onClick={() => setAnnualBilling(true)}
               className={`flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium transition-all ${
                 annualBilling
-                  ? "bg-white text-slate-950 shadow-lg"
-                  : "text-slate-400 hover:text-white"
+                  ? "bg-slate-950 text-white dark:bg-white dark:text-slate-950 shadow-lg"
+                  : "text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white"
               }`}
             >
               Annual
 
-              <span className="rounded-full bg-cyan-400/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-cyan-300">
+              <span className="rounded-full bg-cyan-500/15 text-cyan-700 dark:bg-cyan-400/10 dark:text-cyan-300 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide">
                 Save 25%
               </span>
             </button>
@@ -174,8 +174,8 @@ export default function PricingSection() {
                 key={tier.id}
                 className={`group relative flex flex-col rounded-3xl border p-7 transition-all duration-300 sm:p-8 ${
                   tier.highlighted
-                    ? "border-cyan-400/40 bg-gradient-to-b from-cyan-400/[0.09] via-white/[0.045] to-white/[0.02] shadow-[0_0_70px_rgba(34,211,238,0.10)] md:-translate-y-3"
-                    : "border-white/10 bg-white/[0.025] hover:-translate-y-1 hover:border-white/20 hover:bg-white/[0.045]"
+                    ? "border-cyan-500/50 bg-gradient-to-b from-cyan-50/80 via-white to-white dark:from-cyan-400/[0.09] dark:via-white/[0.045] dark:to-white/[0.02] shadow-xl shadow-cyan-500/10 dark:shadow-[0_0_70px_rgba(34,211,238,0.10)] md:-translate-y-3"
+                    : "border-black/10 dark:border-white/10 bg-white dark:bg-white/[0.025] hover:-translate-y-1 hover:border-black/20 dark:hover:border-white/20 hover:bg-slate-50/50 dark:hover:bg-white/[0.045] shadow-lg shadow-black/[0.02] dark:shadow-none"
                 }`}
               >
                 {/* Badge */}
@@ -184,8 +184,8 @@ export default function PricingSection() {
                     <div
                       className={`flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1.5 text-[11px] font-bold shadow-lg ${
                         tier.highlighted
-                          ? "border border-cyan-300/30 bg-cyan-300 text-slate-950 shadow-cyan-500/20"
-                          : "border border-white/15 bg-white/10 text-white backdrop-blur-xl"
+                          ? "border border-cyan-400/30 bg-cyan-500 dark:bg-cyan-300 text-white dark:text-slate-950 shadow-cyan-500/20"
+                          : "border border-black/10 dark:border-white/15 bg-slate-900 text-white dark:bg-white/10 dark:text-white backdrop-blur-xl"
                       }`}
                     >
                       {tier.highlighted ? (
@@ -202,19 +202,19 @@ export default function PricingSection() {
                 {/* Plan Header */}
                 <div>
                   <div className="flex items-center justify-between">
-                    <h3 className="text-xl font-bold text-white">
+                    <h3 className="text-xl font-bold text-slate-950 dark:text-white">
                       {tier.name}
                     </h3>
                   </div>
 
-                  <p className="mt-3 min-h-[72px] text-sm leading-6 text-slate-400">
+                  <p className="mt-3 min-h-[72px] text-sm leading-6 text-slate-600 dark:text-slate-400">
                     {tier.description}
                   </p>
 
                   {/* Price */}
                   <div className="mt-7">
                     <div className="flex items-end gap-1">
-                      <span className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
+                      <span className="text-4xl font-extrabold tracking-tight text-slate-950 dark:text-white sm:text-5xl">
                         ${price}
                       </span>
 
@@ -234,27 +234,27 @@ export default function PricingSection() {
                   <div
                     className={`mt-6 flex items-center gap-2 rounded-xl border px-3.5 py-3 ${
                       tier.highlighted
-                        ? "border-cyan-400/20 bg-cyan-400/[0.07]"
-                        : "border-white/10 bg-white/[0.03]"
+                        ? "border-cyan-400/30 bg-cyan-50 dark:border-cyan-400/20 dark:bg-cyan-400/[0.07]"
+                        : "border-black/10 dark:border-white/10 bg-slate-50 dark:bg-white/[0.03]"
                     }`}
                   >
                     <FiZap
                       className={`h-4 w-4 shrink-0 ${
                         tier.highlighted
-                          ? "text-cyan-300"
-                          : "text-slate-400"
+                          ? "text-cyan-600 dark:text-cyan-300"
+                          : "text-slate-500 dark:text-slate-400"
                       }`}
                     />
 
-                    <span className="text-xs font-semibold text-slate-200">
+                    <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">
                       {tier.credits}
                     </span>
                   </div>
 
                   {/* Trial Highlight */}
                   {tier.trial && (
-                    <div className="mt-3 rounded-xl border border-cyan-400/20 bg-cyan-400/[0.05] px-3.5 py-2.5 text-center">
-                      <span className="text-xs font-semibold text-cyan-300">
+                    <div className="mt-3 rounded-xl border border-cyan-400/30 bg-cyan-500/10 dark:border-cyan-400/20 dark:bg-cyan-400/[0.05] px-3.5 py-2.5 text-center">
+                      <span className="text-xs font-semibold text-cyan-700 dark:text-cyan-300">
                         14 days free · No charge today
                       </span>
                     </div>
@@ -262,7 +262,7 @@ export default function PricingSection() {
                 </div>
 
                 {/* Divider */}
-                <div className="my-7 h-px w-full bg-white/10" />
+                <div className="my-7 h-px w-full bg-black/10 dark:bg-white/10" />
 
                 {/* Features */}
                 <div className="flex-1">
@@ -274,13 +274,13 @@ export default function PricingSection() {
                     {tier.features.map((feature, index) => (
                       <li
                         key={index}
-                        className="flex items-start gap-3 text-sm text-slate-300"
+                        className="flex items-start gap-3 text-sm text-slate-700 dark:text-slate-300"
                       >
                         <span
                           className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${
                             tier.highlighted
-                              ? "bg-cyan-400/10 text-cyan-300"
-                              : "bg-white/[0.06] text-slate-300"
+                              ? "bg-cyan-500/15 text-cyan-600 dark:bg-cyan-400/10 dark:text-cyan-300"
+                              : "bg-black/[0.05] dark:bg-white/[0.06] text-slate-700 dark:text-slate-300"
                           }`}
                         >
                           <FiCheck className="h-3 w-3" />
@@ -298,8 +298,8 @@ export default function PricingSection() {
                     href={tier.ctaHref}
                     className={`flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3.5 text-sm font-semibold transition-all ${
                       tier.highlighted
-                        ? "bg-white text-slate-950 shadow-xl shadow-white/10 hover:bg-slate-100"
-                        : "border border-white/10 bg-white/[0.06] text-white hover:bg-white/[0.11]"
+                        ? "bg-slate-950 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-100 shadow-xl shadow-slate-950/15 dark:shadow-white/10"
+                        : "border border-black/10 dark:border-white/10 bg-slate-100 dark:bg-white/[0.06] text-slate-900 dark:text-white hover:bg-slate-200 dark:hover:bg-white/[0.11]"
                     }`}
                   >
                     {tier.ctaText}
@@ -314,41 +314,41 @@ export default function PricingSection() {
 
         {/* Trust Row */}
         <div className="mt-12 flex flex-col items-center justify-center gap-3 text-center sm:flex-row sm:gap-6">
-          <div className="flex items-center gap-2 text-xs text-slate-500">
-            <FiCheck className="h-3.5 w-3.5 text-cyan-400" />
+          <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-500">
+            <FiCheck className="h-3.5 w-3.5 text-cyan-600 dark:text-cyan-400" />
             14-day Pro trial
           </div>
 
-          <div className="hidden h-4 w-px bg-white/10 sm:block" />
+          <div className="hidden h-4 w-px bg-black/10 dark:bg-white/10 sm:block" />
 
-          <div className="flex items-center gap-2 text-xs text-slate-500">
-            <FiCheck className="h-3.5 w-3.5 text-cyan-400" />
+          <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-500">
+            <FiCheck className="h-3.5 w-3.5 text-cyan-600 dark:text-cyan-400" />
             Cancel anytime
           </div>
 
-          <div className="hidden h-4 w-px bg-white/10 sm:block" />
+          <div className="hidden h-4 w-px bg-black/10 dark:bg-white/10 sm:block" />
 
-          <div className="flex items-center gap-2 text-xs text-slate-500">
-            <FiCheck className="h-3.5 w-3.5 text-cyan-400" />
+          <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-500">
+            <FiCheck className="h-3.5 w-3.5 text-cyan-600 dark:text-cyan-400" />
             Commercial rights on paid plans
           </div>
         </div>
 
         {/* Enterprise */}
-        <div className="mt-10 rounded-2xl border border-white/10 bg-white/[0.025] px-6 py-5 text-center sm:flex sm:items-center sm:justify-between sm:text-left">
+        <div className="mt-10 rounded-2xl border border-black/10 dark:border-white/10 bg-white dark:bg-white/[0.025] px-6 py-5 text-center sm:flex sm:items-center sm:justify-between sm:text-left shadow-sm dark:shadow-none">
           <div>
-            <p className="font-semibold text-white">
+            <p className="font-semibold text-slate-950 dark:text-white">
               Need more rendering power?
             </p>
 
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-slate-600 dark:text-slate-500">
               Custom credits, dedicated GPU capacity, API access and SSO.
             </p>
           </div>
 
           <Link
-            href="/contact"
-            className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-cyan-300 transition-colors hover:text-cyan-200 sm:mt-0"
+            href="/register"
+            className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-cyan-600 dark:text-cyan-300 transition-colors hover:text-cyan-700 dark:hover:text-cyan-200 sm:mt-0"
           >
             Talk to our team
             <FiArrowRight className="h-4 w-4" />
@@ -359,7 +359,7 @@ export default function PricingSection() {
         <div className="mt-8 text-center">
           <Link
             href="/billing"
-            className="text-xs font-medium text-slate-500 underline decoration-white/10 underline-offset-4 transition-colors hover:text-white"
+            className="text-xs font-medium text-slate-500 underline decoration-black/10 dark:decoration-white/10 underline-offset-4 transition-colors hover:text-slate-900 dark:hover:text-white"
           >
             Compare all features and credit usage
           </Link>

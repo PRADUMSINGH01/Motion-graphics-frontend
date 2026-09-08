@@ -64,13 +64,13 @@ function LoginForm() {
   };
 
   return (
-    <div className="relative min-h-screen flex flex-col justify-center items-center px-4 py-12 font-poppins text-slate-100 bg-[#090a0f] overflow-hidden">
+    <div className="relative min-h-screen flex flex-col justify-center items-center px-4 py-12 font-poppins text-slate-900 dark:text-slate-100 bg-slate-50 dark:bg-[#090a0f] overflow-hidden transition-colors duration-300">
       {/* Interactive Animated Spider Web Canvas Background */}
       <SpiderNetBackground />
 
       {/* Atmospheric dark fade overlay */}
       <div
-        className="absolute inset-0 bg-gradient-to-b from-[#090a0f]/40 via-transparent to-[#090a0f]/70 pointer-events-none"
+        className="absolute inset-0 bg-gradient-to-b from-slate-50/40 via-transparent to-slate-50/70 dark:from-[#090a0f]/40 dark:via-transparent dark:to-[#090a0f]/70 pointer-events-none transition-colors duration-300"
         aria-hidden="true"
       />
 
@@ -80,16 +80,16 @@ function LoginForm() {
       </div>
 
       {/* Login Card */}
-      <div className="relative z-10 w-full max-w-md bg-[#121319]/85 backdrop-blur-2xl border border-white/[0.08] rounded-3xl shadow-2xl p-8 space-y-6">
+      <div className="relative z-10 w-full max-w-md bg-white/90 dark:bg-[#121319]/85 backdrop-blur-2xl border border-black/10 dark:border-white/[0.08] rounded-3xl shadow-2xl p-8 space-y-6">
         {/* Brand Header */}
         <div className="text-center space-y-2">
           <Link href="/" className="inline-flex items-center gap-2.5 group">
             <Logo size={42} />
           </Link>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white font-comic">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-950 dark:text-white font-comic">
             Welcome Back
           </h1>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-500 dark:text-slate-400">
             Sign in to access your Animagent AI workspace
           </p>
         </div>
@@ -99,16 +99,16 @@ function LoginForm() {
 
         {/* Divider */}
         <div className="relative flex items-center justify-center">
-          <div className="w-full border-t border-white/[0.08]" />
-          <span className="absolute bg-[#121319] px-3 text-[11px] font-mono uppercase tracking-wider text-slate-500">
+          <div className="w-full border-t border-black/10 dark:border-white/[0.08]" />
+          <span className="absolute bg-white dark:bg-[#121319] px-3 text-[11px] font-mono uppercase tracking-wider text-slate-500">
             or sign in with email
           </span>
         </div>
 
         {/* Inline Form Error Notification */}
         {formError && (
-          <div className="p-3 bg-red-500/10 border border-red-500/25 rounded-xl flex items-start gap-2.5 text-xs text-red-300">
-            <FiAlertCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
+          <div className="p-3 bg-red-500/10 border border-red-500/25 rounded-xl flex items-start gap-2.5 text-xs text-red-600 dark:text-red-300">
+            <FiAlertCircle className="w-4 h-4 text-red-500 dark:text-red-400 flex-shrink-0 mt-0.5" />
             <span>{formError}</span>
           </div>
         )}
@@ -116,11 +116,11 @@ function LoginForm() {
         {/* Login Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-slate-300">
+            <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
               Email Address
             </label>
             <div className="relative flex items-center">
-              <FiMail className="absolute left-3.5 w-4 h-4 text-slate-500 pointer-events-none" />
+              <FiMail className="absolute left-3.5 w-4 h-4 text-slate-400 dark:text-slate-500 pointer-events-none" />
               <input
                 type="email"
                 required
@@ -131,14 +131,14 @@ function LoginForm() {
                   if (formError) setFormError(null);
                 }}
                 placeholder="name@studio.com"
-                className="w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm bg-white/[0.04] border border-white/[0.08] rounded-xl focus:outline-none focus:border-cyan-400 text-white placeholder-slate-500 transition-all"
+                className="w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm bg-black/[0.03] dark:bg-white/[0.04] border border-black/10 dark:border-white/[0.08] rounded-xl focus:outline-none focus:border-cyan-500 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 transition-all"
               />
             </div>
           </div>
 
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-medium text-slate-300">
+              <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
                 Password
               </label>
               <button
@@ -149,13 +149,13 @@ function LoginForm() {
                     "Password reset service is active. Contact your administrator or check the password reset endpoint."
                   )
                 }
-                className="text-xs text-cyan-400 hover:text-cyan-300 hover:underline cursor-pointer"
+                className="text-xs text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 hover:underline cursor-pointer"
               >
                 Forgot?
               </button>
             </div>
             <div className="relative flex items-center">
-              <FiLock className="absolute left-3.5 w-4 h-4 text-slate-500 pointer-events-none" />
+              <FiLock className="absolute left-3.5 w-4 h-4 text-slate-400 dark:text-slate-500 pointer-events-none" />
               <input
                 type={showPassword ? "text" : "password"}
                 required
@@ -166,12 +166,12 @@ function LoginForm() {
                   if (formError) setFormError(null);
                 }}
                 placeholder="••••••••"
-                className="w-full pl-10 pr-10 py-2.5 text-xs sm:text-sm bg-white/[0.04] border border-white/[0.08] rounded-xl focus:outline-none focus:border-cyan-400 text-white placeholder-slate-500 transition-all"
+                className="w-full pl-10 pr-10 py-2.5 text-xs sm:text-sm bg-black/[0.03] dark:bg-white/[0.04] border border-black/10 dark:border-white/[0.08] rounded-xl focus:outline-none focus:border-cyan-500 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 transition-all"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 text-slate-500 hover:text-slate-300 transition-colors p-1 cursor-pointer"
+                className="absolute right-3 text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors p-1 cursor-pointer"
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? <FiEyeOff className="w-4 h-4" /> : <FiEye className="w-4 h-4" />}
@@ -182,10 +182,10 @@ function LoginForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs sm:text-sm font-semibold text-slate-900 bg-white hover:bg-slate-100 shadow-md shadow-black/30 transition-all duration-200 active:scale-[0.98] cursor-pointer disabled:opacity-60"
+            className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs sm:text-sm font-semibold text-white bg-slate-950 hover:bg-slate-800 dark:text-slate-900 dark:bg-white dark:hover:bg-slate-100 shadow-md shadow-slate-950/15 dark:shadow-black/30 transition-all duration-200 active:scale-[0.98] cursor-pointer disabled:opacity-60"
           >
             {loading ? (
-              <div className="w-4 h-4 border-2 border-slate-900 border-t-transparent rounded-full animate-spin" />
+              <div className="w-4 h-4 border-2 border-white dark:border-slate-900 border-t-transparent rounded-full animate-spin" />
             ) : (
               <>
                 <span>Sign In to Animagent</span>
@@ -196,11 +196,11 @@ function LoginForm() {
         </form>
 
         {/* Footer switch */}
-        <div className="text-center text-xs text-slate-400 pt-1">
+        <div className="text-center text-xs text-slate-500 dark:text-slate-400 pt-1">
           Don&apos;t have an account?{" "}
           <Link
             href="/register"
-            className="font-semibold text-white hover:text-cyan-400 hover:underline transition-colors"
+            className="font-semibold text-slate-950 dark:text-white hover:text-cyan-600 dark:hover:text-cyan-400 hover:underline transition-colors"
           >
             Sign up for free
           </Link>
@@ -214,7 +214,7 @@ export default function LoginPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-[#090a0f] flex items-center justify-center text-slate-400">
+        <div className="min-h-screen bg-slate-50 dark:bg-[#090a0f] flex items-center justify-center text-slate-500 dark:text-slate-400">
           Loading sign in...
         </div>
       }

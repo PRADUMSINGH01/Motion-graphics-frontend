@@ -117,10 +117,10 @@ export default function Logo({
 
       {showText && (
         <div className={`flex items-center gap-2 ${textClassName}`}>
-          <span className="font-bold text-base tracking-tight text-white group-hover:text-cyan-300 transition-colors font-sans">
+          <span className="font-bold text-base tracking-tight text-slate-900 dark:text-white group-hover:text-cyan-600 dark:group-hover:text-cyan-300 transition-colors font-sans">
             Animagent
           </span>
-          <span className="px-1.5 py-0.2 rounded text-[9px] font-mono uppercase bg-cyan-500/15 text-cyan-300 font-bold border border-cyan-400/30">
+          <span className="px-1.5 py-0.2 rounded text-[9px] font-mono uppercase bg-cyan-500/15 text-cyan-600 dark:text-cyan-300 font-bold border border-cyan-400/30">
             AI
           </span>
         </div>

@@ -1,8 +1,39 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --font-headline: 'Comic Relief', cursive, sans-serif;
   --font-body: 'Poppins', sans-serif;
+
+  /* Default Dark Tokens */
+  --background: #090a0f;
+  --foreground: #f8fafc;
+  --surface-primary: #121013;
+  --surface-card: rgba(18, 19, 25, 0.85);
+  --surface-glass: rgba(12, 12, 17, 0.85);
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.15);
+  --text-primary: #ffffff;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --spidernet-spoke: rgba(165, 180, 252, 0.24);
+  --spidernet-ring: rgba(196, 181, 253, 0.35);
+}
+
+html.light {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --surface-primary: #ffffff;
+  --surface-card: rgba(255, 255, 255, 0.95);
+  --surface-glass: rgba(255, 255, 255, 0.85);
+  --border-subtle: rgba(0, 0, 0, 0.08);
+  --border-strong: rgba(0, 0, 0, 0.14);
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --spidernet-spoke: rgba(99, 102, 241, 0.38);
+  --spidernet-ring: rgba(124, 58, 237, 0.32);
 }
 
 @theme inline {
@@ -21,7 +52,7 @@ body {
   background-color: var(--background);
   color: var(--foreground);
   font-family: var(--font-body);
-  color-scheme: dark;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 /* Primary headlines */

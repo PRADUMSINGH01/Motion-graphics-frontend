@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useAlert } from "../../context/AlertContext";
-import { api, addCharConversion, addChatConversation } from "../../lib/api";
+import { api } from "../../lib/api";
 import {
   StylePreset,
   AspectRatio,
@@ -11,6 +11,7 @@ import {
   BillingInterval,
   PlanTier,
   CharEffect,
+  GeneratedTemplateItem,
   ProjectItem,
   InspirationPreset,
   ColorPalette,
@@ -34,7 +35,6 @@ export function useWorkspace() {
   useEffect(() => {
     if (!isLoading && !user) {
       if (typeof window !== "undefined") {
-        // Clear any stale tokens before navigating to prevent middleware bounces
         document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; max-age=0; SameSite=Lax";
         document.cookie = "animagent_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; max-age=0; SameSite=Lax";
         try {
@@ -46,9 +46,21 @@ export function useWorkspace() {
     }
   }, [user, isLoading]);
 
-  // Projects state: pure database-driven state, initialized empty (no mock/dummy data)
-  const [projects, setProjects] = useState<ProjectItem[]>(DEFAULT_PROJECTS);
-  const [activeProjectId, setActiveProjectId] = useState<string>("");
+  // Generated Templates state: stores all templates generated via prompt backend API
+  const [generatedTemplates, setGeneratedTemplates] = useState<GeneratedTemplateItem[]>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const stored = localStorage.getItem("animagent_generated_templates");
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+      } catch {}
+    }
+    return DEFAULT_PROJECTS;
+  });
+
+  const [activeTemplateId, setActiveTemplateId] = useState<string>("");
 
   // Active generation parameters (start empty, no dummy text/prompt)
   const [promptText, setPromptText] = useState("");
@@ -62,30 +74,46 @@ export function useWorkspace() {
   const [generationStatus, setGenerationStatus] = useState("");
   const [copiedPrompt, setCopiedPrompt] = useState(false);
 
-  // Character Vectorizer Dedicated State (clean initial empty string)
+  // Character Vectorizer Dedicated State
   const [charInput, setCharInput] = useState("");
   const [charEffect, setCharEffect] = useState<CharEffect>("kinetic_split");
   const [isConvertingChar, setIsConvertingChar] = useState(false);
 
-  // Dynamic activeProject resolution: returns actual project or clean new composition
-  const activeProject = useMemo<ProjectItem>(() => {
-    if (projects.length > 0) {
-      return projects.find((p) => p.id === activeProjectId) || projects[0];
+  // Dynamic activeTemplate resolution: returns actual active template or clean composition
+  const activeTemplate = useMemo<GeneratedTemplateItem>(() => {
+    if (generatedTemplates.length > 0) {
+      return (
+        generatedTemplates.find((p) => p.id === activeTemplateId) ||
+        generatedTemplates[0]
+      );
     }
     return {
       id: "new-composition",
-      name: promptText.trim() ? (promptText.trim().length > 24 ? `${promptText.trim().slice(0, 24)}...` : promptText.trim()) : "Motion Studio",
+      name: promptText.trim()
+        ? promptText.trim().length > 24
+          ? `${promptText.trim().slice(0, 24)}...`
+          : promptText.trim()
+        : "Motion Studio",
       category: activeStyle,
       duration: 5,
       prompt: promptText,
       text: liveText,
-      updatedAt: "Ready",
+      fps: 60,
       palette: colorPalette,
+      createdAt: new Date().toISOString(),
+      updatedAt: "Ready",
     };
-  }, [projects, activeProjectId, activeStyle, promptText, liveText, colorPalette]);
+  }, [generatedTemplates, activeTemplateId, activeStyle, promptText, liveText, colorPalette]);
+
+  // Backward-compatible alias
+  const activeProject = activeTemplate;
+  const projects = generatedTemplates;
+  const activeProjectId = activeTemplateId;
 
   // Active animation flag: true ONLY when a motion graphic has actually been generated
-  const hasActiveAnimation = Boolean(liveText.trim() || (projects.length > 0 && activeProjectId));
+  const hasActiveAnimation = Boolean(
+    liveText.trim() || (generatedTemplates.length > 0 && activeTemplateId)
+  );
 
   // Billing & Usage States
   const [billingInterval, setBillingInterval] = useState<BillingInterval>("annual");
@@ -101,38 +129,6 @@ export function useWorkspace() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const canvasContainerRef = useRef<HTMLDivElement | null>(null);
   const startTimeRef = useRef<number>(Date.now());
-
-  // Fetch real user projects/conversations from backend DB on mount
-  useEffect(() => {
-    let isMounted = true;
-    async function loadDbProjects() {
-      try {
-        const res = await api.conversation.list();
-        if (isMounted && res?.conversations && Array.isArray(res.conversations) && res.conversations.length > 0) {
-          const loaded: ProjectItem[] = res.conversations.map((c: any) => ({
-            id: c.id,
-            name: c.title || "Untitled Motion",
-            category: "Kinetic Typography",
-            duration: 5,
-            prompt: c.title || "",
-            text: (c.title || "").toUpperCase().slice(0, 18),
-            updatedAt: c.updatedAt ? new Date(c.updatedAt).toLocaleDateString() : "Recent",
-            palette: "cyan",
-          }));
-          setProjects(loaded);
-          setActiveProjectId(loaded[0].id);
-        }
-      } catch {
-        // Backend DB has no conversations or offline: keep projects empty []
-      }
-    }
-    if (user) {
-      loadDbProjects();
-    }
-    return () => {
-      isMounted = false;
-    };
-  }, [user]);
 
   // Check URL query param on mount (?tab=billing or ?tab=usage or ?prompt=...&style=...&text=...)
   useEffect(() => {
@@ -164,24 +160,69 @@ export function useWorkspace() {
     }
   }, [success]);
 
-  // Explicit project selection handler
+  // Explicit template selection handler
+  const handleSelectTemplate = useCallback(
+    (template: GeneratedTemplateItem) => {
+      setActiveTemplateId(template.id);
+      setPromptText(template.prompt);
+      setActiveStyle(template.category);
+      setLiveText(template.text);
+      if (template.palette) {
+        setColorPalette(template.palette);
+      }
+      startTimeRef.current = Date.now();
+      setCurrentTime(0);
+      setIsPlaying(true);
+    },
+    []
+  );
+
   const handleSelectProject = useCallback(
     (id: string) => {
-      setActiveProjectId(id);
-      const proj = projects.find((p) => p.id === id);
-      if (proj) {
-        setPromptText(proj.prompt);
-        setActiveStyle(proj.category);
-        setLiveText(proj.text);
-        if (proj.palette) {
-          setColorPalette(proj.palette);
-        }
-        startTimeRef.current = Date.now();
-        setCurrentTime(0);
-        setIsPlaying(false);
+      const found = generatedTemplates.find((p) => p.id === id);
+      if (found) {
+        handleSelectTemplate(found);
       }
     },
-    [projects]
+    [generatedTemplates, handleSelectTemplate]
+  );
+
+  // Template deletion handler
+  const handleDeleteTemplate = useCallback(
+    (id: string) => {
+      setGeneratedTemplates((prev) => {
+        const updated = prev.filter((t) => t.id !== id);
+        try {
+          localStorage.setItem("animagent_generated_templates", JSON.stringify(updated));
+        } catch {}
+        return updated;
+      });
+      if (activeTemplateId === id) {
+        setActiveTemplateId("");
+      }
+      success("Template Removed", "Removed template from your generated grid.");
+    },
+    [activeTemplateId, success]
+  );
+
+  // Clear all generated templates handler
+  const handleClearTemplates = useCallback(() => {
+    setGeneratedTemplates([]);
+    setActiveTemplateId("");
+    try {
+      localStorage.removeItem("animagent_generated_templates");
+    } catch {}
+    success("Grid Cleared", "Cleared all generated templates.");
+  }, [success]);
+
+  // Remix template handler
+  const handleRemixTemplate = useCallback(
+    (remixPrompt: string, remixStyle: StylePreset) => {
+      setPromptText(remixPrompt);
+      setActiveStyle(remixStyle);
+      success("Template Loaded", `Loaded ${remixStyle} prompt. Customize or click Generate.`);
+    },
+    [success]
   );
 
   // 60FPS High-Definition Canvas Render Engine
@@ -202,7 +243,7 @@ export function useWorkspace() {
     [activeStyle, liveText, isPlaying, colorPalette, motionSpeed]
   );
 
-  // 60FPS Animation Loop: Respects play state and stops at duration end
+  // 60FPS Animation Loop
   useEffect(() => {
     let animationFrameId: number;
 
@@ -216,9 +257,9 @@ export function useWorkspace() {
       const rect = canvas.getBoundingClientRect();
       if (rect.width === 0 || rect.height === 0) return;
 
-      if (canvas.width !== rect.width * dpr || canvas.height !== rect.height * dpr) {
-        canvas.width = rect.width * dpr;
-        canvas.height = rect.height * dpr;
+      if (canvas.width !== Math.floor(rect.width * dpr) || canvas.height !== Math.floor(rect.height * dpr)) {
+        canvas.width = Math.floor(rect.width * dpr);
+        canvas.height = Math.floor(rect.height * dpr);
       }
 
       ctx.save();
@@ -227,15 +268,15 @@ export function useWorkspace() {
       let t = currentTime;
       if (isPlaying) {
         const elapsed = (Date.now() - startTimeRef.current) / 1000;
-        if (elapsed > activeProject.duration) {
+        if (elapsed > activeTemplate.duration) {
           if (isLooping) {
             startTimeRef.current = Date.now();
             t = 0;
             setCurrentTime(0);
           } else {
             setIsPlaying(false);
-            t = activeProject.duration;
-            setCurrentTime(activeProject.duration);
+            t = activeTemplate.duration;
+            setCurrentTime(activeTemplate.duration);
           }
         } else {
           t = elapsed;
@@ -251,7 +292,7 @@ export function useWorkspace() {
 
     animationFrameId = requestAnimationFrame(render);
     return () => cancelAnimationFrame(animationFrameId);
-  }, [isPlaying, isLooping, currentTime, activeProject.duration, renderEngine]);
+  }, [isPlaying, isLooping, currentTime, activeTemplate.duration, renderEngine]);
 
   // Spacebar Play / Pause Shortcut
   useEffect(() => {
@@ -268,14 +309,14 @@ export function useWorkspace() {
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isPlaying, currentTime, activeProject.duration]);
+  }, [isPlaying, currentTime, activeTemplate.duration]);
 
   // Clean Play / Pause Toggle Helper
   const togglePlay = () => {
     if (isPlaying) {
       setIsPlaying(false);
     } else {
-      if (currentTime >= activeProject.duration) {
+      if (currentTime >= activeTemplate.duration) {
         startTimeRef.current = Date.now();
         setCurrentTime(0);
       } else {
@@ -291,7 +332,7 @@ export function useWorkspace() {
     startTimeRef.current = Date.now() - val * 1000;
   };
 
-  // Handle Prompt-to-Motion Generation: Strictly awaits server response from /api/prompt
+  // Handle Prompt-to-Motion Generation: connects via Next.js API /api/prompt to Express backend
   const handleGenerate = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     const trimmed = promptText.trim();
@@ -300,23 +341,22 @@ export function useWorkspace() {
       return;
     }
 
-    // Enter waiting / generating state (do NOT prematurely render canvas before server responds)
     setIsGenerating(true);
     setGenerationProgress(20);
-    setGenerationStatus("Connecting to /api/prompt & dispatching prompt to GPU queue...");
+    setGenerationStatus("Connecting to Next.js /api/prompt & Express backend API...");
 
     try {
       const generatedPromptId = `p-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
       const activeUserId =
         user?.id ||
         (typeof window !== "undefined"
-          ? localStorage.getItem("animagent_user_id") || "guest_user"
-          : "guest_user");
+          ? localStorage.getItem("animagent_user_id") || "creator"
+          : "creator");
 
       setGenerationProgress(45);
-      setGenerationStatus("Synthesizing 60 FPS motion on GPU cluster...");
+      setGenerationStatus("Backend queue processing prompt on GPU cluster...");
 
-      // Await real server response from prompt API
+      // Await server response from /api/prompt (which connects to Express backend API)
       const serverRes = await api.prompt.submit({
         prompt: trimmed,
         userId: activeUserId,
@@ -325,19 +365,18 @@ export function useWorkspace() {
       });
 
       setGenerationProgress(80);
-      setGenerationStatus("Receiving synthesized motion parameters from server...");
+      setGenerationStatus("Receiving generated 60 FPS motion templates...");
 
-      // Small 300ms visual buffer so user sees that server generation succeeded smoothly
       await new Promise((resolve) => setTimeout(resolve, 300));
       setGenerationProgress(100);
 
-      // Extract and preview the response returned by prompt API
+      // Extract motion data
       const motionData = serverRes?.motion;
       const finalRenderText =
         motionData?.renderedText ||
         trimmed.slice(0, 24).toUpperCase();
-      const finalStyle = (motionData?.style as StylePreset) || "Kinetic Typography";
-      const finalPalette = (motionData?.palette as ColorPalette) || "cyan";
+      const finalStyle = (motionData?.style as StylePreset) || activeStyle || "Kinetic Typography";
+      const finalPalette = (motionData?.palette as ColorPalette) || colorPalette || "cyan";
       const finalDuration = motionData?.duration || 5;
 
       // Update canvas engine state with the server response
@@ -346,52 +385,52 @@ export function useWorkspace() {
       setColorPalette(finalPalette);
       setMotionSpeed(1);
 
-      // Save conversation in DB
-      addChatConversation({
-        title: trimmed.slice(0, 32),
-        prompt: trimmed,
-        category: finalStyle,
-      }).catch(() => {});
+      // Extract generated templates array from API response
+      const incomingTemplates: GeneratedTemplateItem[] =
+        serverRes?.templates && Array.isArray(serverRes.templates) && serverRes.templates.length > 0
+          ? serverRes.templates
+          : [
+              {
+                id: `tmpl-${generatedPromptId}`,
+                name: trimmed.length > 24 ? `${trimmed.slice(0, 24)}...` : trimmed,
+                category: finalStyle,
+                duration: finalDuration,
+                prompt: trimmed,
+                text: finalRenderText,
+                palette: finalPalette,
+                fps: 60,
+                createdAt: new Date().toISOString(),
+                updatedAt: "Just now",
+                jobId: serverRes?.job?.id,
+              },
+            ];
 
-      const generatedProjectId =
-        activeProject?.id && activeProject.id !== "new-composition"
-          ? activeProject.id
-          : `p-${Date.now()}`;
-
-      const savedProject: ProjectItem = {
-        id: generatedProjectId,
-        name: trimmed.length > 28 ? `${trimmed.slice(0, 28)}...` : trimmed,
-        category: finalStyle,
-        duration: finalDuration,
-        prompt: trimmed,
-        text: finalRenderText,
-        palette: finalPalette,
-        updatedAt: "Just now",
-      };
-
-      setProjects((prev) => {
-        const index = prev.findIndex((p) => p.id === generatedProjectId);
-        if (index !== -1) {
-          return prev.map((p) => (p.id === generatedProjectId ? savedProject : p));
-        }
-        return [savedProject, ...prev];
+      // Add newly generated templates to state and persist in localStorage
+      setGeneratedTemplates((prev) => {
+        const newIds = new Set(incomingTemplates.map((t) => t.id));
+        const filteredPrev = prev.filter((p) => !newIds.has(p.id));
+        const combined = [...incomingTemplates, ...filteredPrev];
+        try {
+          localStorage.setItem("animagent_generated_templates", JSON.stringify(combined));
+        } catch {}
+        return combined;
       });
-      setActiveProjectId(generatedProjectId);
 
-      // Reset transport and start playback with the new server-generated motion
+      // Select primary newly generated template
+      setActiveTemplateId(incomingTemplates[0].id);
+
+      // Reset transport and start playback
       startTimeRef.current = Date.now();
       setCurrentTime(0);
       setIsPlaying(true);
 
       success(
-        "Motion Generated",
-        serverRes?.job?.id
-          ? `Queued job #${serverRes.job.id} • Previewing 60FPS ${finalStyle}.`
-          : `Previewing 60FPS ${finalStyle} from server.`
+        "Templates Generated",
+        `Synthesized ${incomingTemplates.length} 60FPS motion template variations from your prompt.`
       );
     } catch (err: any) {
       console.error("[Workspace] Prompt API error:", err);
-      failure("Generation Error", err?.message || "Could not reach prompt server.");
+      failure("Generation Error", err?.message || "Could not reach prompt backend server.");
     } finally {
       setIsGenerating(false);
       setGenerationProgress(0);
@@ -409,7 +448,7 @@ export function useWorkspace() {
 
     setIsConvertingChar(true);
     try {
-      await addCharConversion({
+      await api.charConversion.add({
         text: charInput.trim().toUpperCase(),
         effect: charEffect,
       });
@@ -496,10 +535,9 @@ export function useWorkspace() {
     }
   };
 
-  // Create Project
-  // Reset to clean prompt creation (no dummy projects)
+  // Reset to clean prompt creation
   const handleCreateProject = () => {
-    setActiveProjectId("");
+    setActiveTemplateId("");
     setPromptText("");
     setLiveText("");
     setCurrentTime(0);
@@ -525,7 +563,7 @@ export function useWorkspace() {
     failure("No Receipts", "No billing receipts found in database for this account.");
   };
 
-  // User Plan & Usage Details: strictly DB-backed, no mock/dummy fallbacks
+  // User Plan & Usage Details: strictly DB-backed
   const userPlan: PlanTier = (user?.plan?.tier as PlanTier) || "free";
   const userPlanInterval: BillingInterval =
     (user?.plan?.billingInterval as BillingInterval) || "monthly";
@@ -537,7 +575,7 @@ export function useWorkspace() {
     "Creator";
   const userEmail = user?.email || "";
 
-  // Real-time usage calculation: fallback to 0 if not provided in DB
+  // Real-time usage calculation
   const genUsed = (user?.usage?.generations?.monthly ?? 0) + extraCredits;
   const genLimit =
     user?.usage?.generations?.limit ??
@@ -579,10 +617,23 @@ export function useWorkspace() {
     workspaceMode,
     setWorkspaceMode,
     hasActiveAnimation,
+    // Generated Templates State & Handlers
+    generatedTemplates,
+    setGeneratedTemplates,
+    activeTemplateId,
+    setActiveTemplateId,
+    activeTemplate,
+    handleSelectTemplate,
+    handleDeleteTemplate,
+    handleClearTemplates,
+    handleRemixTemplate,
+    // Backward-compatible aliases
     projects,
     activeProjectId,
-    setActiveProjectId,
+    setActiveProjectId: setActiveTemplateId,
     activeProject,
+    handleSelectProject,
+    // Generation parameters
     promptText,
     setPromptText,
     activeStyle,
@@ -627,7 +678,6 @@ export function useWorkspace() {
     handleScrub,
     handleGenerate,
     handleCreateProject,
-    handleSelectProject,
     handleSelectPreset,
     handleDownloadReceipt,
     pricingTiers: PRICING_TIERS,
