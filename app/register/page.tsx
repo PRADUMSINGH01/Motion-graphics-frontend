@@ -19,10 +19,17 @@ import GoogleAuthButton from "../components/GoogleAuthButton";
 import BackButton from "../components/BackButton";
 import Logo from "../components/Logo";
 import { useAuth } from "../context/AuthContext";
+import type { PlanTier } from "../workspace/types";
+
+const planTiers: PlanTier[] = ["free", "creator", "pro", "enterprise"];
+
+function getRequestedPlan(value: string | null): PlanTier {
+  return planTiers.includes(value as PlanTier) ? (value as PlanTier) : "free";
+}
 
 function RegisterForm() {
   const searchParams = useSearchParams();
-  const requestedPlan = (searchParams.get("plan") as string | null) || "free";
+  const requestedPlan = getRequestedPlan(searchParams.get("plan"));
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
