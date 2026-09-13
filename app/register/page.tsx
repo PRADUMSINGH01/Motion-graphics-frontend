@@ -1,15 +1,13 @@
 "use client";
 
-import React, { useState, Suspense, useEffect } from "react";
+import React, { useState, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
   FiUser,
   FiMail,
   FiLock,
-  FiArrowLeft,
   FiArrowRight,
-  FiLayers,
   FiCheck,
   FiZap,
   FiEye,
@@ -21,11 +19,10 @@ import GoogleAuthButton from "../components/GoogleAuthButton";
 import BackButton from "../components/BackButton";
 import Logo from "../components/Logo";
 import { useAuth } from "../context/AuthContext";
-import { useAlert } from "../context/AlertContext";
 
 function RegisterForm() {
   const searchParams = useSearchParams();
-  const requestedPlan = (searchParams.get("plan") as any) || "free";
+  const requestedPlan = (searchParams.get("plan") as string | null) || "free";
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -35,7 +32,8 @@ function RegisterForm() {
   const [formError, setFormError] = useState<string | null>(null);
 
   const { register } = useAuth();
-  const { failure } = useAlert();
+  const searchError = searchParams.get("error");
+  const displayError = formError ?? (searchError ? decodeURIComponent(searchError) : null);
 
   const planTitles: Record<string, string> = {
     creator: "Creator Tier (150 Gens/mo)",
@@ -45,13 +43,6 @@ function RegisterForm() {
   };
 
   const selectedPlanTitle = planTitles[requestedPlan] || planTitles.free;
-
-  useEffect(() => {
-    const errorParam = searchParams.get("error");
-    if (errorParam) {
-      setFormError(decodeURIComponent(errorParam));
-    }
-  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,21 +68,27 @@ function RegisterForm() {
       if (!ok) {
         setFormError("Registration could not be completed. Please check your details.");
       }
-    } catch (err: any) {
-      setFormError(err?.message || "An unexpected error occurred during account creation.");
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : "An unexpected error occurred during account creation.";
+      setFormError(message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="relative min-h-screen flex flex-col justify-center items-center px-4 py-12 font-poppins text-slate-900 dark:text-slate-100 bg-slate-50 dark:bg-[#090a0f] overflow-hidden transition-colors duration-300">
+    <div className="relative min-h-screen flex flex-col justify-center items-center px-4 py-12 font-poppins text-[var(--text-primary)] bg-[var(--background)] overflow-hidden transition-colors duration-300">
       {/* Interactive Animated Canvas Background */}
       <SpiderNetBackground />
 
-      {/* Atmospheric dark fade overlay */}
+      {/* Atmospheric themed fade overlay */}
       <div
-        className="absolute inset-0 bg-gradient-to-b from-slate-50/40 via-transparent to-slate-50/70 dark:from-[#090a0f]/40 dark:via-transparent dark:to-[#090a0f]/70 pointer-events-none transition-colors duration-300"
+        className="absolute inset-0 pointer-events-none transition-colors duration-300"
+        style={{
+          background:
+            "radial-gradient(circle at 15% 20%, rgba(207,121,93,0.18), transparent 26%), radial-gradient(circle at 82% 10%, rgba(164,119,140,0.16), transparent 24%), linear-gradient(to bottom, rgba(243,238,229,0.12), rgba(243,238,229,0.02), rgba(243,238,229,0.18))",
+        }}
         aria-hidden="true"
       />
 
@@ -101,22 +98,22 @@ function RegisterForm() {
       </div>
 
       {/* Register Card */}
-      <div className="relative z-10 w-full max-w-md bg-white/90 dark:bg-[#121319]/85 backdrop-blur-2xl border border-black/10 dark:border-white/[0.08] rounded-3xl shadow-2xl p-8 space-y-6">
+      <div className="relative z-10 w-full max-w-md rounded-3xl border border-[var(--border-subtle)] bg-[var(--surface-card)]/95 p-8 shadow-[0_24px_80px_rgba(0,0,0,0.2)] backdrop-blur-2xl space-y-6">
         {/* Brand Header */}
         <div className="text-center space-y-2">
           <Link href="/" className="inline-flex items-center gap-2.5 group">
             <Logo size={42} />
           </Link>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-950 dark:text-white font-comic">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--text-primary)] font-comic">
             Create Your Account
           </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
+          <p className="text-xs text-[var(--text-secondary)]">
             Start generating autonomous motion graphics with Animagent AI
           </p>
 
           {requestedPlan !== "free" && (
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 border border-cyan-400/25 mt-2">
-              <FiZap className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border mt-2 bg-[color:color-mix(in_srgb,var(--accent-primary)_12%,transparent)] text-[var(--accent-primary)] border-[color:color-mix(in_srgb,var(--accent-primary)_35%,transparent)]">
+              <FiZap className="w-3.5 h-3.5 text-[var(--accent-primary)]" />
               <span>Target: {selectedPlanTitle}</span>
             </div>
           )}
@@ -127,28 +124,28 @@ function RegisterForm() {
 
         {/* Divider */}
         <div className="relative flex items-center justify-center">
-          <div className="w-full border-t border-black/10 dark:border-white/[0.08]" />
-          <span className="absolute bg-white dark:bg-[#121319] px-3 text-[11px] font-mono uppercase tracking-wider text-slate-500">
+          <div className="w-full border-t border-[var(--border-subtle)]" />
+          <span className="absolute bg-[var(--surface-card)] px-3 text-[11px] font-mono uppercase tracking-wider text-[var(--text-muted)]">
             or register with email
           </span>
         </div>
 
         {/* Inline Form Error Notification */}
-        {formError && (
-          <div className="p-3 bg-red-500/10 border border-red-500/25 rounded-xl flex items-start gap-2.5 text-xs text-red-600 dark:text-red-300">
-            <FiAlertCircle className="w-4 h-4 text-red-500 dark:text-red-400 flex-shrink-0 mt-0.5" />
-            <span>{formError}</span>
+        {displayError && (
+          <div className="p-3 bg-[color:color-mix(in_srgb,var(--accent-primary)_12%,transparent)] border border-[color:color-mix(in_srgb,var(--accent-primary)_35%,transparent)] rounded-xl flex items-start gap-2.5 text-xs text-[var(--text-primary)]">
+            <FiAlertCircle className="w-4 h-4 text-[var(--accent-primary)] flex-shrink-0 mt-0.5" />
+            <span>{displayError}</span>
           </div>
         )}
 
         {/* Register Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+            <label className="text-xs font-medium text-[var(--text-secondary)]">
               Full Name
             </label>
             <div className="relative flex items-center">
-              <FiUser className="absolute left-3.5 w-4 h-4 text-slate-400 dark:text-slate-500 pointer-events-none" />
+              <FiUser className="absolute left-3.5 w-4 h-4 text-[var(--text-muted)] pointer-events-none" />
               <input
                 type="text"
                 required
@@ -159,17 +156,17 @@ function RegisterForm() {
                   if (formError) setFormError(null);
                 }}
                 placeholder="Alex Morgan"
-                className="w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm bg-black/[0.03] dark:bg-white/[0.04] border border-black/10 dark:border-white/[0.08] rounded-xl focus:outline-none focus:border-cyan-500 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 transition-all"
+                className="w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-xl focus:outline-none focus:border-[var(--accent-primary)] text-[var(--text-primary)] placeholder-[var(--text-muted)] transition-all"
               />
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+            <label className="text-xs font-medium text-[var(--text-secondary)]">
               Work Email
             </label>
             <div className="relative flex items-center">
-              <FiMail className="absolute left-3.5 w-4 h-4 text-slate-400 dark:text-slate-500 pointer-events-none" />
+              <FiMail className="absolute left-3.5 w-4 h-4 text-[var(--text-muted)] pointer-events-none" />
               <input
                 type="email"
                 required
@@ -180,17 +177,17 @@ function RegisterForm() {
                   if (formError) setFormError(null);
                 }}
                 placeholder="name@studio.com"
-                className="w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm bg-black/[0.03] dark:bg-white/[0.04] border border-black/10 dark:border-white/[0.08] rounded-xl focus:outline-none focus:border-cyan-500 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 transition-all"
+                className="w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-xl focus:outline-none focus:border-[var(--accent-primary)] text-[var(--text-primary)] placeholder-[var(--text-muted)] transition-all"
               />
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+            <label className="text-xs font-medium text-[var(--text-secondary)]">
               Password
             </label>
             <div className="relative flex items-center">
-              <FiLock className="absolute left-3.5 w-4 h-4 text-slate-400 dark:text-slate-500 pointer-events-none" />
+              <FiLock className="absolute left-3.5 w-4 h-4 text-[var(--text-muted)] pointer-events-none" />
               <input
                 type={showPassword ? "text" : "password"}
                 required
@@ -202,18 +199,18 @@ function RegisterForm() {
                   if (formError) setFormError(null);
                 }}
                 placeholder="Minimum 8 characters"
-                className="w-full pl-10 pr-10 py-2.5 text-xs sm:text-sm bg-black/[0.03] dark:bg-white/[0.04] border border-black/10 dark:border-white/[0.08] rounded-xl focus:outline-none focus:border-cyan-500 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 transition-all"
+                className="w-full pl-10 pr-10 py-2.5 text-xs sm:text-sm bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-xl focus:outline-none focus:border-[var(--accent-primary)] text-[var(--text-primary)] placeholder-[var(--text-muted)] transition-all"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors p-1"
+                className="absolute right-3 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors p-1"
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? <FiEyeOff className="w-4 h-4" /> : <FiEye className="w-4 h-4" />}
               </button>
             </div>
-            <p className="text-[11px] text-slate-500">
+            <p className="text-[11px] text-[var(--text-muted)]">
               Use 8 or more characters with a mix of letters and numbers.
             </p>
           </div>
@@ -221,10 +218,10 @@ function RegisterForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs sm:text-sm font-semibold text-white bg-slate-950 hover:bg-slate-800 dark:text-slate-900 dark:bg-white dark:hover:bg-slate-100 shadow-md shadow-slate-950/15 dark:shadow-black/30 transition-all duration-200 active:scale-[0.98] cursor-pointer disabled:opacity-60"
+            className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs sm:text-sm font-semibold text-[var(--background)] bg-[var(--text-primary)] hover:opacity-90 shadow-md shadow-black/10 transition-all duration-200 active:scale-[0.98] cursor-pointer disabled:opacity-60"
           >
             {loading ? (
-              <div className="w-4 h-4 border-2 border-white dark:border-slate-900 border-t-transparent rounded-full animate-spin" />
+              <div className="w-4 h-4 border-2 border-[var(--background)] border-t-transparent rounded-full animate-spin" />
             ) : (
               <>
                 <span>Create Workspace Account</span>
@@ -235,17 +232,17 @@ function RegisterForm() {
         </form>
 
         {/* Plan note */}
-        <div className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400 justify-center">
-          <FiCheck className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
+        <div className="flex items-center gap-2 text-[11px] text-[var(--text-secondary)] justify-center">
+          <FiCheck className="w-3.5 h-3.5 text-[var(--accent-primary)]" />
           <span>Realtime DB sync • Instant cloud GPU queue</span>
         </div>
 
         {/* Footer switch */}
-        <div className="text-center text-xs text-slate-500 dark:text-slate-400 pt-1 border-t border-black/10 dark:border-white/[0.06]">
+        <div className="text-center text-xs text-[var(--text-secondary)] pt-1 border-t border-[var(--border-subtle)]">
           Already have an account?{" "}
           <Link
             href="/login"
-            className="font-semibold text-slate-950 dark:text-white hover:text-cyan-600 dark:hover:text-cyan-400 hover:underline transition-colors"
+            className="font-semibold text-[var(--text-primary)] hover:text-[var(--accent-primary)] hover:underline transition-colors"
           >
             Sign in
           </Link>
@@ -259,7 +256,7 @@ export default function RegisterPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-slate-50 dark:bg-[#090a0f] flex items-center justify-center text-slate-500 dark:text-slate-400">
+        <div className="min-h-screen bg-[var(--background)] flex items-center justify-center text-[var(--text-secondary)]">
           Loading workspace registration...
         </div>
       }

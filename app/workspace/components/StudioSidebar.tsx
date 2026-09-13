@@ -60,7 +60,7 @@ export default function StudioSidebar({
   };
 
   return (
-    <aside className="w-[240px] shrink-0 border-r border-black/[0.08] dark:border-white/[0.08] bg-white/95 dark:bg-[#0c0c11]/95 backdrop-blur-2xl flex flex-col justify-between h-full z-20 select-none transition-colors duration-200">
+    <aside className="w-[240px] shrink-0 border-r border-[#172b3a]/10 dark:border-[#bedce5]/[0.12] bg-white/95 dark:bg-[#0f1d2c]/95 backdrop-blur-2xl flex flex-col justify-between h-full z-20 select-none transition-colors duration-200">
       {/* Top Brand & Nav */}
       <div className="flex flex-col flex-1 overflow-y-auto scrollbar-none">
         {/* Brand Header with Back Button */}
@@ -238,7 +238,7 @@ export default function StudioSidebar({
       </div>
 
       {/* Sidebar Bottom: Live Compute Quota + Integrated User Card Dock */}
-      <div className="p-2.5 border-t border-black/[0.06] dark:border-white/[0.06] bg-slate-50 dark:bg-[#090a0f] space-y-2 transition-colors">
+      <div className="p-2.5 border-t border-[#172b3a]/[0.08] dark:border-[#bedce5]/[0.08] bg-[#f4f7f8] dark:bg-[#0a1421] space-y-2 transition-colors">
         {/* Compact Compute Quota */}
         <div className="p-2 rounded-xl bg-white dark:bg-white/[0.02] border border-black/[0.06] dark:border-white/[0.05] shadow-xs dark:shadow-none space-y-1.5">
           <div className="flex items-center justify-between">

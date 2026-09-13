@@ -365,14 +365,14 @@ export default function Navbar() {
                 <div className="flex items-center gap-2">
                   <Link
                     href="/login"
-                    className="px-3 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white rounded-lg hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-colors"
+                    className="hidden whitespace-nowrap px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-black/[0.04] hover:text-slate-950 sm:inline-flex dark:text-slate-300 dark:hover:bg-white/[0.04] dark:hover:text-white"
                   >
                     Log in
                   </Link>
 
                   <Link
                     href="/register"
-                    className="inline-flex items-center gap-1 px-3.5 py-1.5 text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 dark:text-slate-950 dark:bg-white dark:hover:bg-slate-200 rounded-xl shadow-sm transition-all active:scale-[0.98]"
+                    className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-xl bg-slate-900 px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-slate-800 active:scale-[0.98] dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200"
                   >
                     <span>Get Started</span>
                     <FiArrowRight className="w-3.5 h-3.5" />

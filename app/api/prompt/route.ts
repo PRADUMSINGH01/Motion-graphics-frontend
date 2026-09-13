@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { createMotionBillingQuote } from "../../lib/motionBilling";
 
 export async function POST(req: Request) {
   try {
@@ -145,6 +146,7 @@ export async function POST(req: Request) {
     return NextResponse.json({
       success: true,
       message: backendData?.message || "Prompt motion generated successfully",
+      billing: createMotionBillingQuote(),
       backendConnected: Boolean(backendData),
       job: backendData?.job || {
         id: `job-${Date.now()}`,

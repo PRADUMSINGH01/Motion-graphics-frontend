@@ -1,83 +1,120 @@
-"use client";
-
-import React from "react";
 import Link from "next/link";
-import {
-  FiArrowRight,
-  FiZap,
-  FiPlay,
-  FiLayers,
-  FiFilm,
-  FiCode,
-  FiSliders,
-} from "react-icons/fi";
-import SpiderNetBackground from "./SpiderNetBackground";
+import { FiArrowRight, FiPlay } from "react-icons/fi";
+
+const capabilities = [
+  ["01", "Direct your scene", "Describe the visual, timing, and feeling in plain language."],
+  ["02", "Shape every detail", "Refine the composition, keyframes, and output in one place."],
+  ["03", "Ship the final cut", "Export production-ready motion without the hand-off overhead."],
+] as const;
 
 export default function MainSection() {
   return (
-    <main className="relative w-full min-h-[90vh] flex flex-col items-center justify-center text-center px-4 sm:px-6 lg:px-8 py-20 sm:py-28 overflow-hidden font-poppins text-slate-900 dark:text-white bg-slate-50 dark:bg-[#121013] transition-colors duration-300">
-      {/* Animated Spider Web Canvas Background */}
-      <SpiderNetBackground />
-
-      {/* Atmospheric depth gradients */}
+    <section className="relative isolate overflow-hidden bg-[var(--background)] text-[var(--text-primary)]">
       <div
-        className="absolute inset-0 pointer-events-none bg-gradient-to-b from-slate-50/60 via-transparent to-slate-50 dark:from-[#121013]/60 dark:via-transparent dark:to-[#121013] transition-colors duration-300"
+        className="pointer-events-none absolute inset-0 opacity-70"
         aria-hidden="true"
+        style={{
+          backgroundImage:
+            "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='.13'/%3E%3C/svg%3E\"), linear-gradient(90deg, var(--border-subtle) 1px, transparent 1px), linear-gradient(var(--border-subtle) 1px, transparent 1px)",
+          backgroundSize: "180px 180px, 96px 96px, 96px 96px",
+          backgroundPosition: "0 0, center center, center center",
+          maskImage: "linear-gradient(to bottom, black 0%, black 68%, transparent 100%)",
+        }}
       />
 
-      {/* Hero Content */}
-      <div className="relative z-10 max-w-5xl mx-auto flex flex-col items-center pointer-events-auto">
-        {/* Release Badge */}
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-black/[0.04] dark:bg-white/10 border border-black/10 dark:border-white/20 text-slate-800 dark:text-white text-xs font-semibold mb-6 backdrop-blur-md shadow-lg shadow-black/[0.03] dark:shadow-xl hover:bg-black/[0.08] dark:hover:bg-white/15 transition-all">
-          <FiZap className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
-          <span>Animagent • Autonomous Motion AI Agent Live</span>
+      <div className="relative mx-auto flex min-h-[min(860px,100vh)] max-w-7xl flex-col justify-center px-5 pb-16 pt-32 sm:px-8 lg:px-10 lg:pt-36">
+        <div className="grid items-center gap-14 lg:grid-cols-[1.02fr_0.98fr] lg:gap-20">
+          <div className="max-w-2xl">
+            <div className="mb-8 inline-flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--text-secondary)]">
+              <span className="h-px w-7 bg-[var(--accent-primary)]" />
+              Motion, made deliberate
+            </div>
+
+            <h1 className="max-w-xl text-5xl font-semibold tracking-[-0.055em] text-[var(--text-primary)] sm:text-6xl lg:text-[4.6rem] lg:leading-[0.98]">
+              Give every idea a moving form.
+            </h1>
+
+            <p className="mt-7 max-w-lg text-base leading-7 text-[var(--text-secondary)] sm:text-lg sm:leading-8">
+              Animagent turns a creative brief into precise motion graphics — from first direction to final render.
+            </p>
+
+            <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
+              <Link
+                href="/register"
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-[var(--text-primary)] px-5 text-sm font-semibold text-[var(--background)] transition-transform duration-200 hover:-translate-y-0.5"
+              >
+                Start creating
+                <FiArrowRight className="h-4 w-4" aria-hidden="true" />
+              </Link>
+              <Link
+                href="/workspace"
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-[var(--border-strong)] bg-[var(--surface-glass)] px-5 text-sm font-semibold text-[var(--text-primary)] transition-colors hover:bg-[var(--surface-card)]"
+              >
+                <FiPlay className="h-3.5 w-3.5 text-[var(--accent-primary)]" aria-hidden="true" />
+                Open studio
+              </Link>
+            </div>
+
+            <p className="mt-5 text-xs text-[var(--text-muted)]">
+              Production-ready exports. No credit card required.
+            </p>
+          </div>
+
+          <div className="relative mx-auto w-full max-w-xl lg:mx-0">
+            <div className="absolute -inset-4 border border-[var(--border-subtle)]" aria-hidden="true" />
+            <div className="relative overflow-hidden rounded-xl border border-[var(--border-strong)] bg-[var(--surface-card)] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.22)] sm:p-5">
+              <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-4">
+                <div className="flex items-center gap-2.5">
+                  <span className="h-2 w-2 rounded-full bg-[var(--accent-primary)]" />
+                  <span className="text-xs font-medium text-[var(--text-secondary)]">New composition</span>
+                </div>
+                <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--text-muted)]">00:08:24</span>
+              </div>
+
+              <div className="mt-5 rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-primary)] p-4">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">Direction</p>
+                <p className="mt-2 text-sm leading-6 text-[var(--text-primary)]">
+                  A quiet title sequence. Paper texture, slow pacing, and a precise final reveal.
+                </p>
+              </div>
+
+              <div className="mt-5 grid grid-cols-[58px_1fr] gap-3">
+                <div className="space-y-3 pt-1.5 font-mono text-[10px] text-[var(--text-muted)]">
+                  <p>00:00</p>
+                  <p>00:03</p>
+                  <p>00:06</p>
+                </div>
+                <div className="space-y-3">
+                  <div className="h-7 rounded-md bg-[color:color-mix(in_srgb,var(--accent-primary)_28%,transparent)]" />
+                  <div className="ml-[18%] h-7 w-[72%] rounded-md bg-[color:color-mix(in_srgb,var(--accent-secondary)_34%,transparent)]" />
+                  <div className="ml-[42%] h-7 w-[46%] rounded-md bg-[color:color-mix(in_srgb,var(--accent-tertiary)_36%,transparent)]" />
+                </div>
+              </div>
+
+              <div className="mt-6 flex items-center justify-between border-t border-[var(--border-subtle)] pt-4">
+                <div className="flex -space-x-1.5" aria-hidden="true">
+                  <span className="h-5 w-5 rounded-full border-2 border-[var(--surface-card)] bg-[var(--accent-primary)]" />
+                  <span className="h-5 w-5 rounded-full border-2 border-[var(--surface-card)] bg-[var(--accent-secondary)]" />
+                  <span className="h-5 w-5 rounded-full border-2 border-[var(--surface-card)] bg-[var(--accent-tertiary)]" />
+                </div>
+                <span className="text-xs font-medium text-[var(--text-secondary)]">Ready to render</span>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Clean Modern H1 Headline */}
-        <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-slate-950 dark:text-white max-w-4xl leading-tight font-sans drop-shadow-xs dark:drop-shadow-[0_4px_24px_rgba(0,0,0,0.85)]">
-          Generate Studio-Grade Motion Graphics with AI
-        </h1>
-
-        {/* Subtitle in Poppins */}
-        <p className="mt-6 text-lg sm:text-xl text-slate-600 dark:text-slate-300 max-w-3xl font-normal leading-relaxed drop-shadow-none dark:drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)]">
-          Describe any animation, kinetic title, or 3D scene. Our autonomous AI agent scripts, keyframes, rigs physics, and renders studio-grade motion assets in seconds.
-        </p>
-
-        {/* Primary Action Buttons */}
-        <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-          <Link
-            href="/register"
-            className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-sm font-semibold text-white bg-slate-950 hover:bg-slate-800 dark:text-slate-900 dark:bg-white dark:hover:bg-slate-100 shadow-xl shadow-slate-950/15 dark:shadow-black/40 transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.99]"
-          >
-            <span>Start Creating for Free</span>
-            <FiArrowRight className="w-4 h-4 text-white dark:text-slate-900" />
-          </Link>
-
-          <Link
-            href="/workspace"
-            className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl text-sm font-semibold text-slate-800 dark:text-white bg-black/[0.04] dark:bg-white/5 hover:bg-black/[0.08] dark:hover:bg-white/10 border border-black/10 dark:border-white/15 hover:border-black/20 dark:hover:border-white/30 backdrop-blur-md shadow-md transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.99]"
-          >
-            <FiPlay className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
-            <span>Open Studio Workspace</span>
-          </Link>
-        </div>
-
-        {/* Feature Spec Badges */}
-        <div className="mt-12 flex flex-wrap items-center justify-center gap-3 text-xs text-slate-700 dark:text-white">
-          <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-white/80 dark:bg-black/40 backdrop-blur-md border border-black/10 dark:border-white/10 shadow-sm">
-            <FiFilm className="text-cyan-600 dark:text-cyan-400 w-3.5 h-3.5" /> 4K 60FPS Lossless
-          </span>
-          <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-white/80 dark:bg-black/40 backdrop-blur-md border border-black/10 dark:border-white/10 shadow-sm">
-            <FiLayers className="text-purple-600 dark:text-purple-400 w-3.5 h-3.5" /> Autonomous Keyframing &amp; Easing
-          </span>
-          <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-white/80 dark:bg-black/40 backdrop-blur-md border border-black/10 dark:border-white/10 shadow-sm">
-            <FiCode className="text-pink-600 dark:text-pink-400 w-3.5 h-3.5" /> Export After Effects &amp; Lottie JSON
-          </span>
-          <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-white/80 dark:bg-black/40 backdrop-blur-md border border-black/10 dark:border-white/10 shadow-sm">
-            <FiSliders className="text-blue-600 dark:text-blue-400 w-3.5 h-3.5" /> Full Layer Timeline Control
-          </span>
+        <div className="mt-16 grid border-t border-[var(--border-subtle)] pt-7 sm:grid-cols-3 sm:gap-8 lg:mt-20">
+          {capabilities.map(([number, title, description]) => (
+            <div key={number} className="flex gap-4 py-4 sm:py-0">
+              <span className="font-mono text-xs text-[var(--accent-primary)]">{number}</span>
+              <div>
+                <h2 className="text-sm font-semibold text-[var(--text-primary)]">{title}</h2>
+                <p className="mt-1.5 max-w-xs text-sm leading-6 text-[var(--text-secondary)]">{description}</p>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
-    </main>
+    </section>
   );
 }

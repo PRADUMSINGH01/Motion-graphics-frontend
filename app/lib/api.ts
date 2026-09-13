@@ -3,6 +3,8 @@
  * Connects frontend to backend REST endpoints with session cookies & bearer token support.
  */
 
+import type { MotionBillingQuote } from "./motionBilling";
+
 export const HOSTED_API_URL = "https://motion-backend--background-ab0ec.us-east4.hosted.app";
 export const LOCAL_API_URL = "http://localhost:8080";
 
@@ -393,6 +395,7 @@ export const api = {
       return (await res.json()) as {
         success: boolean;
         message: string;
+        billing?: MotionBillingQuote;
         backendConnected?: boolean;
         job?: any;
         motion?: {

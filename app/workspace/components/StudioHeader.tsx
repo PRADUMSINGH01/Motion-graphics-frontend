@@ -52,7 +52,7 @@ export default function StudioHeader({
   };
 
   return (
-    <header className="relative z-10 h-14 shrink-0 border-b border-black/[0.08] dark:border-white/[0.08] bg-white/85 dark:bg-[#121013]/85 backdrop-blur-xl px-4 sm:px-5 flex items-center justify-between text-slate-900 dark:text-white transition-colors duration-200">
+    <header className="relative z-10 h-14 shrink-0 border-b border-[#172b3a]/10 dark:border-[#bedce5]/[0.12] bg-white/85 dark:bg-[#101e2e]/85 backdrop-blur-xl px-4 sm:px-5 flex items-center justify-between text-[#172b3a] dark:text-[#f2f7f8] transition-colors duration-200">
       {workspaceMode === "prompt" ? (
         <>
           <div className="flex items-center gap-3">

@@ -232,9 +232,9 @@ export default function SpiderNetBackground({
         hubY,
         Math.max(cssWidth, cssHeight) * (0.68 + hubPulse * 0.05)
       );
-      radial.addColorStop(0, "rgba(56, 189, 248, 0.12)"); // Cyan core
-      radial.addColorStop(0.25, "rgba(139, 92, 246, 0.07)"); // Violet mid
-      radial.addColorStop(0.55, "rgba(236, 72, 153, 0.03)"); // Rose subtle edge
+      radial.addColorStop(0, "rgba(207, 121, 93, 0.12)"); // Terracotta core
+      radial.addColorStop(0.25, "rgba(164, 119, 140, 0.08)"); // Plum mid
+      radial.addColorStop(0.55, "rgba(156, 175, 127, 0.04)"); // Sage edge
       radial.addColorStop(1, "rgba(0, 0, 0, 0)");
       ctx.fillStyle = radial;
       ctx.fillRect(0, 0, cssWidth, cssHeight);
@@ -245,7 +245,7 @@ export default function SpiderNetBackground({
           spokeIndex: Math.floor(Math.random() * spokeCount),
           progress: 0,
           speed: 0.012 + Math.random() * 0.016,
-          color: Math.random() > 0.5 ? "#38bdf8" : "#c084fc",
+          color: Math.random() > 0.5 ? "#cf795d" : "#a4778c",
           size: 2.2 + Math.random() * 1.5,
         });
       }

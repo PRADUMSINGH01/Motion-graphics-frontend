@@ -44,7 +44,7 @@ export default function StudioCanvasPlayer({
   return (
     <div
       ref={canvasContainerRef}
-      className={`relative rounded-2xl bg-[#030406] border border-black/10 dark:border-white/[0.12] shadow-2xl overflow-hidden flex flex-col w-full transition-all duration-300 ${
+      className={`relative rounded-2xl bg-[#06111d] border border-[#172b3a]/10 dark:border-[#bedce5]/[0.16] shadow-2xl overflow-hidden flex flex-col w-full transition-all duration-300 ${
         aspectRatio === "16:9"
           ? "max-w-3xl aspect-[16/9] max-h-[50vh]"
           : aspectRatio === "9:16"
@@ -88,7 +88,7 @@ export default function StudioCanvasPlayer({
       </div>
 
       {/* Integrated Transport Control Dock */}
-      <div className="h-11 shrink-0 bg-white/95 dark:bg-[#090b10]/95 border-t border-black/[0.08] dark:border-white/[0.08] px-3.5 flex items-center gap-2.5 select-none transition-colors">
+      <div className="h-11 shrink-0 bg-white/95 dark:bg-[#0d1a29]/95 border-t border-[#172b3a]/[0.08] dark:border-[#bedce5]/[0.1] px-3.5 flex items-center gap-2.5 select-none transition-colors">
         {/* Play / Pause Toggle */}
         <button
           type="button"

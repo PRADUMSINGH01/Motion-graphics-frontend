@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import Link from "next/link";
 import {
   FiSearch,
@@ -28,8 +28,17 @@ import {
   FiSquare,
   FiTrendingUp,
   FiCompass,
-  FiTag,
+  FiUser,
+  FiShuffle,
+  FiFilter,
+  FiEye,
+  FiRotateCcw,
+  FiChevronDown,
+  FiChevronLeft,
+  FiChevronRight,
+  FiLoader,
   FiRefreshCw,
+  FiArrowUp,
 } from "react-icons/fi";
 import { useAlert } from "../context/AlertContext";
 import SpiderNetBackground from "../components/SpiderNetBackground";
@@ -85,10 +94,18 @@ export default function ExplorePage() {
   // Filters and search states
   const [activeCategory, setActiveCategory] = useState<string>("All");
   const [aspectRatioFilter, setAspectRatioFilter] = useState<string>("All");
+  const [motionFormat, setMotionFormat] = useState<"vertical" | "landscape">("vertical");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
-  const [sortBy, setSortBy] = useState<"popular" | "remixes" | "recent" | "duration">("popular");
+  const [durationFilter, setDurationFilter] = useState<"all" | "short" | "medium" | "long">("all");
+  const [fpsFilter, setFpsFilter] = useState<"all" | "60" | "30">("all");
+  const [sortBy, setSortBy] = useState<"popular" | "remixes" | "recent" | "duration" | "duration-desc">("popular");
   const [layoutMode, setLayoutMode] = useState<"grid" | "cinema">("grid");
+  const [marketView, setMarketView] = useState<"all" | "featured" | "saved" | "pro">("all");
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [autoPlayAll, setAutoPlayAll] = useState(false);
+  const [visibleCount, setVisibleCount] = useState<number>(12);
+  const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
 
   // Interaction states
   const [hoveredId, setHoveredId] = useState<string | null>(null);
@@ -100,6 +117,8 @@ export default function ExplorePage() {
   const [copiedPrompt, setCopiedPrompt] = useState(false);
   const [copiedJson, setCopiedJson] = useState(false);
   const [copiedShareLink, setCopiedShareLink] = useState(false);
+  const [copiedPromptId, setCopiedPromptId] = useState<string | null>(null);
+  const [copiedShareId, setCopiedShareId] = useState<string | null>(null);
   const [modalTab, setModalTab] = useState<"specs" | "json">("specs");
 
   // Modal playback & custom text state
@@ -147,21 +166,6 @@ export default function ExplorePage() {
       success("Saved to Collection", "Motion template bookmarked to your studio library.");
     }
   };
-
-  // Check URL query param ?template=... on mount for deep linking
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      const tplParam = params.get("template");
-      if (tplParam) {
-        const found = templates.find((t) => t.id === tplParam);
-        if (found) {
-          setSelectedItem(found);
-          setModalCustomText(found.defaultText);
-        }
-      }
-    }
-  }, []);
 
   // Update modal text when selected item changes
   useEffect(() => {
@@ -1359,6 +1363,18 @@ export default function ExplorePage() {
     []
   );
 
+  // Check URL query param ?template=... on mount for deep linking.
+  useEffect(() => {
+    const tplParam = new URLSearchParams(window.location.search).get("template");
+    if (!tplParam) return;
+
+    const found = templates.find((template) => template.id === tplParam);
+    if (found) {
+      setSelectedItem(found);
+      setModalCustomText(found.defaultText);
+    }
+  }, [templates]);
+
   // Top Featured Template for the Spotlight Banner
   const featuredTemplate = useMemo(() => {
     return templates.find((t) => t.featured) || templates[0];
@@ -1368,7 +1384,7 @@ export default function ExplorePage() {
   const allTags = useMemo(() => {
     const tagsSet = new Set<string>();
     templates.forEach((t) => t.tags.forEach((tag) => tagsSet.add(tag)));
-    return Array.from(tagsSet).slice(0, 8);
+    return Array.from(tagsSet).slice(0, 18);
   }, [templates]);
 
   // Filtered & Sorted Templates
@@ -1381,6 +1397,20 @@ export default function ExplorePage() {
           aspectRatioFilter === "All" || tpl.aspectRatio === aspectRatioFilter;
         const matchesTag =
           !selectedTag || tpl.tags.includes(selectedTag);
+        const matchesView =
+          marketView === "all" ||
+          (marketView === "featured" && tpl.featured) ||
+          (marketView === "saved" && !!savedIds[tpl.id]) ||
+          (marketView === "pro" && tpl.author.pro);
+        const matchesDuration =
+          durationFilter === "all" ||
+          (durationFilter === "short" && tpl.durationSec <= 4) ||
+          (durationFilter === "medium" && tpl.durationSec > 4 && tpl.durationSec <= 6) ||
+          (durationFilter === "long" && tpl.durationSec > 6);
+        const matchesFps =
+          fpsFilter === "all" ||
+          (fpsFilter === "60" && tpl.fps === 60) ||
+          (fpsFilter === "30" && tpl.fps === 30);
         const q = searchQuery.toLowerCase().trim();
         const matchesSearch =
           !q ||
@@ -1390,15 +1420,112 @@ export default function ExplorePage() {
           tpl.category.toLowerCase().includes(q) ||
           tpl.tags.some((tag) => tag.toLowerCase().includes(q));
 
-        return matchesCat && matchesAspect && matchesTag && matchesSearch;
+        return matchesCat && matchesAspect && matchesTag && matchesView && matchesDuration && matchesFps && matchesSearch;
       })
       .sort((a, b) => {
         if (sortBy === "popular") return b.likes - a.likes;
         if (sortBy === "remixes") return b.remixes - a.remixes;
         if (sortBy === "duration") return a.durationSec - b.durationSec;
-        return b.id.localeCompare(a.id);
+        if (sortBy === "duration-desc") return b.durationSec - a.durationSec;
+        if (sortBy === "recent") return b.id.localeCompare(a.id);
+        return b.likes - a.likes;
       });
-  }, [templates, activeCategory, aspectRatioFilter, selectedTag, searchQuery, sortBy]);
+  }, [templates, activeCategory, aspectRatioFilter, selectedTag, marketView, durationFilter, fpsFilter, savedIds, searchQuery, sortBy]);
+
+  // Paginated templates for display (6 per row, default first 12)
+  const displayedTemplates = useMemo(() => {
+    return filteredTemplates.slice(0, visibleCount);
+  }, [filteredTemplates, visibleCount]);
+
+  // Reset pagination on filter or search changes
+  useEffect(() => {
+    setVisibleCount(12);
+  }, [activeCategory, aspectRatioFilter, durationFilter, fpsFilter, selectedTag, marketView, searchQuery, sortBy]);
+
+  // Load more presets handler
+  const handleLoadMore = () => {
+    setIsLoadingMore(true);
+    setTimeout(() => {
+      setVisibleCount((prev) => Math.min(prev + 6, filteredTemplates.length));
+      setIsLoadingMore(false);
+    }, 350);
+  };
+
+  const handleLoadAll = () => {
+    setVisibleCount(filteredTemplates.length);
+  };
+
+  // Active non-default filter count
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    if (activeCategory !== "All") count++;
+    if (aspectRatioFilter !== "All") count++;
+    if (durationFilter !== "all") count++;
+    if (fpsFilter !== "all") count++;
+    if (selectedTag) count++;
+    if (marketView !== "all") count++;
+    if (searchQuery.trim()) count++;
+    return count;
+  }, [activeCategory, aspectRatioFilter, durationFilter, fpsFilter, selectedTag, marketView, searchQuery]);
+
+  // Reset all filters to default
+  const handleResetAllFilters = () => {
+    setActiveCategory("All");
+    setAspectRatioFilter("All");
+    setDurationFilter("all");
+    setFpsFilter("all");
+    setSelectedTag(null);
+    setMarketView("all");
+    setSearchQuery("");
+    setSortBy("popular");
+  };
+
+  // Hidden file input for loading external presets
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImportPresetJson = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const data = JSON.parse(event.target?.result as string);
+        success("Preset Loaded", `Loaded "${data.name || data.title || "Custom"}" preset!`);
+        window.location.href = `/workspace?prompt=${encodeURIComponent(data.prompt || "")}&style=${encodeURIComponent(data.category || "")}&text=${encodeURIComponent(data.defaultText || "")}`;
+      } catch {
+        alert("Invalid JSON preset file format.");
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  // Surprise / Shuffle helper
+  const handleShuffleRandom = () => {
+    if (filteredTemplates.length === 0) return;
+    const randomIndex = Math.floor(Math.random() * filteredTemplates.length);
+    const chosen = filteredTemplates[randomIndex];
+    setSelectedItem(chosen);
+    success("Surprise Pick!", `Opened "${chosen.title}" in inspector.`);
+  };
+
+  // Card Copy Prompt Helper
+  const handleCopyCardPrompt = (e: React.MouseEvent, item: TemplateItem) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(item.prompt);
+    setCopiedPromptId(item.id);
+    success("Prompt Copied", `Copied prompt for "${item.title}".`);
+    setTimeout(() => setCopiedPromptId(null), 1800);
+  };
+
+  // Card Share Helper
+  const handleShareCard = (e: React.MouseEvent, item: TemplateItem) => {
+    e.stopPropagation();
+    const shareUrl = `${window.location.origin}/explore?template=${item.id}`;
+    navigator.clipboard.writeText(shareUrl);
+    setCopiedShareId(item.id);
+    success("Link Copied", `Direct link copied for "${item.title}".`);
+    setTimeout(() => setCopiedShareId(null), 1800);
+  };
 
   // Copy prompt helper
   const copyPromptText = (text: string) => {
@@ -1452,159 +1579,132 @@ export default function ExplorePage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col font-sans text-slate-900 dark:text-slate-100 bg-slate-50 dark:bg-[#090a0f] relative overflow-x-hidden selection:bg-cyan-500/30 selection:text-cyan-800 dark:selection:text-cyan-200 transition-colors duration-200">
+    <div className="marketplace-shell min-h-screen flex flex-col font-sans text-slate-900 dark:text-[#eee8dc] bg-[#f3eee5] dark:bg-[#171914] relative overflow-x-hidden selection:bg-[#cf795d]/30 selection:text-[#eee8dc] transition-colors duration-200">
       {/* Interactive Background Canvas */}
-      <div className="fixed inset-0 pointer-events-none z-0 opacity-55">
-        <SpiderNetBackground opacity={0.65} />
+      <div className="fixed inset-0 pointer-events-none z-0 opacity-40">
+        <SpiderNetBackground opacity={0.5} />
       </div>
 
-      {/* Hero Header Section with Dynamic Spotlight */}
-      <section className="relative z-10 pt-28 pb-8 px-4 sm:px-6 lg:px-8 border-b border-black/[0.06] dark:border-white/[0.06] bg-gradient-to-b from-slate-100/90 dark:from-[#0e1017]/90 via-slate-50/70 dark:via-[#0c0d14]/70 to-transparent backdrop-blur-xs">
-        <div className="max-w-7xl mx-auto space-y-6">
-          {/* Back Navigation & Theme Toggle */}
-          <div className="flex items-center justify-between">
+      {/* Hero Header Section - Professional, Compact & Full-Width */}
+      <section className="relative z-10 pt-24 pb-5 px-4 sm:px-6 lg:px-8 xl:px-10 border-b border-black/[0.06] dark:border-white/[0.06] bg-gradient-to-b from-black/[0.02] dark:from-white/[0.02] to-transparent">
+        <div className="w-full max-w-[1920px] mx-auto space-y-4">
+          {/* Top Bar: Navigation, Action Buttons & Theme Toggle */}
+          <div className="flex items-center justify-between gap-3 flex-wrap sm:flex-nowrap">
             <BackButton fallbackUrl="/workspace" label="Back to Studio" />
-            <ThemeToggle />
+
+            {/* Quick Action Button Cluster */}
+            <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap">
+              {/* Load / Import Preset JSON */}
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleImportPresetJson}
+                accept=".json"
+                className="hidden"
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-black/[0.04] dark:bg-white/[0.06] hover:bg-[#cf795d]/15 hover:text-[#cf795d] text-slate-700 dark:text-[#eee8dc] border border-black/[0.08] dark:border-white/[0.1] transition-all cursor-pointer shadow-xs active:scale-95"
+                title="Load a custom JSON preset from your computer"
+              >
+                <FiDownload className="w-3.5 h-3.5 text-[#cf795d] rotate-180" />
+                <span>Load Preset</span>
+              </button>
+
+              {/* Surprise Me / Random Picker */}
+              <button
+                type="button"
+                onClick={handleShuffleRandom}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-black/[0.04] dark:bg-white/[0.06] hover:bg-[#cf795d]/15 hover:text-[#cf795d] text-slate-700 dark:text-[#eee8dc] border border-black/[0.08] dark:border-white/[0.1] transition-all cursor-pointer shadow-xs active:scale-95"
+                title="Randomly pick and inspect an animation preset"
+              >
+                <FiShuffle className="w-3.5 h-3.5 text-[#cf795d]" />
+                <span>Surprise Me</span>
+              </button>
+
+              {/* Auto-Play All Toggle */}
+              <button
+                type="button"
+                onClick={() => setAutoPlayAll((prev) => !prev)}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer shadow-xs active:scale-95 ${
+                  autoPlayAll
+                    ? "bg-[#cf795d] text-white shadow-md shadow-[#cf795d]/30"
+                    : "bg-black/[0.04] dark:bg-white/[0.06] hover:bg-black/[0.08] dark:hover:bg-white/[0.1] text-slate-700 dark:text-[#eee8dc] border border-black/[0.08] dark:border-white/[0.1]"
+                }`}
+                title="Toggle continuous 60FPS animation for all visible cards"
+              >
+                {autoPlayAll ? (
+                  <>
+                    <FiPause className="w-3.5 h-3.5 fill-current" />
+                    <span>Auto-Play ON</span>
+                  </>
+                ) : (
+                  <>
+                    <FiPlay className="w-3.5 h-3.5 fill-current" />
+                    <span>Auto-Play All</span>
+                  </>
+                )}
+              </button>
+
+              {/* Open Studio Direct CTA */}
+              <Link
+                href="/workspace"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-[#cf795d] to-[#e5987d] text-slate-950 hover:brightness-110 shadow-sm hover:shadow-[#cf795d]/25 transition-all active:scale-95"
+                title="Launch the Animagent Motion Graphics Workspace"
+              >
+                <FiZap className="w-3.5 h-3.5 fill-slate-950" />
+                <span>Open Studio</span>
+              </Link>
+
+              {/* Realtime Engine Status Pill */}
+              <span className="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium bg-black/[0.04] dark:bg-white/[0.05] border border-black/[0.06] dark:border-white/[0.08] text-slate-600 dark:text-[#b8b5a8]">
+                <span className="w-2 h-2 rounded-full bg-[#cf795d] animate-pulse" />
+                <span>60 FPS Engine</span>
+              </span>
+
+              <ThemeToggle />
+            </div>
           </div>
-          {/* Header Title & Metrics */}
-          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
-            <div className="space-y-3 max-w-3xl">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/25 dark:border-cyan-400/25 text-cyan-700 dark:text-cyan-300 text-xs font-semibold shadow-xs">
-                <FiZap className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400 fill-cyan-600 dark:fill-cyan-400" />
-                <span>Next-Gen Motion Gallery</span>
+
+          {/* Header Title & Subtitle */}
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3 pt-1">
+            <div>
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#cf795d]/15 border border-[#cf795d]/30 text-[#cf795d] text-xs font-semibold mb-2">
+                <FiZap className="w-3 h-3 fill-[#cf795d]" />
+                <span>Motion Preset Showcase</span>
               </div>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-slate-950 dark:text-white font-sans">
-                Curated Motion Presets
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-slate-950 dark:text-[#f1eadf] font-headline">
+                Curated Motion Library
               </h1>
-              <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 leading-relaxed max-w-2xl font-sans">
-                Explore production-grade procedural animations, kinetic typography, 9:16 vertical reels, 3D
-                refractions, and UI micro-interactions. Scrub live timelines and remix directly in Studio.
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-[#b8b5a8] mt-1 max-w-2xl font-sans">
+                Explore procedural 60FPS motion presets in 9:16 vertical reels &amp; widescreen formats. Hover or scrub along the timeline to preview, then remix instantly in Studio.
               </p>
             </div>
 
-            {/* Platform Stats Pills */}
-            <div className="flex items-center gap-3 shrink-0 overflow-x-auto pb-1">
-              <div className="px-4 py-2.5 rounded-2xl bg-white/80 dark:bg-white/[0.04] border border-black/10 dark:border-white/[0.08] backdrop-blur-md shadow-xs">
-                <div className="text-[10px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono">
-                  Active Presets
-                </div>
-                <div className="text-base sm:text-lg font-bold text-slate-950 dark:text-white">
-                  {templates.length}+ Ready
-                </div>
-              </div>
-
-              <div className="px-4 py-2.5 rounded-2xl bg-white/80 dark:bg-white/[0.04] border border-black/10 dark:border-white/[0.08] backdrop-blur-md shadow-xs">
-                <div className="text-[10px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono">
-                  Engine
-                </div>
-                <div className="text-base sm:text-lg font-bold text-cyan-600 dark:text-cyan-400">
-                  60 FPS Live
-                </div>
-              </div>
-
-              <div className="px-4 py-2.5 rounded-2xl bg-white/80 dark:bg-white/[0.04] border border-black/10 dark:border-white/[0.08] backdrop-blur-md shadow-xs">
-                <div className="text-[10px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono">
-                  Export
-                </div>
-                <div className="text-base sm:text-lg font-bold text-indigo-600 dark:text-indigo-400">
-                  4K • ProRes • Lottie
-                </div>
-              </div>
+            {/* Quick Metrics */}
+            <div className="flex items-center gap-2 text-xs font-mono text-slate-500 dark:text-[#888b7e] flex-wrap">
+              <span className="px-2.5 py-1 rounded-lg bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08]">
+                {templates.length} Presets
+              </span>
+              <span className="px-2.5 py-1 rounded-lg bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08]">
+                {filteredTemplates.length} Showing
+              </span>
+              <span className="px-2.5 py-1 rounded-lg bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08]">
+                4K • ProRes • Lottie
+              </span>
             </div>
           </div>
-
-          {/* Spotlight Hero Banner: Featured Template of the Day */}
-          {featuredTemplate && (
-            <div className="relative rounded-3xl bg-gradient-to-r from-white via-slate-50 to-indigo-50/40 dark:from-[#121420] dark:via-[#10121b] dark:to-[#151624] border border-cyan-500/30 p-4 sm:p-6 shadow-xl dark:shadow-2xl dark:shadow-cyan-950/40 overflow-hidden group">
-              <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
-
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center relative z-10">
-                {/* Left: Interactive Live Preview */}
-                <div className="lg:col-span-5 relative aspect-video rounded-2xl overflow-hidden bg-black/60 border border-black/10 dark:border-white/10 shadow-lg">
-                  <VirtualCardCanvas
-                    renderAnimation={featuredTemplate.renderAnimation}
-                    isHovered={true}
-                    customText={featuredTemplate.defaultText}
-                  />
-                  <div className="absolute top-3 left-3 px-2.5 py-1 rounded-md bg-black/80 backdrop-blur-md text-[10px] font-bold text-cyan-300 border border-cyan-400/30 flex items-center gap-1.5">
-                    <FiStar className="w-3 h-3 text-cyan-400 fill-cyan-400" />
-                    <span>FEATURED PRESET</span>
-                  </div>
-                  <div className="absolute bottom-3 right-3 px-2.5 py-1 rounded-md bg-black/80 backdrop-blur-md text-[10px] font-mono text-white border border-white/15">
-                    {featuredTemplate.resolution} • {featuredTemplate.fps} FPS
-                  </div>
-                </div>
-
-                {/* Right: Metadata & Instant Remix CTA */}
-                <div className="lg:col-span-7 space-y-4">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="px-3 py-1 rounded-full text-xs font-semibold bg-cyan-500/15 text-cyan-700 dark:text-cyan-300 border border-cyan-500/25 dark:border-cyan-400/25">
-                      {featuredTemplate.category}
-                    </span>
-                    <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">
-                      {featuredTemplate.duration} duration
-                    </span>
-                    <span className="text-xs text-slate-400 dark:text-slate-500">•</span>
-                    <span className="text-xs text-slate-600 dark:text-slate-400">
-                      By {featuredTemplate.author.name}
-                    </span>
-                  </div>
-
-                  <div>
-                    <h2 className="text-xl sm:text-2xl font-bold text-slate-950 dark:text-white tracking-tight">
-                      {featuredTemplate.title}
-                    </h2>
-                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1.5 leading-relaxed max-w-2xl font-sans">
-                      &quot;{featuredTemplate.prompt}&quot;
-                    </p>
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-3 pt-2">
-                    <Link
-                      href={`/workspace?prompt=${encodeURIComponent(
-                        featuredTemplate.prompt
-                      )}&style=${encodeURIComponent(
-                        featuredTemplate.category
-                      )}&text=${encodeURIComponent(featuredTemplate.defaultText)}`}
-                      className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-400 to-indigo-500 text-slate-950 font-bold text-xs sm:text-sm flex items-center gap-2 shadow-lg shadow-cyan-500/25 hover:brightness-110 active:scale-95 transition-all"
-                    >
-                      <FiZap className="w-4 h-4 fill-slate-950" />
-                      <span>Remix in Studio</span>
-                      <FiArrowRight className="w-4 h-4" />
-                    </Link>
-
-                    <button
-                      type="button"
-                      onClick={() => setSelectedItem(featuredTemplate)}
-                      className="px-4 py-2.5 rounded-xl bg-black/5 hover:bg-black/10 dark:bg-white/10 dark:hover:bg-white/15 text-slate-800 dark:text-white text-xs sm:text-sm font-semibold border border-black/10 dark:border-white/15 transition-all flex items-center gap-2"
-                    >
-                      <FiMaximize2 className="w-4 h-4" />
-                      <span>Inspect Keyframes &amp; Specs</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => copyPromptText(featuredTemplate.prompt)}
-                      className="p-2.5 rounded-xl bg-black/5 hover:bg-black/10 dark:bg-white/[0.05] dark:hover:bg-white/10 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border border-black/10 dark:border-white/10 transition-colors"
-                      title="Copy Prompt"
-                    >
-                      <FiCopy className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </section>
 
-      {/* Sticky High-Precision Filter & Search Bar */}
-      <div className="sticky top-16 sm:top-20 z-30 border-b border-black/[0.08] dark:border-white/[0.08] bg-white/90 dark:bg-[#0c0c11]/90 backdrop-blur-xl transition-all shadow-md dark:shadow-xl">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 space-y-3">
-          {/* Row 1: Categories & Search Controls */}
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
-            {/* Category Pills */}
-            <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-1 lg:pb-0">
+      {/* Sticky Multi-Tier Filter & Search Bar - Full-Width Edge-to-Edge */}
+      <div className="sticky top-16 sm:top-20 z-30 border-b border-black/[0.08] dark:border-white/[0.08] bg-[#f3eee5]/95 dark:bg-[#171914]/95 backdrop-blur-xl transition-all shadow-sm">
+        <div className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 py-3 space-y-2.5">
+          {/* Row 1: Categories, Formats, Search & Toolbar Controls */}
+          <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-2.5">
+            {/* Left: Category Navigation Pills */}
+            <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-0.5">
               {categories.map((cat) => {
                 const isActive = activeCategory === cat;
                 const count =
@@ -1617,18 +1717,18 @@ export default function ExplorePage() {
                     key={cat}
                     type="button"
                     onClick={() => setActiveCategory(cat)}
-                    className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 ${
+                    className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 ${
                       isActive
-                        ? "bg-slate-900 text-white dark:bg-white dark:text-slate-950 shadow-md"
-                        : "text-slate-600 hover:text-slate-950 hover:bg-black/[0.05] dark:text-slate-400 dark:hover:text-white dark:hover:bg-white/[0.06] border border-transparent hover:border-black/10 dark:hover:border-white/10"
+                        ? "bg-[#cf795d] text-white shadow-sm font-semibold"
+                        : "text-slate-600 hover:text-slate-950 hover:bg-black/[0.05] dark:text-[#b8b5a8] dark:hover:text-[#eee8dc] dark:hover:bg-white/[0.06] border border-black/[0.06] dark:border-white/[0.08]"
                     }`}
                   >
                     <span>{cat}</span>
                     <span
                       className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
                         isActive
-                          ? "bg-white/20 text-white dark:bg-slate-900 dark:text-white"
-                          : "bg-black/[0.06] text-slate-600 dark:bg-white/10 dark:text-slate-400"
+                          ? "bg-white/25 text-white"
+                          : "bg-black/[0.06] text-slate-600 dark:bg-white/10 dark:text-[#888b7e]"
                       }`}
                     >
                       {count}
@@ -1638,23 +1738,59 @@ export default function ExplorePage() {
               })}
             </div>
 
-            {/* Right: Search, Sort & Layout */}
-            <div className="flex items-center gap-2.5 shrink-0 flex-wrap sm:flex-nowrap">
+            {/* Right: Search, Format Switcher, Filter Drawer Toggle & Sort */}
+            <div className="flex items-center gap-2 shrink-0 flex-wrap sm:flex-nowrap">
+              {/* Motion Format Toggle (Vertical 9:16 vs Landscape 16:9) */}
+              <div className="flex items-center gap-1 bg-black/[0.03] dark:bg-white/[0.04] p-0.5 rounded-xl border border-black/[0.06] dark:border-white/[0.08]">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMotionFormat("vertical");
+                    setAspectRatioFilter("All");
+                  }}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
+                    motionFormat === "vertical"
+                      ? "bg-[#cf795d] text-white shadow-xs font-semibold"
+                      : "text-slate-600 dark:text-[#b8b5a8] hover:text-slate-950 dark:hover:text-[#eee8dc]"
+                  }`}
+                  title="9:16 Vertical Motion (Reels, TikTok, Shorts)"
+                >
+                  <FiSmartphone className="w-3.5 h-3.5" />
+                  <span>9:16 Vertical</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMotionFormat("landscape");
+                    setAspectRatioFilter("All");
+                  }}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
+                    motionFormat === "landscape"
+                      ? "bg-[#cf795d] text-white shadow-xs font-semibold"
+                      : "text-slate-600 dark:text-[#b8b5a8] hover:text-slate-950 dark:hover:text-[#eee8dc]"
+                  }`}
+                  title="16:9 Landscape Motion (Widescreen UHD)"
+                >
+                  <FiTv className="w-3.5 h-3.5" />
+                  <span>16:9</span>
+                </button>
+              </div>
+
               {/* Search Input */}
-              <div className="relative flex items-center w-full sm:w-60">
-                <FiSearch className="absolute left-3 w-3.5 h-3.5 text-slate-400 dark:text-slate-500 pointer-events-none" />
+              <div className="relative flex items-center w-full sm:w-52">
+                <FiSearch className="absolute left-3 w-3.5 h-3.5 text-slate-400 dark:text-[#888b7e] pointer-events-none" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search prompt, tag, style..."
-                  className="w-full pl-8 pr-7 py-1.5 text-xs bg-black/[0.03] dark:bg-white/[0.04] border border-black/10 dark:border-white/[0.1] hover:border-black/20 dark:hover:border-white/20 focus:border-cyan-500 rounded-full text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none transition-all shadow-inner"
+                  placeholder="Search presets, tags..."
+                  className="w-full pl-8 pr-7 py-1.5 text-xs bg-black/[0.03] dark:bg-white/[0.04] border border-black/10 dark:border-white/[0.1] hover:border-black/20 dark:hover:border-white/20 focus:border-[#cf795d] rounded-full text-slate-900 dark:text-[#eee8dc] placeholder-slate-400 dark:placeholder-[#888b7e] focus:outline-none transition-all"
                 />
                 {searchQuery && (
                   <button
                     type="button"
                     onClick={() => setSearchQuery("")}
-                    className="absolute right-2.5 text-slate-400 hover:text-slate-900 dark:text-slate-500 dark:hover:text-white"
+                    className="absolute right-2.5 text-slate-400 hover:text-slate-950 dark:text-[#888b7e] dark:hover:text-white"
                   >
                     <FiX className="w-3.5 h-3.5" />
                   </button>
@@ -1665,45 +1801,58 @@ export default function ExplorePage() {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as any)}
-                className="px-3 py-1.5 text-xs bg-white dark:bg-white/[0.04] border border-black/10 dark:border-white/[0.1] rounded-full text-slate-700 dark:text-slate-300 focus:outline-none hover:border-black/20 dark:hover:border-white/20 cursor-pointer"
+                className="px-3 py-1.5 text-xs bg-white dark:bg-[#20241d] border border-black/10 dark:border-white/[0.1] rounded-full text-slate-700 dark:text-[#eee8dc] focus:outline-none hover:border-black/20 dark:hover:border-white/20 cursor-pointer"
               >
-                <option value="popular" className="bg-white text-slate-900 dark:bg-[#121319] dark:text-white">
-                  Most Popular
-                </option>
-                <option value="remixes" className="bg-white text-slate-900 dark:bg-[#121319] dark:text-white">
-                  Most Remixed
-                </option>
-                <option value="duration" className="bg-white text-slate-900 dark:bg-[#121319] dark:text-white">
-                  Shortest Duration
-                </option>
-                <option value="recent" className="bg-white text-slate-900 dark:bg-[#121319] dark:text-white">
-                  Recently Added
-                </option>
+                <option value="popular">Most Popular</option>
+                <option value="remixes">Most Remixed</option>
+                <option value="duration">Shortest Duration</option>
+                <option value="duration-desc">Longest Duration</option>
+                <option value="recent">Recently Added</option>
               </select>
+
+              {/* Filters & Tags Drawer Toggle */}
+              <button
+                type="button"
+                onClick={() => setShowAdvancedFilters((prev) => !prev)}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all cursor-pointer ${
+                  showAdvancedFilters || activeFilterCount > 0
+                    ? "bg-[#cf795d]/15 text-[#cf795d] border-[#cf795d]/40 font-semibold"
+                    : "bg-white dark:bg-[#20241d] text-slate-700 dark:text-[#eee8dc] border-black/10 dark:border-white/[0.1] hover:border-black/20 dark:hover:border-white/20"
+                }`}
+                title="Toggle duration, FPS, and tag filters"
+              >
+                <FiSliders className="w-3.5 h-3.5" />
+                <span>Filters</span>
+                {activeFilterCount > 0 && (
+                  <span className="w-4 h-4 rounded-full bg-[#cf795d] text-white text-[10px] font-mono flex items-center justify-center">
+                    {activeFilterCount}
+                  </span>
+                )}
+              </button>
 
               {/* Layout Switcher */}
               <div className="hidden sm:flex items-center bg-black/[0.04] dark:bg-white/[0.04] p-0.5 rounded-full border border-black/[0.08] dark:border-white/[0.08]">
                 <button
                   type="button"
                   onClick={() => setLayoutMode("grid")}
-                  className={`p-1.5 rounded-full transition-colors ${
+                  className={`p-1.5 rounded-full transition-colors cursor-pointer ${
                     layoutMode === "grid"
-                      ? "bg-white text-slate-950 shadow-xs"
-                      : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+                      ? "bg-[#cf795d] text-white shadow-xs"
+                      : "text-slate-500 hover:text-slate-950 dark:text-[#888b7e] dark:hover:text-white"
                   }`}
-                  title="Grid View"
+                  title="6 in a Row Grid"
                 >
                   <FiGrid className="w-3.5 h-3.5" />
                 </button>
                 <button
                   type="button"
                   onClick={() => setLayoutMode("cinema")}
-                  className={`p-1.5 rounded-full transition-colors ${
+                  className={`p-1.5 rounded-full transition-colors cursor-pointer ${
                     layoutMode === "cinema"
-                      ? "bg-white text-slate-950 shadow-xs"
-                      : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+                      ? "bg-[#cf795d] text-white shadow-xs"
+                      : "text-slate-500 hover:text-slate-950 dark:text-[#888b7e] dark:hover:text-white"
                   }`}
-                  title="Cinema View"
+                  title="Cinema Mode (4 in a row)"
                 >
                   <FiMaximize2 className="w-3.5 h-3.5" />
                 </button>
@@ -1711,118 +1860,287 @@ export default function ExplorePage() {
             </div>
           </div>
 
-          {/* Row 2: Aspect Ratio Filters & Tag Chips */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 pt-1 border-t border-black/[0.05] dark:border-white/[0.05]">
-            {/* Aspect Ratio Buttons */}
-            <div className="flex items-center gap-1.5">
-              <span className="text-[11px] text-slate-500 font-mono mr-1 hidden md:inline">
-                Ratio:
-              </span>
+          {/* Row 2: Market View Tabs & Active Filter Summary */}
+          <div className="flex items-center justify-between gap-2 pt-1 border-t border-black/[0.04] dark:border-white/[0.04] text-xs">
+            <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none">
               {[
-                { id: "All", label: "All Ratios", icon: null },
-                { id: "16:9", label: "16:9 Landscape", icon: FiTv },
-                { id: "9:16", label: "9:16 Vertical (Reels)", icon: FiSmartphone },
-                { id: "1:1", label: "1:1 Square", icon: FiSquare },
-              ].map((item) => {
-                const isActive = aspectRatioFilter === item.id;
-                const Icon = item.icon;
+                { id: "all", label: "All Presets", icon: FiCompass },
+                { id: "featured", label: "Editor's Picks", icon: FiStar },
+                { id: "saved", label: "Saved Presets", icon: FiBookmark },
+                { id: "pro", label: "Pro Creators", icon: FiUser },
+              ].map((view) => {
+                const Icon = view.icon;
+                const active = marketView === view.id;
                 return (
                   <button
-                    key={item.id}
+                    key={view.id}
                     type="button"
-                    onClick={() => setAspectRatioFilter(item.id)}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
-                      isActive
-                        ? "bg-cyan-500/15 dark:bg-cyan-500/20 text-cyan-800 dark:text-cyan-300 border border-cyan-500/30 dark:border-cyan-400/35 font-semibold"
-                        : "text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white bg-black/[0.02] dark:bg-white/[0.02] border border-transparent hover:border-black/10 dark:hover:border-white/10"
+                    onClick={() => setMarketView(view.id as typeof marketView)}
+                    className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-medium transition-colors cursor-pointer ${
+                      active
+                        ? "bg-[#cf795d]/20 text-[#cf795d] font-semibold"
+                        : "text-slate-500 dark:text-[#888b7e] hover:text-slate-900 dark:hover:text-white"
                     }`}
                   >
-                    {Icon && <Icon className="w-3 h-3" />}
-                    <span>{item.label}</span>
+                    <Icon className="w-3 h-3" />
+                    <span>{view.label}</span>
                   </button>
                 );
               })}
             </div>
 
-            {/* Quick Tag Pills */}
-            <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-0.5">
-              <span className="text-[11px] text-slate-500 font-mono mr-1 hidden lg:inline">
-                Tags:
-              </span>
-              {allTags.map((tag) => {
-                const isSelected = selectedTag === tag;
-                return (
-                  <button
-                    key={tag}
-                    type="button"
-                    onClick={() => setSelectedTag(isSelected ? null : tag)}
-                    className={`px-2.5 py-0.5 rounded-md text-[11px] font-mono transition-colors whitespace-nowrap ${
-                      isSelected
-                        ? "bg-cyan-500 text-slate-950 font-bold"
-                        : "bg-black/[0.04] dark:bg-white/[0.04] text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white hover:bg-black/[0.08] dark:hover:bg-white/[0.08]"
-                    }`}
-                  >
-                    #{tag}
-                  </button>
-                );
-              })}
-              {selectedTag && (
+            <div className="flex items-center gap-3 shrink-0">
+              {activeFilterCount > 0 && (
                 <button
                   type="button"
-                  onClick={() => setSelectedTag(null)}
-                  className="text-[10px] text-slate-500 hover:text-slate-900 dark:hover:text-white underline ml-1 cursor-pointer"
+                  onClick={handleResetAllFilters}
+                  className="inline-flex items-center gap-1 text-[11px] text-[#cf795d] hover:brightness-110 font-semibold cursor-pointer underline-offset-2 hover:underline"
                 >
-                  Clear Tag
+                  <FiRotateCcw className="w-3 h-3" />
+                  <span>Reset All ({activeFilterCount})</span>
                 </button>
               )}
+              <span className="text-[11px] text-slate-500 dark:text-[#888b7e] font-mono">
+                {filteredTemplates.length} presets • {motionFormat === "vertical" ? "9:16 Vertical" : "16:9 Landscape"}
+              </span>
             </div>
           </div>
+
+          {/* Row 3: Advanced Filter Drawer (Collapsible) */}
+          {showAdvancedFilters && (
+            <div className="pt-2.5 pb-1 border-t border-black/[0.06] dark:border-white/[0.06] space-y-2.5 animate-in fade-in duration-150">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                {/* Duration Filter */}
+                <div className="space-y-1.5">
+                  <span className="text-[10px] uppercase tracking-wider font-mono text-slate-500 dark:text-[#888b7e] flex items-center gap-1">
+                    <FiClock className="w-3 h-3 text-[#cf795d]" />
+                    <span>Duration Range</span>
+                  </span>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    {[
+                      { id: "all", label: "All Durations" },
+                      { id: "short", label: "≤ 4s Micro" },
+                      { id: "medium", label: "4-6s Short" },
+                      { id: "long", label: "> 6s Extended" },
+                    ].map((opt) => (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        onClick={() => setDurationFilter(opt.id as any)}
+                        className={`px-2 py-0.5 rounded-md text-[11px] font-medium transition-all cursor-pointer ${
+                          durationFilter === opt.id
+                            ? "bg-[#cf795d] text-white font-semibold"
+                            : "bg-black/[0.04] dark:bg-white/[0.05] text-slate-600 dark:text-[#b8b5a8] hover:bg-black/[0.08] dark:hover:bg-white/[0.09]"
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* FPS Filter */}
+                <div className="space-y-1.5">
+                  <span className="text-[10px] uppercase tracking-wider font-mono text-slate-500 dark:text-[#888b7e] flex items-center gap-1">
+                    <FiTrendingUp className="w-3 h-3 text-[#cf795d]" />
+                    <span>Target Frame Rate</span>
+                  </span>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    {[
+                      { id: "all", label: "All FPS" },
+                      { id: "60", label: "60 FPS (Ultra Fluid)" },
+                      { id: "30", label: "30 FPS (Standard)" },
+                    ].map((opt) => (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        onClick={() => setFpsFilter(opt.id as any)}
+                        className={`px-2 py-0.5 rounded-md text-[11px] font-medium transition-all cursor-pointer ${
+                          fpsFilter === opt.id
+                            ? "bg-[#cf795d] text-white font-semibold"
+                            : "bg-black/[0.04] dark:bg-white/[0.05] text-slate-600 dark:text-[#b8b5a8] hover:bg-black/[0.08] dark:hover:bg-white/[0.09]"
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Aspect Ratio Filter */}
+                <div className="space-y-1.5">
+                  <span className="text-[10px] uppercase tracking-wider font-mono text-slate-500 dark:text-[#888b7e] flex items-center gap-1">
+                    <FiSquare className="w-3 h-3 text-[#cf795d]" />
+                    <span>Canvas Aspect Ratio</span>
+                  </span>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    {[
+                      { id: "All", label: "All Ratios" },
+                      { id: "9:16", label: "9:16 Vertical" },
+                      { id: "16:9", label: "16:9 Landscape" },
+                      { id: "1:1", label: "1:1 Square" },
+                    ].map((opt) => (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        onClick={() => setAspectRatioFilter(opt.id)}
+                        className={`px-2 py-0.5 rounded-md text-[11px] font-medium transition-all cursor-pointer ${
+                          aspectRatioFilter === opt.id
+                            ? "bg-[#cf795d] text-white font-semibold"
+                            : "bg-black/[0.04] dark:bg-white/[0.05] text-slate-600 dark:text-[#b8b5a8] hover:bg-black/[0.08] dark:hover:bg-white/[0.09]"
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Tag Cloud */}
+              <div className="pt-2 border-t border-black/[0.04] dark:border-white/[0.04] flex items-center gap-1.5 flex-wrap">
+                <span className="text-[10px] uppercase tracking-wider font-mono text-slate-500 dark:text-[#888b7e] mr-1">
+                  Tags:
+                </span>
+                {allTags.map((tag) => {
+                  const isSelected = selectedTag === tag;
+                  return (
+                    <button
+                      key={tag}
+                      type="button"
+                      onClick={() => setSelectedTag(isSelected ? null : tag)}
+                      className={`px-2 py-0.5 rounded-full text-[10px] font-mono transition-all cursor-pointer ${
+                        isSelected
+                          ? "bg-[#cf795d] text-white font-semibold"
+                          : "bg-black/[0.03] dark:bg-white/[0.04] text-slate-600 dark:text-[#b8b5a8] hover:bg-black/[0.07] dark:hover:bg-white/[0.08]"
+                      }`}
+                    >
+                      #{tag}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Active Filter Chips Ribbon */}
+              {activeFilterCount > 0 && (
+                <div className="pt-1.5 flex items-center gap-1.5 flex-wrap">
+                  <span className="text-[10px] uppercase font-mono text-slate-400 dark:text-[#888b7e]">
+                    Active Filters:
+                  </span>
+                  {activeCategory !== "All" && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] bg-[#cf795d]/20 text-[#cf795d] font-semibold border border-[#cf795d]/30">
+                      Category: {activeCategory}
+                      <button
+                        type="button"
+                        onClick={() => setActiveCategory("All")}
+                        className="hover:text-slate-900 dark:hover:text-white"
+                      >
+                        <FiX className="w-2.5 h-2.5" />
+                      </button>
+                    </span>
+                  )}
+                  {durationFilter !== "all" && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] bg-[#cf795d]/20 text-[#cf795d] font-semibold border border-[#cf795d]/30">
+                      Duration: {durationFilter}
+                      <button
+                        type="button"
+                        onClick={() => setDurationFilter("all")}
+                        className="hover:text-slate-900 dark:hover:text-white"
+                      >
+                        <FiX className="w-2.5 h-2.5" />
+                      </button>
+                    </span>
+                  )}
+                  {fpsFilter !== "all" && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] bg-[#cf795d]/20 text-[#cf795d] font-semibold border border-[#cf795d]/30">
+                      FPS: {fpsFilter}
+                      <button
+                        type="button"
+                        onClick={() => setFpsFilter("all")}
+                        className="hover:text-slate-900 dark:hover:text-white"
+                      >
+                        <FiX className="w-2.5 h-2.5" />
+                      </button>
+                    </span>
+                  )}
+                  {selectedTag && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] bg-[#cf795d]/20 text-[#cf795d] font-semibold border border-[#cf795d]/30">
+                      Tag: #{selectedTag}
+                      <button
+                        type="button"
+                        onClick={() => setSelectedTag(null)}
+                        className="hover:text-slate-900 dark:hover:text-white"
+                      >
+                        <FiX className="w-2.5 h-2.5" />
+                      </button>
+                    </span>
+                  )}
+                  {aspectRatioFilter !== "All" && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] bg-[#cf795d]/20 text-[#cf795d] font-semibold border border-[#cf795d]/30">
+                      Ratio: {aspectRatioFilter}
+                      <button
+                        type="button"
+                        onClick={() => setAspectRatioFilter("All")}
+                        className="hover:text-slate-900 dark:hover:text-white"
+                      >
+                        <FiX className="w-2.5 h-2.5" />
+                      </button>
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={handleResetAllFilters}
+                    className="text-[10px] text-slate-500 hover:text-slate-900 dark:text-[#888b7e] dark:hover:text-white underline cursor-pointer ml-1"
+                  >
+                    Clear All
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Main Template Showcase Section */}
-      <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
+      {/* Main Full-Page Template Showcase - 6-in-a-Row Pure Motion Grid */}
+      <main className="relative z-10 w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 py-6 flex-1">
         {filteredTemplates.length === 0 ? (
           <div className="text-center py-28 space-y-3">
-            <div className="w-12 h-12 mx-auto rounded-full bg-slate-100 dark:bg-white/[0.05] border border-black/10 dark:border-white/10 flex items-center justify-center text-slate-500 dark:text-slate-400">
+            <div className="w-12 h-12 mx-auto rounded-full bg-slate-100 dark:bg-white/[0.05] border border-black/10 dark:border-white/10 flex items-center justify-center text-slate-500 dark:text-[#888b7e]">
               <FiSearch className="w-5 h-5" />
             </div>
-            <h3 className="text-base font-semibold text-slate-900 dark:text-white">
+            <h3 className="text-base font-semibold text-slate-900 dark:text-[#f1eadf]">
               No matching motion presets found
             </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
-              We couldn&apos;t find any templates matching your current filters. Try
-              clearing your search query, aspect ratio, or category.
+            <p className="text-xs text-slate-500 dark:text-[#b8b5a8] max-w-sm mx-auto">
+              Try adjusting your search query, duration, or frame rate filter.
             </p>
             <button
               type="button"
-              onClick={() => {
-                setSearchQuery("");
-                setActiveCategory("All");
-                setAspectRatioFilter("All");
-                setSelectedTag(null);
-              }}
-              className="mt-2 px-4 py-1.5 rounded-lg bg-black/5 hover:bg-black/10 dark:bg-white/10 dark:hover:bg-white/15 text-xs text-slate-800 dark:text-white transition-colors cursor-pointer"
+              onClick={handleResetAllFilters}
+              className="mt-2 inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-[#cf795d] text-white text-xs font-semibold hover:brightness-110 transition-colors cursor-pointer"
             >
-              Reset All Filters
+              <FiRotateCcw className="w-3.5 h-3.5" />
+              <span>Reset All Filters</span>
             </button>
           </div>
         ) : (
-          <div
-            className={`grid gap-6 ${
+          <>
+            <div
+              className={`grid gap-3 sm:gap-3.5 ${
               layoutMode === "cinema"
-                ? "grid-cols-1 md:grid-cols-2"
-                : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+                ? "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+                : "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-6"
             }`}
           >
-            {filteredTemplates.map((item) => {
+            {displayedTemplates.map((item) => {
               const isHovered = hoveredId === item.id;
               const isScrubbing = scrubbingId === item.id;
               const progress = scrubProgress[item.id] ?? (isHovered ? 0.5 : 0);
               const isLiked = !!likedIds[item.id];
               const isSaved = !!savedIds[item.id];
+              const totalLikes = item.likes + (isLiked ? 1 : 0);
 
-              // Scrubbing calculation
+              // Scrubbing calculation on mousemove
               const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
                 const rect = e.currentTarget.getBoundingClientRect();
                 const pos = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
@@ -1835,228 +2153,205 @@ export default function ExplorePage() {
                 setScrubbingId(null);
               };
 
-              // Formatted scrub time code
               const currentTime = isScrubbing
                 ? (progress * item.durationSec).toFixed(1)
                 : "0.0";
 
+              const cardAspectClass =
+                motionFormat === "vertical"
+                  ? "aspect-[9/16]"
+                  : motionFormat === "landscape"
+                  ? "aspect-video"
+                  : item.aspectRatio === "9:16"
+                  ? "aspect-[9/16]"
+                  : item.aspectRatio === "1:1"
+                  ? "aspect-square"
+                  : "aspect-video";
+
               return (
                 <div
                   key={item.id}
-                  className="group flex flex-col rounded-3xl bg-white dark:bg-[#111218]/90 border border-black/10 dark:border-white/[0.08] hover:border-cyan-500/40 transition-all duration-300 shadow-md hover:shadow-cyan-500/10 overflow-hidden"
+                  className={`group relative rounded-2xl overflow-hidden bg-[#10120e] border border-black/10 dark:border-white/[0.08] hover:border-[#cf795d]/60 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-[#cf795d]/10 ${cardAspectClass} cursor-pointer select-none`}
                   onMouseEnter={() => setHoveredId(item.id)}
                   onMouseLeave={handleMouseLeave}
+                  onClick={() => setSelectedItem(item)}
+                  onMouseMove={handleMouseMove}
                 >
-                  {/* Canvas Stage Container with Aspect Ratio */}
-                  <div
-                    className={`relative w-full overflow-hidden cursor-pointer bg-[#07080c] ${
-                      item.aspectRatio === "9:16"
-                        ? "aspect-[4/3] flex items-center justify-center"
-                        : item.aspectRatio === "1:1"
-                        ? "aspect-video flex items-center justify-center"
-                        : "aspect-video"
-                    }`}
-                    onClick={() => setSelectedItem(item)}
-                    onMouseMove={handleMouseMove}
-                  >
-                    {/* Viewport Virtualized Canvas */}
-                    <div className="w-full h-full">
-                      <VirtualCardCanvas
-                        renderAnimation={item.renderAnimation}
-                        isHovered={isHovered}
-                        scrubProgress={isScrubbing ? progress : undefined}
-                        durationSec={item.durationSec}
-                        customText={item.defaultText}
-                      />
-                    </div>
+                  {/* Viewport Virtualized Live Canvas */}
+                  <div className="w-full h-full">
+                    <VirtualCardCanvas
+                      renderAnimation={item.renderAnimation}
+                      isHovered={isHovered}
+                      scrubProgress={isScrubbing ? progress : undefined}
+                      durationSec={item.durationSec}
+                      customText={item.defaultText}
+                      autoPlay={autoPlayAll}
+                    />
+                  </div>
 
-                    {/* Top Badges: Category & Quality */}
-                    <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none z-10">
-                      <span className="px-2.5 py-1 rounded-lg bg-black/80 backdrop-blur-md text-[10px] font-semibold text-cyan-300 border border-white/10 flex items-center gap-1 shadow-sm">
-                        <FiLayers className="w-3 h-3 text-cyan-400" />
-                        <span>{item.category}</span>
+                  {/* Top Bar Badges & Quick Action Buttons */}
+                  <div className="absolute top-2 left-2 right-2 flex items-center justify-between pointer-events-none z-10 transition-opacity duration-200">
+                    <div className="flex items-center gap-1">
+                      <span className="px-2 py-0.5 rounded-md bg-black/75 backdrop-blur-md text-[9px] font-semibold text-[#f1eadf] border border-white/10 flex items-center gap-1 shadow-xs">
+                        <FiLayers className="w-2.5 h-2.5 text-[#cf795d]" />
+                        <span className="truncate max-w-[70px]">{item.category}</span>
                       </span>
-
-                      <div className="flex items-center gap-1.5">
-                        <span className="px-2 py-0.5 rounded-md bg-black/80 backdrop-blur-md text-[10px] font-mono text-slate-300 border border-white/10">
-                          {item.aspectRatio}
-                        </span>
-                        <span className="px-2 py-0.5 rounded-md bg-black/80 backdrop-blur-md text-[10px] font-mono text-slate-300 border border-white/10">
-                          {item.duration}
-                        </span>
-                      </div>
+                      <span className="px-1.5 py-0.5 rounded-md bg-black/75 backdrop-blur-md text-[9px] font-mono text-[#e5987d] border border-white/10 font-bold">
+                        {motionFormat === "vertical" ? "9:16" : item.aspectRatio}
+                      </span>
                     </div>
 
-                    {/* Interactive Horizontal Scrub Bar Indicator */}
-                    <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-black/50 z-20">
-                      <div
-                        className="h-full bg-gradient-to-r from-cyan-400 via-indigo-500 to-pink-500 transition-all duration-75"
-                        style={{
-                          width: isScrubbing ? `${progress * 100}%` : isHovered ? "100%" : "0%",
-                        }}
-                      />
-                    </div>
+                    {/* Quick Button Cluster (Always Interactive) */}
+                    <div className="flex items-center gap-1 pointer-events-auto">
+                      {/* Copy Prompt Button */}
+                      <button
+                        type="button"
+                        onClick={(e) => handleCopyCardPrompt(e, item)}
+                        className="p-1.5 rounded-md bg-black/70 hover:bg-white text-white hover:text-slate-950 backdrop-blur-md border border-white/10 transition-all active:scale-95 cursor-pointer shadow-xs"
+                        title="Copy AI Prompt"
+                      >
+                        {copiedPromptId === item.id ? (
+                          <FiCheck className="w-3 h-3 text-emerald-400" />
+                        ) : (
+                          <FiCopy className="w-3 h-3" />
+                        )}
+                      </button>
 
-                    {/* Scrubbing Timestamp Overlay Pill */}
-                    {isScrubbing && (
-                      <div className="absolute bottom-3 left-3 z-20 px-2 py-0.5 rounded bg-black/85 text-[10px] font-mono text-cyan-300 border border-cyan-400/30">
-                        {currentTime}s / {item.durationSec}s
-                      </div>
-                    )}
+                      {/* Share Link Button */}
+                      <button
+                        type="button"
+                        onClick={(e) => handleShareCard(e, item)}
+                        className="p-1.5 rounded-md bg-black/70 hover:bg-white text-white hover:text-slate-950 backdrop-blur-md border border-white/10 transition-all active:scale-95 cursor-pointer shadow-xs"
+                        title="Share Direct Link"
+                      >
+                        {copiedShareId === item.id ? (
+                          <FiCheck className="w-3 h-3 text-emerald-400" />
+                        ) : (
+                          <FiShare2 className="w-3 h-3" />
+                        )}
+                      </button>
 
-                    {/* Hover Action Overlay */}
-                    <div
-                      className={`absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-black/40 transition-opacity duration-200 flex flex-col justify-between p-3.5 z-10 ${
-                        isHovered ? "opacity-100" : "opacity-0 pointer-events-none"
-                      }`}
-                    >
-                      {/* Top Right Quick Actions */}
-                      <div className="flex items-center justify-end gap-1.5">
-                        <button
-                          type="button"
-                          onClick={(e) => handleSaveToggle(item.id, e)}
-                          className="p-2 rounded-xl bg-black/75 hover:bg-white text-white hover:text-slate-950 backdrop-blur-md border border-white/15 transition-all active:scale-95"
-                          title="Save to Collection"
-                        >
-                          <FiBookmark
-                            className={`w-3.5 h-3.5 ${
-                              isSaved ? "fill-current text-cyan-400" : ""
-                            }`}
-                          />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={(e) => handleLikeToggle(item.id, e)}
-                          className="p-2 rounded-xl bg-black/75 hover:bg-white text-white hover:text-slate-950 backdrop-blur-md border border-white/15 transition-all active:scale-95"
-                          title="Like Template"
-                        >
-                          <FiHeart
-                            className={`w-3.5 h-3.5 ${
-                              isLiked ? "fill-rose-500 text-rose-500" : ""
-                            }`}
-                          />
-                        </button>
-                      </div>
+                      {/* Save to Collection Button */}
+                      <button
+                        type="button"
+                        onClick={(e) => handleSaveToggle(item.id, e)}
+                        className="p-1.5 rounded-md bg-black/70 hover:bg-white text-white hover:text-slate-950 backdrop-blur-md border border-white/10 transition-all active:scale-95 cursor-pointer shadow-xs"
+                        title="Save to Library"
+                      >
+                        <FiBookmark
+                          className={`w-3 h-3 ${
+                            isSaved ? "fill-current text-[#cf795d]" : ""
+                          }`}
+                        />
+                      </button>
 
-                      {/* Bottom Primary Remix & Inspect CTA */}
-                      <div className="flex items-end justify-between gap-2">
-                        <div className="space-y-0.5 max-w-[55%]">
-                          <span className="text-xs font-semibold text-white drop-shadow-md line-clamp-1">
-                            {item.title}
-                          </span>
-                          <span className="text-[10px] text-slate-300 line-clamp-1 font-mono">
-                            {item.resolution}
-                          </span>
-                        </div>
-
-                        {/* HIGH-CONVERSION 1-CLICK REMIX ACTION */}
-                        <div className="flex items-center gap-1.5 shrink-0">
-                          <Link
-                            href={`/workspace?prompt=${encodeURIComponent(
-                              item.prompt
-                            )}&style=${encodeURIComponent(
-                              item.category
-                            )}&text=${encodeURIComponent(item.defaultText)}`}
-                            onClick={(e) => e.stopPropagation()}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-cyan-400 to-indigo-500 text-slate-950 font-bold text-xs shadow-lg shadow-cyan-500/25 hover:brightness-110 active:scale-95 transition-all"
-                            title="Remix this template in Studio"
-                          >
-                            <FiZap className="w-3.5 h-3.5 fill-slate-950" />
-                            <span>Remix in Studio</span>
-                          </Link>
-
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedItem(item);
-                            }}
-                            className="p-2 rounded-xl bg-black/75 hover:bg-white/20 text-white border border-white/20 backdrop-blur-md transition-colors"
-                            title="Inspect specs & keyframes"
-                          >
-                            <FiMaximize2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </div>
+                      {/* Like Button with Counter */}
+                      <button
+                        type="button"
+                        onClick={(e) => handleLikeToggle(item.id, e)}
+                        className="inline-flex items-center gap-1 px-1.5 py-1 rounded-md bg-black/70 hover:bg-white text-white hover:text-slate-950 backdrop-blur-md border border-white/10 transition-all active:scale-95 cursor-pointer shadow-xs"
+                        title="Like Template"
+                      >
+                        <FiHeart
+                          className={`w-3 h-3 ${
+                            isLiked ? "fill-rose-500 text-rose-500" : ""
+                          }`}
+                        />
+                        <span className="text-[9px] font-mono font-bold leading-none">
+                          {totalLikes}
+                        </span>
+                      </button>
                     </div>
                   </div>
 
-                  {/* Card Content & Metadata Footer */}
-                  <div className="p-4 flex flex-col justify-between gap-3">
-                    {/* Title and Tech Tags */}
-                    <div>
-                      <div className="flex items-start justify-between gap-2">
-                        <h3
-                          onClick={() => setSelectedItem(item)}
-                          className="text-sm font-semibold text-slate-900 dark:text-white hover:text-cyan-600 dark:hover:text-cyan-300 transition-colors cursor-pointer line-clamp-1"
-                        >
-                          {item.title}
-                        </h3>
+                  {/* Interactive Horizontal Scrub Bar Indicator */}
+                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/40 z-20 pointer-events-none">
+                    <div
+                      className="h-full bg-gradient-to-r from-[#cf795d] via-[#e5987d] to-[#a4778c] transition-all duration-75"
+                      style={{
+                        width: isScrubbing ? `${progress * 100}%` : isHovered ? "100%" : "0%",
+                      }}
+                    />
+                  </div>
 
-                        {/* Color Palette Dots */}
-                        <div className="flex items-center gap-1 shrink-0 pt-1">
-                          {item.palette.slice(0, 3).map((color, idx) => (
-                            <span
-                              key={idx}
-                              className="w-2.5 h-2.5 rounded-full border border-black/40 shadow-xs"
-                              style={{ backgroundColor: color }}
-                              title={color}
-                            />
-                          ))}
-                        </div>
-                      </div>
-
-                      <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 line-clamp-2 leading-relaxed font-sans">
-                        {item.prompt}
-                      </p>
+                  {/* Scrubbing Timestamp Overlay Pill */}
+                  {isScrubbing && (
+                    <div className="absolute bottom-2.5 left-2.5 z-20 px-1.5 py-0.5 rounded bg-black/90 text-[9px] font-mono text-[#e5987d] border border-[#cf795d]/40 shadow-md">
+                      {currentTime}s / {item.durationSec}s
                     </div>
+                  )}
 
-                    {/* Footer Row: Author & Social Metrics */}
-                    <div className="pt-2 border-t border-black/[0.06] dark:border-white/[0.06] flex items-center justify-between text-xs">
-                      {/* Author Profile */}
-                      <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-cyan-500/20 to-purple-500/20 border border-black/10 dark:border-white/15 text-[10px] font-bold text-slate-800 dark:text-white flex items-center justify-center">
-                          {item.author.avatar}
-                        </div>
-                        <span className="text-xs font-medium text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white transition-colors">
-                          {item.author.name}
+                  {/* Cinematic Hover Action Overlay */}
+                  <div
+                    className={`absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-black/60 transition-opacity duration-200 flex flex-col justify-end p-3 z-10 ${
+                      isHovered ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+                    }`}
+                  >
+                    {/* Bottom Metadata & Multi-Button Action Bar */}
+                    <div className="space-y-2 pt-2">
+                      <div className="space-y-0.5">
+                        <span className="text-xs font-semibold text-white drop-shadow-md truncate block">
+                          {item.title}
                         </span>
-                        {item.author.pro && (
-                          <span className="px-1.5 py-0.2 rounded text-[9px] font-bold uppercase tracking-wider bg-cyan-500/15 text-cyan-700 dark:text-cyan-300 border border-cyan-500/25 dark:border-cyan-400/25">
-                            PRO
+                        <div className="flex items-center justify-between text-[10px] text-[#b8b5a8] font-mono">
+                          <span>
+                            {item.duration} • {item.fps}fps
                           </span>
-                        )}
+                          {/* Palette preview dots */}
+                          <div className="flex items-center gap-1">
+                            {item.palette.slice(0, 3).map((color, i) => (
+                              <span
+                                key={i}
+                                className="w-2 h-2 rounded-full border border-white/20"
+                                style={{ backgroundColor: color }}
+                              />
+                            ))}
+                          </div>
+                        </div>
                       </div>
 
-                      {/* Stats & Quick Actions */}
-                      <div className="flex items-center gap-3">
-                        <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-[11px] font-mono">
-                          <span className="flex items-center gap-1">
-                            <FiHeart
-                              className={`w-3 h-3 ${
-                                isLiked ? "text-rose-500 fill-rose-500" : ""
-                              }`}
-                            />
-                            <span>{item.likes + (isLiked ? 1 : 0)}</span>
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <FiRepeat className="w-3 h-3 text-cyan-600 dark:text-cyan-400" />
-                            <span>{item.remixes}</span>
-                          </span>
-                        </div>
-
-                        {/* Inline Quick Remix Link */}
+                      {/* Multi-Button Action Bar */}
+                      <div className="flex items-center gap-1.5 pt-0.5">
+                        {/* Primary 1-Click Remix Button */}
                         <Link
                           href={`/workspace?prompt=${encodeURIComponent(
                             item.prompt
                           )}&style=${encodeURIComponent(
                             item.category
                           )}&text=${encodeURIComponent(item.defaultText)}`}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold text-cyan-700 dark:text-cyan-400 hover:text-cyan-800 dark:hover:text-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/25 transition-all"
+                          onClick={(e) => e.stopPropagation()}
+                          className="flex-1 inline-flex items-center justify-center gap-1 py-1.5 px-2 rounded-lg bg-gradient-to-r from-[#cf795d] to-[#e5987d] text-slate-950 font-bold text-xs shadow-md hover:brightness-110 active:scale-95 transition-all"
+                          title="Remix this template in Studio"
                         >
-                          <FiZap className="w-3 h-3 fill-cyan-500 dark:fill-cyan-400" />
+                          <FiZap className="w-3 h-3 fill-slate-950" />
                           <span>Remix</span>
                         </Link>
+
+                        {/* Specs / Inspect Button */}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedItem(item);
+                          }}
+                          className="p-1.5 rounded-lg bg-black/75 hover:bg-white/25 text-white border border-white/20 backdrop-blur-md transition-colors cursor-pointer"
+                          title="Inspect specs & keyframes"
+                        >
+                          <FiEye className="w-3.5 h-3.5" />
+                        </button>
+
+                        {/* Export JSON Button */}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            downloadJsonPreset(item);
+                          }}
+                          className="p-1.5 rounded-lg bg-black/75 hover:bg-white/25 text-white border border-white/20 backdrop-blur-md transition-colors cursor-pointer"
+                          title="Export JSON Preset"
+                        >
+                          <FiDownload className="w-3.5 h-3.5" />
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -2064,8 +2359,76 @@ export default function ExplorePage() {
               );
             })}
           </div>
-        )}
-      </main>
+
+          {/* Load More Presets Control Center */}
+          <div className="mt-8 pt-6 border-t border-black/[0.06] dark:border-white/[0.06] flex flex-col items-center justify-center gap-3">
+            {/* Progress / Status Summary */}
+            <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-[#888b7e] font-mono">
+              <span>Showing {displayedTemplates.length} of {filteredTemplates.length} presets</span>
+              <div className="w-24 h-1.5 rounded-full bg-black/10 dark:bg-white/10 overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-[#cf795d] to-[#e5987d] transition-all duration-300"
+                  style={{
+                    width: `${Math.min(100, (displayedTemplates.length / Math.max(1, filteredTemplates.length)) * 100)}%`,
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Load More Button Group */}
+            {displayedTemplates.length < filteredTemplates.length ? (
+              <div className="flex items-center gap-2.5">
+                {/* Primary Load More Button */}
+                <button
+                  type="button"
+                  onClick={handleLoadMore}
+                  disabled={isLoadingMore}
+                  className="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#cf795d] to-[#e5987d] hover:brightness-110 text-slate-950 text-xs font-bold shadow-md shadow-[#cf795d]/20 active:scale-95 transition-all cursor-pointer disabled:opacity-75"
+                >
+                  {isLoadingMore ? (
+                    <>
+                      <FiLoader className="w-4 h-4 animate-spin" />
+                      <span>Loading Presets...</span>
+                    </>
+                  ) : (
+                    <>
+                      <FiChevronDown className="w-4 h-4" />
+                      <span>Load More Presets (+6)</span>
+                    </>
+                  )}
+                </button>
+
+                {/* Show All Button */}
+                <button
+                  type="button"
+                  onClick={handleLoadAll}
+                  className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-black/[0.04] dark:bg-white/[0.06] hover:bg-black/[0.08] dark:hover:bg-white/[0.1] border border-black/10 dark:border-white/10 text-slate-700 dark:text-[#eee8dc] text-xs font-semibold transition-all cursor-pointer"
+                  title="Display all remaining templates at once"
+                >
+                  <span>Show All ({filteredTemplates.length})</span>
+                </button>
+              </div>
+            ) : (
+              <div className="flex flex-col sm:flex-row items-center gap-3 pt-1">
+                <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                  <FiCheck className="w-3.5 h-3.5" />
+                  <span>All {filteredTemplates.length} Presets Loaded</span>
+                </span>
+
+                <button
+                  type="button"
+                  onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+                  className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs text-slate-500 dark:text-[#888b7e] hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
+                >
+                  <FiArrowUp className="w-3 h-3" />
+                  <span>Back to Top</span>
+                </button>
+              </div>
+            )}
+          </div>
+        </>
+      )}
+    </main>
 
       {/* Deep Studio Inspector & Remix Modal */}
       {selectedItem && (
@@ -2074,25 +2437,25 @@ export default function ExplorePage() {
           onClick={() => setSelectedItem(null)}
         >
           <div
-            className="relative w-full max-w-5xl rounded-3xl bg-white dark:bg-[#0f1016] border border-black/10 dark:border-white/10 shadow-2xl overflow-hidden flex flex-col text-slate-900 dark:text-white my-auto max-h-[92vh] transition-colors"
+            className="relative w-full max-w-5xl rounded-3xl bg-white dark:bg-[#1a1d17] border border-black/10 dark:border-white/10 shadow-2xl overflow-hidden flex flex-col text-slate-900 dark:text-[#eee8dc] my-auto max-h-[92vh] transition-colors"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div className="p-4 sm:p-6 border-b border-black/[0.08] dark:border-white/[0.08] flex items-center justify-between bg-slate-50 dark:bg-[#12141d]/90">
+            <div className="p-4 sm:p-6 border-b border-black/[0.08] dark:border-white/[0.08] flex items-center justify-between bg-[#f8f5ee] dark:bg-[#151712]">
               <div className="flex items-center gap-3.5">
-                <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-cyan-400 to-indigo-600 text-slate-950 font-bold flex items-center justify-center shadow-md">
+                <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#cf795d] to-[#e5987d] text-slate-950 font-bold flex items-center justify-center shadow-md">
                   <FiZap className="w-5 h-5 fill-slate-950" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h2 className="text-base sm:text-lg font-bold text-slate-950 dark:text-white font-sans">
+                    <h2 className="text-base sm:text-lg font-bold text-slate-950 dark:text-[#f1eadf] font-headline">
                       {selectedItem.title}
                     </h2>
-                    <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-cyan-500/15 text-cyan-700 dark:text-cyan-300 border border-cyan-500/25 dark:border-cyan-400/25">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-[#cf795d]/15 text-[#cf795d] border border-[#cf795d]/25">
                       {selectedItem.category}
                     </span>
                   </div>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  <p className="text-xs text-slate-500 dark:text-[#888b7e] mt-0.5">
                     Authored by {selectedItem.author.name} • {selectedItem.views} views • {selectedItem.remixes} remixes
                   </p>
                 </div>
@@ -2106,7 +2469,7 @@ export default function ExplorePage() {
                   )}&style=${encodeURIComponent(
                     selectedItem.category
                   )}&text=${encodeURIComponent(modalCustomText || selectedItem.defaultText)}`}
-                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-400 to-indigo-500 text-slate-950 text-xs font-bold hover:brightness-110 transition-all flex items-center gap-1.5 shadow-lg shadow-cyan-500/20 active:scale-95"
+                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#cf795d] to-[#e5987d] text-slate-950 text-xs font-bold hover:brightness-110 transition-all flex items-center gap-1.5 shadow-lg shadow-[#cf795d]/20 active:scale-95"
                 >
                   <FiZap className="w-3.5 h-3.5 fill-slate-950" />
                   <span>Remix in Studio</span>
@@ -2115,7 +2478,7 @@ export default function ExplorePage() {
                 <button
                   type="button"
                   onClick={() => shareTemplateLink(selectedItem)}
-                  className="p-2 rounded-xl bg-black/5 hover:bg-black/10 dark:bg-white/[0.06] dark:hover:bg-white/[0.12] text-slate-600 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white transition-colors cursor-pointer"
+                  className="p-2 rounded-xl bg-black/5 hover:bg-black/10 dark:bg-white/[0.06] dark:hover:bg-white/[0.12] text-slate-600 dark:text-[#b8b5a8] hover:text-slate-950 dark:hover:text-white transition-colors cursor-pointer"
                   title="Share template link"
                 >
                   {copiedShareLink ? <FiCheck className="w-4 h-4 text-emerald-500 dark:text-emerald-400" /> : <FiShare2 className="w-4 h-4" />}
@@ -2124,17 +2487,17 @@ export default function ExplorePage() {
                 <button
                   type="button"
                   onClick={() => downloadJsonPreset(selectedItem)}
-                  className="px-3.5 py-2 rounded-xl bg-black/5 hover:bg-black/10 dark:bg-white/10 dark:hover:bg-white/15 text-slate-800 dark:text-white text-xs font-semibold border border-black/10 dark:border-white/15 transition-colors flex items-center gap-1.5 cursor-pointer"
+                  className="px-3.5 py-2 rounded-xl bg-black/5 hover:bg-black/10 dark:bg-white/10 dark:hover:bg-white/15 text-slate-800 dark:text-[#eee8dc] text-xs font-semibold border border-black/10 dark:border-white/15 transition-colors flex items-center gap-1.5 cursor-pointer"
                   title="Download preset JSON"
                 >
-                  <FiDownload className="w-3.5 h-3.5 text-slate-600 dark:text-slate-300" />
+                  <FiDownload className="w-3.5 h-3.5 text-slate-600 dark:text-[#b8b5a8]" />
                   <span className="hidden sm:inline">JSON</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setSelectedItem(null)}
-                  className="p-2 rounded-xl bg-black/5 hover:bg-black/10 dark:bg-white/[0.06] dark:hover:bg-white/[0.12] text-slate-500 hover:text-slate-950 dark:text-slate-400 dark:hover:text-white transition-colors cursor-pointer"
+                  className="p-2 rounded-xl bg-black/5 hover:bg-black/10 dark:bg-white/[0.06] dark:hover:bg-white/[0.12] text-slate-500 hover:text-slate-950 dark:text-[#888b7e] dark:hover:text-white transition-colors cursor-pointer"
                 >
                   <FiX className="w-5 h-5" />
                 </button>
@@ -2144,9 +2507,15 @@ export default function ExplorePage() {
             {/* Modal Body: Split Interactive View */}
             <div className="grid grid-cols-1 lg:grid-cols-12 overflow-y-auto">
               {/* Left Column: Interactive Cinematic Canvas Player */}
-              <div className="lg:col-span-7 bg-[#07080c] flex flex-col border-b lg:border-b-0 lg:border-r border-black/[0.08] dark:border-white/[0.08]">
-                {/* Canvas Container */}
-                <div className="relative w-full aspect-video flex items-center justify-center overflow-hidden bg-radial from-slate-900 to-[#07080c]">
+              <div className="lg:col-span-7 bg-[#10120e] flex flex-col border-b lg:border-b-0 lg:border-r border-black/[0.08] dark:border-white/[0.08]">
+                {/* Canvas Container with dynamic 9:16 vertical support */}
+                <div
+                  className={`relative w-full flex items-center justify-center overflow-hidden bg-[#0c0e0a] ${
+                    selectedItem.aspectRatio === "9:16" || motionFormat === "vertical"
+                      ? "aspect-[9/16] max-h-[60vh] mx-auto my-3 rounded-2xl border border-white/10 shadow-2xl"
+                      : "aspect-video"
+                  }`}
+                >
                   <VirtualCardCanvas
                     renderAnimation={selectedItem.renderAnimation}
                     isHovered={modalPlaying}
@@ -2155,18 +2524,18 @@ export default function ExplorePage() {
                   />
 
                   {/* Corner Badges */}
-                  <div className="absolute bottom-3 right-3 px-2.5 py-1 rounded-md bg-black/80 backdrop-blur-md text-[10px] font-mono text-cyan-300 border border-white/10">
+                  <div className="absolute bottom-3 right-3 px-2.5 py-1 rounded-md bg-black/80 backdrop-blur-md text-[10px] font-mono text-[#e5987d] border border-white/10">
                     60 FPS REAL-TIME • {selectedItem.resolution}
                   </div>
                 </div>
 
                 {/* Player Controls Toolbar */}
-                <div className="p-4 bg-slate-100 dark:bg-[#0a0b10] border-t border-black/[0.08] dark:border-white/[0.08] flex items-center justify-between text-xs">
+                <div className="p-4 bg-slate-100 dark:bg-[#151712] border-t border-black/[0.08] dark:border-white/[0.08] flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
                       onClick={() => setModalPlaying(!modalPlaying)}
-                      className="px-3 py-1.5 rounded-lg bg-black/5 hover:bg-black/10 dark:bg-white/10 dark:hover:bg-white/20 text-slate-800 dark:text-white transition-colors flex items-center gap-1.5 font-medium cursor-pointer"
+                      className="px-3 py-1.5 rounded-lg bg-black/5 hover:bg-black/10 dark:bg-white/10 dark:hover:bg-white/20 text-slate-800 dark:text-[#eee8dc] transition-colors flex items-center gap-1.5 font-medium cursor-pointer"
                     >
                       {modalPlaying ? (
                         <>
@@ -2181,15 +2550,15 @@ export default function ExplorePage() {
                       )}
                     </button>
 
-                    <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white dark:bg-white/[0.05] border border-black/10 dark:border-white/10 text-slate-700 dark:text-slate-300 font-mono text-[11px] shadow-xs">
-                      <FiClock className="w-3 h-3 text-slate-500 dark:text-slate-400" />
+                    <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white dark:bg-white/[0.05] border border-black/10 dark:border-white/10 text-slate-700 dark:text-[#b8b5a8] font-mono text-[11px] shadow-xs">
+                      <FiClock className="w-3 h-3 text-slate-500 dark:text-[#888b7e]" />
                       <span>{selectedItem.duration}</span>
                     </div>
                   </div>
 
                   {/* Playback speed toggle */}
                   <div className="flex items-center gap-1">
-                    <span className="text-[11px] text-slate-500 dark:text-slate-400 font-mono mr-1">
+                    <span className="text-[11px] text-slate-500 dark:text-[#888b7e] font-mono mr-1">
                       Speed:
                     </span>
                     {[0.5, 1, 1.5, 2].map((s) => (
@@ -2199,8 +2568,8 @@ export default function ExplorePage() {
                         onClick={() => setModalSpeed(s)}
                         className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold transition-colors cursor-pointer ${
                           modalSpeed === s
-                            ? "bg-cyan-500 text-slate-950"
-                            : "bg-black/5 dark:bg-white/[0.05] text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white"
+                            ? "bg-[#cf795d] text-white"
+                            : "bg-black/5 dark:bg-white/[0.05] text-slate-600 dark:text-[#888b7e] hover:text-slate-950 dark:hover:text-white"
                         }`}
                       >
                         {s}x
@@ -2211,7 +2580,7 @@ export default function ExplorePage() {
               </div>
 
               {/* Right Column: Prompt, Custom Text & Specs */}
-              <div className="lg:col-span-5 p-5 sm:p-6 space-y-5 bg-white dark:bg-[#0f1016]">
+              <div className="lg:col-span-5 p-5 sm:p-6 space-y-5 bg-white dark:bg-[#1a1d17]">
                 {/* Navigation Tabs */}
                 <div className="flex items-center gap-2 border-b border-black/[0.08] dark:border-white/[0.08] pb-3">
                   <button
@@ -2219,8 +2588,8 @@ export default function ExplorePage() {
                     onClick={() => setModalTab("specs")}
                     className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer ${
                       modalTab === "specs"
-                        ? "bg-cyan-500/10 dark:bg-white/10 text-cyan-800 dark:text-cyan-300 border border-cyan-500/30 dark:border-cyan-400/30 font-semibold"
-                        : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+                        ? "bg-[#cf795d]/15 text-[#cf795d] border border-[#cf795d]/30 font-semibold"
+                        : "text-slate-500 hover:text-slate-950 dark:text-[#888b7e] dark:hover:text-white"
                     }`}
                   >
                     <FiSliders className="w-3.5 h-3.5" />
@@ -2231,8 +2600,8 @@ export default function ExplorePage() {
                     onClick={() => setModalTab("json")}
                     className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer ${
                       modalTab === "json"
-                        ? "bg-cyan-500/10 dark:bg-white/10 text-cyan-800 dark:text-cyan-300 border border-cyan-500/30 dark:border-cyan-400/30 font-semibold"
-                        : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+                        ? "bg-[#cf795d]/15 text-[#cf795d] border border-[#cf795d]/30 font-semibold"
+                        : "text-slate-500 hover:text-slate-950 dark:text-[#888b7e] dark:hover:text-white"
                     }`}
                   >
                     <FiCode className="w-3.5 h-3.5" />
@@ -2244,12 +2613,12 @@ export default function ExplorePage() {
                   <>
                     {/* Live Custom Text Input */}
                     <div className="space-y-2">
-                      <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-                        <span className="font-semibold uppercase tracking-wider font-mono text-[10px] text-cyan-600 dark:text-cyan-400">
-                          Live Custom Text Playground
+                      <div className="flex items-center justify-between text-xs text-slate-500 dark:text-[#888b7e]">
+                        <span className="font-semibold uppercase tracking-wider font-mono text-[10px] text-[#cf795d]">
+                          Custom text
                         </span>
-                        <span className="text-[10px] text-slate-400 dark:text-slate-500">
-                          Updates canvas in real-time
+                        <span className="text-[10px] text-slate-400 dark:text-[#888b7e]">
+                          Live preview
                         </span>
                       </div>
                       <div className="relative">
@@ -2258,21 +2627,21 @@ export default function ExplorePage() {
                           value={modalCustomText}
                           onChange={(e) => setModalCustomText(e.target.value)}
                           placeholder={selectedItem.defaultText}
-                          className="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-white/[0.04] border border-black/10 dark:border-white/10 focus:border-cyan-500 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none font-mono"
+                          className="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-white/[0.04] border border-black/10 dark:border-white/10 focus:border-[#cf795d] text-xs text-slate-900 dark:text-[#eee8dc] placeholder-slate-400 dark:placeholder-[#888b7e] focus:outline-none font-mono"
                         />
                       </div>
                     </div>
 
                     {/* Prompt Box */}
                     <div className="space-y-2">
-                      <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-                        <span className="font-semibold uppercase tracking-wider font-mono text-[10px] text-cyan-600 dark:text-cyan-400">
-                          Generative Motion Prompt
+                      <div className="flex items-center justify-between text-xs text-slate-500 dark:text-[#888b7e]">
+                        <span className="font-semibold uppercase tracking-wider font-mono text-[10px] text-[#cf795d]">
+                          Motion prompt
                         </span>
                         <button
                           type="button"
                           onClick={() => copyPromptText(selectedItem.prompt)}
-                          className="inline-flex items-center gap-1 text-cyan-600 hover:text-cyan-700 dark:text-cyan-400 dark:hover:text-cyan-300 font-medium cursor-pointer"
+                          className="inline-flex items-center gap-1 text-[#cf795d] hover:brightness-110 font-medium cursor-pointer"
                         >
                           {copiedPrompt ? (
                             <>
@@ -2287,14 +2656,14 @@ export default function ExplorePage() {
                           )}
                         </button>
                       </div>
-                      <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-black/10 dark:border-white/10 text-xs font-mono text-slate-800 dark:text-slate-200 leading-relaxed">
+                      <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-black/10 dark:border-white/10 text-xs font-mono text-slate-800 dark:text-[#eee8dc] leading-relaxed">
                         &quot;{selectedItem.prompt}&quot;
                       </div>
                     </div>
 
                     {/* Animation Technical Specs */}
                     <div className="space-y-2">
-                      <span className="font-semibold uppercase tracking-wider font-mono text-[10px] text-slate-500 dark:text-slate-400">
+                      <span className="font-semibold uppercase tracking-wider font-mono text-[10px] text-slate-500 dark:text-[#888b7e]">
                         Animation Parameters
                       </span>
                       <div className="grid grid-cols-2 gap-2 text-xs">
@@ -2302,7 +2671,7 @@ export default function ExplorePage() {
                           <div className="text-[10px] text-slate-500 font-mono">
                             RESOLUTION
                           </div>
-                          <div className="text-slate-900 dark:text-white font-semibold mt-0.5">
+                          <div className="text-slate-900 dark:text-[#f1eadf] font-semibold mt-0.5">
                             {selectedItem.resolution}
                           </div>
                         </div>
@@ -2311,7 +2680,7 @@ export default function ExplorePage() {
                           <div className="text-[10px] text-slate-500 font-mono">
                             FRAME RATE
                           </div>
-                          <div className="text-cyan-600 dark:text-cyan-400 font-semibold mt-0.5">
+                          <div className="text-[#cf795d] font-semibold mt-0.5">
                             {selectedItem.fps} FPS Continuous
                           </div>
                         </div>
@@ -2320,7 +2689,7 @@ export default function ExplorePage() {
                           <div className="text-[10px] text-slate-500 font-mono">
                             EASING EQUATION
                           </div>
-                          <div className="text-indigo-600 dark:text-indigo-300 font-mono text-[11px] mt-0.5">
+                          <div className="text-[#a4778c] font-mono text-[11px] mt-0.5">
                             {selectedItem.easing}
                           </div>
                         </div>
@@ -2329,7 +2698,7 @@ export default function ExplorePage() {
 
                     {/* Color Scheme Palette Swatches */}
                     <div className="space-y-2">
-                      <span className="font-semibold uppercase tracking-wider font-mono text-[10px] text-slate-500 dark:text-slate-400">
+                      <span className="font-semibold uppercase tracking-wider font-mono text-[10px] text-slate-500 dark:text-[#888b7e]">
                         Color Palette
                       </span>
                       <div className="flex items-center gap-2 flex-wrap">
@@ -2341,7 +2710,7 @@ export default function ExplorePage() {
                               navigator.clipboard.writeText(color);
                               success("Copied Color", `Hex code ${color} copied.`);
                             }}
-                            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50 dark:bg-white/[0.04] border border-black/10 dark:border-white/10 hover:border-black/20 dark:hover:border-white/20 text-xs font-mono text-slate-700 dark:text-slate-300 transition-colors cursor-pointer"
+                            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50 dark:bg-white/[0.04] border border-black/10 dark:border-white/10 hover:border-black/20 dark:hover:border-white/20 text-xs font-mono text-slate-700 dark:text-[#eee8dc] transition-colors cursor-pointer"
                           >
                             <span
                               className="w-3 h-3 rounded-full border border-black/20"
@@ -2356,8 +2725,8 @@ export default function ExplorePage() {
                 ) : (
                   /* Keyframe Preset JSON Code View */
                   <div className="space-y-2">
-                    <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-                      <span className="font-semibold uppercase tracking-wider font-mono text-[10px] text-cyan-600 dark:text-cyan-400">
+                    <div className="flex items-center justify-between text-xs text-slate-500 dark:text-[#888b7e]">
+                      <span className="font-semibold uppercase tracking-wider font-mono text-[10px] text-[#cf795d]">
                         Preset JSON Definition
                       </span>
                       <button
@@ -2382,7 +2751,7 @@ export default function ExplorePage() {
                           success("JSON Copied", "Preset configuration copied.");
                           setTimeout(() => setCopiedJson(false), 2000);
                         }}
-                        className="inline-flex items-center gap-1 text-cyan-600 hover:text-cyan-700 dark:text-cyan-400 dark:hover:text-cyan-300 font-medium cursor-pointer"
+                        className="inline-flex items-center gap-1 text-[#cf795d] hover:brightness-110 font-medium cursor-pointer"
                       >
                         {copiedJson ? (
                           <>
@@ -2398,7 +2767,7 @@ export default function ExplorePage() {
                       </button>
                     </div>
 
-                    <pre className="p-3.5 rounded-xl bg-slate-900 dark:bg-black/60 border border-black/10 dark:border-white/10 text-[11px] font-mono text-slate-200 dark:text-slate-300 overflow-x-auto max-h-72 leading-relaxed">
+                    <pre className="p-3.5 rounded-xl bg-slate-900 dark:bg-black/60 border border-black/10 dark:border-white/10 text-[11px] font-mono text-slate-200 dark:text-[#eee8dc] overflow-x-auto max-h-72 leading-relaxed">
                       {JSON.stringify(
                         {
                           id: selectedItem.id,
@@ -2427,7 +2796,7 @@ export default function ExplorePage() {
                     )}&style=${encodeURIComponent(
                       selectedItem.category
                     )}&text=${encodeURIComponent(modalCustomText || selectedItem.defaultText)}`}
-                    className="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-400 to-indigo-500 text-slate-950 font-bold text-sm hover:brightness-110 transition-all flex items-center justify-center gap-2 shadow-xl shadow-cyan-500/20 active:scale-[0.99]"
+                    className="w-full py-3 rounded-xl bg-gradient-to-r from-[#cf795d] to-[#e5987d] text-slate-950 font-bold text-sm hover:brightness-110 transition-all flex items-center justify-center gap-2 shadow-xl shadow-[#cf795d]/20 active:scale-[0.99]"
                   >
                     <FiZap className="w-4 h-4 fill-slate-950" />
                     <span>Open &amp; Remix in Animagent Studio</span>
@@ -2451,6 +2820,7 @@ function VirtualCardCanvas({
   durationSec = 5,
   customText,
   playbackSpeed = 1,
+  autoPlay = false,
 }: {
   renderAnimation: (
     ctx: CanvasRenderingContext2D,
@@ -2465,6 +2835,7 @@ function VirtualCardCanvas({
   durationSec?: number;
   customText?: string;
   playbackSpeed?: number;
+  autoPlay?: boolean;
 }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -2505,6 +2876,8 @@ function VirtualCardCanvas({
 
     ctx.scale(dpr, dpr);
 
+    const isRunning = autoPlay || isHovered;
+
     const render = () => {
       // If user is actively scrubbing, lock time to scrub progress
       if (typeof scrubProgress === "number") {
@@ -2515,8 +2888,8 @@ function VirtualCardCanvas({
 
       // Only run RAF loop if element is visible in viewport
       if (isVisibleRef.current) {
-        time += (isHovered ? 0.025 : 0.015) * playbackSpeed;
-        renderAnimation(ctx, parentWidth, parentHeight, time, isHovered, customText);
+        time += (isRunning ? 0.024 : 0.012) * playbackSpeed;
+        renderAnimation(ctx, parentWidth, parentHeight, time, isRunning, customText);
       }
 
       frameId = requestAnimationFrame(render);
@@ -2525,7 +2898,7 @@ function VirtualCardCanvas({
     render();
 
     return () => cancelAnimationFrame(frameId);
-  }, [renderAnimation, isHovered, scrubProgress, durationSec, customText, playbackSpeed]);
+  }, [renderAnimation, isHovered, scrubProgress, durationSec, customText, playbackSpeed, autoPlay]);
 
   return (
     <div ref={containerRef} className="w-full h-full">

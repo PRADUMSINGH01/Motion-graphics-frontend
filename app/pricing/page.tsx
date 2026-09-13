@@ -1,6 +1,10 @@
-import BillingPage from "../billing/page";
+import PricingSection from "../components/PricingSection";
 
 export default function PricingPage() {
-  return <BillingPage />;
+  return (
+    <main className="pt-16">
+      <PricingSection />
+    </main>
+  );
 }
 

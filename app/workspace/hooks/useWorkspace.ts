@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useAlert } from "../../context/AlertContext";
 import { api } from "../../lib/api";
+import { formatInr } from "../../lib/motionBilling";
 import {
   StylePreset,
   AspectRatio,
@@ -119,7 +120,8 @@ export function useWorkspace() {
   const [billingInterval, setBillingInterval] = useState<BillingInterval>("annual");
   const [isUpdatingPlan, setIsUpdatingPlan] = useState(false);
   const [selectedTierForUpdate, setSelectedTierForUpdate] = useState<PlanTier | null>(null);
-  const [extraCredits, setExtraCredits] = useState(0);
+  // Credit purchases must come from a settled server-side wallet, not browser state.
+  const extraCredits = 0;
   const [isRefreshingQuotas, setIsRefreshingQuotas] = useState(false);
 
   // Player state
@@ -354,7 +356,7 @@ export function useWorkspace() {
           : "creator");
 
       setGenerationProgress(45);
-      setGenerationStatus("Backend queue processing prompt on GPU cluster...");
+      setGenerationStatus("Preparing one Motion Credit (₹10) generation job...");
 
       // Await server response from /api/prompt (which connects to Express backend API)
       const serverRes = await api.prompt.submit({
@@ -426,7 +428,7 @@ export function useWorkspace() {
 
       success(
         "Templates Generated",
-        `Synthesized ${incomingTemplates.length} 60FPS motion template variations from your prompt.`
+        `Synthesized ${incomingTemplates.length} 60FPS template variations from one generation. Estimated usage: ${serverRes.billing?.totalCredits ?? 1} Motion Credit (${formatInr(serverRes.billing?.totalInr ?? 10)}).`
       );
     } catch (err: any) {
       console.error("[Workspace] Prompt API error:", err);
@@ -515,10 +517,9 @@ export function useWorkspace() {
 
   // Top Up On-Demand Credits
   const handleTopUpCredits = (amount: number, price: string) => {
-    setExtraCredits((prev) => prev + amount);
     success(
-      "Compute Credits Added",
-      `Added +${amount} On-Demand Generations (${price}) to your workspace balance.`
+      "Motion Credit Quote",
+      `${price} buys ${amount} Motion Credits. Connect a secure server-side checkout to complete this purchase and update the wallet balance.`
     );
   };
 
@@ -576,10 +577,11 @@ export function useWorkspace() {
   const userEmail = user?.email || "";
 
   // Real-time usage calculation
-  const genUsed = (user?.usage?.generations?.monthly ?? 0) + extraCredits;
-  const genLimit =
+  const genUsed = user?.usage?.generations?.monthly ?? 0;
+  const includedGenLimit =
     user?.usage?.generations?.limit ??
     (userPlan === "creator" ? 150 : userPlan === "pro" ? 600 : userPlan === "enterprise" ? 10000 : 10);
+  const genLimit = includedGenLimit + extraCredits;
   const genPercent = genLimit > 0 ? Math.min(100, Math.round((genUsed / genLimit) * 100)) : 0;
 
   const rendersUsed = user?.usage?.renders?.monthly ?? 0;

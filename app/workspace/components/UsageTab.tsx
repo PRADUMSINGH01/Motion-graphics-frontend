@@ -9,6 +9,7 @@ import {
   FiTrendingUp,
 } from "react-icons/fi";
 import { PlanTier } from "../types";
+import { formatInr, MOTION_CREDIT_PRICE_INR } from "../../lib/motionBilling";
 
 interface UsageTabProps {
   userPlan: PlanTier;
@@ -217,7 +218,7 @@ export default function UsageTab({
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
             <FiTrendingUp className="text-cyan-600 dark:text-cyan-400" />
-            Instant On-Demand Credit Top-Ups
+            Motion Credit Top-Ups
           </h3>
           {extraCredits > 0 && (
             <span className="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-cyan-500/15 dark:bg-cyan-500/20 text-cyan-700 dark:text-cyan-300 border border-cyan-500/30">
@@ -227,50 +228,42 @@ export default function UsageTab({
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div className="p-3 rounded-xl bg-slate-50 dark:bg-white/[0.02] border border-black/[0.06] dark:border-white/[0.06] flex items-center justify-between">
-            <div>
-              <div className="text-xs font-bold text-slate-900 dark:text-white">+100 Runs</div>
-              <span className="text-[10px] font-mono text-cyan-600 dark:text-cyan-400">$9 USD</span>
-            </div>
-            <button
-              type="button"
-              onClick={() => onTopUpCredits(100, "$9")}
-              className="px-2.5 py-1 rounded-lg text-xs font-medium bg-black/5 hover:bg-black/10 dark:bg-white/10 dark:hover:bg-white/20 text-slate-800 dark:text-white transition-all cursor-pointer"
-            >
-              Add
-            </button>
-          </div>
+          {[10, 50, 100].map((credits) => {
+            const price = formatInr(credits * MOTION_CREDIT_PRICE_INR);
+            const isRecommended = credits === 50;
 
-          <div className="p-3 rounded-xl bg-cyan-50 dark:bg-cyan-950/20 border border-cyan-400/40 dark:border-cyan-500/30 flex items-center justify-between">
-            <div>
-              <div className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-                <span>+500 Runs</span>
-                <span className="px-1 rounded text-[8px] font-mono bg-cyan-500 text-black font-bold">PRO</span>
+            return (
+              <div
+                key={credits}
+                className={`flex items-center justify-between rounded-xl border p-3 ${
+                  isRecommended
+                    ? "border-cyan-400/40 bg-cyan-50 dark:border-cyan-500/30 dark:bg-cyan-950/20"
+                    : "border-black/[0.06] bg-slate-50 dark:border-white/[0.06] dark:bg-white/[0.02]"
+                }`}
+              >
+                <div>
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900 dark:text-white">
+                    <span>+{credits} Credits</span>
+                    {isRecommended && (
+                      <span className="rounded bg-cyan-500 px-1 text-[8px] font-mono font-bold text-black">POPULAR</span>
+                    )}
+                  </div>
+                  <span className="font-mono text-[10px] text-cyan-700 dark:text-cyan-400">{price}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => onTopUpCredits(credits, price)}
+                  className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-all ${
+                    isRecommended
+                      ? "bg-cyan-500 text-black shadow-xs hover:bg-cyan-400"
+                      : "bg-black/5 text-slate-800 hover:bg-black/10 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
+                  }`}
+                >
+                  View price
+                </button>
               </div>
-              <span className="text-[10px] font-mono text-cyan-700 dark:text-cyan-400">$39 USD</span>
-            </div>
-            <button
-              type="button"
-              onClick={() => onTopUpCredits(500, "$39")}
-              className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-cyan-500 hover:bg-cyan-400 text-black transition-all cursor-pointer shadow-xs"
-            >
-              Add
-            </button>
-          </div>
-
-          <div className="p-3 rounded-xl bg-slate-50 dark:bg-white/[0.02] border border-black/[0.06] dark:border-white/[0.06] flex items-center justify-between">
-            <div>
-              <div className="text-xs font-bold text-slate-900 dark:text-white">+1,500 Runs</div>
-              <span className="text-[10px] font-mono text-purple-600 dark:text-purple-300">$99 USD</span>
-            </div>
-            <button
-              type="button"
-              onClick={() => onTopUpCredits(1500, "$99")}
-              className="px-2.5 py-1 rounded-lg text-xs font-medium bg-black/5 hover:bg-black/10 dark:bg-white/10 dark:hover:bg-white/20 text-slate-800 dark:text-white transition-all cursor-pointer"
-            >
-              Add
-            </button>
-          </div>
+            );
+          })}
         </div>
       </div>
     </div>

@@ -1,671 +1,97 @@
-"use client";
-
-import { useLayoutEffect, useRef } from "react";
-import gsap from "gsap";
-
-const QUOTES = [
-  ["IDEAS", "DESERVE", "TO MOVE."],
-  ["MAKE", "EVERY FRAME", "MATTER."],
-  ["TURN", "THOUGHT", "INTO MOTION."],
-  ["LESS", "KEYFRAMES.", "MORE CREATING."],
-  ["DESIGN", "SHOULD", "MOVE."],
-  ["BEAUTIFUL", "IS GOOD.", "ALIVE IS BETTER."],
-  ["FROM", "CODE", "TO EMOTION."],
-  ["CREATE", "WITHOUT", "LIMITS."],
-  ["GIVE", "IDEAS", "A REASON TO MOVE."],
-  ["YOUR IDEA.", "OUR", "MOTION."],
-];
-
-// ----------------------------------------------------
-// 10 animation presets — one per quote
-// ----------------------------------------------------
-
-type CharAnim = {
-  name: string;
-  enter: (tl: gsap.core.Timeline, chars: HTMLElement[]) => void;
-  exit: (tl: gsap.core.Timeline, chars: HTMLElement[]) => void;
-};
-
-const ANIMATIONS: CharAnim[] = [
-  // 1 — RISE (original style)
-  {
-    name: "Rise",
-    enter: (tl, chars) => {
-      tl.from(chars, {
-        y: 90,
-        opacity: 0,
-        rotateX: -60,
-        scale: 0.96,
-        transformOrigin: "50% 100%",
-        duration: 0.9,
-        stagger: 0.022,
-        ease: "power4.out",
-      }, 0);
-    },
-    exit: (tl, chars) => {
-      tl.to(chars, {
-        y: -80,
-        opacity: 0,
-        rotateX: 55,
-        duration: 0.6,
-        stagger: 0.015,
-        ease: "power3.in",
-      }, 0);
-    },
-  },
-
-  // 2 — DROP (falls from above, bounces to settle)
-  {
-    name: "Drop",
-    enter: (tl, chars) => {
-      tl.from(chars, {
-        y: -140,
-        opacity: 0,
-        duration: 0.85,
-        stagger: 0.024,
-        ease: "back.out(1.6)",
-      }, 0);
-    },
-    exit: (tl, chars) => {
-      tl.to(chars, {
-        y: 130,
-        opacity: 0,
-        rotation: 4,
-        duration: 0.55,
-        stagger: 0.016,
-        ease: "power2.in",
-      }, 0);
-    },
-  },
-
-  // 3 — BLUR (soft focus reveal)
-  {
-    name: "Blur",
-    enter: (tl, chars) => {
-      tl.from(chars, {
-        opacity: 0,
-        filter: "blur(14px)",
-        scale: 1.25,
-        duration: 1,
-        stagger: 0.03,
-        ease: "power2.out",
-      }, 0);
-    },
-    exit: (tl, chars) => {
-      tl.to(chars, {
-        opacity: 0,
-        filter: "blur(12px)",
-        scale: 1.15,
-        duration: 0.55,
-        stagger: 0.014,
-        ease: "power2.in",
-      }, 0);
-    },
-  },
-
-  // 4 — FLIP (3D card-flip cascade)
-  {
-    name: "Flip",
-    enter: (tl, chars) => {
-      tl.from(chars, {
-        rotateY: -90,
-        opacity: 0,
-        transformOrigin: "left center",
-        duration: 0.8,
-        stagger: 0.025,
-        ease: "power3.out",
-      }, 0);
-    },
-    exit: (tl, chars) => {
-      tl.to(chars, {
-        rotateY: 90,
-        opacity: 0,
-        transformOrigin: "right center",
-        duration: 0.55,
-        stagger: 0.016,
-        ease: "power2.in",
-      }, 0);
-    },
-  },
-
-  // 5 — ELASTIC (springy wave settle)
-  {
-    name: "Elastic",
-    enter: (tl, chars) => {
-      tl.from(chars, {
-        y: 60,
-        opacity: 0,
-        scale: 0.8,
-        duration: 1.4,
-        stagger: 0.035,
-        ease: "elastic.out(1, 0.55)",
-      }, 0);
-    },
-    exit: (tl, chars) => {
-      tl.to(chars, {
-        y: -50,
-        opacity: 0,
-        duration: 0.5,
-        stagger: 0.014,
-        ease: "power2.in",
-      }, 0);
-    },
-  },
-
-  // 6 — SCATTER (flies in from random directions)
-  {
-    name: "Scatter",
-    enter: (tl, chars) => {
-      tl.from(chars, {
-        x: () => gsap.utils.random(-220, 220),
-        y: () => gsap.utils.random(-160, 160),
-        rotation: () => gsap.utils.random(-90, 90),
-        opacity: 0,
-        duration: 0.9,
-        stagger: { each: 0.018, from: "random" },
-        ease: "power3.out",
-      }, 0);
-    },
-    exit: (tl, chars) => {
-      tl.to(chars, {
-        x: () => gsap.utils.random(-180, 180),
-        y: () => gsap.utils.random(-140, 140),
-        rotation: () => gsap.utils.random(-60, 60),
-        opacity: 0,
-        duration: 0.6,
-        stagger: { each: 0.014, from: "random" },
-        ease: "power2.in",
-      }, 0);
-    },
-  },
-
-  // 7 — POP (scales up from nothing, center outward)
-  {
-    name: "Pop",
-    enter: (tl, chars) => {
-      tl.from(chars, {
-        scale: 0,
-        opacity: 0,
-        duration: 0.7,
-        stagger: { each: 0.03, from: "center" },
-        ease: "back.out(2.4)",
-      }, 0);
-    },
-    exit: (tl, chars) => {
-      tl.to(chars, {
-        scale: 0,
-        opacity: 0,
-        duration: 0.5,
-        stagger: { each: 0.02, from: "center" },
-        ease: "back.in(2)",
-      }, 0);
-    },
-  },
-
-  // 8 — SLIDE (alternating left/right converge)
-  {
-    name: "Slide",
-    enter: (tl, chars) => {
-      const even = chars.filter((_, i) => i % 2 === 0);
-      const odd = chars.filter((_, i) => i % 2 === 1);
-
-      tl.from(even, {
-        x: -70,
-        opacity: 0,
-        duration: 0.8,
-        stagger: 0.03,
-        ease: "power4.out",
-      }, 0);
-
-      tl.from(odd, {
-        x: 70,
-        opacity: 0,
-        duration: 0.8,
-        stagger: 0.03,
-        ease: "power4.out",
-      }, 0.05);
-    },
-    exit: (tl, chars) => {
-      const even = chars.filter((_, i) => i % 2 === 0);
-      const odd = chars.filter((_, i) => i % 2 === 1);
-
-      tl.to(even, { x: 60, opacity: 0, duration: 0.5, stagger: 0.015, ease: "power2.in" }, 0);
-      tl.to(odd, { x: -60, opacity: 0, duration: 0.5, stagger: 0.015, ease: "power2.in" }, 0);
-    },
-  },
-
-  // 9 — ZOOM (slams in from oversized scale)
-  {
-    name: "Zoom",
-    enter: (tl, chars) => {
-      tl.from(chars, {
-        scale: 2.6,
-        opacity: 0,
-        rotateX: 25,
-        duration: 0.9,
-        stagger: 0.02,
-        ease: "expo.out",
-      }, 0);
-    },
-    exit: (tl, chars) => {
-      tl.to(chars, {
-        scale: 2.2,
-        opacity: 0,
-        duration: 0.55,
-        stagger: 0.012,
-        ease: "expo.in",
-      }, 0);
-    },
-  },
-
-  // 10 — SWING (pendulum rotation from top)
-  {
-    name: "Swing",
-    enter: (tl, chars) => {
-      tl.from(chars, {
-        rotation: (i) => (i % 2 === 0 ? -50 : 50),
-        y: 70,
-        opacity: 0,
-        transformOrigin: "top center",
-        duration: 0.9,
-        stagger: 0.024,
-        ease: "back.out(1.7)",
-      }, 0);
-    },
-    exit: (tl, chars) => {
-      tl.to(chars, {
-        rotation: (i) => (i % 2 === 0 ? 40 : -40),
-        y: 90,
-        opacity: 0,
-        transformOrigin: "bottom center",
-        duration: 0.55,
-        stagger: 0.015,
-        ease: "power2.in",
-      }, 0);
-    },
-  },
-];
-
 export default function MotionQuote() {
-  const root = useRef<HTMLDivElement>(null);
-  const line1 = useRef<HTMLDivElement>(null);
-  const line2 = useRef<HTMLDivElement>(null);
-  const line3 = useRef<HTMLDivElement>(null);
-  const labelRef = useRef<HTMLDivElement>(null);
-
-  useLayoutEffect(() => {
-    if (!root.current) return;
-
-    const ctx = gsap.context(() => {
-      let index = 0;
-      let autoTimer: gsap.core.Tween | null = null;
-      let isTransitioning = false;
-      let currentAnim = ANIMATIONS[0];
-
-      const splitChars = (
-        element: HTMLElement | null,
-        text: string
-      ) => {
-        if (!element) return;
-
-        element.innerHTML = "";
-
-        [...text].forEach((char) => {
-          const span = document.createElement("span");
-
-          span.className =
-            "quote-char inline-block will-change-transform";
-
-          span.textContent =
-            char === " " ? "\u00A0" : char;
-
-          element.appendChild(span);
-        });
-      };
-
-      const chars = (element: HTMLElement | null) => {
-        if (!element) return [];
-
-        return Array.from(
-          element.querySelectorAll<HTMLElement>(".quote-char")
-        );
-      };
-
-      const highlightBreath = gsap.to(
-        ".quote-main-highlight",
-        {
-          y: -2,
-          duration: 2.2,
-          repeat: -1,
-          yoyo: true,
-          ease: "sine.inOut",
-          paused: true,
-        }
-      );
-
-      const setQuote = () => {
-        const [a, b, c] = QUOTES[index];
-
-        splitChars(line1.current, a);
-        splitChars(line2.current, b);
-        splitChars(line3.current, c);
-      };
-
-      const enterQuote = () => {
-        setQuote();
-
-        const c1 = chars(line1.current);
-        const c2 = chars(line2.current);
-        const c3 = chars(line3.current);
-        const all = [...c1, ...c2, ...c3];
-
-        // Pick this quote's animation
-        currentAnim = ANIMATIONS[index % ANIMATIONS.length];
-
-        gsap.set(".quote-highlight-line", {
-          scaleX: 0,
-          opacity: 0,
-          transformOrigin: "center",
-        });
-
-        gsap.set(".quote-main-highlight", {
-          scale: 0.94,
-        });
-
-        const tl = gsap.timeline({
-          defaults: {
-            ease: "power4.out",
-          },
-        });
-
-        currentAnim.enter(tl, all);
-
-        // Highlight — every slide
-        tl.to(
-          ".quote-main-highlight",
-          {
-            scale: 1,
-            duration: 0.8,
-            ease: "expo.out",
-          },
-          0.35
-        );
-
-        tl.to(
-          ".quote-highlight-line",
-          {
-            scaleX: 1,
-            opacity: 1,
-            duration: 0.8,
-            ease: "expo.inOut",
-          },
-          0.5
-        );
-
-        // Animation name label
-        if (labelRef.current) {
-          labelRef.current.textContent =
-            currentAnim.name.toUpperCase();
-
-          gsap.fromTo(
-            labelRef.current,
-            { opacity: 0 },
-            { opacity: 0.35, duration: 0.7, ease: "power2.out" }
-          );
-        }
-
-        highlightBreath.restart();
-
-        autoTimer?.kill();
-
-        autoTimer = gsap.delayedCall(
-          5.2,
-          nextQuote
-        );
-      };
-
-      const exitQuote = () => {
-        if (isTransitioning) return;
-
-        isTransitioning = true;
-        autoTimer?.kill();
-        highlightBreath.pause();
-
-        const c1 = chars(line1.current);
-        const c2 = chars(line2.current);
-        const c3 = chars(line3.current);
-        const all = [...c1, ...c2, ...c3];
-
-        const tl = gsap.timeline({
-          onComplete: () => {
-            index = (index + 1) % QUOTES.length;
-            isTransitioning = false;
-            enterQuote();
-          },
-        });
-
-        // Exit with the SAME style the quote entered with
-        currentAnim.exit(tl, all);
-
-        tl.to(
-          ".quote-highlight-line",
-          {
-            scaleX: 0,
-            opacity: 0,
-            duration: 0.35,
-            ease: "power2.in",
-          },
-          0
-        );
-      };
-
-      const nextQuote = () => {
-        exitQuote();
-      };
-
-      enterQuote();
-
-      // ----------------------------------------------------
-      // Mouse interaction
-      // ----------------------------------------------------
-
-      const onMove = (event: PointerEvent) => {
-        const rect =
-          root.current?.getBoundingClientRect();
-
-        if (!rect) return;
-
-        const x =
-          (event.clientX - rect.left) /
-          rect.width -
-          0.5;
-
-        const y =
-          (event.clientY - rect.top) /
-          rect.height -
-          0.5;
-
-        gsap.to(".quote-stage", {
-          x: x * 8,
-          y: y * 5,
-          rotateY: x * 1.5,
-          rotateX: y * -1.2,
-          duration: 0.8,
-          ease: "power3.out",
-          overwrite: true,
-        });
-      };
-
-      const onLeave = () => {
-        gsap.to(".quote-stage", {
-          x: 0,
-          y: 0,
-          rotateY: 0,
-          rotateX: 0,
-          duration: 1,
-          ease: "power4.out",
-        });
-      };
-
-      root.current?.addEventListener(
-        "pointermove",
-        onMove
-      );
-
-      root.current?.addEventListener(
-        "pointerleave",
-        onLeave
-      );
-
-      return () => {
-        autoTimer?.kill();
-        highlightBreath.kill();
-
-        root.current?.removeEventListener(
-          "pointermove",
-          onMove
-        );
-
-        root.current?.removeEventListener(
-          "pointerleave",
-          onLeave
-        );
-      };
-    }, root);
-
-    return () => ctx.revert();
-  }, []);
-
   return (
-    <section
-      ref={root}
-      className="
-        quote-highlight
-        relative
-        flex
-        min-h-screen
-        w-full
-        items-center
-        justify-center
-        overflow-hidden
-        bg-slate-100
-        dark:bg-black
-        text-slate-900
-        dark:text-white
-        transition-colors
-        duration-300
-      "
-    >
-      <div
-        className="
-          quote-stage
-          relative
-          w-full
-          max-w-[1800px]
-          px-8
-          text-center
-        "
-        style={{
-          perspective: "1400px",
-          transformStyle: "preserve-3d",
-        }}
-      >
-        <div
-          className="mx-auto w-fit"
-          style={{
-            perspective: "1200px",
-          }}
-        >
-          {/* LINE 1 */}
-          <div className="overflow-hidden">
-            <div
-              ref={line1}
-              className="
-                whitespace-nowrap
-                text-[clamp(3rem,7vw,7rem)]
-                font-light
-                leading-[0.9]
-                tracking-[-0.065em]
-                text-slate-800
-                dark:text-white
-              "
-            />
-          </div>
+    <section className="border-y border-[var(--border-subtle)] bg-[var(--surface-primary)] px-5 py-20 text-[var(--text-primary)] sm:px-8 sm:py-24 lg:px-10">
+      <style>{`
+        @keyframes reel-slide {
+          0%, 16% { transform: translateX(-17%); opacity: 0; }
+          30%, 70% { transform: translateX(0); opacity: 1; }
+          84%, 100% { transform: translateX(17%); opacity: 0; }
+        }
+        @keyframes reel-line {
+          0% { transform: translateX(-110%); }
+          48%, 100% { transform: translateX(110%); }
+        }
+        @keyframes reel-orbit {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        @keyframes reel-pulse {
+          0%, 100% { transform: scale(0.82); opacity: 0.35; }
+          50% { transform: scale(1); opacity: 0.85; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .reel-slide, .reel-line, .reel-orbit, .reel-pulse { animation: none !important; }
+        }
+      `}</style>
 
-          {/* LINE 2 — PRIMARY */}
-          <div className="overflow-hidden">
-            <div
-              ref={line2}
-              data-highlight="true"
-              className="
-                quote-main-highlight
-                whitespace-nowrap
-                text-[clamp(4.8rem,13vw,14rem)]
-                font-black
-                leading-[0.78]
-                tracking-[-0.09em]
-                text-slate-950
-                dark:text-white
-                will-change-transform
-              "
-            />
+      <div className="mx-auto max-w-7xl">
+        <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--accent-primary)]">
+              Motion direction / 01
+            </p>
+            <h2 className="mt-3 text-3xl font-semibold tracking-[-0.045em] sm:text-4xl">
+              Motion graphics with a point of view.
+            </h2>
           </div>
+          <p className="max-w-sm text-sm leading-6 text-[var(--text-secondary)] sm:text-right">
+            A clean preview of the timing, type, and composition Animagent builds from a single brief.
+          </p>
+        </div>
 
-          {/* LINE 3 */}
-          <div className="overflow-hidden pb-7">
-            <div
-              ref={line3}
-              className="
-                whitespace-nowrap
-                bg-gradient-to-r
-                from-cyan-600
-                via-indigo-600
-                to-purple-600
-                dark:from-cyan-300
-                dark:via-white
-                dark:to-cyan-300
-                bg-clip-text
-                text-[clamp(3rem,7vw,7rem)]
-                font-black
-                leading-[0.9]
-                tracking-[-0.065em]
-                text-transparent
-              "
-            />
-          </div>
-
+        <figure className="relative min-h-[390px] overflow-hidden rounded-2xl border border-[var(--border-strong)] bg-[#10130f] p-5 shadow-[0_28px_90px_rgba(0,0,0,0.24)] sm:min-h-[520px] sm:p-8">
           <div
-            className="
-              quote-highlight-line
-              mx-auto
-              mt-4
-              h-[2px]
-              w-[min(520px,55vw)]
-              rounded-full
-              bg-slate-900/25
-              dark:bg-white
-              opacity-0
-            "
+            className="pointer-events-none absolute inset-0 opacity-40"
+            aria-hidden="true"
+            style={{
+              backgroundImage:
+                "linear-gradient(rgba(241,234,223,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(241,234,223,0.06) 1px, transparent 1px)",
+              backgroundSize: "72px 72px",
+            }}
           />
+
+          <div className="relative flex items-center justify-between text-[10px] font-mono uppercase tracking-[0.15em] text-[#b8b5a8]">
+            <span>Animagent motion system</span>
+            <span>16:9 · 60 FPS</span>
+          </div>
+
+          <div className="relative mx-auto mt-6 flex h-[280px] max-w-4xl items-center justify-center overflow-hidden border-y border-[#eee8dc]/10 sm:mt-10 sm:h-[350px]">
+            <div className="reel-orbit absolute h-52 w-52 rounded-full border border-[#cf795d]/35 sm:h-72 sm:w-72" style={{ animation: "reel-orbit 18s linear infinite" }} aria-hidden="true">
+              <span className="absolute -top-1 left-1/2 h-2 w-2 -translate-x-1/2 rounded-full bg-[#cf795d]" />
+            </div>
+            <div className="reel-orbit absolute h-36 w-72 rounded-[50%] border border-[#9caf7f]/30 sm:h-48 sm:w-[420px]" style={{ animation: "reel-orbit 12s linear infinite reverse" }} aria-hidden="true" />
+            <div className="reel-pulse absolute h-24 w-24 rounded-full bg-[#a4778c]/20 blur-2xl sm:h-36 sm:w-36" style={{ animation: "reel-pulse 3.2s ease-in-out infinite" }} aria-hidden="true" />
+
+            <div className="relative overflow-hidden px-3 text-center">
+              <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.24em] text-[#cf795d]">A composed reveal</p>
+              <div className="overflow-hidden">
+                <p className="reel-slide whitespace-nowrap text-[clamp(3.6rem,11vw,9.5rem)] font-semibold leading-[0.78] tracking-[-0.09em] text-[#eee8dc]" style={{ animation: "reel-slide 6.5s cubic-bezier(0.65,0,0.35,1) infinite" }}>
+                  FRAME
+                </p>
+              </div>
+              <div className="mt-4 h-px overflow-hidden bg-[#eee8dc]/15">
+                <div className="reel-line h-full w-2/5 bg-[#cf795d]" style={{ animation: "reel-line 3.5s cubic-bezier(0.65,0,0.35,1) infinite" }} />
+              </div>
+            </div>
+          </div>
+
+          <div className="relative mt-6 grid gap-3 border-t border-[#eee8dc]/10 pt-5 text-xs text-[#b8b5a8] sm:mt-8 sm:grid-cols-3">
+            <div className="flex items-center gap-3"><span className="font-mono text-[#cf795d]">01</span><span>Editorial kinetic type</span></div>
+            <div className="flex items-center gap-3"><span className="font-mono text-[#cf795d]">02</span><span>Layered spatial timing</span></div>
+            <div className="flex items-center gap-3"><span className="font-mono text-[#cf795d]">03</span><span>Texture-led art direction</span></div>
+          </div>
+        </figure>
+
+        <div className="mt-10 overflow-hidden border-y border-[var(--border-subtle)] py-5 sm:mt-12 sm:py-6">
+          <div className="reel-slide flex w-max items-center gap-6 whitespace-nowrap" style={{ animation: "reel-slide 7s cubic-bezier(0.65,0,0.35,1) infinite" }} aria-hidden="true">
+            <span className="text-[clamp(2.4rem,6vw,5.5rem)] font-semibold leading-none tracking-[-0.07em] text-[var(--text-primary)]">MAKE</span>
+            <span className="text-[clamp(2.4rem,6vw,5.5rem)] font-semibold leading-none tracking-[-0.07em] text-[var(--accent-primary)]">EVERY</span>
+            <span className="text-[clamp(2.4rem,6vw,5.5rem)] font-semibold leading-none tracking-[-0.07em] text-[var(--text-primary)]">FRAME</span>
+            <span className="text-[clamp(2.4rem,6vw,5.5rem)] font-semibold leading-none tracking-[-0.07em] text-[var(--text-secondary)]">MATTER.</span>
+          </div>
+          <p className="sr-only">Make every frame matter.</p>
         </div>
       </div>
-
-      {/* Current animation name */}
-      <div
-        ref={labelRef}
-        className="
-          pointer-events-none
-          absolute
-          bottom-8
-          left-1/2
-          -translate-x-1/2
-          text-[11px]
-          uppercase
-          tracking-[0.4em]
-          text-slate-500
-          dark:text-white
-        "
-      />
     </section>
   );
 }

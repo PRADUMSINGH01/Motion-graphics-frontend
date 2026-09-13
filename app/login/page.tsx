@@ -1,14 +1,12 @@
 "use client";
 
-import React, { useState, useEffect, Suspense } from "react";
+import React, { useState, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
   FiMail,
   FiLock,
-  FiArrowLeft,
   FiArrowRight,
-  FiLayers,
   FiEye,
   FiEyeOff,
   FiAlertCircle,
@@ -30,13 +28,8 @@ function LoginForm() {
 
   const { login } = useAuth();
   const { failure } = useAlert();
-
-  useEffect(() => {
-    const errorParam = searchParams.get("error");
-    if (errorParam) {
-      setFormError(decodeURIComponent(errorParam));
-    }
-  }, [searchParams]);
+  const searchError = searchParams.get("error");
+  const displayError = formError ?? (searchError ? decodeURIComponent(searchError) : null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,21 +49,26 @@ function LoginForm() {
       if (!ok) {
         setFormError("Authentication failed. Please verify your email and password.");
       }
-    } catch (err: any) {
-      setFormError(err?.message || "Login request encountered an error.");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Login request encountered an error.";
+      setFormError(message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="relative min-h-screen flex flex-col justify-center items-center px-4 py-12 font-poppins text-slate-900 dark:text-slate-100 bg-slate-50 dark:bg-[#090a0f] overflow-hidden transition-colors duration-300">
+    <div className="relative min-h-screen flex flex-col justify-center items-center px-4 py-12 font-poppins text-[var(--text-primary)] bg-[var(--background)] overflow-hidden transition-colors duration-300">
       {/* Interactive Animated Spider Web Canvas Background */}
       <SpiderNetBackground />
 
-      {/* Atmospheric dark fade overlay */}
+      {/* Atmospheric themed fade overlay */}
       <div
-        className="absolute inset-0 bg-gradient-to-b from-slate-50/40 via-transparent to-slate-50/70 dark:from-[#090a0f]/40 dark:via-transparent dark:to-[#090a0f]/70 pointer-events-none transition-colors duration-300"
+        className="absolute inset-0 pointer-events-none transition-colors duration-300"
+        style={{
+          background:
+            "radial-gradient(circle at 15% 20%, rgba(207,121,93,0.18), transparent 26%), radial-gradient(circle at 82% 10%, rgba(164,119,140,0.16), transparent 24%), linear-gradient(to bottom, rgba(243,238,229,0.12), rgba(243,238,229,0.02), rgba(243,238,229,0.18))",
+        }}
         aria-hidden="true"
       />
 
@@ -80,16 +78,16 @@ function LoginForm() {
       </div>
 
       {/* Login Card */}
-      <div className="relative z-10 w-full max-w-md bg-white/90 dark:bg-[#121319]/85 backdrop-blur-2xl border border-black/10 dark:border-white/[0.08] rounded-3xl shadow-2xl p-8 space-y-6">
+      <div className="relative z-10 w-full max-w-md rounded-3xl border border-[var(--border-subtle)] bg-[var(--surface-card)]/95 p-8 shadow-[0_24px_80px_rgba(0,0,0,0.2)] backdrop-blur-2xl space-y-6">
         {/* Brand Header */}
         <div className="text-center space-y-2">
           <Link href="/" className="inline-flex items-center gap-2.5 group">
             <Logo size={42} />
           </Link>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-950 dark:text-white font-comic">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--text-primary)] font-comic">
             Welcome Back
           </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
+          <p className="text-xs text-[var(--text-secondary)]">
             Sign in to access your Animagent AI workspace
           </p>
         </div>
@@ -99,28 +97,28 @@ function LoginForm() {
 
         {/* Divider */}
         <div className="relative flex items-center justify-center">
-          <div className="w-full border-t border-black/10 dark:border-white/[0.08]" />
-          <span className="absolute bg-white dark:bg-[#121319] px-3 text-[11px] font-mono uppercase tracking-wider text-slate-500">
+          <div className="w-full border-t border-[var(--border-subtle)]" />
+          <span className="absolute bg-[var(--surface-card)] px-3 text-[11px] font-mono uppercase tracking-wider text-[var(--text-muted)]">
             or sign in with email
           </span>
         </div>
 
         {/* Inline Form Error Notification */}
-        {formError && (
-          <div className="p-3 bg-red-500/10 border border-red-500/25 rounded-xl flex items-start gap-2.5 text-xs text-red-600 dark:text-red-300">
-            <FiAlertCircle className="w-4 h-4 text-red-500 dark:text-red-400 flex-shrink-0 mt-0.5" />
-            <span>{formError}</span>
+        {displayError && (
+          <div className="p-3 bg-[color:color-mix(in_srgb,var(--accent-primary)_12%,transparent)] border border-[color:color-mix(in_srgb,var(--accent-primary)_35%,transparent)] rounded-xl flex items-start gap-2.5 text-xs text-[var(--text-primary)]">
+            <FiAlertCircle className="w-4 h-4 text-[var(--accent-primary)] flex-shrink-0 mt-0.5" />
+            <span>{displayError}</span>
           </div>
         )}
 
         {/* Login Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+            <label className="text-xs font-medium text-[var(--text-secondary)]">
               Email Address
             </label>
             <div className="relative flex items-center">
-              <FiMail className="absolute left-3.5 w-4 h-4 text-slate-400 dark:text-slate-500 pointer-events-none" />
+              <FiMail className="absolute left-3.5 w-4 h-4 text-[var(--text-muted)] pointer-events-none" />
               <input
                 type="email"
                 required
@@ -131,14 +129,14 @@ function LoginForm() {
                   if (formError) setFormError(null);
                 }}
                 placeholder="name@studio.com"
-                className="w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm bg-black/[0.03] dark:bg-white/[0.04] border border-black/10 dark:border-white/[0.08] rounded-xl focus:outline-none focus:border-cyan-500 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 transition-all"
+                className="w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-xl focus:outline-none focus:border-[var(--accent-primary)] text-[var(--text-primary)] placeholder-[var(--text-muted)] transition-all"
               />
             </div>
           </div>
 
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
+              <label className="text-xs font-medium text-[var(--text-secondary)]">
                 Password
               </label>
               <button
@@ -149,13 +147,13 @@ function LoginForm() {
                     "Password reset service is active. Contact your administrator or check the password reset endpoint."
                   )
                 }
-                className="text-xs text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 hover:underline cursor-pointer"
+                className="text-xs text-[var(--accent-primary)] hover:underline cursor-pointer"
               >
                 Forgot?
               </button>
             </div>
             <div className="relative flex items-center">
-              <FiLock className="absolute left-3.5 w-4 h-4 text-slate-400 dark:text-slate-500 pointer-events-none" />
+              <FiLock className="absolute left-3.5 w-4 h-4 text-[var(--text-muted)] pointer-events-none" />
               <input
                 type={showPassword ? "text" : "password"}
                 required
@@ -166,12 +164,12 @@ function LoginForm() {
                   if (formError) setFormError(null);
                 }}
                 placeholder="••••••••"
-                className="w-full pl-10 pr-10 py-2.5 text-xs sm:text-sm bg-black/[0.03] dark:bg-white/[0.04] border border-black/10 dark:border-white/[0.08] rounded-xl focus:outline-none focus:border-cyan-500 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 transition-all"
+                className="w-full pl-10 pr-10 py-2.5 text-xs sm:text-sm bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-xl focus:outline-none focus:border-[var(--accent-primary)] text-[var(--text-primary)] placeholder-[var(--text-muted)] transition-all"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors p-1 cursor-pointer"
+                className="absolute right-3 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors p-1 cursor-pointer"
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? <FiEyeOff className="w-4 h-4" /> : <FiEye className="w-4 h-4" />}
@@ -182,10 +180,10 @@ function LoginForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs sm:text-sm font-semibold text-white bg-slate-950 hover:bg-slate-800 dark:text-slate-900 dark:bg-white dark:hover:bg-slate-100 shadow-md shadow-slate-950/15 dark:shadow-black/30 transition-all duration-200 active:scale-[0.98] cursor-pointer disabled:opacity-60"
+            className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs sm:text-sm font-semibold text-[var(--background)] bg-[var(--text-primary)] hover:opacity-90 shadow-md shadow-black/10 transition-all duration-200 active:scale-[0.98] cursor-pointer disabled:opacity-60"
           >
             {loading ? (
-              <div className="w-4 h-4 border-2 border-white dark:border-slate-900 border-t-transparent rounded-full animate-spin" />
+              <div className="w-4 h-4 border-2 border-[var(--background)] border-t-transparent rounded-full animate-spin" />
             ) : (
               <>
                 <span>Sign In to Animagent</span>
@@ -196,11 +194,11 @@ function LoginForm() {
         </form>
 
         {/* Footer switch */}
-        <div className="text-center text-xs text-slate-500 dark:text-slate-400 pt-1">
+        <div className="text-center text-xs text-[var(--text-secondary)] pt-1">
           Don&apos;t have an account?{" "}
           <Link
             href="/register"
-            className="font-semibold text-slate-950 dark:text-white hover:text-cyan-600 dark:hover:text-cyan-400 hover:underline transition-colors"
+            className="font-semibold text-[var(--text-primary)] hover:text-[var(--accent-primary)] hover:underline transition-colors"
           >
             Sign up for free
           </Link>
@@ -214,7 +212,7 @@ export default function LoginPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-slate-50 dark:bg-[#090a0f] flex items-center justify-center text-slate-500 dark:text-slate-400">
+        <div className="min-h-screen bg-[var(--background)] flex items-center justify-center text-[var(--text-secondary)]">
           Loading sign in...
         </div>
       }
