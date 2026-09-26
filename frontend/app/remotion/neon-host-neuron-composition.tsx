@@ -1,5 +1,5 @@
 
-import { AbsoluteFill, interpolate, useCurrentFrame, useVideoConfig } from 'remotion';
+import { AbsoluteFill, useCurrentFrame, useVideoConfig } from 'remotion';
 import './styles.css'; // You can move your CSS content into this file
 
 export const JevPresentation = () => {
@@ -36,11 +36,6 @@ export const JevPresentation = () => {
 
       <div className="sceneTag show">{activeScene.tag}</div>
 
-      {/* Render Scenes - Using conditional rendering based on activeIndex */}
-      {activeIndex === 0 && <Scene1 />}
-      {activeIndex === 1 && <Scene2 />}
-      {/* ... Add other scene components similarly */}
-      
       {/* Timeline UI */}
       <div className="timeline">
         <div className="track"><div className="progress" style={{ width: `${(currentTime / 60) * 100}%` }} /></div>

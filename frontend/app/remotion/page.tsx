@@ -1,5 +1,5 @@
-import {JevShort} from "./RemotionRenderer";
+import RemotionComposition from "./composition";
 
 export default function RemotionPage() {
-  return <JevShort />;
+  return <RemotionComposition />;
 }
