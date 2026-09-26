@@ -82,13 +82,13 @@ function LoginForm() {
         {/* Brand Header */}
         <div className="text-center space-y-2">
           <Link href="/" className="inline-flex items-center gap-2.5 group">
-            <Logo size={42} />
+            <Logo size={52} />
           </Link>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--text-primary)] font-comic">
             Welcome Back
           </h1>
           <p className="text-xs text-[var(--text-secondary)]">
-            Sign in to access your Animagent AI workspace
+            Sign in to access your byreel AI workspace
           </p>
         </div>
 
@@ -186,7 +186,7 @@ function LoginForm() {
               <div className="w-4 h-4 border-2 border-[var(--background)] border-t-transparent rounded-full animate-spin" />
             ) : (
               <>
-                <span>Sign In to Animagent</span>
+                <span>Sign In to byreel</span>
                 <FiArrowRight className="w-4 h-4" />
               </>
             )}

@@ -151,7 +151,7 @@ export function useWorkspace() {
 
       if (paramPrompt) {
         setPromptText(decodeURIComponent(paramPrompt));
-        success("Template Loaded", "Remixing template in Animagent Studio. Customize prompt, style, or text below.");
+        success("Template Loaded", "Remixing template in byreel Studio. Customize prompt, style, or text below.");
       }
       if (paramStyle) {
         setActiveStyle(paramStyle as StylePreset);

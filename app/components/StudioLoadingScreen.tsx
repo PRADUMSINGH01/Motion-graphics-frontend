@@ -10,7 +10,7 @@ interface StudioLoadingScreenProps {
 }
 
 export default function StudioLoadingScreen({
-  message = "INITIALIZING ANIMAGENT STUDIO...",
+  message = "INITIALIZING BYREEL STUDIO...",
   subMessage = "Allocating GPU Shaders & Neural Pipeline",
   fullScreen = true,
 }: StudioLoadingScreenProps) {

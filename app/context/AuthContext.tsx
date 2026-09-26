@@ -209,7 +209,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       success(
         "Signed In Successfully",
-        `Welcome back, ${loggedUser.name}! Your Animagent AI workspace is loaded.`
+        `Welcome back, ${loggedUser.name}! Your byreel AI workspace is loaded.`
       );
 
       setTimeout(() => {
@@ -284,7 +284,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       success(
         "Account Created Successfully",
-        `Welcome to Animagent AI, ${trimmedName}! Your ${res.user.plan.tier.toUpperCase()} workspace is activated.`
+        `Welcome to byreel AI, ${trimmedName}! Your ${res.user.plan.tier.toUpperCase()} workspace is activated.`
       );
 
       setTimeout(() => {
@@ -342,7 +342,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             document.cookie = `animagent_token=${res.token}; path=/; max-age=604800; SameSite=Lax`;
           }
         }
-        success("Google Registration Successful", `Welcome to Animagent AI, ${newUser.name}!`);
+        success("Google Registration Successful", `Welcome to byreel AI, ${newUser.name}!`);
         setTimeout(() => router.push("/workspace"), 700);
         return true;
       }

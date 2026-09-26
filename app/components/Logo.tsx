@@ -1,7 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
+import { useTheme } from "../context/ThemeContext";
 
 interface LogoProps {
   size?: number;
@@ -11,46 +12,55 @@ interface LogoProps {
 }
 
 /**
- * Official Animagent Brand Logo Component
- * Uses the uploaded 3D ribbon motion logo image.
+ * Official byreel Brand Logo Component
+ * Crops to show only the icon mark (left portion) of the full-width logo image.
  */
 export default function Logo({
-  size = 36,
+  size = 48,
   className = "",
-  showText = false,
-  textClassName = "",
 }: LogoProps) {
+  const { resolvedTheme } = useTheme();
+  const [hasThemeLogoError, setHasThemeLogoError] = useState(false);
+  const themeLogo = resolvedTheme === "dark" ? "/darkmode.png" : "/light.png";
+  const logoSrc = hasThemeLogoError ? "/brand-logo.png" : themeLogo;
+
   return (
-    <div className={`inline-flex items-center gap-2.5 ${className}`}>
+    <div className={`inline-flex items-center gap-3 ${className}`}>
+      {/* Icon mark — cropped from wide logo to show just the symbol */}
       <div
-        className="relative flex-shrink-0 transition-transform duration-300 "
+        className="relative flex-shrink-0 overflow-hidden transition-transform duration-300 hover:scale-105"
         style={{ width: size, height: size }}
       >
         <Image
-          src="/brand-logo.png"
-          alt="Animagent Logo"
-          width={size}
+          src={logoSrc}
+          alt="byreel Logo"
+          width={size * 4}
           height={size}
-          className="object-contain w-full h-full"
+          className="object-cover object-left h-full w-auto max-w-none"
+          style={{ height: size, width: "auto", maxWidth: "none" }}
           priority
+          onError={() => setHasThemeLogoError(true)}
         />
       </div>
 
-      {showText && (
-        <div className={`flex items-center gap-2 ${textClassName}`}>
-          <span className="font-bold text-base tracking-tight text-slate-900 dark:text-white group-hover:text-[#cf795d] dark:group-hover:text-[#e5987d] transition-colors font-sans">
-            Animagent
-          </span>
-          <span className="px-1.5 py-0.5 rounded text-[9px] font-mono uppercase bg-[#cf795d]/15 text-[#cf795d] font-bold border border-[#cf795d]/30">
-            AI
-          </span>
-        </div>
-      )}
+      {/* Brand wordmark */}
+      <span
+        className="font-bold tracking-[-0.04em] select-none"
+        style={{
+          fontSize: size * 0.42,
+          color: "var(--text-primary)",
+          fontFamily: "var(--font-headline)",
+          letterSpacing: "-0.04em",
+        }}
+      >
+        byreel
+      </span>
     </div>
   );
 }
 
 
+
 interface LogoProps {
   size?: number;
   className?: string;
@@ -59,7 +69,7 @@ interface LogoProps {
 }
 
 /**
- * Official Animagent Geometric Ribbon "M" Logo Component
+ * Official byreel Geometric Ribbon "M" Logo Component
  * High-definition vector graphics with moss, terracotta, and plum gradients.
  */
 // export default function Logo({
@@ -167,7 +177,7 @@ interface LogoProps {
 //       {showText && (
 //         <div className={`flex items-center gap-2 ${textClassName}`}>
 //           <span className="font-bold text-base tracking-tight text-slate-900 dark:text-white group-hover:text-cyan-600 dark:group-hover:text-cyan-300 transition-colors font-sans">
-//             Animagent
+//             byreel
 //           </span>
 //           <span className="px-1.5 py-0.2 rounded text-[9px] font-mono uppercase bg-cyan-500/15 text-cyan-600 dark:text-cyan-300 font-bold border border-cyan-400/30">
 //             AI

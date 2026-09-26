@@ -1,97 +1,480 @@
+"use client"
 export default function MotionQuote() {
   return (
-    <section className="border-y border-[var(--border-subtle)] bg-[var(--surface-primary)] px-5 py-20 text-[var(--text-primary)] sm:px-8 sm:py-24 lg:px-10">
-      <style>{`
-        @keyframes reel-slide {
-          0%, 16% { transform: translateX(-17%); opacity: 0; }
-          30%, 70% { transform: translateX(0); opacity: 1; }
-          84%, 100% { transform: translateX(17%); opacity: 0; }
+    <div className="flex min-h-[520px] w-full overflow-hidden">
+      <FieldBackground />
+    </div>
+  );
+}
+
+
+
+
+
+
+import { useEffect, useRef } from "react";
+import { useTheme } from "../context/ThemeContext";
+
+const LOOP = 24;
+const OM = (2 * Math.PI) / LOOP;
+
+export function FieldBackground() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { resolvedTheme } = useTheme();
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    let W = 0;
+    let H = 0;
+    let DPR = 1;
+    let animationFrame = 0;
+    const startTime = performance.now();
+
+    // --------------------------------------------------
+    // Grain texture
+    // --------------------------------------------------
+
+    const grainCanvas = document.createElement("canvas");
+    grainCanvas.width = 256;
+    grainCanvas.height = 256;
+
+    const grainCtx = grainCanvas.getContext("2d");
+
+    if (!grainCtx) return;
+
+    const imageData = grainCtx.createImageData(256, 256);
+
+    for (let i = 0; i < imageData.data.length; i += 4) {
+      const value = (118 + Math.random() * 20) | 0;
+
+      imageData.data[i] = value;
+      imageData.data[i + 1] = value;
+      imageData.data[i + 2] = value;
+      imageData.data[i + 3] = 255;
+    }
+
+    grainCtx.putImageData(imageData, 0, 0);
+
+    let grainPattern: CanvasPattern | null = null;
+
+    // --------------------------------------------------
+    // Bloom canvas
+    // --------------------------------------------------
+
+    const bloomCanvas = document.createElement("canvas");
+    const bloomCtx = bloomCanvas.getContext("2d");
+
+    if (!bloomCtx) return;
+
+    // --------------------------------------------------
+    // Resize
+    // --------------------------------------------------
+
+    const resize = () => {
+      DPR = Math.min(window.devicePixelRatio || 1, 2);
+
+      const parent = canvas.parentElement;
+      W = Math.floor((parent?.clientWidth || window.innerWidth) * DPR);
+      H = Math.floor((parent?.clientHeight || window.innerHeight) * DPR);
+
+      canvas.width = W;
+      canvas.height = H;
+
+      canvas.style.width = "100%";
+      canvas.style.height = "100%";
+
+      grainPattern = ctx.createPattern(grainCanvas, "repeat");
+    };
+
+    resize();
+
+    const resizeObserver = new ResizeObserver(resize);
+    if (canvas.parentElement) resizeObserver.observe(canvas.parentElement);
+
+    // --------------------------------------------------
+    // Field
+    // --------------------------------------------------
+
+    const field = (x: number, z: number, t: number) => {
+      let h = 0;
+
+      h += 2.6 * Math.sin(x * 0.2 + z * 0.1 + t * OM * 2);
+
+      h += 1.7 * Math.sin(
+        x * 0.09 -
+          z * 0.22 -
+          t * OM * 3 +
+          1.3
+      );
+
+      h += 1.1 * Math.sin(
+        x * 0.32 +
+          z * 0.3 +
+          t * OM * 5 +
+          2.1
+      );
+
+      h += 0.65 * Math.sin(
+        x * 0.52 -
+          z * 0.44 -
+          t * OM * 7 +
+          4.4
+      );
+
+      h += 0.3 * Math.sin(
+        x * 0.85 +
+          z * 0.75 +
+          t * OM * 11 +
+          0.7
+      );
+
+      h += 0.9 * Math.sin(
+        (x + z) * 0.14 +
+          t * OM * 2
+      );
+
+      return h;
+    };
+
+    // --------------------------------------------------
+    // Camera
+    // --------------------------------------------------
+
+    const FOV = () => 0.95 * H;
+
+    const CAMY = 3.2;
+    const CAMZ = -9;
+
+    const project = (
+      x: number,
+      y: number,
+      z: number
+    ): [number, number, number] => {
+      const dz = z - CAMZ;
+
+      const scale = FOV() / dz;
+
+      return [
+        W * 0.5 + x * scale,
+        H * 0.46 - (y - CAMY) * scale,
+        scale,
+      ];
+    };
+
+    // --------------------------------------------------
+    // Draw
+    // --------------------------------------------------
+
+    const draw = (t: number) => {
+      // Reset transform
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+      // ----------------------------------------------
+      // Background
+      // ----------------------------------------------
+
+      const background = ctx.createLinearGradient(
+        0,
+        0,
+        0,
+        H
+      );
+
+      const isDark = resolvedTheme === "dark";
+      background.addColorStop(0, isDark ? "#17181b" : "#f4f1ea");
+      background.addColorStop(0.45, isDark ? "#131417" : "#e9e5dc");
+      background.addColorStop(1, isDark ? "#0c0d0f" : "#d9d5cb");
+
+      ctx.fillStyle = background;
+      ctx.fillRect(0, 0, W, H);
+
+      // ----------------------------------------------
+      // Grid configuration
+      // ----------------------------------------------
+
+      const XN = 92;
+      const ZN = 110;
+
+      const XSPAN = 46;
+
+      const Z0 = 6;
+      const Z1 = 130;
+
+      const depthAlpha = (z: number) =>
+        Math.min(
+          1,
+          Math.max(
+            0,
+            (Z1 - z) / (Z1 - Z0)
+          )
+        );
+
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+
+      // ----------------------------------------------
+      // Horizontal grid
+      // ----------------------------------------------
+
+      for (let j = 0; j < ZN; j++) {
+        const u = j / (ZN - 1);
+
+        const ze =
+          Z0 +
+          (Z1 - Z0) *
+            Math.pow(u, 1.7);
+
+        ctx.beginPath();
+
+        let started = false;
+
+        for (let i = 0; i <= XN * 2; i++) {
+          const x =
+            -XSPAN / 2 +
+            (XSPAN * i) / (XN * 2);
+
+          const y = field(x, ze, t);
+
+          const [px, py] =
+            project(x, y, ze);
+
+          if (!started) {
+            ctx.moveTo(px, py);
+            started = true;
+          } else {
+            ctx.lineTo(px, py);
+          }
         }
-        @keyframes reel-line {
-          0% { transform: translateX(-110%); }
-          48%, 100% { transform: translateX(110%); }
+
+        const alpha =
+          0.05 +
+          0.34 * depthAlpha(ze);
+
+        ctx.strokeStyle = isDark
+          ? `rgba(232,233,228,${alpha.toFixed(3)})`
+          : `rgba(35,39,45,${alpha.toFixed(3)})`;
+
+        ctx.lineWidth =
+          Math.max(
+            0.55,
+            1.05 * depthAlpha(ze)
+          ) * DPR;
+
+        ctx.stroke();
+      }
+
+      // ----------------------------------------------
+      // Vertical grid
+      // ----------------------------------------------
+
+      for (let i = 0; i <= XN; i++) {
+        const x =
+          -XSPAN / 2 +
+          (XSPAN * i) / XN;
+
+        ctx.beginPath();
+
+        let started = false;
+
+        for (let j = 0; j <= ZN * 2; j++) {
+          const u =
+            j / (ZN * 2);
+
+          const ze =
+            Z0 +
+            (Z1 - Z0) *
+              Math.pow(u, 1.7);
+
+          const y =
+            field(x, ze, t);
+
+          const [px, py] =
+            project(x, y, ze);
+
+          if (!started) {
+            ctx.moveTo(px, py);
+            started = true;
+          } else {
+            ctx.lineTo(px, py);
+          }
         }
-        @keyframes reel-orbit {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-        @keyframes reel-pulse {
-          0%, 100% { transform: scale(0.82); opacity: 0.35; }
-          50% { transform: scale(1); opacity: 0.85; }
-        }
-        @media (prefers-reduced-motion: reduce) {
-          .reel-slide, .reel-line, .reel-orbit, .reel-pulse { animation: none !important; }
-        }
-      `}</style>
 
-      <div className="mx-auto max-w-7xl">
-        <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--accent-primary)]">
-              Motion direction / 01
-            </p>
-            <h2 className="mt-3 text-3xl font-semibold tracking-[-0.045em] sm:text-4xl">
-              Motion graphics with a point of view.
-            </h2>
-          </div>
-          <p className="max-w-sm text-sm leading-6 text-[var(--text-secondary)] sm:text-right">
-            A clean preview of the timing, type, and composition Animagent builds from a single brief.
-          </p>
-        </div>
+        const alpha =
+          0.045 +
+          0.30 *
+            depthAlpha(
+              Z0 +
+                (Z1 - Z0) *
+                  0.35
+            );
 
-        <figure className="relative min-h-[390px] overflow-hidden rounded-2xl border border-[var(--border-strong)] bg-[#10130f] p-5 shadow-[0_28px_90px_rgba(0,0,0,0.24)] sm:min-h-[520px] sm:p-8">
-          <div
-            className="pointer-events-none absolute inset-0 opacity-40"
-            aria-hidden="true"
-            style={{
-              backgroundImage:
-                "linear-gradient(rgba(241,234,223,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(241,234,223,0.06) 1px, transparent 1px)",
-              backgroundSize: "72px 72px",
-            }}
-          />
+        ctx.strokeStyle = isDark
+          ? `rgba(226,227,222,${alpha.toFixed(3)})`
+          : `rgba(35,39,45,${alpha.toFixed(3)})`;
 
-          <div className="relative flex items-center justify-between text-[10px] font-mono uppercase tracking-[0.15em] text-[#b8b5a8]">
-            <span>Animagent motion system</span>
-            <span>16:9 · 60 FPS</span>
-          </div>
+        ctx.lineWidth = 0.8 * DPR;
 
-          <div className="relative mx-auto mt-6 flex h-[280px] max-w-4xl items-center justify-center overflow-hidden border-y border-[#eee8dc]/10 sm:mt-10 sm:h-[350px]">
-            <div className="reel-orbit absolute h-52 w-52 rounded-full border border-[#cf795d]/35 sm:h-72 sm:w-72" style={{ animation: "reel-orbit 18s linear infinite" }} aria-hidden="true">
-              <span className="absolute -top-1 left-1/2 h-2 w-2 -translate-x-1/2 rounded-full bg-[#cf795d]" />
-            </div>
-            <div className="reel-orbit absolute h-36 w-72 rounded-[50%] border border-[#9caf7f]/30 sm:h-48 sm:w-[420px]" style={{ animation: "reel-orbit 12s linear infinite reverse" }} aria-hidden="true" />
-            <div className="reel-pulse absolute h-24 w-24 rounded-full bg-[#a4778c]/20 blur-2xl sm:h-36 sm:w-36" style={{ animation: "reel-pulse 3.2s ease-in-out infinite" }} aria-hidden="true" />
+        ctx.stroke();
+      }
 
-            <div className="relative overflow-hidden px-3 text-center">
-              <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.24em] text-[#cf795d]">A composed reveal</p>
-              <div className="overflow-hidden">
-                <p className="reel-slide whitespace-nowrap text-[clamp(3.6rem,11vw,9.5rem)] font-semibold leading-[0.78] tracking-[-0.09em] text-[#eee8dc]" style={{ animation: "reel-slide 6.5s cubic-bezier(0.65,0,0.35,1) infinite" }}>
-                  FRAME
-                </p>
-              </div>
-              <div className="mt-4 h-px overflow-hidden bg-[#eee8dc]/15">
-                <div className="reel-line h-full w-2/5 bg-[#cf795d]" style={{ animation: "reel-line 3.5s cubic-bezier(0.65,0,0.35,1) infinite" }} />
-              </div>
-            </div>
-          </div>
+      // ----------------------------------------------
+      // Bloom
+      // ----------------------------------------------
 
-          <div className="relative mt-6 grid gap-3 border-t border-[#eee8dc]/10 pt-5 text-xs text-[#b8b5a8] sm:mt-8 sm:grid-cols-3">
-            <div className="flex items-center gap-3"><span className="font-mono text-[#cf795d]">01</span><span>Editorial kinetic type</span></div>
-            <div className="flex items-center gap-3"><span className="font-mono text-[#cf795d]">02</span><span>Layered spatial timing</span></div>
-            <div className="flex items-center gap-3"><span className="font-mono text-[#cf795d]">03</span><span>Texture-led art direction</span></div>
-          </div>
-        </figure>
+      const bloomWidth =
+        Math.max(1, Math.floor(W / 3));
 
-        <div className="mt-10 overflow-hidden border-y border-[var(--border-subtle)] py-5 sm:mt-12 sm:py-6">
-          <div className="reel-slide flex w-max items-center gap-6 whitespace-nowrap" style={{ animation: "reel-slide 7s cubic-bezier(0.65,0,0.35,1) infinite" }} aria-hidden="true">
-            <span className="text-[clamp(2.4rem,6vw,5.5rem)] font-semibold leading-none tracking-[-0.07em] text-[var(--text-primary)]">MAKE</span>
-            <span className="text-[clamp(2.4rem,6vw,5.5rem)] font-semibold leading-none tracking-[-0.07em] text-[var(--accent-primary)]">EVERY</span>
-            <span className="text-[clamp(2.4rem,6vw,5.5rem)] font-semibold leading-none tracking-[-0.07em] text-[var(--text-primary)]">FRAME</span>
-            <span className="text-[clamp(2.4rem,6vw,5.5rem)] font-semibold leading-none tracking-[-0.07em] text-[var(--text-secondary)]">MATTER.</span>
-          </div>
-          <p className="sr-only">Make every frame matter.</p>
-        </div>
-      </div>
-    </section>
+      const bloomHeight =
+        Math.max(1, Math.floor(H / 3));
+
+      if (
+        bloomCanvas.width !== bloomWidth ||
+        bloomCanvas.height !== bloomHeight
+      ) {
+        bloomCanvas.width = bloomWidth;
+        bloomCanvas.height = bloomHeight;
+      }
+
+      bloomCtx.clearRect(
+        0,
+        0,
+        bloomWidth,
+        bloomHeight
+      );
+
+      bloomCtx.filter = "blur(7px)";
+
+      bloomCtx.drawImage(
+        canvas,
+        0,
+        0,
+        bloomWidth,
+        bloomHeight
+      );
+
+      bloomCtx.filter = "none";
+
+      ctx.save();
+
+      ctx.globalCompositeOperation = isDark ? "lighter" : "multiply";
+
+      ctx.globalAlpha = 0.16;
+
+      ctx.drawImage(
+        bloomCanvas,
+        0,
+        0,
+        W,
+        H
+      );
+
+      ctx.restore();
+
+      // ----------------------------------------------
+      // Vignette
+      // ----------------------------------------------
+
+      const vignette =
+        ctx.createRadialGradient(
+          W / 2,
+          H * 0.55,
+          H * 0.25,
+          W / 2,
+          H * 0.55,
+          H * 0.95
+        );
+
+      vignette.addColorStop(
+        0,
+        "rgba(0,0,0,0)"
+      );
+
+      vignette.addColorStop(
+        1,
+        isDark ? "rgba(5,6,7,0.55)" : "rgba(35,39,45,0.12)"
+      );
+
+      ctx.fillStyle = vignette;
+
+      ctx.fillRect(
+        0,
+        0,
+        W,
+        H
+      );
+
+      // ----------------------------------------------
+      // Grain
+      // ----------------------------------------------
+
+      if (grainPattern) {
+        ctx.save();
+
+        ctx.globalCompositeOperation =
+          "overlay";
+
+        ctx.globalAlpha = isDark ? 0.05 : 0.035;
+
+        ctx.fillStyle =
+          grainPattern;
+
+        ctx.fillRect(
+          0,
+          0,
+          W,
+          H
+        );
+
+        ctx.restore();
+      }
+    };
+
+    // --------------------------------------------------
+    // Animation
+    // --------------------------------------------------
+
+    const animate = (now: number) => {
+      const elapsed =
+        (now - startTime) / 1000;
+
+      const time =
+        elapsed % LOOP;
+
+      draw(time);
+
+      animationFrame =
+        requestAnimationFrame(animate);
+    };
+
+    animationFrame =
+      requestAnimationFrame(animate);
+
+    // --------------------------------------------------
+    // Cleanup
+    // --------------------------------------------------
+
+    return () => {
+      cancelAnimationFrame(
+        animationFrame
+      );
+
+      resizeObserver.disconnect();
+    };
+  }, [resolvedTheme]);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      className="w-full h-[100%]"
+      style={{
+        display: "block",
+        background: "#111214",
+      }}
+    />
   );
 }

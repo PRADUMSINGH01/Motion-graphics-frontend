@@ -59,7 +59,7 @@ export interface TemplateItem {
   category: TemplateCategory;
   duration: string;
   durationSec: number;
-  aspectRatio: "16:9" | "9:16" | "1:1";
+  aspectRatio: "16:9" | "9:16";
   fps: number;
   resolution: string;
   easing: string;
@@ -92,7 +92,8 @@ export default function ExplorePage() {
   const { success } = useAlert();
 
   // Filters and search states
-  const [activeCategory, setActiveCategory] = useState<string>("All");
+  const [activeCategory, setActiveCategory] = useState<string>("all");
+  const [activeSubcategory, setActiveSubcategory] = useState<string | null>(null);
   const [aspectRatioFilter, setAspectRatioFilter] = useState<string>("All");
   const [motionFormat, setMotionFormat] = useState<"vertical" | "landscape">("vertical");
   const [searchQuery, setSearchQuery] = useState("");
@@ -176,15 +177,168 @@ export default function ExplorePage() {
     }
   }, [selectedItem]);
 
-  const categories = [
-    "All",
-    "Kinetic Typography",
-    "Social & Reels (9:16)",
-    "3D & VFX",
-    "Logo Reveals",
-    "UI & Lottie",
-    "HUD & Cyberpunk",
-  ];
+const exploreCategories = [
+  {
+    id: "all",
+    label: "All Motion",
+    icon: FiGrid,
+    subcategories: [],
+  },
+  {
+    id: "typography",
+    label: "Typography",
+    icon: FiCode,
+    subcategories: [
+      "Kinetic Typography",
+      "Text Highlights",
+      "Lower Thirds",
+      "Title Cards",
+      "Captions & Subtitles",
+    ],
+  },
+  {
+    id: "explainers",
+    label: "Explainers",
+    icon: FiLayers,
+    subcategories: [
+      "Diagrams",
+      "Flowcharts",
+      "Data Visualization",
+      "Timelines",
+      "Maps",
+      "Code & Algorithms",
+    ],
+  },
+  {
+    id: "branding",
+    label: "Branding",
+    icon: FiStar,
+    subcategories: [
+      "Logo Reveals",
+      "YouTube Intros",
+      "YouTube Outros",
+      "Subscribe CTA",
+      "Channel Stingers",
+    ],
+  },
+  {
+    id: "transitions",
+    label: "Transitions & Effects",
+    icon: FiZap,
+    subcategories: [
+      "Glitch",
+      "Zoom",
+      "Blur",
+      "Light Leaks",
+      "Particles",
+      "Camera Moves",
+    ],
+  },
+  {
+    id: "audio",
+    label: "Audio Visuals",
+    icon: FiPlay,
+    subcategories: [
+      "Waveforms",
+      "Equalizers",
+      "Beat Sync",
+      "Podcast",
+      "Music Visualizers",
+    ],
+  },
+  {
+    id: "ui",
+    label: "UI & Tech",
+    icon: FiSmartphone,
+    subcategories: [
+      "UI Motion",
+      "App Screens",
+      "Device Mockups",
+      "HUD",
+      "Cyberpunk",
+    ],
+  },
+  {
+    id: "3d",
+    label: "3D & VFX",
+    icon: FiMaximize2,
+    subcategories: [
+      "3D Objects",
+      "Glass & Chrome",
+      "Liquid",
+      "Particle Worlds",
+      "Sci-Fi",
+    ],
+  },
+  {
+    id: "social",
+    label: "Social & Shorts",
+    icon: FiShare2,
+    subcategories: [
+      "YouTube Shorts",
+      "Instagram Reels",
+      "TikTok",
+      "9:16",
+    ],
+  },
+] as const;
+
+const legacyCategoryParent: Record<TemplateCategory, string> = {
+  "Kinetic Typography": "typography",
+  "Social & Reels (9:16)": "social",
+  "3D & VFX": "3d",
+  "Logo Reveals": "branding",
+  "UI & Lottie": "ui",
+  "HUD & Cyberpunk": "ui",
+};
+
+function getTemplateSubcategory(template: TemplateItem): string {
+  const title = template.title.toLowerCase();
+  const tags = template.tags.map((tag) => tag.toLowerCase()).join(" ");
+
+  if (template.category === "Kinetic Typography") {
+    if (title.includes("subtitle") || tags.includes("captions")) return "Captions & Subtitles";
+    if (title.includes("swiss") || title.includes("title card")) return "Title Cards";
+    if (title.includes("highlight")) return "Text Highlights";
+    return "Kinetic Typography";
+  }
+
+  if (template.category === "Social & Reels (9:16)") {
+    if (title.includes("podcast")) return "Podcast";
+    if (title.includes("reel")) return "Instagram Reels";
+    return "YouTube Shorts";
+  }
+
+  if (template.category === "Logo Reveals") {
+    if (title.includes("stinger")) return "Channel Stingers";
+    return "Logo Reveals";
+  }
+
+  if (template.category === "UI & Lottie") {
+    if (title.includes("lottie") || tags.includes("micro-interaction")) return "UI Motion";
+    if (title.includes("dynamic island")) return "Device Mockups";
+    return "UI Motion";
+  }
+
+  if (template.category === "HUD & Cyberpunk") {
+    if (title.includes("glitch")) return "Glitch";
+    return title.includes("hud") || tags.includes("hud") ? "HUD" : "Cyberpunk";
+  }
+
+  if (template.category === "3D & VFX") {
+    if (title.includes("chrome") || title.includes("liquid")) return "Liquid";
+    if (title.includes("warp") || title.includes("aurora") || title.includes("spectrum")) return "Particle Worlds";
+    if (title.includes("prism") || title.includes("glass")) return "Glass & Chrome";
+    if (title.includes("synthwave") || title.includes("cyber")) return "Sci-Fi";
+    return "3D Objects";
+  }
+
+  return template.category;
+}
+
+function getTemplateParent(template: TemplateItem): string {
+  return legacyCategoryParent[template.category] ?? "all";
+}
 
   // 18 Curated Broadcast-Grade Procedural Motion Templates
   const templates: TemplateItem[] = useMemo(
@@ -434,7 +588,7 @@ export default function ExplorePage() {
         tags: ["Logo Reveal", "Arc Sweep", "Neon Corona", "Particle Aura"],
         palette: ["#22d3ee", "#6366f1", "#a855f7", "#ffffff"],
         exportFormats: ["MP4 (H.264)", "ProRes 4444 (Alpha)", "Lottie JSON"],
-        defaultText: "ANIMAGENT",
+        defaultText: "BYREEL",
         prompt:
           "Dual vector neon circular arcs rotating synchronously with glowing particle corona, high-voltage plasma flare, and central brand emblem reveal.",
         author: { name: "Kaelen Voss", avatar: "KV", pro: true, role: "Motion Designer" },
@@ -487,9 +641,9 @@ export default function ExplorePage() {
         category: "3D & VFX",
         duration: "0:06",
         durationSec: 6,
-        aspectRatio: "1:1",
+        aspectRatio: "16:9",
         fps: 60,
-        resolution: "2160×2160 (1:1 Square)",
+        resolution: "3840×2160 (4K 16:9)",
         easing: "cubic-bezier(0.33, 1, 0.68, 1)",
         tags: ["Metaball", "Liquid Chrome", "Harmonic Waves", "Organic"],
         palette: ["#a855f7", "#3b82f6", "#06b6d4", "#e2e8f0"],
@@ -924,9 +1078,9 @@ export default function ExplorePage() {
         category: "UI & Lottie",
         duration: "0:03",
         durationSec: 3,
-        aspectRatio: "1:1",
+        aspectRatio: "16:9",
         fps: 60,
-        resolution: "1920×1920 (1:1 Square)",
+        resolution: "1920×1080 (FHD 16:9)",
         easing: "cubic-bezier(0.175, 0.885, 0.32, 1.275)",
         tags: ["Micro-interaction", "Lottie", "Checkmark", "Confetti Burst"],
         palette: ["#10b981", "#fbbf24", "#f43f5e", "#38bdf8"],
@@ -1035,9 +1189,9 @@ export default function ExplorePage() {
         category: "Logo Reveals",
         duration: "0:05",
         durationSec: 5,
-        aspectRatio: "1:1",
+        aspectRatio: "16:9",
         fps: 60,
-        resolution: "2160×2160 (1:1 Square)",
+        resolution: "1920×1080 (FHD 16:9)",
         easing: "cubic-bezier(0.2, 0.8, 0.2, 1)",
         tags: ["Logo Stinger", "Neon Trace", "Wireframe", "Plasma Line"],
         palette: ["#22d3ee", "#a855f7", "#ffffff", "#0e0f15"],
@@ -1299,9 +1453,9 @@ export default function ExplorePage() {
         category: "UI & Lottie",
         duration: "0:04",
         durationSec: 4,
-        aspectRatio: "1:1",
+        aspectRatio: "16:9",
         fps: 60,
-        resolution: "1920×1920 (1:1 Square)",
+        resolution: "1920×1080 (FHD 16:9)",
         easing: "cubic-bezier(0.25, 1, 0.5, 1)",
         tags: ["Glassmorphism", "Card Tilt", "Micro-Interaction", "Specular"],
         palette: ["#38bdf8", "#818cf8", "#ffffff", "#1e293b"],
@@ -1391,8 +1545,13 @@ export default function ExplorePage() {
   const filteredTemplates = useMemo(() => {
     return templates
       .filter((tpl) => {
+        const parentCategory = getTemplateParent(tpl);
+        const subcategory = getTemplateSubcategory(tpl);
+
         const matchesCat =
-          activeCategory === "All" || tpl.category === activeCategory;
+          activeCategory === "all" || parentCategory === activeCategory;
+        const matchesSubcategory =
+          !activeSubcategory || subcategory === activeSubcategory;
         const matchesAspect =
           aspectRatioFilter === "All" || tpl.aspectRatio === aspectRatioFilter;
         const matchesTag =
@@ -1411,6 +1570,7 @@ export default function ExplorePage() {
           fpsFilter === "all" ||
           (fpsFilter === "60" && tpl.fps === 60) ||
           (fpsFilter === "30" && tpl.fps === 30);
+
         const q = searchQuery.toLowerCase().trim();
         const matchesSearch =
           !q ||
@@ -1418,9 +1578,19 @@ export default function ExplorePage() {
           tpl.prompt.toLowerCase().includes(q) ||
           tpl.author.name.toLowerCase().includes(q) ||
           tpl.category.toLowerCase().includes(q) ||
+          subcategory.toLowerCase().includes(q) ||
           tpl.tags.some((tag) => tag.toLowerCase().includes(q));
 
-        return matchesCat && matchesAspect && matchesTag && matchesView && matchesDuration && matchesFps && matchesSearch;
+        return (
+          matchesCat &&
+          matchesSubcategory &&
+          matchesAspect &&
+          matchesTag &&
+          matchesView &&
+          matchesDuration &&
+          matchesFps &&
+          matchesSearch
+        );
       })
       .sort((a, b) => {
         if (sortBy === "popular") return b.likes - a.likes;
@@ -1430,7 +1600,19 @@ export default function ExplorePage() {
         if (sortBy === "recent") return b.id.localeCompare(a.id);
         return b.likes - a.likes;
       });
-  }, [templates, activeCategory, aspectRatioFilter, selectedTag, marketView, durationFilter, fpsFilter, savedIds, searchQuery, sortBy]);
+  }, [
+    templates,
+    activeCategory,
+    activeSubcategory,
+    aspectRatioFilter,
+    selectedTag,
+    marketView,
+    durationFilter,
+    fpsFilter,
+    savedIds,
+    searchQuery,
+    sortBy,
+  ]);
 
   // Paginated templates for display (6 per row, default first 12)
   const displayedTemplates = useMemo(() => {
@@ -1440,7 +1622,7 @@ export default function ExplorePage() {
   // Reset pagination on filter or search changes
   useEffect(() => {
     setVisibleCount(12);
-  }, [activeCategory, aspectRatioFilter, durationFilter, fpsFilter, selectedTag, marketView, searchQuery, sortBy]);
+  }, [activeCategory, activeSubcategory, aspectRatioFilter, durationFilter, fpsFilter, selectedTag, marketView, searchQuery, sortBy]);
 
   // Load more presets handler
   const handleLoadMore = () => {
@@ -1458,7 +1640,8 @@ export default function ExplorePage() {
   // Active non-default filter count
   const activeFilterCount = useMemo(() => {
     let count = 0;
-    if (activeCategory !== "All") count++;
+    if (activeCategory !== "all") count++;
+    if (activeSubcategory) count++;
     if (aspectRatioFilter !== "All") count++;
     if (durationFilter !== "all") count++;
     if (fpsFilter !== "all") count++;
@@ -1466,11 +1649,12 @@ export default function ExplorePage() {
     if (marketView !== "all") count++;
     if (searchQuery.trim()) count++;
     return count;
-  }, [activeCategory, aspectRatioFilter, durationFilter, fpsFilter, selectedTag, marketView, searchQuery]);
+  }, [activeCategory, activeSubcategory, aspectRatioFilter, durationFilter, fpsFilter, selectedTag, marketView, searchQuery]);
 
   // Reset all filters to default
   const handleResetAllFilters = () => {
-    setActiveCategory("All");
+    setActiveCategory("all");
+    setActiveSubcategory(null);
     setAspectRatioFilter("All");
     setDurationFilter("all");
     setFpsFilter("all");
@@ -1549,7 +1733,7 @@ export default function ExplorePage() {
     const presetData = {
       name: item.title,
       version: "2.5.0",
-      generator: "Animagent AI Motion Engine",
+      generator: "byreel AI Motion Engine",
       category: item.category,
       duration: item.duration,
       durationSec: item.durationSec,
@@ -1579,7 +1763,7 @@ export default function ExplorePage() {
   };
 
   return (
-    <div className="marketplace-shell min-h-screen flex flex-col font-sans text-slate-900 dark:text-[#eee8dc] bg-[#f3eee5] dark:bg-[#171914] relative overflow-x-hidden selection:bg-[#cf795d]/30 selection:text-[#eee8dc] transition-colors duration-200">
+    <div className="marketplace-shell min-h-screen flex flex-col absolute top-0 z-50 font-sans text-slate-900 dark:text-[#eee8dc] bg-[#f3eee5] dark:bg-[#171914] relative overflow-x-hidden selection:bg-[#cf795d]/30 selection:text-[#eee8dc] transition-colors duration-200">
       {/* Interactive Background Canvas */}
       <div className="fixed inset-0 pointer-events-none z-0 opacity-40">
         <SpiderNetBackground opacity={0.5} />
@@ -1651,7 +1835,7 @@ export default function ExplorePage() {
               <Link
                 href="/workspace"
                 className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-[#cf795d] to-[#e5987d] text-slate-950 hover:brightness-110 shadow-sm hover:shadow-[#cf795d]/25 transition-all active:scale-95"
-                title="Launch the Animagent Motion Graphics Workspace"
+                title="Launch the byreel Motion Graphics Workspace"
               >
                 <FiZap className="w-3.5 h-3.5 fill-slate-950" />
                 <span>Open Studio</span>
@@ -1675,10 +1859,10 @@ export default function ExplorePage() {
                 <span>Motion Preset Showcase</span>
               </div>
               <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-slate-950 dark:text-[#f1eadf] font-headline">
-                Curated Motion Library
+                Motion Graphics for YouTube
               </h1>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-[#b8b5a8] mt-1 max-w-2xl font-sans">
-                Explore procedural 60FPS motion presets in 9:16 vertical reels &amp; widescreen formats. Hover or scrub along the timeline to preview, then remix instantly in Studio.
+                Find production-ready motion graphics for explainers, coding videos, documentaries, Shorts, branding and more. Preview instantly, then remix in Studio.
               </p>
             </div>
 
@@ -1698,401 +1882,231 @@ export default function ExplorePage() {
         </div>
       </section>
 
-      {/* Sticky Multi-Tier Filter & Search Bar - Full-Width Edge-to-Edge */}
-      <div className="sticky top-16 sm:top-20 z-30 border-b border-black/[0.08] dark:border-white/[0.08] bg-[#f3eee5]/95 dark:bg-[#171914]/95 backdrop-blur-xl transition-all shadow-sm">
-        <div className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 py-3 space-y-2.5">
-          {/* Row 1: Categories, Formats, Search & Toolbar Controls */}
-          <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-2.5">
-            {/* Left: Category Navigation Pills */}
-            <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-0.5">
-              {categories.map((cat) => {
-                const isActive = activeCategory === cat;
-                const count =
-                  cat === "All"
-                    ? templates.length
-                    : templates.filter((t) => t.category === cat).length;
-
-                return (
-                  <button
-                    key={cat}
-                    type="button"
-                    onClick={() => setActiveCategory(cat)}
-                    className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 ${
-                      isActive
-                        ? "bg-[#cf795d] text-white shadow-sm font-semibold"
-                        : "text-slate-600 hover:text-slate-950 hover:bg-black/[0.05] dark:text-[#b8b5a8] dark:hover:text-[#eee8dc] dark:hover:bg-white/[0.06] border border-black/[0.06] dark:border-white/[0.08]"
-                    }`}
-                  >
-                    <span>{cat}</span>
-                    <span
-                      className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
-                        isActive
-                          ? "bg-white/25 text-white"
-                          : "bg-black/[0.06] text-slate-600 dark:bg-white/10 dark:text-[#888b7e]"
-                      }`}
-                    >
-                      {count}
-                    </span>
-                  </button>
-                );
-              })}
+      {/* Sticky Library Toolbar */}
+      <div className="sticky top-16 sm:top-20 z-30 border-b border-black/[0.08] dark:border-white/[0.08] bg-[#f3eee5]/95 dark:bg-[#171914]/95 backdrop-blur-xl shadow-sm">
+        <div className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 py-3">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#cf795d]">
+                  Explore
+                </span>
+                <span className="h-1 w-1 rounded-full bg-black/20 dark:bg-white/20" />
+                <span className="text-[11px] font-mono text-slate-500 dark:text-[#888b7e]">
+                  {filteredTemplates.length} presets
+                </span>
+              </div>
+              <h2 className="mt-0.5 truncate text-base font-semibold text-slate-950 dark:text-[#f1eadf]">
+                {activeSubcategory ||
+                  exploreCategories.find((category) => category.id === activeCategory)?.label ||
+                  "All Motion"}
+              </h2>
             </div>
 
-            {/* Right: Search, Format Switcher, Filter Drawer Toggle & Sort */}
-            <div className="flex items-center gap-2 shrink-0 flex-wrap sm:flex-nowrap">
-              {/* Motion Format Toggle (Vertical 9:16 vs Landscape 16:9) */}
-              <div className="flex items-center gap-1 bg-black/[0.03] dark:bg-white/[0.04] p-0.5 rounded-xl border border-black/[0.06] dark:border-white/[0.08]">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMotionFormat("vertical");
-                    setAspectRatioFilter("All");
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              {/* Mobile Category Picker */}
+              <div className="lg:hidden">
+                <select
+                  value={activeCategory}
+                  onChange={(event) => {
+                    setActiveCategory(event.target.value);
+                    setActiveSubcategory(null);
                   }}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
-                    motionFormat === "vertical"
-                      ? "bg-[#cf795d] text-white shadow-xs font-semibold"
-                      : "text-slate-600 dark:text-[#b8b5a8] hover:text-slate-950 dark:hover:text-[#eee8dc]"
-                  }`}
-                  title="9:16 Vertical Motion (Reels, TikTok, Shorts)"
+                  className="h-10 w-full min-w-[180px] rounded-xl border border-black/[0.08] bg-white/80 px-3 text-xs font-medium text-slate-800 outline-none transition focus:border-[#cf795d]/50 focus:ring-2 focus:ring-[#cf795d]/10 dark:border-white/[0.08] dark:bg-white/[0.04] dark:text-[#eee8dc]"
                 >
-                  <FiSmartphone className="w-3.5 h-3.5" />
-                  <span>9:16 Vertical</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMotionFormat("landscape");
-                    setAspectRatioFilter("All");
-                  }}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
-                    motionFormat === "landscape"
-                      ? "bg-[#cf795d] text-white shadow-xs font-semibold"
-                      : "text-slate-600 dark:text-[#b8b5a8] hover:text-slate-950 dark:hover:text-[#eee8dc]"
-                  }`}
-                  title="16:9 Landscape Motion (Widescreen UHD)"
-                >
-                  <FiTv className="w-3.5 h-3.5" />
-                  <span>16:9</span>
-                </button>
+                  {exploreCategories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.label}
+                    </option>
+                  ))}
+                </select>
               </div>
 
-              {/* Search Input */}
-              <div className="relative flex items-center w-full sm:w-52">
-                <FiSearch className="absolute left-3 w-3.5 h-3.5 text-slate-400 dark:text-[#888b7e] pointer-events-none" />
+              <div className="relative min-w-0 sm:w-[320px]">
+                <FiSearch className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-[#777a70]" />
                 <input
-                  type="text"
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search presets, tags..."
-                  className="w-full pl-8 pr-7 py-1.5 text-xs bg-black/[0.03] dark:bg-white/[0.04] border border-black/10 dark:border-white/[0.1] hover:border-black/20 dark:hover:border-white/20 focus:border-[#cf795d] rounded-full text-slate-900 dark:text-[#eee8dc] placeholder-slate-400 dark:placeholder-[#888b7e] focus:outline-none transition-all"
+                  onChange={(event) => setSearchQuery(event.target.value)}
+                  placeholder="Search motion graphics..."
+                  className="h-10 w-full rounded-xl border border-black/[0.08] bg-white/80 pl-9 pr-10 text-xs outline-none transition focus:border-[#cf795d]/50 focus:ring-2 focus:ring-[#cf795d]/10 dark:border-white/[0.08] dark:bg-white/[0.04] dark:text-[#eee8dc]"
                 />
                 {searchQuery && (
                   <button
                     type="button"
                     onClick={() => setSearchQuery("")}
-                    className="absolute right-2.5 text-slate-400 hover:text-slate-950 dark:text-[#888b7e] dark:hover:text-white"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                    aria-label="Clear search"
                   >
-                    <FiX className="w-3.5 h-3.5" />
+                    <FiX className="h-3.5 w-3.5" />
                   </button>
                 )}
               </div>
 
-              {/* Sort Selector */}
               <select
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
-                className="px-3 py-1.5 text-xs bg-white dark:bg-[#20241d] border border-black/10 dark:border-white/[0.1] rounded-full text-slate-700 dark:text-[#eee8dc] focus:outline-none hover:border-black/20 dark:hover:border-white/20 cursor-pointer"
+                onChange={(event) => setSortBy(event.target.value as typeof sortBy)}
+                className="h-10 rounded-xl border border-black/[0.08] bg-white/80 px-3 text-xs font-medium text-slate-800 outline-none dark:border-white/[0.08] dark:bg-white/[0.04] dark:text-[#eee8dc]"
+                aria-label="Sort presets"
               >
-                <option value="popular">Most Popular</option>
-                <option value="remixes">Most Remixed</option>
-                <option value="duration">Shortest Duration</option>
-                <option value="duration-desc">Longest Duration</option>
-                <option value="recent">Recently Added</option>
+                <option value="popular">Most popular</option>
+                <option value="remixes">Most remixed</option>
+                <option value="recent">Recent</option>
+                <option value="duration">Shortest</option>
+                <option value="duration-desc">Longest</option>
               </select>
 
-              {/* Filters & Tags Drawer Toggle */}
               <button
                 type="button"
-                onClick={() => setShowAdvancedFilters((prev) => !prev)}
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all cursor-pointer ${
+                onClick={() => setShowAdvancedFilters((previous) => !previous)}
+                className={`inline-flex h-10 items-center justify-center gap-2 rounded-xl border px-3 text-xs font-semibold transition-colors ${
                   showAdvancedFilters || activeFilterCount > 0
-                    ? "bg-[#cf795d]/15 text-[#cf795d] border-[#cf795d]/40 font-semibold"
-                    : "bg-white dark:bg-[#20241d] text-slate-700 dark:text-[#eee8dc] border-black/10 dark:border-white/[0.1] hover:border-black/20 dark:hover:border-white/20"
+                    ? "border-[#cf795d]/40 bg-[#cf795d]/10 text-[#cf795d]"
+                    : "border-black/[0.08] bg-white/80 text-slate-700 hover:bg-black/[0.04] dark:border-white/[0.08] dark:bg-white/[0.04] dark:text-[#eee8dc] dark:hover:bg-white/[0.07]"
                 }`}
-                title="Toggle duration, FPS, and tag filters"
               >
-                <FiSliders className="w-3.5 h-3.5" />
+                <FiFilter className="h-3.5 w-3.5" />
                 <span>Filters</span>
                 {activeFilterCount > 0 && (
-                  <span className="w-4 h-4 rounded-full bg-[#cf795d] text-white text-[10px] font-mono flex items-center justify-center">
+                  <span className="rounded-full bg-[#cf795d] px-1.5 py-0.5 text-[9px] text-white">
                     {activeFilterCount}
                   </span>
                 )}
               </button>
-
-              {/* Layout Switcher */}
-              <div className="hidden sm:flex items-center bg-black/[0.04] dark:bg-white/[0.04] p-0.5 rounded-full border border-black/[0.08] dark:border-white/[0.08]">
-                <button
-                  type="button"
-                  onClick={() => setLayoutMode("grid")}
-                  className={`p-1.5 rounded-full transition-colors cursor-pointer ${
-                    layoutMode === "grid"
-                      ? "bg-[#cf795d] text-white shadow-xs"
-                      : "text-slate-500 hover:text-slate-950 dark:text-[#888b7e] dark:hover:text-white"
-                  }`}
-                  title="6 in a Row Grid"
-                >
-                  <FiGrid className="w-3.5 h-3.5" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setLayoutMode("cinema")}
-                  className={`p-1.5 rounded-full transition-colors cursor-pointer ${
-                    layoutMode === "cinema"
-                      ? "bg-[#cf795d] text-white shadow-xs"
-                      : "text-slate-500 hover:text-slate-950 dark:text-[#888b7e] dark:hover:text-white"
-                  }`}
-                  title="Cinema Mode (4 in a row)"
-                >
-                  <FiMaximize2 className="w-3.5 h-3.5" />
-                </button>
-              </div>
             </div>
           </div>
 
-          {/* Row 2: Market View Tabs & Active Filter Summary */}
-          <div className="flex items-center justify-between gap-2 pt-1 border-t border-black/[0.04] dark:border-white/[0.04] text-xs">
-            <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none">
-              {[
-                { id: "all", label: "All Presets", icon: FiCompass },
-                { id: "featured", label: "Editor's Picks", icon: FiStar },
-                { id: "saved", label: "Saved Presets", icon: FiBookmark },
-                { id: "pro", label: "Pro Creators", icon: FiUser },
-              ].map((view) => {
-                const Icon = view.icon;
-                const active = marketView === view.id;
-                return (
-                  <button
-                    key={view.id}
-                    type="button"
-                    onClick={() => setMarketView(view.id as typeof marketView)}
-                    className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[11px] font-medium transition-colors cursor-pointer ${
-                      active
-                        ? "bg-[#cf795d]/20 text-[#cf795d] font-semibold"
-                        : "text-slate-500 dark:text-[#888b7e] hover:text-slate-900 dark:hover:text-white"
-                    }`}
-                  >
-                    <Icon className="w-3 h-3" />
-                    <span>{view.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-
-            <div className="flex items-center gap-3 shrink-0">
-              {activeFilterCount > 0 && (
-                <button
-                  type="button"
-                  onClick={handleResetAllFilters}
-                  className="inline-flex items-center gap-1 text-[11px] text-[#cf795d] hover:brightness-110 font-semibold cursor-pointer underline-offset-2 hover:underline"
-                >
-                  <FiRotateCcw className="w-3 h-3" />
-                  <span>Reset All ({activeFilterCount})</span>
-                </button>
-              )}
-              <span className="text-[11px] text-slate-500 dark:text-[#888b7e] font-mono">
-                {filteredTemplates.length} presets • {motionFormat === "vertical" ? "9:16 Vertical" : "16:9 Landscape"}
-              </span>
-            </div>
-          </div>
-
-          {/* Row 3: Advanced Filter Drawer (Collapsible) */}
           {showAdvancedFilters && (
-            <div className="pt-2.5 pb-1 border-t border-black/[0.06] dark:border-white/[0.06] space-y-2.5 animate-in fade-in duration-150">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                {/* Duration Filter */}
-                <div className="space-y-1.5">
-                  <span className="text-[10px] uppercase tracking-wider font-mono text-slate-500 dark:text-[#888b7e] flex items-center gap-1">
-                    <FiClock className="w-3 h-3 text-[#cf795d]" />
-                    <span>Duration Range</span>
-                  </span>
-                  <div className="flex items-center gap-1.5 flex-wrap">
+            <div className="mt-3 border-t border-black/[0.06] pt-3 dark:border-white/[0.06]">
+              <div className="grid gap-3 md:grid-cols-3">
+                <div>
+                  <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-[#888b7e]">
+                    View
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
                     {[
-                      { id: "all", label: "All Durations" },
-                      { id: "short", label: "≤ 4s Micro" },
-                      { id: "medium", label: "4-6s Short" },
-                      { id: "long", label: "> 6s Extended" },
-                    ].map((opt) => (
+                      { id: "all", label: "All" },
+                      { id: "featured", label: "Featured" },
+                      { id: "saved", label: "Saved" },
+                      { id: "pro", label: "Pro creators" },
+                    ].map((view) => (
                       <button
-                        key={opt.id}
+                        key={view.id}
                         type="button"
-                        onClick={() => setDurationFilter(opt.id as any)}
-                        className={`px-2 py-0.5 rounded-md text-[11px] font-medium transition-all cursor-pointer ${
-                          durationFilter === opt.id
-                            ? "bg-[#cf795d] text-white font-semibold"
-                            : "bg-black/[0.04] dark:bg-white/[0.05] text-slate-600 dark:text-[#b8b5a8] hover:bg-black/[0.08] dark:hover:bg-white/[0.09]"
+                        onClick={() => setMarketView(view.id as typeof marketView)}
+                        className={`rounded-lg px-2.5 py-1.5 text-[11px] font-medium transition-colors ${
+                          marketView === view.id
+                            ? "bg-[#cf795d] text-white"
+                            : "bg-black/[0.04] text-slate-600 hover:bg-black/[0.07] dark:bg-white/[0.05] dark:text-[#b8b5a8] dark:hover:bg-white/[0.08]"
                         }`}
                       >
-                        {opt.label}
+                        {view.label}
                       </button>
                     ))}
                   </div>
                 </div>
 
-                {/* FPS Filter */}
-                <div className="space-y-1.5">
-                  <span className="text-[10px] uppercase tracking-wider font-mono text-slate-500 dark:text-[#888b7e] flex items-center gap-1">
-                    <FiTrendingUp className="w-3 h-3 text-[#cf795d]" />
-                    <span>Target Frame Rate</span>
-                  </span>
-                  <div className="flex items-center gap-1.5 flex-wrap">
+                <div>
+                  <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-[#888b7e]">
+                    Duration
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
                     {[
-                      { id: "all", label: "All FPS" },
-                      { id: "60", label: "60 FPS (Ultra Fluid)" },
-                      { id: "30", label: "30 FPS (Standard)" },
-                    ].map((opt) => (
+                      { id: "all", label: "Any length" },
+                      { id: "short", label: "0–4s" },
+                      { id: "medium", label: "4–6s" },
+                      { id: "long", label: "6s+" },
+                    ].map((option) => (
                       <button
-                        key={opt.id}
+                        key={option.id}
                         type="button"
-                        onClick={() => setFpsFilter(opt.id as any)}
-                        className={`px-2 py-0.5 rounded-md text-[11px] font-medium transition-all cursor-pointer ${
-                          fpsFilter === opt.id
-                            ? "bg-[#cf795d] text-white font-semibold"
-                            : "bg-black/[0.04] dark:bg-white/[0.05] text-slate-600 dark:text-[#b8b5a8] hover:bg-black/[0.08] dark:hover:bg-white/[0.09]"
+                        onClick={() => setDurationFilter(option.id as typeof durationFilter)}
+                        className={`rounded-lg px-2.5 py-1.5 text-[11px] font-medium transition-colors ${
+                          durationFilter === option.id
+                            ? "bg-[#cf795d] text-white"
+                            : "bg-black/[0.04] text-slate-600 hover:bg-black/[0.07] dark:bg-white/[0.05] dark:text-[#b8b5a8] dark:hover:bg-white/[0.08]"
                         }`}
                       >
-                        {opt.label}
+                        {option.label}
                       </button>
                     ))}
                   </div>
                 </div>
 
-                {/* Aspect Ratio Filter */}
-                <div className="space-y-1.5">
-                  <span className="text-[10px] uppercase tracking-wider font-mono text-slate-500 dark:text-[#888b7e] flex items-center gap-1">
-                    <FiSquare className="w-3 h-3 text-[#cf795d]" />
-                    <span>Canvas Aspect Ratio</span>
-                  </span>
-                  <div className="flex items-center gap-1.5 flex-wrap">
+                <div>
+                  <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-[#888b7e]">
+                    Canvas
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
                     {[
-                      { id: "All", label: "All Ratios" },
-                      { id: "9:16", label: "9:16 Vertical" },
-                      { id: "16:9", label: "16:9 Landscape" },
-                      { id: "1:1", label: "1:1 Square" },
-                    ].map((opt) => (
+                      { id: "All", label: "All" },
+                      { id: "16:9", label: "16:9" },
+                      { id: "9:16", label: "9:16" },
+                    ].map((option) => (
                       <button
-                        key={opt.id}
+                        key={option.id}
                         type="button"
-                        onClick={() => setAspectRatioFilter(opt.id)}
-                        className={`px-2 py-0.5 rounded-md text-[11px] font-medium transition-all cursor-pointer ${
-                          aspectRatioFilter === opt.id
-                            ? "bg-[#cf795d] text-white font-semibold"
-                            : "bg-black/[0.04] dark:bg-white/[0.05] text-slate-600 dark:text-[#b8b5a8] hover:bg-black/[0.08] dark:hover:bg-white/[0.09]"
+                        onClick={() => setAspectRatioFilter(option.id)}
+                        className={`rounded-lg px-2.5 py-1.5 text-[11px] font-medium transition-colors ${
+                          aspectRatioFilter === option.id
+                            ? "bg-[#cf795d] text-white"
+                            : "bg-black/[0.04] text-slate-600 hover:bg-black/[0.07] dark:bg-white/[0.05] dark:text-[#b8b5a8] dark:hover:bg-white/[0.08]"
                         }`}
                       >
-                        {opt.label}
+                        {option.label}
                       </button>
                     ))}
                   </div>
                 </div>
               </div>
 
-              {/* Tag Cloud */}
-              <div className="pt-2 border-t border-black/[0.04] dark:border-white/[0.04] flex items-center gap-1.5 flex-wrap">
-                <span className="text-[10px] uppercase tracking-wider font-mono text-slate-500 dark:text-[#888b7e] mr-1">
-                  Tags:
-                </span>
-                {allTags.map((tag) => {
-                  const isSelected = selectedTag === tag;
-                  return (
+              <div className="mt-3 border-t border-black/[0.05] pt-3 dark:border-white/[0.05]">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className="mr-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-[#888b7e]">
+                    Tags
+                  </span>
+                  {allTags.map((tag) => (
                     <button
                       key={tag}
                       type="button"
-                      onClick={() => setSelectedTag(isSelected ? null : tag)}
-                      className={`px-2 py-0.5 rounded-full text-[10px] font-mono transition-all cursor-pointer ${
-                        isSelected
-                          ? "bg-[#cf795d] text-white font-semibold"
-                          : "bg-black/[0.03] dark:bg-white/[0.04] text-slate-600 dark:text-[#b8b5a8] hover:bg-black/[0.07] dark:hover:bg-white/[0.08]"
+                      onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
+                      className={`rounded-full px-2 py-1 text-[10px] font-mono transition-colors ${
+                        selectedTag === tag
+                          ? "bg-[#cf795d] text-white"
+                          : "bg-black/[0.035] text-slate-600 hover:bg-black/[0.07] dark:bg-white/[0.04] dark:text-[#b8b5a8] dark:hover:bg-white/[0.08]"
                       }`}
                     >
                       #{tag}
                     </button>
-                  );
-                })}
+                  ))}
+                </div>
               </div>
 
-              {/* Active Filter Chips Ribbon */}
               {activeFilterCount > 0 && (
-                <div className="pt-1.5 flex items-center gap-1.5 flex-wrap">
-                  <span className="text-[10px] uppercase font-mono text-slate-400 dark:text-[#888b7e]">
-                    Active Filters:
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400 dark:text-[#777a70]">
+                    Active
                   </span>
-                  {activeCategory !== "All" && (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] bg-[#cf795d]/20 text-[#cf795d] font-semibold border border-[#cf795d]/30">
-                      Category: {activeCategory}
-                      <button
-                        type="button"
-                        onClick={() => setActiveCategory("All")}
-                        className="hover:text-slate-900 dark:hover:text-white"
-                      >
-                        <FiX className="w-2.5 h-2.5" />
-                      </button>
+                  {activeCategory !== "all" && (
+                    <span className="rounded-full border border-[#cf795d]/25 bg-[#cf795d]/10 px-2.5 py-1 text-[10px] font-semibold text-[#cf795d]">
+                      {exploreCategories.find((item) => item.id === activeCategory)?.label}
                     </span>
                   )}
-                  {durationFilter !== "all" && (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] bg-[#cf795d]/20 text-[#cf795d] font-semibold border border-[#cf795d]/30">
-                      Duration: {durationFilter}
-                      <button
-                        type="button"
-                        onClick={() => setDurationFilter("all")}
-                        className="hover:text-slate-900 dark:hover:text-white"
-                      >
-                        <FiX className="w-2.5 h-2.5" />
-                      </button>
-                    </span>
-                  )}
-                  {fpsFilter !== "all" && (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] bg-[#cf795d]/20 text-[#cf795d] font-semibold border border-[#cf795d]/30">
-                      FPS: {fpsFilter}
-                      <button
-                        type="button"
-                        onClick={() => setFpsFilter("all")}
-                        className="hover:text-slate-900 dark:hover:text-white"
-                      >
-                        <FiX className="w-2.5 h-2.5" />
-                      </button>
+                  {activeSubcategory && (
+                    <span className="rounded-full border border-[#cf795d]/25 bg-[#cf795d]/10 px-2.5 py-1 text-[10px] font-semibold text-[#cf795d]">
+                      {activeSubcategory}
                     </span>
                   )}
                   {selectedTag && (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] bg-[#cf795d]/20 text-[#cf795d] font-semibold border border-[#cf795d]/30">
-                      Tag: #{selectedTag}
-                      <button
-                        type="button"
-                        onClick={() => setSelectedTag(null)}
-                        className="hover:text-slate-900 dark:hover:text-white"
-                      >
-                        <FiX className="w-2.5 h-2.5" />
-                      </button>
-                    </span>
-                  )}
-                  {aspectRatioFilter !== "All" && (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] bg-[#cf795d]/20 text-[#cf795d] font-semibold border border-[#cf795d]/30">
-                      Ratio: {aspectRatioFilter}
-                      <button
-                        type="button"
-                        onClick={() => setAspectRatioFilter("All")}
-                        className="hover:text-slate-900 dark:hover:text-white"
-                      >
-                        <FiX className="w-2.5 h-2.5" />
-                      </button>
+                    <span className="rounded-full border border-[#cf795d]/25 bg-[#cf795d]/10 px-2.5 py-1 text-[10px] font-semibold text-[#cf795d]">
+                      #{selectedTag}
                     </span>
                   )}
                   <button
                     type="button"
                     onClick={handleResetAllFilters}
-                    className="text-[10px] text-slate-500 hover:text-slate-900 dark:text-[#888b7e] dark:hover:text-white underline cursor-pointer ml-1"
+                    className="ml-1 text-[10px] font-medium text-slate-500 underline hover:text-slate-950 dark:text-[#888b7e] dark:hover:text-white"
                   >
-                    Clear All
+                    Clear filters
                   </button>
                 </div>
               )}
@@ -2101,8 +2115,120 @@ export default function ExplorePage() {
         </div>
       </div>
 
-      {/* Main Full-Page Template Showcase - 6-in-a-Row Pure Motion Grid */}
+      {/* Motion Library */}
       <main className="relative z-10 w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 py-6 flex-1">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[240px_minmax(0,1fr)]">
+          {/* Desktop Category Sidebar */}
+          <aside className="hidden lg:block">
+            <div className="sticky top-32">
+              <div className="mb-4">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-[#888b7e]">
+                  Categories
+                </p>
+                <p className="mt-1 text-sm font-semibold text-slate-950 dark:text-[#f1eadf]">
+                  Find the right motion
+                </p>
+              </div>
+
+              <nav className="space-y-1">
+                {exploreCategories.map((category) => {
+                  const Icon = category.icon;
+                  const active = activeCategory === category.id;
+                  const categoryCount =
+                    category.id === "all"
+                      ? templates.length
+                      : templates.filter((template) => getTemplateParent(template) === category.id).length;
+
+                  return (
+                    <div key={category.id}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setActiveCategory(category.id);
+                          setActiveSubcategory(null);
+                        }}
+                        className={`group flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-sm transition-all ${
+                          active
+                            ? "bg-[#cf795d]/12 text-[#cf795d]"
+                            : "text-slate-700 hover:bg-black/[0.035] hover:text-slate-950 dark:text-[#b8b5a8] dark:hover:bg-white/[0.045] dark:hover:text-white"
+                        }`}
+                      >
+                        <Icon className={`h-4 w-4 shrink-0 ${active ? "text-[#cf795d]" : "opacity-70"}`} />
+                        <span className={`min-w-0 flex-1 truncate ${active ? "font-semibold" : "font-medium"}`}>
+                          {category.label}
+                        </span>
+                        <span className={`font-mono text-[9px] ${active ? "text-[#cf795d]/80" : "text-slate-400 dark:text-[#777a70]"}`}>
+                          {categoryCount}
+                        </span>
+                        {category.subcategories.length > 0 && (
+                          <FiChevronRight
+                            className={`h-3 w-3 shrink-0 transition-transform ${
+                              active ? "rotate-90" : "opacity-40 group-hover:translate-x-0.5"
+                            }`}
+                          />
+                        )}
+                      </button>
+
+                      {active && category.subcategories.length > 0 && (
+                        <div className="ml-5 mt-1 border-l border-black/[0.07] pl-3 dark:border-white/[0.07]">
+                          {category.subcategories.map((subcategory) => {
+                            const subActive = activeSubcategory === subcategory;
+                            const subCount = templates.filter(
+                              (template) =>
+                                getTemplateParent(template) === category.id &&
+                                getTemplateSubcategory(template) === subcategory
+                            ).length;
+
+                            return (
+                              <button
+                                key={subcategory}
+                                type="button"
+                                onClick={() => {
+                                  setActiveCategory(category.id);
+                                  setActiveSubcategory(subActive ? null : subcategory);
+                                }}
+                                className={`flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-[11px] transition-colors ${
+                                  subActive
+                                    ? "font-semibold text-[#cf795d]"
+                                    : "text-slate-500 hover:text-slate-900 dark:text-[#8f9188] dark:hover:text-white"
+                                }`}
+                              >
+                                <span className="min-w-0 flex-1 truncate">{subcategory}</span>
+                                {subCount > 0 && (
+                                  <span className="font-mono text-[9px] opacity-45">{subCount}</span>
+                                )}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </nav>
+
+              <div className="mt-6 rounded-2xl border border-black/[0.06] bg-black/[0.02] p-3 dark:border-white/[0.06] dark:bg-white/[0.025]">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#cf795d]/10 text-[#cf795d]">
+                    <FiZap className="h-3.5 w-3.5" />
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-semibold text-slate-900 dark:text-[#eee8dc]">Need something custom?</p>
+                    <p className="text-[10px] text-slate-500 dark:text-[#888b7e]">Generate it in Studio.</p>
+                  </div>
+                </div>
+                <Link
+                  href="/workspace"
+                  className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-[#cf795d] px-3 py-2 text-[11px] font-semibold text-white transition hover:brightness-110"
+                >
+                  Open Studio
+                  <FiArrowRight className="h-3 w-3" />
+                </Link>
+              </div>
+            </div>
+          </aside>
+
+          <section className="min-w-0">
         {filteredTemplates.length === 0 ? (
           <div className="text-center py-28 space-y-3">
             <div className="w-12 h-12 mx-auto rounded-full bg-slate-100 dark:bg-white/[0.05] border border-black/10 dark:border-white/10 flex items-center justify-center text-slate-500 dark:text-[#888b7e]">
@@ -2128,8 +2254,8 @@ export default function ExplorePage() {
             <div
               className={`grid gap-3 sm:gap-3.5 ${
               layoutMode === "cinema"
-                ? "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
-                : "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-6"
+                ? "grid-cols-1 sm:grid-cols-2 xl:grid-cols-3"
+                : "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5"
             }`}
           >
             {displayedTemplates.map((item) => {
@@ -2164,8 +2290,6 @@ export default function ExplorePage() {
                   ? "aspect-video"
                   : item.aspectRatio === "9:16"
                   ? "aspect-[9/16]"
-                  : item.aspectRatio === "1:1"
-                  ? "aspect-square"
                   : "aspect-video";
 
               return (
@@ -2428,7 +2552,9 @@ export default function ExplorePage() {
           </div>
         </>
       )}
-    </main>
+          </section>
+        </div>
+      </main>
 
       {/* Deep Studio Inspector & Remix Modal */}
       {selectedItem && (
@@ -2799,7 +2925,7 @@ export default function ExplorePage() {
                     className="w-full py-3 rounded-xl bg-gradient-to-r from-[#cf795d] to-[#e5987d] text-slate-950 font-bold text-sm hover:brightness-110 transition-all flex items-center justify-center gap-2 shadow-xl shadow-[#cf795d]/20 active:scale-[0.99]"
                   >
                     <FiZap className="w-4 h-4 fill-slate-950" />
-                    <span>Open &amp; Remix in Animagent Studio</span>
+                    <span>Open &amp; Remix in byreel Studio</span>
                     <FiArrowRight className="w-4 h-4 ml-1" />
                   </Link>
                 </div>

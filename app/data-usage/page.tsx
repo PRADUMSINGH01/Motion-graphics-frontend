@@ -17,7 +17,7 @@ import {
 } from "react-icons/fi";
 
 export const metadata = {
-  title: "Data Usage & AI Ethics - Animagent AI",
+  title: "Data Usage & AI Ethics - byreel AI",
   description: "Our policy regarding AI model training, zero data retention, and proprietary asset protection for motion graphics.",
 };
 
@@ -74,7 +74,7 @@ export default function DataUsagePage() {
           </div>
 
           <p className="text-xs sm:text-sm text-slate-800 dark:text-slate-200 leading-relaxed font-normal bg-white/80 dark:bg-white/[0.02] p-4 rounded-xl border border-purple-100 dark:border-white/[0.06] shadow-sm">
-            &quot;Animagent AI does <strong className="text-slate-950 dark:text-white">NOT</strong> use, train, fine-tune, or calibrate public foundational models on your private motion prompts, client vector files, brand guidelines, or custom keyframe curves. Your creative intellectual property belongs exclusively to you.&quot;
+            &quot;byreel AI does <strong className="text-slate-950 dark:text-white">NOT</strong> use, train, fine-tune, or calibrate public foundational models on your private motion prompts, client vector files, brand guidelines, or custom keyframe curves. Your creative intellectual property belongs exclusively to you.&quot;
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
@@ -102,7 +102,7 @@ export default function DataUsagePage() {
               <span>1. How Our Motion Foundation Models Are Trained</span>
             </h2>
             <p>
-              Animagent&apos;s generative motion engines (including the Spider-Web Canvas Engine, Procedural Physics Simulator, and 3D Bezier Curve Synthesizer) are trained solely through:
+              byreel&apos;s generative motion engines (including the Spider-Web Canvas Engine, Procedural Physics Simulator, and 3D Bezier Curve Synthesizer) are trained solely through:
             </p>
             <ul className="list-disc pl-5 space-y-2 text-slate-600 dark:text-slate-400">
               <li>
@@ -112,7 +112,7 @@ export default function DataUsagePage() {
                 <strong className="text-slate-950 dark:text-white">Fully Licensed Open-Source Codebases:</strong> Permissively licensed graphics code (MIT, Apache 2.0, BSD) covering WebGL shaders, Three.js shaders, and SVG path specifications.
               </li>
               <li>
-                <strong className="text-slate-950 dark:text-white">In-House Studio Animations:</strong> Bespoke motion graphics created directly by Animagent&apos;s salaried animators with 100% clean title and copyright clearance.
+                <strong className="text-slate-950 dark:text-white">In-House Studio Animations:</strong> Bespoke motion graphics created directly by byreel&apos;s salaried animators with 100% clean title and copyright clearance.
               </li>
             </ul>
           </section>

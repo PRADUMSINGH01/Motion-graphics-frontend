@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { FiArrowRight, FiShield } from "react-icons/fi";
 import MainSection from "./components/MainSection";
-import MotionQuote from "./components/MotionQuote";
 import PricingSection from "./components/PricingSection";
 
 export default function Home() {
@@ -9,10 +8,6 @@ export default function Home() {
     <div className="flex-1 flex flex-col font-poppins text-slate-800 dark:text-slate-100">
       {/* MAIN HERO SECTION WITH ANIMATED SPIDER WEB CANVAS */}
       <MainSection />
-
-      {/* GSAP MOTION QUOTE SHOWCASE */}
-      <MotionQuote />
-
       {/* PRICING PLANS SECTION */}
       <PricingSection />
 
@@ -40,7 +35,7 @@ export default function Home() {
               className="inline-flex items-center gap-2 px-4 py-3 text-sm font-medium text-slate-800 dark:text-white bg-black/[0.04] dark:bg-white/10 border border-black/10 dark:border-white/15 rounded-xl hover:bg-black/[0.08] dark:hover:bg-white/20 transition-colors"
             >
               <FiShield className="w-4 h-4 text-amber-500 dark:text-yellow-300" />
-              <span>Animagent Sign In</span>
+              <span>byreel Sign In</span>
             </Link>
           </div>
         </div>

@@ -127,7 +127,7 @@ function AlertToast({
       progressBar: "bg-gradient-to-r from-emerald-400 to-cyan-400",
       glowColor: "shadow-[0_20px_50px_rgba(0,0,0,0.8),0_0_25px_rgba(16,185,129,0.12)]",
       Icon: FiCheckCircle,
-      tag: "ANIMAGENT • SUCCESS",
+      tag: "BYREEL • SUCCESS",
     },
     failure: {
       leftBorder: "border-l-amber-400",
@@ -138,7 +138,7 @@ function AlertToast({
       progressBar: "bg-gradient-to-r from-amber-400 to-yellow-400",
       glowColor: "shadow-[0_20px_50px_rgba(0,0,0,0.8),0_0_25px_rgba(245,158,11,0.12)]",
       Icon: FiAlertTriangle,
-      tag: "ANIMAGENT • NOTICE",
+      tag: "BYREEL • NOTICE",
     },
     error: {
       leftBorder: "border-l-rose-500",
@@ -149,7 +149,7 @@ function AlertToast({
       progressBar: "bg-gradient-to-r from-rose-500 to-pink-500",
       glowColor: "shadow-[0_20px_50px_rgba(0,0,0,0.8),0_0_25px_rgba(244,63,94,0.12)]",
       Icon: FiXCircle,
-      tag: "ANIMAGENT • ERROR",
+      tag: "BYREEL • ERROR",
     },
   }[alert.type];
 

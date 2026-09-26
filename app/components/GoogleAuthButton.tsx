@@ -86,7 +86,7 @@ export default function GoogleAuthButton({
             applyOAuthSession(token, user);
             success(
               mode === "login" ? "Google Sign-In Successful" : "Google Registration Complete",
-              `Welcome to Animagent Studio, ${user.profile?.displayName || user.email?.split("@")[0] || "Creator"}!`
+              `Welcome to byreel Studio, ${user.profile?.displayName || user.email?.split("@")[0] || "Creator"}!`
             );
 
             setTimeout(() => {

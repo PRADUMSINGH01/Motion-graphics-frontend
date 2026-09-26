@@ -107,28 +107,32 @@ export default function Navbar() {
       <header
         className={`fixed top-0 left-0 right-0 w-full z-50 transition-all duration-300 ease-in-out select-none ${
           isScrolled || mobileMenuOpen
-            ? "bg-white/85 dark:bg-[#0c0c11]/85 backdrop-blur-xl border-b border-black/[0.08] dark:border-white/[0.08] shadow-lg shadow-black/[0.04] dark:shadow-2xl dark:shadow-black/70 py-2.5 sm:py-3"
-            : "bg-transparent backdrop-blur-none border-b border-transparent shadow-none py-3.5 sm:py-4"
+            ? "backdrop-blur-xl border-b shadow-lg py-2"
+            : "bg-transparent backdrop-blur-none border-b border-transparent shadow-none py-3"
         }`}
+        style={{
+          background: isScrolled || mobileMenuOpen ? "color-mix(in srgb, var(--background) 88%, transparent)" : "transparent",
+          borderColor: isScrolled || mobileMenuOpen ? "var(--border-subtle)" : "transparent",
+          boxShadow: isScrolled || mobileMenuOpen ? "0 1px 32px color-mix(in srgb, var(--background) 60%, transparent)" : "none",
+        }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between gap-4">
-            {/* 1. Brand Logo */}
-            <div className="flex items-center gap-8">
-              <Link href="/" className="flex items-center gap-2.5 group">
-                <Logo size={34} showText={true} />
-              </Link>
+          {/* Three-column grid: left nav | center logo | right actions */}
+          <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
+            {/* ── LEFT: Desktop Navigation ── */}
+            <div className="flex items-center gap-1">
 
-              {/* 2. Desktop Navigation Bar */}
-              <nav className="hidden md:flex items-center gap-1" aria-label="Main Navigation">
-                {/* Motion Studio Link (Featured) */}
+              {/* Desktop nav — hidden on mobile */}
+              <nav className="hidden md:flex items-center gap-0.5" aria-label="Main Navigation">
+                {/* Studio */}
                 <Link
                   href="/workspace"
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                    pathname === "/workspace"
-                      ? "bg-cyan-500/15 dark:bg-cyan-500/20 text-cyan-700 dark:text-cyan-300 border border-cyan-500/30 dark:border-cyan-500/40 shadow-xs"
-                      : "text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 hover:bg-cyan-500/10"
-                  }`}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
+                  style={{
+                    color: pathname === "/workspace" ? "var(--accent-primary)" : "var(--text-secondary)",
+                    background: pathname === "/workspace" ? "color-mix(in srgb, var(--accent-primary) 12%, transparent)" : "transparent",
+                    border: pathname === "/workspace" ? "1px solid color-mix(in srgb, var(--accent-primary) 25%, transparent)" : "1px solid transparent",
+                  }}
                 >
                   <FiZap className="w-3.5 h-3.5" />
                   <span>Studio</span>
@@ -151,117 +155,91 @@ export default function Navbar() {
                   <button
                     type="button"
                     onClick={() => setProductDropdownOpen(!productDropdownOpen)}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
-                      productDropdownOpen || pathname?.startsWith("/product")
-                        ? "text-slate-900 dark:text-white bg-black/[0.06] dark:bg-white/[0.08]"
-                        : "text-slate-600 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.04]"
-                    }`}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer"
+                    style={{ color: "var(--text-secondary)" }}
                   >
                     <span>Products</span>
                     <FiChevronDown
-                      className={`w-3 h-3 text-slate-400 transition-transform duration-200 ${
-                        productDropdownOpen ? "rotate-180 text-cyan-600 dark:text-cyan-400" : ""
+                      className={`w-3 h-3 transition-transform duration-200 ${
+                        productDropdownOpen ? "rotate-180" : ""
                       }`}
+                      style={{ color: productDropdownOpen ? "var(--accent-primary)" : "var(--text-muted)" }}
                     />
                   </button>
 
-                  {/* Clean Dropdown Card */}
                   {productDropdownOpen && (
-                    <div className="absolute top-full left-0 mt-2 w-72 rounded-2xl bg-white/95 dark:bg-[#0e0f14]/95 backdrop-blur-2xl border border-black/[0.08] dark:border-white/[0.1] shadow-2xl p-2 space-y-1 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
-                      <Link
-                        href="/workspace"
-                        className="flex items-start gap-2.5 p-2.5 rounded-xl hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors group"
+                    <div
+                      className="absolute top-full left-0 mt-2 w-72 rounded-2xl backdrop-blur-2xl border shadow-2xl p-2 space-y-1 z-50 animate-in fade-in slide-in-from-top-1 duration-150"
+                      style={{
+                        background: "color-mix(in srgb, var(--surface-card) 95%, transparent)",
+                        borderColor: "var(--border-subtle)",
+                      }}
+                    >
+                      <Link href="/workspace" className="flex items-start gap-2.5 p-2.5 rounded-xl transition-colors group" style={{ color: "var(--text-primary)" }}
+                        onMouseEnter={e => (e.currentTarget.style.background = "color-mix(in srgb, var(--accent-primary) 6%, transparent)")}
+                        onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
                       >
-                        <div className="w-7 h-7 rounded-lg bg-cyan-500/15 border border-cyan-400/25 flex items-center justify-center text-cyan-600 dark:text-cyan-400 shrink-0 group-hover:scale-105 transition-transform">
+                        <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform" style={{ background: "color-mix(in srgb, var(--accent-primary) 15%, transparent)", border: "1px solid color-mix(in srgb, var(--accent-primary) 25%, transparent)", color: "var(--accent-primary)" }}>
                           <FiZap className="w-3.5 h-3.5" />
                         </div>
                         <div>
-                          <div className="text-xs font-semibold text-slate-900 dark:text-white group-hover:text-cyan-600 dark:group-hover:text-cyan-300 transition-colors">
-                            Motion Studio
-                          </div>
-                          <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">
-                            60FPS natural language prompt-to-animation engine
-                          </p>
+                          <div className="text-xs font-semibold" style={{ color: "var(--text-primary)" }}>Motion Studio</div>
+                          <p className="text-[10px] mt-0.5 leading-snug" style={{ color: "var(--text-muted)" }}>60FPS natural language prompt-to-animation engine</p>
                         </div>
                       </Link>
 
-                      <Link
-                        href="/workspace?tab=vectorizer"
-                        className="flex items-start gap-2.5 p-2.5 rounded-xl hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors group"
+                      <Link href="/workspace?tab=vectorizer" className="flex items-start gap-2.5 p-2.5 rounded-xl transition-colors group" style={{ color: "var(--text-primary)" }}
+                        onMouseEnter={e => (e.currentTarget.style.background = "color-mix(in srgb, var(--accent-secondary) 6%, transparent)")}
+                        onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
                       >
-                        <div className="w-7 h-7 rounded-lg bg-purple-500/15 border border-purple-400/25 flex items-center justify-center text-purple-600 dark:text-purple-400 shrink-0 group-hover:scale-105 transition-transform">
+                        <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform" style={{ background: "color-mix(in srgb, var(--accent-secondary) 15%, transparent)", border: "1px solid color-mix(in srgb, var(--accent-secondary) 25%, transparent)", color: "var(--accent-secondary)" }}>
                           <FiType className="w-3.5 h-3.5" />
                         </div>
                         <div>
-                          <div className="text-xs font-semibold text-slate-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-300 transition-colors">
-                            Character Vectorizer
-                          </div>
-                          <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">
-                            Procedural typography glyph keyframes &amp; physics
-                          </p>
+                          <div className="text-xs font-semibold" style={{ color: "var(--text-primary)" }}>Character Vectorizer</div>
+                          <p className="text-[10px] mt-0.5 leading-snug" style={{ color: "var(--text-muted)" }}>Procedural typography glyph keyframes &amp; physics</p>
                         </div>
                       </Link>
 
-                      <Link
-                        href="/api-keys"
-                        className="flex items-start gap-2.5 p-2.5 rounded-xl hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition-colors group"
+                      <Link href="/api-keys" className="flex items-start gap-2.5 p-2.5 rounded-xl transition-colors group" style={{ color: "var(--text-primary)" }}
+                        onMouseEnter={e => (e.currentTarget.style.background = "color-mix(in srgb, var(--accent-tertiary) 6%, transparent)")}
+                        onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
                       >
-                        <div className="w-7 h-7 rounded-lg bg-emerald-500/15 border border-emerald-400/25 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0 group-hover:scale-105 transition-transform">
+                        <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform" style={{ background: "color-mix(in srgb, var(--accent-tertiary) 15%, transparent)", border: "1px solid color-mix(in srgb, var(--accent-tertiary) 25%, transparent)", color: "var(--accent-tertiary)" }}>
                           <FiKey className="w-3.5 h-3.5" />
                         </div>
                         <div>
-                          <div className="text-xs font-semibold text-slate-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-300 transition-colors">
-                            Developer API &amp; SDK
-                          </div>
-                          <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">
-                            Generate API tokens, webhooks &amp; headless render calls
-                          </p>
+                          <div className="text-xs font-semibold" style={{ color: "var(--text-primary)" }}>Developer API &amp; SDK</div>
+                          <p className="text-[10px] mt-0.5 leading-snug" style={{ color: "var(--text-muted)" }}>Generate API tokens, webhooks &amp; headless render calls</p>
                         </div>
                       </Link>
                     </div>
                   )}
                 </div>
 
-                {/* Explore Templates */}
-                <Link
-                  href="/explore"
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                    pathname === "/explore"
-                      ? "text-slate-950 dark:text-white bg-black/[0.06] dark:bg-white/[0.08]"
-                      : "text-slate-600 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.04]"
-                  }`}
-                >
-                  Explore
-                </Link>
-
-                {/* Plans & Pricing */}
-                <Link
-                  href="/pricing"
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                    pathname === "/pricing" || pathname === "/billing"
-                      ? "text-slate-950 dark:text-white bg-black/[0.06] dark:bg-white/[0.08]"
-                      : "text-slate-600 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.04]"
-                  }`}
-                >
-                  Pricing
-                </Link>
-
-                {/* Developer API */}
-                <Link
-                  href="/api-keys"
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                    pathname === "/api-keys"
-                      ? "text-slate-950 dark:text-white bg-black/[0.06] dark:bg-white/[0.08]"
-                      : "text-slate-600 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white hover:bg-black/[0.04] dark:hover:bg-white/[0.04]"
-                  }`}
-                >
-                  API Keys
-                </Link>
+                {[{ href: "/explore", label: "Explore" }, { href: "/pricing", label: "Pricing" }, { href: "/api-keys", label: "API Keys" }].map(({ href, label }) => (
+                  <Link
+                    key={href}
+                    href={href}
+                    className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                    style={{
+                      color: pathname === href ? "var(--text-primary)" : "var(--text-secondary)",
+                      background: pathname === href ? "color-mix(in srgb, var(--border-strong) 60%, transparent)" : "transparent",
+                    }}
+                  >
+                    {label}
+                  </Link>
+                ))}
               </nav>
             </div>
 
-            {/* 3. Right Action Area */}
-            <div className="flex items-center gap-2 sm:gap-2.5">
+            {/* ── CENTER: Brand Logo ── */}
+            <Link href="/" className="flex items-center justify-center group">
+              <Logo size={52} />
+            </Link>
+
+            {/* ── RIGHT: Actions ── */}
+            <div className="flex items-center justify-end gap-2 sm:gap-2.5">
               {/* Theme Toggle Button */}
               <ThemeToggle />
 
@@ -384,7 +362,8 @@ export default function Navbar() {
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="md:hidden p-1.5 rounded-lg text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white hover:bg-black/[0.06] dark:hover:bg-white/[0.06] transition-colors cursor-pointer"
+                className="md:hidden p-1.5 rounded-lg transition-colors cursor-pointer"
+                style={{ color: "var(--text-secondary)" }}
                 aria-label="Toggle navigation menu"
               >
                 {mobileMenuOpen ? <FiX className="w-5 h-5" /> : <FiMenu className="w-5 h-5" />}

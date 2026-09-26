@@ -109,13 +109,13 @@ function RegisterForm() {
         {/* Brand Header */}
         <div className="text-center space-y-2">
           <Link href="/" className="inline-flex items-center gap-2.5 group">
-            <Logo size={42} />
+            <Logo size={52} />
           </Link>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--text-primary)] font-comic">
             Create Your Account
           </h1>
           <p className="text-xs text-[var(--text-secondary)]">
-            Start generating autonomous motion graphics with Animagent AI
+            Start generating autonomous motion graphics with byreel AI
           </p>
 
           {requestedPlan !== "free" && (

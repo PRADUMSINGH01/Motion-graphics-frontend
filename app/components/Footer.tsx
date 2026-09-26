@@ -44,7 +44,7 @@ export default function Footer() {
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
             </span>
             <span className="font-mono text-emerald-600 dark:text-emerald-400 font-medium">
-              Animagent Engine v4.2 Operational
+              byreel Engine v4.2 Operational
             </span>
             <span className="text-slate-400 dark:text-slate-600">•</span>
             <span className="text-slate-500 dark:text-slate-400">99.98% GPU Cluster Uptime</span>
@@ -98,7 +98,7 @@ export default function Footer() {
           {/* Brand & Mission column */}
           <div className="col-span-2 space-y-4">
             <Link href="/" className="inline-flex items-center gap-2.5 group">
-              <Logo size={32} showText={true} />
+              <Logo size={42} />
             </Link>
 
             <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-sm leading-relaxed">
@@ -181,7 +181,7 @@ export default function Footer() {
                   href="/about"
                   className="inline-flex items-center gap-1.5 hover:text-slate-950 dark:hover:text-white transition-colors"
                 >
-                  <span>About Animagent</span>
+                  <span>About byreel</span>
                 </Link>
               </li>
             </ul>
@@ -227,7 +227,7 @@ export default function Footer() {
         {/* Minimal Bottom Bar */}
         <div className="mt-12 pt-8 border-t border-black/[0.06] dark:border-white/[0.06] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 dark:text-slate-400">
           <p>
-            © {new Date().getFullYear()} Animagent AI Inc. Built for creative developers and motion designers.
+            © {new Date().getFullYear()} byreel AI Inc. Built for creative developers and motion designers.
           </p>
 
           <div className="flex items-center gap-6">

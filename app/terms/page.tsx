@@ -15,8 +15,8 @@ import {
 } from "react-icons/fi";
 
 export const metadata = {
-  title: "Terms & Conditions - Animagent AI",
-  description: "Terms and conditions governing the use of Animagent AI autonomous animation generation services.",
+  title: "Terms & Conditions - byreel AI",
+  description: "Terms and conditions governing the use of byreel AI autonomous animation generation services.",
 };
 
 export default function TermsPage() {
@@ -100,7 +100,7 @@ export default function TermsPage() {
               1. Agreement to Terms
             </h2>
             <p>
-              These Terms &amp; Conditions (&quot;Terms&quot;) constitute a legally binding agreement between you (&quot;User&quot;, &quot;Client&quot;, or &quot;You&quot;) and Animagent AI Inc. (&quot;Company&quot;, &quot;Animagent&quot;, &quot;we&quot;, &quot;us&quot;), governing your access to and usage of the Animagent autonomous animation platform, website, AI rendering APIs, and related creative software services.
+              These Terms &amp; Conditions (&quot;Terms&quot;) constitute a legally binding agreement between you (&quot;User&quot;, &quot;Client&quot;, or &quot;You&quot;) and byreel AI Inc. (&quot;Company&quot;, &quot;byreel&quot;, &quot;we&quot;, &quot;us&quot;), governing your access to and usage of the byreel autonomous animation platform, website, AI rendering APIs, and related creative software services.
             </p>
             <p>
               By creating an account, running generation prompts, reusing motion assets, or purchasing subscription credits, you affirm that you are at least 18 years of age and legally authorized to enter into this agreement.
@@ -113,7 +113,7 @@ export default function TermsPage() {
               2. Description of Autonomous AI Agent Services
             </h2>
             <p>
-              Animagent AI provides an interactive generative workspace where users supply natural language descriptions, vector specifications, and timing parameters. Our autonomous agents translate these inputs into procedural animation code, keyframed timeline data, SVG geometry, WebM/MP4 video streams, and interactive React Three Fiber components.
+              byreel AI provides an interactive generative workspace where users supply natural language descriptions, vector specifications, and timing parameters. Our autonomous agents translate these inputs into procedural animation code, keyframed timeline data, SVG geometry, WebM/MP4 video streams, and interactive React Three Fiber components.
             </p>
             <p>
               We continuously optimize our rendering cluster, model weights, and pipeline algorithms. Features may be updated, modified, or enhanced periodically to maintain state-of-the-art computational performance.
@@ -126,7 +126,7 @@ export default function TermsPage() {
               3. User Accounts and Security
             </h2>
             <p>
-              To access cloud rendering and asset history, you must register for an account. You are solely responsible for maintaining the confidentiality of your credentials and API tokens. Any activity conducted through your authenticated session is your legal responsibility. You agree to immediately notify Animagent if you detect any unauthorized account penetration.
+              To access cloud rendering and asset history, you must register for an account. You are solely responsible for maintaining the confidentiality of your credentials and API tokens. Any activity conducted through your authenticated session is your legal responsibility. You agree to immediately notify byreel if you detect any unauthorized account penetration.
             </p>
           </section>
 
@@ -138,19 +138,19 @@ export default function TermsPage() {
             <div className="space-y-2 pl-4 border-l-2 border-cyan-500/40">
               <h3 className="font-semibold text-slate-900 dark:text-white">4.1 User Input Data</h3>
               <p>
-                You retain complete, unencumbered ownership of all text prompts, brand assets, logos, sketches, and audio tracks you provide to Animagent.
+                You retain complete, unencumbered ownership of all text prompts, brand assets, logos, sketches, and audio tracks you provide to byreel.
               </p>
             </div>
             <div className="space-y-2 pl-4 border-l-2 border-emerald-500/40">
               <h3 className="font-semibold text-slate-900 dark:text-white">4.2 Generated Motion Output</h3>
               <p>
-                Subject to your active subscription or valid compute credit usage, <strong className="text-slate-950 dark:text-white">Animagent assigns to you 100% of all worldwide rights, title, and interest</strong> in the motion graphics rendered through your prompts. You are entitled to copy, broadcast, broadcast-license, sell, monetize, and distribute these renders without royalties or attribution.
+                Subject to your active subscription or valid compute credit usage, <strong className="text-slate-950 dark:text-white">byreel assigns to you 100% of all worldwide rights, title, and interest</strong> in the motion graphics rendered through your prompts. You are entitled to copy, broadcast, broadcast-license, sell, monetize, and distribute these renders without royalties or attribution.
               </p>
             </div>
             <div className="space-y-2 pl-4 border-l-2 border-purple-500/40">
               <h3 className="font-semibold text-slate-900 dark:text-white">4.3 Platform Rights</h3>
               <p>
-                Animagent retains ownership of the underlying software infrastructure, neural network architecture, proprietary shaders, spider-web canvas engine, user interface elements, and brand trademarks.
+                byreel retains ownership of the underlying software infrastructure, neural network architecture, proprietary shaders, spider-web canvas engine, user interface elements, and brand trademarks.
               </p>
             </div>
           </section>
@@ -174,7 +174,7 @@ export default function TermsPage() {
               6. Acceptable Use Policy &amp; Content Restrictions
             </h2>
             <p>
-              You agree not to use Animagent to generate or disseminate:
+              You agree not to use byreel to generate or disseminate:
             </p>
             <ul className="list-disc pl-5 space-y-1 text-slate-600 dark:text-slate-400">
               <li>Non-consensual deepfakes, defamatory animations, or deliberate disinformation;</li>
@@ -203,7 +203,7 @@ export default function TermsPage() {
               8. Limitation of Liability
             </h2>
             <p>
-              To the maximum extent permitted by applicable law, Animagent AI Inc. shall not be liable for indirect, incidental, punitive, or consequential damages resulting from loss of profits, data corruption, or business interruption arising from the use of our autonomous generative software.
+              To the maximum extent permitted by applicable law, byreel AI Inc. shall not be liable for indirect, incidental, punitive, or consequential damages resulting from loss of profits, data corruption, or business interruption arising from the use of our autonomous generative software.
             </p>
           </section>
 

@@ -45,11 +45,9 @@ export default function StudioCanvasPlayer({
     <div
       ref={canvasContainerRef}
       className={`relative rounded-2xl bg-[#06111d] border border-[#172b3a]/10 dark:border-[#bedce5]/[0.16] shadow-2xl overflow-hidden flex flex-col w-full transition-all duration-300 ${
-        aspectRatio === "16:9"
-          ? "max-w-3xl aspect-[16/9] max-h-[50vh]"
-          : aspectRatio === "9:16"
+        aspectRatio === "9:16"
           ? "max-w-xs aspect-[9/16] max-h-[55vh]"
-          : "max-w-md aspect-square max-h-[50vh]"
+          : "max-w-3xl aspect-[16/9] max-h-[50vh]"
       }`}
     >
       {/* 60FPS Canvas */}

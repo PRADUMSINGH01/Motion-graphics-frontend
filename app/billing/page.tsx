@@ -595,7 +595,7 @@ export default function BillingPage() {
             <div className="p-5 rounded-2xl bg-gradient-to-tr from-slate-900 via-[#10131d] to-[#1a1f30] border border-black/20 dark:border-white/15 shadow-xl space-y-4 relative overflow-hidden text-white">
               <div className="flex justify-between items-center">
                 <span className="font-mono text-xs text-cyan-400 font-bold tracking-widest">
-                  ANIMAGENT PRO
+                  BYREEL PRO
                 </span>
                 <span className="text-xs font-mono text-slate-400">VISA</span>
               </div>

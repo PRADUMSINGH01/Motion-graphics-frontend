@@ -14,16 +14,16 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Animagent - Autonomous Motion Graphics AI Agent",
-  description: "Generate broadcast-grade 60FPS motion graphics, procedural physics, and SVG animations from natural language prompts with Animagent AI.",
+  title: "byreel - Autonomous Motion Graphics AI Agent",
+  description: "Generate broadcast-grade 60FPS motion graphics, procedural physics, and SVG animations from natural language prompts with byreel AI.",
   icons: {
     icon: [
-      { url: "/brand-logo.png", type: "image/png", sizes: "512x512" },
-      { url: "/brand-logo.png", type: "image/png", sizes: "192x192" },
+      { url: "/favicon-icon.jpg", type: "image/jpeg", sizes: "512x512" },
+      { url: "/light.png", type: "image/png", sizes: "any" },
       { url: "/icon.svg", type: "image/svg+xml" },
     ],
-    shortcut: "/brand-logo.png",
-    apple: "/brand-logo.png",
+    shortcut: "/favicon-icon.jpg",
+    apple: "/favicon-icon.jpg",
   },
 };
 

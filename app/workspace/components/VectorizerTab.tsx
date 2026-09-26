@@ -42,7 +42,7 @@ export default function VectorizerTab({
             type="text"
             value={charInput}
             onChange={(e) => setCharInput(e.target.value)}
-            placeholder="e.g. ANIMAGENT"
+            placeholder="e.g. BYREEL"
             className="w-full bg-slate-50 dark:bg-[#12141d] border border-black/10 dark:border-white/10 focus:border-cyan-500 rounded-xl px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none font-mono"
           />
         </div>

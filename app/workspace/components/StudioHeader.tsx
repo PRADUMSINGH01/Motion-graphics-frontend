@@ -86,7 +86,7 @@ export default function StudioHeader({
               <>
                 {/* Aspect Ratio Switcher */}
                 <div className="hidden sm:flex items-center bg-black/[0.05] dark:bg-black/40 border border-black/[0.08] dark:border-white/[0.08] p-0.5 rounded-lg">
-                  {(["16:9", "9:16", "1:1"] as AspectRatio[]).map((aspect) => (
+                  {(["16:9", "9:16"] as AspectRatio[]).map((aspect) => (
                     <button
                       key={aspect}
                       type="button"

@@ -21,8 +21,8 @@ import {
 } from "react-icons/fi";
 
 export const metadata = {
-  title: "Product - Animagent Autonomous Motion AI",
-  description: "Explore the complete Animagent product suite: autonomous animation generation, spider-web physics engine, and multi-format export pipeline.",
+  title: "Product - byreel Autonomous Motion AI",
+  description: "Explore the complete byreel product suite: autonomous animation generation, spider-web physics engine, and multi-format export pipeline.",
 };
 
 const productModules = [
@@ -99,7 +99,7 @@ export default function ProductPage() {
         <div className="text-center max-w-3xl mx-auto space-y-4 pb-12">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-medium bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 border border-cyan-500/25">
             <FiBox className="w-3.5 h-3.5" />
-            <span>Animagent Product Architecture</span>
+            <span>byreel Product Architecture</span>
           </div>
 
           <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-slate-950 dark:text-white font-comic">
@@ -107,7 +107,7 @@ export default function ProductPage() {
           </h1>
 
           <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 leading-relaxed font-poppins">
-            Animagent connects generative AI prompt intelligence with real-time procedural physics, giving creative teams the power to produce broadcast-grade animations in seconds.
+            byreel connects generative AI prompt intelligence with real-time procedural physics, giving creative teams the power to produce broadcast-grade animations in seconds.
           </p>
         </div>
 
@@ -185,7 +185,7 @@ export default function ProductPage() {
               </span>
               <h4 className="text-sm font-bold text-slate-900 dark:text-white font-comic">Autonomous Agent Keyframing</h4>
               <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                Animagent calculates spring physics, harmonic damping, and timing curves with interactive 60FPS live preview.
+                byreel calculates spring physics, harmonic damping, and timing curves with interactive 60FPS live preview.
               </p>
             </div>
 
@@ -221,7 +221,7 @@ export default function ProductPage() {
                 Developer Platform
               </span>
               <h3 className="text-2xl font-bold text-slate-950 dark:text-white font-comic">
-                Animagent Developer API &amp; Tokens
+                byreel Developer API &amp; Tokens
               </h3>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-poppins leading-relaxed">
                 Automate kinetic renders, batch process dynamic SVG paths, and generate custom motion loops via our high-speed REST endpoints and streaming Node/Python SDKs.
@@ -276,7 +276,7 @@ export default function ProductPage() {
                 Next-Gen Agent Ecosystem
               </h3>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-poppins leading-relaxed">
-                We are expanding the Animagent neural suite beyond 2D motion with specialized domain agents currently in active R&amp;D.
+                We are expanding the byreel neural suite beyond 2D motion with specialized domain agents currently in active R&amp;D.
               </p>
             </div>
 
@@ -339,7 +339,7 @@ export default function ProductPage() {
               Ready to create autonomous motion graphics?
             </h3>
             <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-poppins">
-              Start your 7-day free trial on Animagent or explore pre-rendered motion loops.
+              Start your 7-day free trial on byreel or explore pre-rendered motion loops.
             </p>
           </div>
           <div className="flex items-center gap-3 shrink-0">

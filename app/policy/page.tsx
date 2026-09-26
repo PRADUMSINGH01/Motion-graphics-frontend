@@ -15,8 +15,8 @@ import {
 } from "react-icons/fi";
 
 export const metadata = {
-  title: "Privacy Policy - Animagent AI",
-  description: "Learn how Animagent AI safeguards your personal information, generation prompts, and rendered motion graphics.",
+  title: "Privacy Policy - byreel AI",
+  description: "Learn how byreel AI safeguards your personal information, generation prompts, and rendered motion graphics.",
 };
 
 export default function PolicyPage() {
@@ -100,7 +100,7 @@ export default function PolicyPage() {
               1. Overview &amp; Commitment
             </h2>
             <p>
-              At Animagent AI, we consider creative confidentiality foundational to our software. This Privacy Policy details how we collect, store, process, and safeguard information when you interact with our web applications, AI prompt agents, rendering APIs, and support channels.
+              At byreel AI, we consider creative confidentiality foundational to our software. This Privacy Policy details how we collect, store, process, and safeguard information when you interact with our web applications, AI prompt agents, rendering APIs, and support channels.
             </p>
           </section>
 
@@ -179,7 +179,7 @@ export default function PolicyPage() {
               6. Your International Privacy Rights (GDPR &amp; CCPA)
             </h2>
             <p>
-              Regardless of your geographical location, Animagent AI extends comprehensive data rights:
+              Regardless of your geographical location, byreel AI extends comprehensive data rights:
             </p>
             <ul className="list-disc pl-5 space-y-1 text-slate-600 dark:text-slate-400">
               <li><strong className="text-slate-950 dark:text-white">Right of Access:</strong> Request a complete JSON export of all stored prompts and project metadata.</li>

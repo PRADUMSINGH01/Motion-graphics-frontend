@@ -180,7 +180,7 @@ export default function ApiKeysPage() {
               API Keys &amp; Developer Tokens
             </h1>
             <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-2xl font-poppins">
-              Programmatically generate 60FPS motion graphics, render physics loops, and extract SVG paths using the Animagent REST API.
+              Programmatically generate 60FPS motion graphics, render physics loops, and extract SVG paths using the byreel REST API.
             </p>
           </div>
 
@@ -254,7 +254,7 @@ export default function ApiKeysPage() {
               </div>
               <h4 className="text-sm font-semibold text-slate-900 dark:text-white">No API Keys Generated Yet</h4>
               <p className="text-xs text-slate-600 dark:text-slate-400 max-w-sm mx-auto">
-                Create a secret key to authenticate your server, script, or mobile pipeline with Animagent AI.
+                Create a secret key to authenticate your server, script, or mobile pipeline with byreel AI.
               </p>
               {user && (
                 <button

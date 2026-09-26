@@ -14,7 +14,7 @@ import {
 } from "react-icons/fi";
 
 export const metadata = {
-  title: "About Us - Animagent AI",
+  title: "About Us - byreel AI",
   description: "Learn about the team and technology powering the world's most advanced autonomous motion graphics agent.",
 };
 
@@ -43,7 +43,7 @@ export default function AboutPage() {
           </h1>
 
           <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 leading-relaxed font-poppins pt-1">
-            Animagent AI was created to replace hours of manual keyframe manipulation with intelligent, procedural physics and autonomous animation intelligence.
+            byreel AI was created to replace hours of manual keyframe manipulation with intelligent, procedural physics and autonomous animation intelligence.
           </p>
         </div>
 
@@ -85,7 +85,7 @@ export default function AboutPage() {
               <span>Built on Ethical AI &amp; Creator Sovereignty</span>
             </h2>
             <p>
-              We firmly reject the practice of training foundational models on non-consensual creator portfolios. Our algorithms are trained strictly on synthetic mathematical simulations, licensed open-source graphics routines, and in-house animation assets. When you build with Animagent, your output is legally unassailable and exclusively yours.
+              We firmly reject the practice of training foundational models on non-consensual creator portfolios. Our algorithms are trained strictly on synthetic mathematical simulations, licensed open-source graphics routines, and in-house animation assets. When you build with byreel, your output is legally unassailable and exclusively yours.
             </p>
           </section>
 

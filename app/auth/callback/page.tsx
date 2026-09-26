@@ -67,7 +67,7 @@ function GoogleCallbackContent() {
         setStatus("success");
         success(
           "Google Sign-In Complete",
-          `Welcome to Animagent Studio, ${name}! Your cloud workspace is ready.`
+          `Welcome to byreel Studio, ${name}! Your cloud workspace is ready.`
         );
 
         setTimeout(() => {
@@ -111,7 +111,7 @@ function GoogleCallbackContent() {
             <FiCheckCircle className="w-10 h-10 text-green-400 mx-auto animate-bounce" />
             <h2 className="text-xl font-bold text-white">Account Verified</h2>
             <p className="text-xs text-slate-300">
-              Launching your Animagent AI workspace now...
+              Launching your byreel AI workspace now...
             </p>
           </div>
         )}

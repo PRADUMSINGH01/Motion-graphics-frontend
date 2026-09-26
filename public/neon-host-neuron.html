@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Neon Host Box → Neuron Firing</title>
+<style>
+  html,body{margin:0;height:100%;background:#05060f;overflow:hidden;font-family:'Arial Black',Arial,sans-serif}
+  #stage{position:relative;width:100vw;height:100vh}
+  .scene{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+
+  /* ---------- Scene 1: Host + Neon Text Box ---------- */
+  #hostScene{opacity:0}
+  .host{position:absolute;bottom:0;left:8vw;width:34vw;max-width:420px}
+  .host svg{width:100%;height:auto;display:block}
+  .neonBox{
+    position:absolute;right:8vw;top:22vh;
+    perspective:900px;opacity:0;
+  }
+  .neonCard{
+    position:relative;transform-style:preserve-3d;
+    padding:34px 46px;
+    background:rgba(10,12,30,.55);
+    border:3px solid #00f6ff;
+    border-radius:14px;
+    box-shadow:0 0 12px #00f6ff,0 0 35px #00f6ff,0 0 80px rgba(0,246,255,.5),inset 0 0 25px rgba(0,246,255,.25);
+  }
+  .neonCard .layer{
+    position:absolute;inset:-3px;border:3px solid #ff2ad4;border-radius:14px;
+    box-shadow:0 0 14px #ff2ad4;pointer-events:none;
+  }
+  .neonCard h1{
+    margin:0;font-size:4.4vw;letter-spacing:.06em;color:#eafcff;
+    text-shadow:0 0 6px #fff,0 0 15px #00f6ff,0 0 40px #00f6ff,0 0 80px #0088ff;
+    transform:translateZ(40px);
+  }
+  .neonCard p{
+    margin:8px 0 0;font-family:Arial,sans-serif;font-weight:bold;font-size:1.2vw;
+    letter-spacing:.4em;color:#9fe9ff;text-shadow:0 0 10px #00f6ff;transform:translateZ(25px);
+  }
+  .neonCard::before{
+    content:"";position:absolute;inset:-3px;border-radius:14px;
+    background:linear-gradient(120deg,transparent 40%,rgba(255,255,255,.35) 50%,transparent 60%);
+    background-size:250% 100%;animation:sheen 2.4s linear infinite;mix-blend-mode:screen;
+  }
+  @keyframes sheen{from{background-position:200% 0}to{background-position:-100% 0}}
+
+  /* ---------- Scene 2: Neuron ---------- */
+  #neuronScene{opacity:0}
+  #neuronSvg{width:80vw;max-width:1100px;height:auto}
+  .flicker{animation:flick .12s steps(2) 3}
+  @keyframes flick{50%{opacity:.3}}
+</style>
+</head>
+<body>
+<div id="stage">
+
+  <!-- Scene 1 -->
+  <div class="scene" id="hostScene">
+    <!-- Simple stylized host (head + shoulders) -->
+    <div class="host">
+      <svg viewBox="0 0 200 240">
+        <defs>
+          <radialGradient id="skin" cx="50%" cy="35%" r="75%">
+            <stop offset="0%" stop-color="#ffd9b8"/><stop offset="100%" stop-color="#d99a6c"/>
+          </radialGradient>
+          <linearGradient id="shirt" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#2a2f55"/><stop offset="100%" stop-color="#141733"/>
+          </linearGradient>
+        </defs>
+        <ellipse cx="100" cy="255" rx="95" ry="70" fill="url(#shirt)"/>
+        <rect x="78" y="150" width="44" height="45" fill="#d99a6c"/>
+        <ellipse cx="100" cy="95" rx="52" ry="62" fill="url(#skin)"/>
+        <path d="M48 88 Q52 28 100 28 Q148 28 152 88 Q150 55 100 52 Q50 55 48 88Z" fill="#3a2a1e"/>
+        <circle cx="80" cy="95" r="5" fill="#1c1410"/>
+        <circle cx="120" cy="95" r="5" fill="#1c1410"/>
+        <path d="M86 122 Q100 132 114 122" stroke="#a85f3c" stroke-width="4" fill="none" stroke-linecap="round"/>
+      </svg>
+    </div>
+
+    <div class="neonBox" id="neonBox">
+      <div class="neonCard" id="neonCard">
+        <div class="layer"></div>
+        <h1>SARAH</h1>
+        <p>YOUR HOST</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scene 2 -->
+  <div class="scene" id="neuronScene">
+    <svg id="neuronSvg" viewBox="0 0 1000 500">
+      <defs>
+        <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
+          <feGaussianBlur stdDeviation="8" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <radialGradient id="nodeG">
+          <stop offset="0%" stop-color="#fff"/><stop offset="100%" stop-color="#00f6ff"/>
+        </radialGradient>
+      </defs>
+      <!-- dendrites -->
+      <g stroke="#4a5fb0" stroke-width="6" fill="none" stroke-linecap="round" id="dendrites">
+        <path d="M330 250 Q240 250 160 180 T60 90"/>
+        <path d="M330 250 Q240 280 150 300 T40 330"/>
+        <path d="M330 250 Q250 220 180 150"/>
+        <path d="M330 250 Q250 320 170 390 T90 440"/>
+      </g>
+      <!-- axon -->
+      <path id="axon" d="M560 250 H700 Q740 250 740 290 T780 330 H900" stroke="#4a5fb0" stroke-width="10" fill="none" stroke-linecap="round"/>
+      <!-- soma -->
+      <circle cx="445" cy="250" r="115" fill="#101638" stroke="#00f6ff" stroke-width="5" filter="url(#glow)"/>
+      <circle cx="445" cy="250" r="45" fill="#1b2a66" stroke="#ff2ad4" stroke-width="4" filter="url(#glow)"/>
+      <!-- terminal node -->
+      <circle id="terminal" cx="905" cy="330" r="26" fill="url(#nodeG)" filter="url(#glow)" opacity="0.35"/>
+      <!-- traveling impulse -->
+      <circle id="impulse" r="16" fill="#fff" filter="url(#glow)" opacity="0"/>
+      <!-- dendrite sparks -->
+      <g id="sparks"></g>
+      <!-- label -->
+      <text x="500" y="470" text-anchor="middle" fill="#9fe9ff" font-family="Arial" font-weight="bold" font-size="30" letter-spacing="8" opacity="0.85">NEURON FIRING</text>
+    </svg>
+  </div>
+</div>
+
+<!-- GSAP -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+const stage = document.getElementById('stage');
+// ---------- Audio: 'ding' ----------
+let actx;
+function ding(freq = 1568, dur = 0.9){
+  actx = actx || new (window.AudioContext||window.webkitAudioContext)();
+  const t = actx.currentTime;
+  [1, 2.76].forEach((mult, i) => {           // bell-like partials
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.type = 'sine';
+    o.frequency.value = freq * mult;
+    g.gain.setValueAtTime(i ? 0.12 : 0.3, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g).connect(actx.destination);
+    o.start(t); o.stop(t + dur);
+  });
+}
+
+// ---------- Scene 1: neon box pops in next to head ----------
+const intro = gsap.timeline();
+intro
+  .to('#hostScene', {opacity:1, duration:0.4})
+  .fromTo('#neonCard', {rotateY:70, rotateX:8, z:-200},
+    {rotateY:-8, rotateX:3, z:0, duration:0.9, ease:'back.out(1.6)'}, 0.3)
+  .fromTo('#neonBox', {opacity:0, scale:0.6},
+    {opacity:1, scale:1, duration:0.7, ease:'elastic.out(1,0.55)'}, 0.3)
+  .to('#neonCard', {rotateY:6, duration:1.4, ease:'sine.inOut', yoyo:true, repeat:1}, '+=0.3')
+  // hold beat, then flash out
+  .to('#hostScene', {duration:0.1, repeat:3, yoyo:true, ease:'none',
+      onStart:()=>stage.classList.add('flicker'), onComplete:()=>stage.classList.remove('flicker')}, '+=0.5')
+  .to('#hostScene', {opacity:0, scale:1.15, duration:0.35, ease:'power2.in',
+      transformOrigin:'50% 50%'}, '>-0.1');
+
+// ---------- Scene 2: neuron fires ----------
+const neuron = gsap.timeline();
+neuron
+  .to('#neuronScene', {opacity:1, duration:0.4}, 3.6)
+  .fromTo('#dendrites path', {strokeDasharray:600, strokeDashoffset:600},
+    {strokeDashoffset:0, duration:0.7, stagger:0.08, ease:'power2.out'}, '>-0.1')
+  .fromTo('#axon', {strokeDasharray:900, strokeDashoffset:900},
+    {strokeDashoffset:0, duration:0.8, ease:'power2.out'}, '<0.2')
+  // impulse travels the axon
+  .add(() => ding(), '+=0.2')                     // ★ 'ding' on fire
+  .set('#impulse', {opacity:1})
+  .to('#impulse', {
+    motionPath:{path:'#axon', align:'#axon', alignOrigin:[0.5,0.5]},
+    duration:0.7, ease:'power2.in'
+  }, '<')
+  // soma + terminal flash
+  .to('#terminal', {opacity:1, scale:2.2, transformOrigin:'50% 50%', duration:0.15, ease:'power3.out'}, '-=0.05')
+  .to('#terminal', {opacity:0.35, scale:1, duration:0.5}, '>')
+  .to('circle[filter="url(#glow)"]', {attr:{r:130}, duration:0.12, yoyo:true, repeat:1}, '<')
+  // synapse burst particles
+  .add(() => {
+    const g = document.getElementById('sparks');
+    for(let i=0;i<10;i++){
+      const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      c.setAttribute('cx',905); c.setAttribute('cy',330); c.setAttribute('r',5);
+      c.setAttribute('fill','#ff2ad4'); c.setAttribute('filter','url(#glow)');
+      g.appendChild(c);
+      gsap.to(c,{x:()=>gsap.utils.random(-120,120), y:()=>gsap.utils.random(-120,120),
+        opacity:0, scale:0.2, duration:0.8, ease:'power2.out', onComplete:()=>c.remove()});
+    }
+  }, '<')
+  .set('#impulse', {opacity:0})
+  // loop: reset and re-fire
+  .to({}, {duration:1.2})
+  .call(() => neuron.restart());
+</script>
+</body>
+</html>

@@ -69,7 +69,7 @@ export default function StudioSidebar({
             <Logo size={28} />
             <div className="flex flex-col">
               <span className="font-bold text-xs tracking-tight text-slate-900 dark:text-white leading-tight">
-                Animagent
+                byreel
               </span>
               <span className="text-[9px] font-mono text-cyan-600 dark:text-cyan-400 font-semibold tracking-wider uppercase">
                 STUDIO {userPlan}

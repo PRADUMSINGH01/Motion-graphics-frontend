@@ -5,7 +5,7 @@ export type StylePreset =
   | "Abstract VFX"
   | "UI & Lottie";
 
-export type AspectRatio = "16:9" | "9:16" | "1:1";
+export type AspectRatio = "16:9" | "9:16";
 export type WorkspaceView = "prompt" | "vectorizer" | "usage" | "billing";
 export type BillingInterval = "monthly" | "annual";
 export type PlanTier = "free" | "creator" | "pro" | "enterprise";
