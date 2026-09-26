@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" fill="none">
+  <defs>
+    <!-- Left Pillar Gradient: Royal Indigo & Violet -->
+    <linearGradient id="mLeftPillar" x1="120" y1="150" x2="200" y2="360" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#4F46E5" />
+      <stop offset="40%" stop-color="#6366F1" />
+      <stop offset="75%" stop-color="#7C3AED" />
+      <stop offset="100%" stop-color="#9333EA" />
+    </linearGradient>
+
+    <!-- Center Diagonal Fold Gradient: Radiant Orchid / Fuchsia -->
+    <linearGradient id="mCenterFold" x1="160" y1="160" x2="330" y2="330" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#7C3AED" />
+      <stop offset="35%" stop-color="#9333EA" />
+      <stop offset="70%" stop-color="#C084FC" />
+      <stop offset="100%" stop-color="#E879F9" />
+    </linearGradient>
+
+    <!-- Right Wing Gradient: Electric Sky Cyan & Brilliant Blue -->
+    <linearGradient id="mRightWing" x1="260" y1="160" x2="385" y2="360" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#38BDF8" />
+      <stop offset="30%" stop-color="#0284C7" />
+      <stop offset="65%" stop-color="#2563EB" />
+      <stop offset="100%" stop-color="#4F46E5" />
+    </linearGradient>
+
+    <!-- Soft Dimensional Ambient Shadow -->
+    <filter id="mShadow" x="-15%" y="-15%" width="130%" height="135%">
+      <feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#0F172A" flood-opacity="0.3" />
+    </filter>
+  </defs>
+
+  <g filter="url(#mShadow)">
+    <!-- 1. Left Vertical Pillar -->
+    <path
+      d="M 155 157
+         C 139.5 157 127 169.5 127 185
+         L 127 327
+         C 127 342.5 139.5 355 155 355
+         C 170.5 355 183 342.5 183 327
+         L 183 255
+         L 183 185
+         C 183 169.5 170.5 157 155 157 Z"
+      fill="url(#mLeftPillar)"
+    />
+
+    <!-- 2. Right Wing Pillar -->
+    <path
+      d="M 357 157
+         C 372.5 157 385 169.5 385 185
+         L 385 327
+         C 385 342.5 372.5 355 357 355
+         C 341.5 355 329 342.5 329 327
+         L 329 250
+         L 266 218
+         L 329 185
+         C 329 169.5 341.5 157 357 157 Z"
+      fill="url(#mRightWing)"
+    />
+
+    <!-- 3. Center Fold Ribbon -->
+    <path
+      d="M 155 157
+         C 165 157 174 162 179 170
+         L 266 218
+         L 329 250
+         L 329 327
+         C 329 330 328.5 333 327.5 336
+         L 183 255
+         L 183 185
+         C 183 173 173 159 155 157 Z"
+      fill="url(#mCenterFold)"
+    />
+
+    <!-- 4. Subtle Crease Separation -->
+    <line
+      x1="329"
+      y1="250"
+      x2="329"
+      y2="327"
+      stroke="rgba(0, 0, 0, 0.14)"
+      stroke-width="2.5"
+      stroke-linecap="round"
+    />
+  </g>
+</svg>

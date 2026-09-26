@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Host — Dark Reveal</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+  html,body{margin:0;height:100%;background:#050505;overflow:hidden;font-family:"Helvetica Neue",Arial,sans-serif;}
+  .stage{position:relative;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;}
+
+  /* Host silhouette — calm face in near-darkness */
+  .host{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:340px;opacity:0;}
+  .head{width:220px;height:280px;margin:0 auto;border-radius:48% 48% 45% 45%;background:radial-gradient(ellipse at 50% 35%,#3a3a42 0%,#232329 55%,#121216 100%);position:relative;box-shadow:0 0 90px rgba(120,130,160,.10);}
+  .hair{position:absolute;top:-18px;left:-10px;right:-10px;height:110px;border-radius:50% 50% 40% 40%;background:linear-gradient(#1a1a20,#0c0c10);}
+  .eye{position:absolute;top:118px;width:26px;height:9px;border-radius:50%;background:#0a0a0e;box-shadow:inset 0 2px 4px rgba(255,255,255,.15);}
+  .eye.l{left:48px;} .eye.r{right:48px;}
+  .eye::after{content:"";position:absolute;top:2px;left:6px;width:12px;height:5px;border-radius:50%;background:radial-gradient(#cfd6e6,#5a6274);}
+  .brow{position:absolute;top:100px;width:34px;height:5px;border-radius:4px;background:#15151b;}
+  .brow.l{left:44px;transform:rotate(-4deg);} .brow.r{right:44px;transform:rotate(4deg);}
+  .nose{position:absolute;top:132px;left:50%;transform:translateX(-50%);width:14px;height:36px;border-radius:8px;background:linear-gradient(#2c2c34,#1c1c22);}
+  .mouth{position:absolute;top:198px;left:50%;transform:translateX(-50%);width:66px;height:8px;border-radius:0 0 40px 40px;background:#101014;box-shadow:inset 0 -2px 3px rgba(255,255,255,.12);}
+  .shoulders{width:420px;height:130px;margin:-30px auto 0;border-radius:60px 60px 0 0;background:linear-gradient(#1b1b22,#0b0b0f);}
+
+  /* Text */
+  .headline{position:relative;z-index:2;text-align:center;color:#fff;font-weight:900;font-size:clamp(48px,9vw,130px);letter-spacing:.02em;line-height:1.05;text-transform:uppercase;}
+  .headline .word{display:inline-block;margin:0 .18em;opacity:0;}
+  .sub{position:relative;z-index:2;color:#8b8fa0;letter-spacing:.45em;font-size:14px;text-transform:uppercase;margin-top:26px;opacity:0;}
+
+  .vig{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 35%,rgba(0,0,0,.85) 100%);}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="host" id="host">
+    <div class="head">
+      <div class="hair"></div>
+      <div class="brow l"></div><div class="brow r"></div>
+      <div class="eye l"></div><div class="eye r"></div>
+      <div class="nose"></div>
+      <div class="mouth"></div>
+    </div>
+    <div class="shoulders"></div>
+  </div>
+  <h1 class="headline"><span class="word">We</span><span class="word">Need</span><span class="word">To</span><span class="word">Talk.</span></h1>
+  <div class="sub" id="sub">A Conversation That Matters</div>
+  <div class="vig"></div>
+</div>
+
+<script>
+const tl = gsap.timeline({defaults:{ease:"power3.out"}});
+
+// host fades in, calm into lens
+tl.fromTo("#host",{opacity:0,scale:.96,y:14},{opacity:1,scale:1,y:0,duration:1.6})
+  // background darkens
+  .to("body",{backgroundColor:"#030304",duration:1.2},"-=0.8")
+  // blink
+  .to(".eye",{scaleY:.1,transformOrigin:"center",duration:.08,yoyo:true,repeat:1},"-=0.4")
+  // words pop in
+  .to(".word",{opacity:1,scale:1,y:0,duration:.7,stagger:.16,ease:"back.out(2.2)",
+      startAt:{scale:2.4,y:30,opacity:0}},"+=0.2")
+  // subtle glow push
+  .to(".headline",{textShadow:"0 0 60px rgba(255,255,255,.25)",duration:1},"<")
+  .to("#sub",{opacity:1,letterSpacing:"0.5em",duration:1.2},"-=0.4")
+  // gentle continuous breathing of host
+  .to("#host",{y:-6,duration:3,ease:"sine.inOut",yoyo:true,repeat:-1},">");
+</script>
+</body>
+</html>
