@@ -54,7 +54,7 @@ export default function RouteProgressBar() {
       }}
     >
       <div
-        className="h-full bg-gradient-to-r from-cyan-500 via-sky-400 to-indigo-500 shadow-[0_0_12px_#00f0ff,0_0_24px_#38bdf8] transition-all duration-300 ease-out relative"
+        className="h-full bg-gradient-to-r from-cyan-500 via-sky-400 to-indigo-500 transition-all duration-300 ease-out relative"
         style={{ width: `${progress}%` }}
       >
         {/* Leading glowing spark beam */}

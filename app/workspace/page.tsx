@@ -24,7 +24,7 @@ export default function WorkspacePage() {
   }
 
   return (
-    <div className="studio-shell flex h-screen w-screen overflow-hidden bg-[#f3eee5] dark:bg-[#171914] text-[#292d25] dark:text-[#eee8dc] font-sans transition-colors duration-300">
+    <div className="studio-shell flex h-screen w-screen overflow-hidden bg-surface-2 text-fg font-sans transition-colors duration-300">
       {/* Dynamic SpiderNet Ambient Background */}
       <SpiderNetBackground opacity={0.3} className="fixed inset-0" />
 

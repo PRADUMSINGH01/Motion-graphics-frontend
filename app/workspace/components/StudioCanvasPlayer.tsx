@@ -44,7 +44,7 @@ export default function StudioCanvasPlayer({
   return (
     <div
       ref={canvasContainerRef}
-      className={`relative rounded-2xl bg-[#06111d] border border-[#172b3a]/10 dark:border-[#bedce5]/[0.16] shadow-2xl overflow-hidden flex flex-col w-full transition-all duration-300 ${
+      className={`relative rounded-2xl bg-[#06111d] border border-line/10 dark:border-line shadow-2xl overflow-hidden flex flex-col w-full transition-all duration-300 ${
         aspectRatio === "9:16"
           ? "max-w-xs aspect-[9/16] max-h-[55vh]"
           : "max-w-3xl aspect-[16/9] max-h-[50vh]"
@@ -86,7 +86,7 @@ export default function StudioCanvasPlayer({
       </div>
 
       {/* Integrated Transport Control Dock */}
-      <div className="h-11 shrink-0 bg-white/95 dark:bg-[#0d1a29]/95 border-t border-[#172b3a]/[0.08] dark:border-[#bedce5]/[0.1] px-3.5 flex items-center gap-2.5 select-none transition-colors">
+      <div className="h-11 shrink-0 bg-surface/95 border-t border-line px-3.5 flex items-center gap-2.5 select-none transition-colors">
         {/* Play / Pause Toggle */}
         <button
           type="button"
@@ -107,8 +107,8 @@ export default function StudioCanvasPlayer({
           onClick={() => setIsLooping(!isLooping)}
           className={`p-1.5 rounded-lg transition-colors cursor-pointer shrink-0 ${
             isLooping
-              ? "text-cyan-600 dark:text-cyan-400 bg-cyan-500/15"
-              : "text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+              ? "text-accent bg-cyan-500/15"
+              : "text-fg-subtle hover:text-fg-muted"
           }`}
           title={isLooping ? "Loop Enabled" : "Loop Disabled (Plays once)"}
         >
@@ -129,7 +129,7 @@ export default function StudioCanvasPlayer({
         </div>
 
         {/* Timecode */}
-        <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400 shrink-0">
+        <span className="text-[11px] font-mono text-fg-muted shrink-0">
           00:0{currentTime.toFixed(1)} / 00:0{duration}.0
         </span>
       </div>

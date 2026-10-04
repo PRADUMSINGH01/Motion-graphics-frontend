@@ -58,19 +58,9 @@ function LoginForm() {
   };
 
   return (
-    <div className="relative min-h-screen flex flex-col justify-center items-center px-4 py-12 font-poppins text-[var(--text-primary)] bg-[var(--background)] overflow-hidden transition-colors duration-300">
+    <div className="relative min-h-screen flex flex-col justify-center items-center px-4 py-12 text-fg bg-canvas overflow-hidden">
       {/* Interactive Animated Spider Web Canvas Background */}
       <SpiderNetBackground />
-
-      {/* Atmospheric themed fade overlay */}
-      <div
-        className="absolute inset-0 pointer-events-none transition-colors duration-300"
-        style={{
-          background:
-            "radial-gradient(circle at 15% 20%, rgba(207,121,93,0.18), transparent 26%), radial-gradient(circle at 82% 10%, rgba(164,119,140,0.16), transparent 24%), linear-gradient(to bottom, rgba(243,238,229,0.12), rgba(243,238,229,0.02), rgba(243,238,229,0.18))",
-        }}
-        aria-hidden="true"
-      />
 
       {/* Back Button */}
       <div className="relative z-10 w-full max-w-md mb-6">
@@ -78,16 +68,16 @@ function LoginForm() {
       </div>
 
       {/* Login Card */}
-      <div className="relative z-10 w-full max-w-md rounded-3xl border border-[var(--border-subtle)] bg-[var(--surface-card)]/95 p-8 shadow-[0_24px_80px_rgba(0,0,0,0.2)] backdrop-blur-2xl space-y-6">
+      <div className="relative z-10 w-full max-w-md card shadow-elevated p-8 space-y-6">
         {/* Brand Header */}
         <div className="text-center space-y-2">
           <Link href="/" className="inline-flex items-center gap-2.5 group">
             <Logo size={52} />
           </Link>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--text-primary)] font-comic">
+          <h1 className="text-2xl font-semibold tracking-[-0.03em] text-fg">
             Welcome Back
           </h1>
-          <p className="text-xs text-[var(--text-secondary)]">
+          <p className="text-sm text-fg-muted">
             Sign in to access your byreel AI workspace
           </p>
         </div>
@@ -98,15 +88,15 @@ function LoginForm() {
         {/* Divider */}
         <div className="relative flex items-center justify-center">
           <div className="w-full border-t border-[var(--border-subtle)]" />
-          <span className="absolute bg-[var(--surface-card)] px-3 text-[11px] font-mono uppercase tracking-wider text-[var(--text-muted)]">
+          <span className="absolute bg-surface px-3 text-xs text-fg-subtle">
             or sign in with email
           </span>
         </div>
 
         {/* Inline Form Error Notification */}
         {displayError && (
-          <div className="p-3 bg-[color:color-mix(in_srgb,var(--accent-primary)_12%,transparent)] border border-[color:color-mix(in_srgb,var(--accent-primary)_35%,transparent)] rounded-xl flex items-start gap-2.5 text-xs text-[var(--text-primary)]">
-            <FiAlertCircle className="w-4 h-4 text-[var(--accent-primary)] flex-shrink-0 mt-0.5" />
+          <div className="p-3 bg-danger/10 border border-danger/30 rounded-lg flex items-start gap-2.5 text-[13px] text-fg">
+            <FiAlertCircle className="w-4 h-4 text-danger flex-shrink-0 mt-0.5" />
             <span>{displayError}</span>
           </div>
         )}
@@ -114,7 +104,7 @@ function LoginForm() {
         {/* Login Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-[var(--text-secondary)]">
+            <label className="text-[13px] font-medium text-fg">
               Email Address
             </label>
             <div className="relative flex items-center">
@@ -129,14 +119,14 @@ function LoginForm() {
                   if (formError) setFormError(null);
                 }}
                 placeholder="name@studio.com"
-                className="w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-xl focus:outline-none focus:border-[var(--accent-primary)] text-[var(--text-primary)] placeholder-[var(--text-muted)] transition-all"
+                className="input pl-10 pr-4"
               />
             </div>
           </div>
 
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-medium text-[var(--text-secondary)]">
+              <label className="text-[13px] font-medium text-fg">
                 Password
               </label>
               <button
@@ -164,7 +154,7 @@ function LoginForm() {
                   if (formError) setFormError(null);
                 }}
                 placeholder="••••••••"
-                className="w-full pl-10 pr-10 py-2.5 text-xs sm:text-sm bg-[var(--surface-primary)] border border-[var(--border-subtle)] rounded-xl focus:outline-none focus:border-[var(--accent-primary)] text-[var(--text-primary)] placeholder-[var(--text-muted)] transition-all"
+                className="input pl-10 pr-10"
               />
               <button
                 type="button"
@@ -180,7 +170,7 @@ function LoginForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs sm:text-sm font-semibold text-[var(--background)] bg-[var(--text-primary)] hover:opacity-90 shadow-md shadow-black/10 transition-all duration-200 active:scale-[0.98] cursor-pointer disabled:opacity-60"
+            className="btn btn-primary w-full"
           >
             {loading ? (
               <div className="w-4 h-4 border-2 border-[var(--background)] border-t-transparent rounded-full animate-spin" />
@@ -194,7 +184,7 @@ function LoginForm() {
         </form>
 
         {/* Footer switch */}
-        <div className="text-center text-xs text-[var(--text-secondary)] pt-1">
+        <div className="text-center text-[13px] text-fg-muted pt-1">
           Don&apos;t have an account?{" "}
           <Link
             href="/register"

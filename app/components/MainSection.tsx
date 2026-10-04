@@ -1,416 +1,260 @@
-"use client";
 import Link from "next/link";
-import { FiArrowRight, FiPlay, FiDownload, FiCode, FiZap, FiLayers } from "react-icons/fi";
-import { FieldBackground } from "./MotionQuote";
-import { useEffect, useRef, useState } from "react";
+import {
+  IconArrowRight,
+  IconSparkles,
+  IconPlay,
+  IconDownload,
+  IconLayers,
+  IconType,
+  IconActivity,
+  IconLayout,
+} from "./Icons";
 
-/* ── Typewriter ── */
-function TypewriterBadge() {
-  const textRef = useRef<HTMLSpanElement>(null);
-  const phrases = [
-    "Motion, made deliberate",
-    "Ideas that move",
-    "Animate anything",
-    "Your creative AI studio",
-  ];
-  useEffect(() => {
-    const state = { idx: 0, char: 0, deleting: false };
-    let timer: ReturnType<typeof setTimeout>;
-    const tick = () => {
-      const current = phrases[state.idx];
-      if (!textRef.current) return;
-      if (!state.deleting) {
-        textRef.current.textContent = current.slice(0, state.char + 1);
-        state.char++;
-        if (state.char === current.length) {
-          state.deleting = true;
-          timer = setTimeout(tick, 2200);
-          return;
-        }
-      } else {
-        textRef.current.textContent = current.slice(0, state.char - 1);
-        state.char--;
-        if (state.char === 0) {
-          state.deleting = false;
-          state.idx = (state.idx + 1) % phrases.length;
-        }
-      }
-      timer = setTimeout(tick, state.deleting ? 42 : 68);
-    };
-    timer = setTimeout(tick, 400);
-    return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-  return (
-    <span ref={textRef} className="inline-block min-w-[1ch]">
-      Motion, made deliberate
-    </span>
-  );
-}
-
-/* ── Animated counter ── */
-function AnimatedCounter({ target, suffix = "" }: { target: number; suffix?: string }) {
-  const [count, setCount] = useState(0);
-  const ref = useRef<HTMLSpanElement>(null);
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry.isIntersecting) return;
-        observer.disconnect();
-        let start = 0;
-        const duration = 1800;
-        const startTime = performance.now();
-        const tick = (now: number) => {
-          const progress = Math.min((now - startTime) / duration, 1);
-          const ease = 1 - Math.pow(1 - progress, 3);
-          setCount(Math.round(ease * target));
-          if (progress < 1) requestAnimationFrame(tick);
-        };
-        requestAnimationFrame(tick);
-      },
-      { threshold: 0.5 }
-    );
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, [target]);
-  return <span ref={ref}>{count}{suffix}</span>;
-}
-
-/* ── Stats ── */
-const stats = [
-  { value: 60, suffix: "FPS", label: "Broadcast Quality" },
-  { value: 10, suffix: "x", label: "Faster Workflow" },
-  { value: 4, suffix: "K", label: "Max Resolution" },
+const LAYERS = [
+  { name: "KineticTitle.tsx", meta: "spring · damping 14", icon: IconType, active: true },
+  { name: "LightSweep.glsl", meta: "interpolate 0 → 30", icon: IconSparkles },
+  { name: "GridMesh.tsx", meta: "3D perspective", icon: IconLayout },
+  { name: "ImpactStem.wav", meta: "beat sync", icon: IconActivity },
 ];
 
-/* ── Ticker items ── */
-const scrollItems = [
-  { icon: <FiCode className="h-3.5 w-3.5" />, text: "HTML Export" },
-  { icon: <FiLayers className="h-3.5 w-3.5" />, text: "CSS Animations" },
-  { icon: <FiZap className="h-3.5 w-3.5" />, text: "JS Motion" },
-  { icon: <FiDownload className="h-3.5 w-3.5" />, text: "MP4 · WebM · SVG" },
-  { icon: <FiPlay className="h-3.5 w-3.5" />, text: "4K Render" },
-  { icon: <FiCode className="h-3.5 w-3.5" />, text: "Transparent Overlays" },
-  { icon: <FiLayers className="h-3.5 w-3.5" />, text: "Brand Presets" },
-  { icon: <FiZap className="h-3.5 w-3.5" />, text: "AI Keyframes" },
-  { icon: <FiDownload className="h-3.5 w-3.5" />, text: "Commercial License" },
-  { icon: <FiPlay className="h-3.5 w-3.5" />, text: "No Hand-off Needed" },
-];
-
-/* ── Infinite scroll ticker ── */
-function ScrollTicker() {
-  const doubled = [...scrollItems, ...scrollItems];
-  return (
-    <div
-      className="relative w-full overflow-hidden py-3.5 border-y"
-      style={{
-        borderColor: "var(--border-subtle)",
-        maskImage: "linear-gradient(90deg, transparent 0%, black 8%, black 92%, transparent 100%)",
-      }}
-    >
-      <div
-        className="flex gap-5 w-max"
-        style={{ animation: "scrollTicker 34s linear infinite" }}
-      >
-        {doubled.map((item, i) => (
-          <div
-            key={i}
-            className="flex items-center gap-2 shrink-0 px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-[0.14em] whitespace-nowrap"
-            style={{
-              color: "var(--text-muted)",
-              border: "1px solid var(--border-subtle)",
-              background: "color-mix(in srgb, var(--accent-primary) 5%, transparent)",
-            }}
-          >
-            <span style={{ color: "var(--accent-primary)" }}>{item.icon}</span>
-            {item.text}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-/* ── Export format pills ── */
-const exportFormats = ["MP4", "WebM", "SVG", "HTML + CSS", "JS Scroll", "GIF", "Transparent PNG"];
-
-/* ── Capabilities ── */
-const capabilities = [
-  {
-    number: "01",
-    icon: "⚡",
-    title: "Direct your scene",
-    description: "Describe the visual, timing, and feeling in plain language. byreel translates intent into precise keyframes.",
-  },
-  {
-    number: "02",
-    icon: "◈",
-    title: "Shape every detail",
-    description: "Refine composition, physics, and brand colors with granular controls — all in one unified studio.",
-  },
-  {
-    number: "03",
-    icon: "▶",
-    title: "Ship the final cut",
-    description: "Export production-ready MP4, WebM, or HTML · CSS · JS scrolls — drop straight into your YouTube workflow.",
-  },
+const TRACKS = [
+  { label: "KineticTitle", left: "4%", width: "46%", tone: "accent" },
+  { label: "LightSweep shader", left: "16%", width: "58%", tone: "neutral" },
+  { label: "ImpactStem.wav", left: "0%", width: "88%", tone: "success" },
 ] as const;
 
 export default function MainSection() {
   return (
-    <section className="relative isolate overflow-hidden bg-[var(--background)] text-[var(--text-primary)]">
-      {/* Animated field background — untouched */}
-      <div className="pointer-events-none absolute inset-0 z-0 opacity-35" aria-hidden="true">
-        <FieldBackground />
-      </div>
-      {/* Noise + grid overlay — untouched */}
+    <section className="relative overflow-hidden pt-32 sm:pt-40 pb-20 sm:pb-28">
+      {/* Background: engineering grid faded towards the edges + soft accent wash */}
       <div
-        className="pointer-events-none absolute inset-0 z-0 opacity-70"
         aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-grid"
         style={{
-          backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='.13'/%3E%3C/svg%3E\"), linear-gradient(90deg, var(--border-subtle) 1px, transparent 1px), linear-gradient(var(--border-subtle) 1px, transparent 1px)",
-          backgroundSize: "180px 180px, 96px 96px, 96px 96px",
-          backgroundPosition: "0 0, center center, center center",
-          maskImage: "linear-gradient(to bottom, black 0%, black 68%, transparent 100%)",
+          maskImage: "radial-gradient(ellipse 70% 55% at 50% 0%, black 30%, transparent 75%)",
+          WebkitMaskImage: "radial-gradient(ellipse 70% 55% at 50% 0%, black 30%, transparent 75%)",
         }}
       />
-      {/* Accent glow orb */}
       <div
-        className="pointer-events-none absolute -top-32 left-1/2 -translate-x-1/2 w-[700px] h-[500px] z-0 opacity-25"
         aria-hidden="true"
-        style={{ background: "radial-gradient(ellipse 60% 55% at 50% 0%, var(--accent-primary), transparent 70%)" }}
-      />
-      {/* Side accent glows */}
-      <div
-        className="pointer-events-none absolute top-1/4 -left-24 w-[360px] h-[360px] z-0 opacity-[0.08]"
-        aria-hidden="true"
-        style={{ background: "radial-gradient(circle, var(--accent-secondary), transparent 70%)" }}
-      />
-      <div
-        className="pointer-events-none absolute top-1/3 -right-24 w-[320px] h-[320px] z-0 opacity-[0.08]"
-        aria-hidden="true"
-        style={{ background: "radial-gradient(circle, var(--accent-tertiary), transparent 70%)" }}
+        className="pointer-events-none absolute left-1/2 top-0 -translate-x-1/2 w-[900px] h-[420px] opacity-70"
+        style={{
+          background: "radial-gradient(ellipse 50% 60% at 50% 0%, var(--accent-soft), transparent 70%)",
+        }}
       />
 
-      {/* ── HERO CONTENT ── */}
-      <div className="relative z-10 mx-auto flex min-h-[min(900px,100vh)] max-w-7xl flex-col justify-center px-5 pb-16 pt-32 sm:px-8 lg:px-10 lg:pt-36">
-        <div className="mx-auto max-w-4xl text-center">
+      <div className="relative container-page flex flex-col items-center text-center">
+        <Link
+          href="/product"
+          style={{ animationDelay: "0ms" }}
+          className="animate-fade-up group inline-flex items-center gap-2 h-7 pl-1 pr-3 rounded-full border border-line bg-surface/70 backdrop-blur text-[12.5px] text-fg-muted hover:text-fg hover:border-line-strong transition-colors"
+        >
+          <span className="badge badge-accent h-5 px-2 text-[11px]">New</span>
+          <span>Motion Agent 2.0 is live</span>
+          <IconArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
+        </Link>
 
-          {/* Animated badge */}
-          <div
-            className="mb-7 inline-flex items-center gap-2.5 rounded-full border border-[var(--border-strong)] bg-[var(--surface-glass)] px-4 py-1.5 backdrop-blur-sm"
-            style={{ boxShadow: "0 0 20px color-mix(in srgb, var(--accent-primary) 18%, transparent)" }}
-          >
-            <span className="inline-block h-1.5 w-1.5 rounded-full bg-[var(--accent-primary)] animate-pulse" />
-            <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--accent-primary)]">
-              <TypewriterBadge />
-            </span>
-          </div>
+        <h1
+          style={{ animationDelay: "70ms" }}
+          className="animate-fade-up mt-6 max-w-4xl text-[2.6rem] leading-[1.05] sm:text-6xl md:text-[4.25rem] font-semibold tracking-[-0.045em] text-fg"
+        >
+          The AI agent for
+          <br />
+          <span className="text-gradient">motion graphics.</span>
+        </h1>
 
-          {/* ── PREMIUM HEADLINE ── */}
-          <h1
-            className="mx-auto max-w-4xl font-bold text-[var(--text-primary)]"
-            style={{
-              fontSize: "clamp(3rem, 9vw, 6.2rem)",
-              lineHeight: "0.92",
-              letterSpacing: "-0.06em",
-              fontFamily: "var(--font-headline)",
-            }}
-          >
-            Give every{" "}
-            <span
-              style={{
-                backgroundImage: "linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 55%, var(--accent-tertiary) 100%)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-              }}
-            >
-              idea
-            </span>
-            {" "}a{" "}
-            <em
-              style={{
-                fontStyle: "italic",
-                fontWeight: 200,
-                letterSpacing: "-0.02em",
-              }}
-            >
-              moving
-            </em>{" "}
-            form.
-          </h1>
+        <p
+          style={{ animationDelay: "140ms" }}
+          className="animate-fade-up mt-6 max-w-[580px] text-base sm:text-lg leading-relaxed text-fg-muted"
+        >
+          Describe a scene in plain language. byreel writes the composition, animates it at 60 FPS
+          and exports a broadcast-ready MP4 — no timeline wrangling required.
+        </p>
 
-          {/* Sub-label */}
-          <p
-            className="mt-4 text-[11px] font-bold uppercase tracking-[0.28em]"
-            style={{ color: "var(--accent-tertiary)" }}
-          >
-            AI Motion Graphics Studio &nbsp;·&nbsp; Built for YouTube Creators
-          </p>
-
-          {/* Subheadline */}
-          <p
-            className="mx-auto mt-7 max-w-2xl text-[var(--text-secondary)]"
-            style={{ fontSize: "clamp(1rem, 2vw, 1.18rem)", lineHeight: "1.78" }}
-          >
-            byreel turns a creative brief into{" "}
-            <strong className="font-semibold text-[var(--text-primary)]">precise motion graphics</strong>
-            {" "}— from first direction to{" "}
-            <strong className="font-semibold text-[var(--text-primary)]">final render</strong>.
-            Export as{" "}
-            <strong className="font-semibold text-[var(--text-primary)]">HTML · CSS · JS</strong>
-            {" "}scrolls so YouTubers drop it straight into their workflow.
-          </p>
-
-          {/* Export format pills */}
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
-            {exportFormats.map((fmt) => (
-              <span
-                key={fmt}
-                className="inline-flex items-center rounded-md px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] transition-all duration-200 hover:scale-105"
-                style={{
-                  color: "var(--accent-primary)",
-                  background: "color-mix(in srgb, var(--accent-primary) 10%, transparent)",
-                  border: "1px solid color-mix(in srgb, var(--accent-primary) 22%, transparent)",
-                }}
-              >
-                {fmt}
-              </span>
-            ))}
-          </div>
-
-          {/* CTAs */}
-          <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Link
-              href="/register"
-              className="group relative inline-flex min-h-[52px] items-center justify-center gap-2.5 overflow-hidden rounded-xl px-8 text-sm font-bold transition-all duration-300 hover:-translate-y-0.5"
-              style={{
-                background: "linear-gradient(135deg, var(--accent-primary) 0%, color-mix(in srgb, var(--accent-primary) 75%, var(--accent-secondary)) 100%)",
-                color: "var(--background)",
-                boxShadow: "0 4px 24px color-mix(in srgb, var(--accent-primary) 40%, transparent), inset 0 1px 0 rgba(255,255,255,0.2)",
-                letterSpacing: "0.01em",
-              }}
-            >
-              <span className="relative z-10">Start creating free</span>
-              <FiArrowRight className="relative z-10 h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" aria-hidden="true" />
-              <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:translate-x-full transition-transform duration-700" aria-hidden="true" />
-            </Link>
-
-            <Link
-              href="/workspace"
-              className="group inline-flex min-h-[52px] items-center justify-center gap-2.5 rounded-xl border border-[var(--border-strong)] bg-[var(--surface-glass)] px-8 text-sm font-semibold text-[var(--text-primary)] transition-all duration-200 hover:bg-[var(--surface-card)] hover:border-[var(--accent-primary)] hover:-translate-y-0.5 backdrop-blur-sm"
-            >
-              <span
-                className="flex h-6 w-6 items-center justify-center rounded-full"
-                style={{ background: "color-mix(in srgb, var(--accent-primary) 20%, transparent)" }}
-              >
-                <FiPlay className="h-3 w-3 text-[var(--accent-primary)]" aria-hidden="true" />
-              </span>
-              Open studio
-            </Link>
-          </div>
-
-          {/* Trust line */}
-          <p className="mt-5 text-xs text-[var(--text-muted)]">
-            Production-ready exports &nbsp;·&nbsp; No credit card required &nbsp;·&nbsp; Cancel anytime
-          </p>
-
-          {/* ── Animated Stats ── */}
-          <div className="mt-14 flex items-center justify-center gap-10 sm:gap-20">
-            {stats.map((stat, i) => (
-              <div key={i} className="text-center group">
-                <p
-                  className="font-bold tabular-nums tracking-[-0.04em] transition-transform duration-300 group-hover:scale-105"
-                  style={{
-                    fontSize: "clamp(2rem, 4.5vw, 3.2rem)",
-                    backgroundImage: "linear-gradient(135deg, var(--text-primary) 0%, var(--accent-primary) 100%)",
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
-                    backgroundClip: "text",
-                  }}
-                >
-                  <AnimatedCounter target={stat.value} suffix={stat.suffix} />
-                </p>
-                <div
-                  className="mx-auto mt-1.5 h-px w-8 transition-all duration-500 group-hover:w-16"
-                  style={{ background: "linear-gradient(90deg, transparent, var(--accent-primary), transparent)" }}
-                />
-                <p className="mt-2 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">
-                  {stat.label}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* ── Infinite scroll ticker ── */}
-      <div className="relative z-10">
-        <ScrollTicker />
-      </div>
-
-      {/* ── HOW IT WORKS ── */}
-      <div className="relative z-10 mx-auto max-w-7xl px-5 py-20 sm:px-8 lg:px-10">
-        <div className="flex items-center gap-4 mb-12">
-          <div className="flex-1 h-px bg-[var(--border-subtle)]" />
-          <span className="text-[10px] font-bold uppercase tracking-[0.28em] text-[var(--text-muted)]">
-            How it works
-          </span>
-          <div className="flex-1 h-px bg-[var(--border-subtle)]" />
+        <div
+          style={{ animationDelay: "210ms" }}
+          className="animate-fade-up mt-9 flex flex-col sm:flex-row items-center gap-3"
+        >
+          <Link href="/workspace" className="btn btn-lg btn-primary min-w-[170px]">
+            Open Studio
+            <IconArrowRight className="w-4 h-4" />
+          </Link>
+          <Link href="/explore" className="btn btn-lg btn-secondary min-w-[170px]">
+            Browse templates
+          </Link>
         </div>
 
-        <div className="grid sm:grid-cols-3 gap-0 sm:gap-8 lg:gap-12">
-          {capabilities.map(({ number, icon, title, description }) => (
-            <div
-              key={number}
-              className="group relative flex flex-col gap-4 py-8 sm:py-6 border-t border-[var(--border-subtle)] sm:border-t-0 first:border-t-0 transition-all duration-300"
-            >
-              {/* Hover accent top-line */}
-              <div
-                className="absolute top-0 left-0 h-[2px] w-0 group-hover:w-full transition-all duration-500 rounded-full"
-                style={{ background: "linear-gradient(90deg, var(--accent-primary), var(--accent-secondary))" }}
-              />
+        <p
+          style={{ animationDelay: "280ms" }}
+          className="animate-fade-up mt-5 text-[13px] text-fg-subtle"
+        >
+          Free plan available · No credit card required
+        </p>
+      </div>
 
-              <div className="flex items-center gap-3">
-                <span className="font-mono text-[10px] font-bold tracking-[0.2em] text-[var(--accent-primary)]">
-                  {number}
-                </span>
-                <span
-                  className="flex h-9 w-9 items-center justify-center rounded-lg text-base transition-all duration-300 group-hover:scale-110 group-hover:rotate-3"
-                  style={{
-                    color: "var(--accent-primary)",
-                    background: "color-mix(in srgb, var(--accent-primary) 12%, transparent)",
-                    border: "1px solid color-mix(in srgb, var(--accent-primary) 25%, transparent)",
-                  }}
-                >
-                  {icon}
-                </span>
+      {/* ── Product mockup ── */}
+      <div className="animate-fade-up [animation-delay:350ms] relative container-page mt-16 sm:mt-20">
+        <div className="relative rounded-2xl border border-line bg-surface shadow-elevated overflow-hidden text-left select-none">
+          {/* Window chrome */}
+          <div className="flex items-center justify-between gap-4 h-11 px-4 border-b border-line bg-canvas-subtle">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="flex gap-1.5 shrink-0" aria-hidden="true">
+                <span className="w-2.5 h-2.5 rounded-full bg-fg/15" />
+                <span className="w-2.5 h-2.5 rounded-full bg-fg/15" />
+                <span className="w-2.5 h-2.5 rounded-full bg-fg/15" />
               </div>
-
-              <div>
-                <h2
-                  className="text-base font-bold tracking-[-0.02em] text-[var(--text-primary)] group-hover:text-[var(--accent-primary)] transition-colors duration-200"
-                  style={{ fontFamily: "var(--font-headline)" }}
-                >
-                  {title}
-                </h2>
-                <p className="mt-2 max-w-xs text-sm leading-7 text-[var(--text-secondary)]">
-                  {description}
-                </p>
+              <div className="flex items-center gap-1.5 text-xs font-mono truncate">
+                <span className="text-fg-subtle">launch-film /</span>
+                <span className="text-fg">KineticLaunch.tsx</span>
               </div>
             </div>
-          ))}
+            <div className="flex items-center gap-2 shrink-0">
+              <span className="hidden sm:inline-flex badge font-mono text-[11px]">3840 × 2160</span>
+              <span className="hidden md:inline-flex badge font-mono text-[11px]">60 FPS</span>
+              <span className="btn btn-sm btn-accent h-7 text-xs pointer-events-none">
+                <IconDownload className="w-3.5 h-3.5" />
+                Export
+              </span>
+            </div>
+          </div>
+
+          {/* Prompt strip */}
+          <div className="flex items-center gap-3 px-4 py-2.5 border-b border-line text-xs">
+            <IconSparkles className="w-4 h-4 text-accent shrink-0" />
+            <span className="text-fg-muted truncate">
+              Kinetic title for a product launch — staggered spring entrance, soft light sweep, cut on the bass drop.
+            </span>
+            <span className="hidden lg:inline-flex ml-auto shrink-0 items-center gap-1.5 text-success font-mono text-[11px]">
+              <span className="w-1.5 h-1.5 rounded-full bg-success" />
+              Rendered in 4.2s
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12">
+            {/* Layers panel */}
+            <aside className="hidden lg:flex lg:col-span-3 flex-col border-r border-line p-3 text-xs">
+              <div className="flex items-center justify-between px-1 pb-2.5 text-[11px] font-medium uppercase tracking-wider text-fg-subtle">
+                <span className="flex items-center gap-1.5">
+                  <IconLayers className="w-3.5 h-3.5" />
+                  Layers
+                </span>
+                <span className="font-mono normal-case tracking-normal">4</span>
+              </div>
+              <div className="flex flex-col gap-1">
+                {LAYERS.map(({ name, meta, icon: Icon, active }) => (
+                  <div
+                    key={name}
+                    className={`flex items-center gap-2.5 p-2 rounded-lg border ${
+                      active ? "bg-accent-soft border-accent/30" : "border-transparent hover:bg-fg/[0.04]"
+                    }`}
+                  >
+                    <span
+                      className={`w-6 h-6 rounded-md flex items-center justify-center ${
+                        active ? "bg-accent-solid text-accent-fg" : "bg-surface-3 text-fg-muted"
+                      }`}
+                    >
+                      <Icon className="w-3.5 h-3.5" />
+                    </span>
+                    <div className="flex flex-col min-w-0">
+                      <span className={`text-[12px] font-medium truncate ${active ? "text-fg" : "text-fg-muted"}`}>
+                        {name}
+                      </span>
+                      <span className="text-[10.5px] text-fg-subtle font-mono truncate">{meta}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-auto pt-3">
+                <div className="rounded-lg border border-line bg-canvas-subtle p-3 font-mono text-[10.5px] leading-relaxed text-fg-muted">
+                  <div className="mb-1.5 flex justify-between text-fg-subtle">
+                    <span>spring()</span>
+                    <span className="text-accent">active</span>
+                  </div>
+                  damping: 14
+                  <br />
+                  stiffness: 110
+                  <br />
+                  mass: 0.7
+                </div>
+              </div>
+            </aside>
+
+            {/* Viewport + timeline */}
+            <div className="lg:col-span-9 flex flex-col">
+              {/* Video viewport — intentionally dark in both themes, like any editor canvas */}
+              <div className="relative flex items-center justify-center min-h-[300px] sm:min-h-[400px] p-6 bg-[#0b0b0e] overflow-hidden group">
+                <div
+                  aria-hidden="true"
+                  className="absolute inset-0"
+                  style={{
+                    background:
+                      "radial-gradient(ellipse 60% 55% at 50% 50%, rgba(61,115,245,0.22), transparent 70%)",
+                  }}
+                />
+                <div
+                  aria-hidden="true"
+                  className="absolute inset-5 sm:inset-8 rounded-md border border-dashed border-white/10 flex items-start justify-between p-2 text-[9px] font-mono text-white/25"
+                >
+                  <span>TITLE SAFE</span>
+                  <span>16:9</span>
+                </div>
+
+                <div className="relative text-center">
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.06] px-2.5 py-1 text-[10px] font-mono text-white/70">
+                    frame 246 · interpolate(0 → 1)
+                  </span>
+                  <h2 className="mt-4 text-4xl sm:text-6xl font-semibold leading-[0.95] tracking-[-0.045em] text-white">
+                    Launch day.
+                  </h2>
+                  <p className="mt-3 text-xs sm:text-sm font-mono text-white/55">Made with byreel · 60 FPS · H.264</p>
+                </div>
+
+                <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <span className="w-14 h-14 rounded-full bg-white/15 border border-white/25 backdrop-blur flex items-center justify-center text-white">
+                    <IconPlay className="w-6 h-6 fill-white ml-0.5" />
+                  </span>
+                </div>
+              </div>
+
+              {/* Timeline */}
+              <div className="border-t border-line p-3 sm:p-4 space-y-2">
+                <div className="flex items-center justify-between pb-1 text-[11px] font-mono text-fg-subtle">
+                  <div className="flex items-center gap-2.5">
+                    <span className="w-6 h-6 rounded-md bg-surface-3 text-fg flex items-center justify-center">
+                      <IconPlay className="w-3 h-3 fill-current" />
+                    </span>
+                    <span className="text-fg">00:04:06</span>
+                    <span>/ 00:15:00</span>
+                  </div>
+                  <span className="hidden sm:inline">Snap · Audio lock</span>
+                </div>
+
+                <div className="relative h-1 rounded-full bg-fg/10 overflow-hidden">
+                  <div className="h-full w-[27%] bg-accent-solid" />
+                </div>
+
+                {TRACKS.map(({ label, left, width, tone }) => (
+                  <div key={label} className="relative h-7 rounded-md bg-fg/[0.03] border border-line overflow-hidden">
+                    <div
+                      className={`absolute top-1 bottom-1 rounded px-2 flex items-center text-[10.5px] font-mono truncate border ${
+                        tone === "accent"
+                          ? "bg-accent-soft border-accent/40 text-accent"
+                          : tone === "success"
+                            ? "bg-success/10 border-success/35 text-success"
+                            : "bg-fg/[0.06] border-line-strong text-fg-muted"
+                      }`}
+                      style={{ left, width }}
+                    >
+                      {label}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-
-      {/* Inline keyframes for scroll ticker */}
-      <style>{`
-        @keyframes scrollTicker {
-          0%   { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-      `}</style>
     </section>
   );
 }

@@ -1763,14 +1763,14 @@ function getTemplateParent(template: TemplateItem): string {
   };
 
   return (
-    <div className="marketplace-shell min-h-screen flex flex-col absolute top-0 z-50 font-sans text-slate-900 dark:text-[#eee8dc] bg-[#f3eee5] dark:bg-[#171914] relative overflow-x-hidden selection:bg-[#cf795d]/30 selection:text-[#eee8dc] transition-colors duration-200">
+    <div className="marketplace-shell min-h-screen flex flex-col absolute top-0 z-50 font-sans text-fg bg-surface-2 relative overflow-x-hidden selection:bg-accent-solid/30 selection:text-accent-fg transition-colors duration-200">
       {/* Interactive Background Canvas */}
       <div className="fixed inset-0 pointer-events-none z-0 opacity-40">
         <SpiderNetBackground opacity={0.5} />
       </div>
 
       {/* Hero Header Section - Professional, Compact & Full-Width */}
-      <section className="relative z-10 pt-24 pb-5 px-4 sm:px-6 lg:px-8 xl:px-10 border-b border-black/[0.06] dark:border-white/[0.06] bg-gradient-to-b from-black/[0.02] dark:from-white/[0.02] to-transparent">
+      <section className="relative z-10 pt-24 pb-5 px-4 sm:px-6 lg:px-8 xl:px-10 border-b border-line bg-gradient-to-b from-black/[0.02] dark:from-white/[0.02] to-transparent">
         <div className="w-full max-w-[1920px] mx-auto space-y-4">
           {/* Top Bar: Navigation, Action Buttons & Theme Toggle */}
           <div className="flex items-center justify-between gap-3 flex-wrap sm:flex-nowrap">
@@ -1789,10 +1789,10 @@ function getTemplateParent(template: TemplateItem): string {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-black/[0.04] dark:bg-white/[0.06] hover:bg-[#cf795d]/15 hover:text-[#cf795d] text-slate-700 dark:text-[#eee8dc] border border-black/[0.08] dark:border-white/[0.1] transition-all cursor-pointer shadow-xs active:scale-95"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-fg/[0.04] hover:bg-accent-solid/15 hover:text-accent text-fg border border-line transition-all cursor-pointer shadow-xs active:scale-95"
                 title="Load a custom JSON preset from your computer"
               >
-                <FiDownload className="w-3.5 h-3.5 text-[#cf795d] rotate-180" />
+                <FiDownload className="w-3.5 h-3.5 text-accent rotate-180" />
                 <span>Load Preset</span>
               </button>
 
@@ -1800,10 +1800,10 @@ function getTemplateParent(template: TemplateItem): string {
               <button
                 type="button"
                 onClick={handleShuffleRandom}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-black/[0.04] dark:bg-white/[0.06] hover:bg-[#cf795d]/15 hover:text-[#cf795d] text-slate-700 dark:text-[#eee8dc] border border-black/[0.08] dark:border-white/[0.1] transition-all cursor-pointer shadow-xs active:scale-95"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-fg/[0.04] hover:bg-accent-solid/15 hover:text-accent text-fg border border-line transition-all cursor-pointer shadow-xs active:scale-95"
                 title="Randomly pick and inspect an animation preset"
               >
-                <FiShuffle className="w-3.5 h-3.5 text-[#cf795d]" />
+                <FiShuffle className="w-3.5 h-3.5 text-accent" />
                 <span>Surprise Me</span>
               </button>
 
@@ -1813,8 +1813,8 @@ function getTemplateParent(template: TemplateItem): string {
                 onClick={() => setAutoPlayAll((prev) => !prev)}
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer shadow-xs active:scale-95 ${
                   autoPlayAll
-                    ? "bg-[#cf795d] text-white shadow-md shadow-[#cf795d]/30"
-                    : "bg-black/[0.04] dark:bg-white/[0.06] hover:bg-black/[0.08] dark:hover:bg-white/[0.1] text-slate-700 dark:text-[#eee8dc] border border-black/[0.08] dark:border-white/[0.1]"
+                    ? "bg-accent-solid text-white shadow-md shadow-accent/30"
+                    : "bg-fg/[0.04] hover:bg-black/[0.08] dark:hover:bg-white/[0.1] text-fg border border-line"
                 }`}
                 title="Toggle continuous 60FPS animation for all visible cards"
               >
@@ -1834,7 +1834,7 @@ function getTemplateParent(template: TemplateItem): string {
               {/* Open Studio Direct CTA */}
               <Link
                 href="/workspace"
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-[#cf795d] to-[#e5987d] text-slate-950 hover:brightness-110 shadow-sm hover:shadow-[#cf795d]/25 transition-all active:scale-95"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-accent-solid to-accent text-slate-950 hover:brightness-110 shadow-sm hover:shadow-accent/25 transition-all active:scale-95"
                 title="Launch the byreel Motion Graphics Workspace"
               >
                 <FiZap className="w-3.5 h-3.5 fill-slate-950" />
@@ -1842,8 +1842,8 @@ function getTemplateParent(template: TemplateItem): string {
               </Link>
 
               {/* Realtime Engine Status Pill */}
-              <span className="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium bg-black/[0.04] dark:bg-white/[0.05] border border-black/[0.06] dark:border-white/[0.08] text-slate-600 dark:text-[#b8b5a8]">
-                <span className="w-2 h-2 rounded-full bg-[#cf795d] animate-pulse" />
+              <span className="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium bg-fg/[0.04] border border-line text-fg-muted">
+                <span className="w-2 h-2 rounded-full bg-accent-solid animate-pulse" />
                 <span>60 FPS Engine</span>
               </span>
 
@@ -1854,27 +1854,27 @@ function getTemplateParent(template: TemplateItem): string {
           {/* Header Title & Subtitle */}
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3 pt-1">
             <div>
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#cf795d]/15 border border-[#cf795d]/30 text-[#cf795d] text-xs font-semibold mb-2">
-                <FiZap className="w-3 h-3 fill-[#cf795d]" />
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-accent-solid/15 border border-accent/30 text-accent text-xs font-semibold mb-2">
+                <FiZap className="w-3 h-3 fill-accent" />
                 <span>Motion Preset Showcase</span>
               </div>
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-slate-950 dark:text-[#f1eadf] font-headline">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-fg font-headline">
                 Motion Graphics for YouTube
               </h1>
-              <p className="text-xs sm:text-sm text-slate-600 dark:text-[#b8b5a8] mt-1 max-w-2xl font-sans">
+              <p className="text-xs sm:text-sm text-fg-muted mt-1 max-w-2xl font-sans">
                 Find production-ready motion graphics for explainers, coding videos, documentaries, Shorts, branding and more. Preview instantly, then remix in Studio.
               </p>
             </div>
 
             {/* Quick Metrics */}
-            <div className="flex items-center gap-2 text-xs font-mono text-slate-500 dark:text-[#888b7e] flex-wrap">
-              <span className="px-2.5 py-1 rounded-lg bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08]">
+            <div className="flex items-center gap-2 text-xs font-mono text-fg-muted flex-wrap">
+              <span className="px-2.5 py-1 rounded-lg bg-fg/[0.04] border border-line">
                 {templates.length} Presets
               </span>
-              <span className="px-2.5 py-1 rounded-lg bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08]">
+              <span className="px-2.5 py-1 rounded-lg bg-fg/[0.04] border border-line">
                 {filteredTemplates.length} Showing
               </span>
-              <span className="px-2.5 py-1 rounded-lg bg-black/[0.03] dark:bg-white/[0.04] border border-black/[0.06] dark:border-white/[0.08]">
+              <span className="px-2.5 py-1 rounded-lg bg-fg/[0.04] border border-line">
                 4K • ProRes • Lottie
               </span>
             </div>
@@ -1883,20 +1883,20 @@ function getTemplateParent(template: TemplateItem): string {
       </section>
 
       {/* Sticky Library Toolbar */}
-      <div className="sticky top-16 sm:top-20 z-30 border-b border-black/[0.08] dark:border-white/[0.08] bg-[#f3eee5]/95 dark:bg-[#171914]/95 backdrop-blur-xl shadow-sm">
+      <div className="sticky top-16 sm:top-20 z-30 border-b border-line bg-canvas-subtle/95 dark:bg-surface-2/95 backdrop-blur-xl shadow-sm">
         <div className="w-full max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 py-3">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#cf795d]">
+                <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-accent">
                   Explore
                 </span>
                 <span className="h-1 w-1 rounded-full bg-black/20 dark:bg-white/20" />
-                <span className="text-[11px] font-mono text-slate-500 dark:text-[#888b7e]">
+                <span className="text-[11px] font-mono text-fg-muted">
                   {filteredTemplates.length} presets
                 </span>
               </div>
-              <h2 className="mt-0.5 truncate text-base font-semibold text-slate-950 dark:text-[#f1eadf]">
+              <h2 className="mt-0.5 truncate text-base font-semibold text-fg">
                 {activeSubcategory ||
                   exploreCategories.find((category) => category.id === activeCategory)?.label ||
                   "All Motion"}
@@ -1912,7 +1912,7 @@ function getTemplateParent(template: TemplateItem): string {
                     setActiveCategory(event.target.value);
                     setActiveSubcategory(null);
                   }}
-                  className="h-10 w-full min-w-[180px] rounded-xl border border-black/[0.08] bg-white/80 px-3 text-xs font-medium text-slate-800 outline-none transition focus:border-[#cf795d]/50 focus:ring-2 focus:ring-[#cf795d]/10 dark:border-white/[0.08] dark:bg-white/[0.04] dark:text-[#eee8dc]"
+                  className="h-10 w-full min-w-[180px] rounded-xl border border-black/[0.08] bg-white/80 px-3 text-xs font-medium text-slate-800 outline-none transition focus:border-accent/50 focus:ring-2 focus:ring-accent/10 dark:border-white/[0.08] dark:bg-white/[0.04] dark:text-fg"
                 >
                   {exploreCategories.map((category) => (
                     <option key={category.id} value={category.id}>
@@ -1923,18 +1923,18 @@ function getTemplateParent(template: TemplateItem): string {
               </div>
 
               <div className="relative min-w-0 sm:w-[320px]">
-                <FiSearch className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-[#777a70]" />
+                <FiSearch className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-fg-subtle" />
                 <input
                   value={searchQuery}
                   onChange={(event) => setSearchQuery(event.target.value)}
                   placeholder="Search motion graphics..."
-                  className="h-10 w-full rounded-xl border border-black/[0.08] bg-white/80 pl-9 pr-10 text-xs outline-none transition focus:border-[#cf795d]/50 focus:ring-2 focus:ring-[#cf795d]/10 dark:border-white/[0.08] dark:bg-white/[0.04] dark:text-[#eee8dc]"
+                  className="h-10 w-full rounded-xl border border-black/[0.08] bg-white/80 pl-9 pr-10 text-xs outline-none transition focus:border-accent/50 focus:ring-2 focus:ring-accent/10 dark:border-white/[0.08] dark:bg-white/[0.04] dark:text-fg"
                 />
                 {searchQuery && (
                   <button
                     type="button"
                     onClick={() => setSearchQuery("")}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-400 hover:text-fg"
                     aria-label="Clear search"
                   >
                     <FiX className="h-3.5 w-3.5" />
@@ -1945,7 +1945,7 @@ function getTemplateParent(template: TemplateItem): string {
               <select
                 value={sortBy}
                 onChange={(event) => setSortBy(event.target.value as typeof sortBy)}
-                className="h-10 rounded-xl border border-black/[0.08] bg-white/80 px-3 text-xs font-medium text-slate-800 outline-none dark:border-white/[0.08] dark:bg-white/[0.04] dark:text-[#eee8dc]"
+                className="h-10 rounded-xl border border-black/[0.08] bg-white/80 px-3 text-xs font-medium text-slate-800 outline-none dark:border-white/[0.08] dark:bg-white/[0.04] dark:text-fg"
                 aria-label="Sort presets"
               >
                 <option value="popular">Most popular</option>
@@ -1960,14 +1960,14 @@ function getTemplateParent(template: TemplateItem): string {
                 onClick={() => setShowAdvancedFilters((previous) => !previous)}
                 className={`inline-flex h-10 items-center justify-center gap-2 rounded-xl border px-3 text-xs font-semibold transition-colors ${
                   showAdvancedFilters || activeFilterCount > 0
-                    ? "border-[#cf795d]/40 bg-[#cf795d]/10 text-[#cf795d]"
-                    : "border-black/[0.08] bg-white/80 text-slate-700 hover:bg-black/[0.04] dark:border-white/[0.08] dark:bg-white/[0.04] dark:text-[#eee8dc] dark:hover:bg-white/[0.07]"
+                    ? "border-accent/40 bg-accent-solid/10 text-accent"
+                    : "border-black/[0.08] bg-white/80 text-slate-700 hover:bg-black/[0.04] dark:border-white/[0.08] dark:bg-white/[0.04] dark:text-fg dark:hover:bg-white/[0.07]"
                 }`}
               >
                 <FiFilter className="h-3.5 w-3.5" />
                 <span>Filters</span>
                 {activeFilterCount > 0 && (
-                  <span className="rounded-full bg-[#cf795d] px-1.5 py-0.5 text-[9px] text-white">
+                  <span className="rounded-full bg-accent-solid px-1.5 py-0.5 text-[9px] text-white">
                     {activeFilterCount}
                   </span>
                 )}
@@ -1979,7 +1979,7 @@ function getTemplateParent(template: TemplateItem): string {
             <div className="mt-3 border-t border-black/[0.06] pt-3 dark:border-white/[0.06]">
               <div className="grid gap-3 md:grid-cols-3">
                 <div>
-                  <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-[#888b7e]">
+                  <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-fg-muted">
                     View
                   </p>
                   <div className="flex flex-wrap gap-1.5">
@@ -1995,8 +1995,8 @@ function getTemplateParent(template: TemplateItem): string {
                         onClick={() => setMarketView(view.id as typeof marketView)}
                         className={`rounded-lg px-2.5 py-1.5 text-[11px] font-medium transition-colors ${
                           marketView === view.id
-                            ? "bg-[#cf795d] text-white"
-                            : "bg-black/[0.04] text-slate-600 hover:bg-black/[0.07] dark:bg-white/[0.05] dark:text-[#b8b5a8] dark:hover:bg-white/[0.08]"
+                            ? "bg-accent-solid text-white"
+                            : "bg-black/[0.04] text-slate-600 hover:bg-fg/[0.06] dark:text-fg-muted dark:hover:bg-white/[0.08]"
                         }`}
                       >
                         {view.label}
@@ -2006,7 +2006,7 @@ function getTemplateParent(template: TemplateItem): string {
                 </div>
 
                 <div>
-                  <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-[#888b7e]">
+                  <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-fg-muted">
                     Duration
                   </p>
                   <div className="flex flex-wrap gap-1.5">
@@ -2022,8 +2022,8 @@ function getTemplateParent(template: TemplateItem): string {
                         onClick={() => setDurationFilter(option.id as typeof durationFilter)}
                         className={`rounded-lg px-2.5 py-1.5 text-[11px] font-medium transition-colors ${
                           durationFilter === option.id
-                            ? "bg-[#cf795d] text-white"
-                            : "bg-black/[0.04] text-slate-600 hover:bg-black/[0.07] dark:bg-white/[0.05] dark:text-[#b8b5a8] dark:hover:bg-white/[0.08]"
+                            ? "bg-accent-solid text-white"
+                            : "bg-black/[0.04] text-slate-600 hover:bg-fg/[0.06] dark:text-fg-muted dark:hover:bg-white/[0.08]"
                         }`}
                       >
                         {option.label}
@@ -2033,7 +2033,7 @@ function getTemplateParent(template: TemplateItem): string {
                 </div>
 
                 <div>
-                  <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-[#888b7e]">
+                  <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-fg-muted">
                     Canvas
                   </p>
                   <div className="flex flex-wrap gap-1.5">
@@ -2048,8 +2048,8 @@ function getTemplateParent(template: TemplateItem): string {
                         onClick={() => setAspectRatioFilter(option.id)}
                         className={`rounded-lg px-2.5 py-1.5 text-[11px] font-medium transition-colors ${
                           aspectRatioFilter === option.id
-                            ? "bg-[#cf795d] text-white"
-                            : "bg-black/[0.04] text-slate-600 hover:bg-black/[0.07] dark:bg-white/[0.05] dark:text-[#b8b5a8] dark:hover:bg-white/[0.08]"
+                            ? "bg-accent-solid text-white"
+                            : "bg-black/[0.04] text-slate-600 hover:bg-fg/[0.06] dark:text-fg-muted dark:hover:bg-white/[0.08]"
                         }`}
                       >
                         {option.label}
@@ -2061,7 +2061,7 @@ function getTemplateParent(template: TemplateItem): string {
 
               <div className="mt-3 border-t border-black/[0.05] pt-3 dark:border-white/[0.05]">
                 <div className="flex flex-wrap items-center gap-1.5">
-                  <span className="mr-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-[#888b7e]">
+                  <span className="mr-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-fg-muted">
                     Tags
                   </span>
                   {allTags.map((tag) => (
@@ -2071,8 +2071,8 @@ function getTemplateParent(template: TemplateItem): string {
                       onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
                       className={`rounded-full px-2 py-1 text-[10px] font-mono transition-colors ${
                         selectedTag === tag
-                          ? "bg-[#cf795d] text-white"
-                          : "bg-black/[0.035] text-slate-600 hover:bg-black/[0.07] dark:bg-white/[0.04] dark:text-[#b8b5a8] dark:hover:bg-white/[0.08]"
+                          ? "bg-accent-solid text-white"
+                          : "bg-black/[0.035] text-slate-600 hover:bg-fg/[0.06] dark:text-fg-muted dark:hover:bg-white/[0.08]"
                       }`}
                     >
                       #{tag}
@@ -2083,28 +2083,28 @@ function getTemplateParent(template: TemplateItem): string {
 
               {activeFilterCount > 0 && (
                 <div className="mt-3 flex flex-wrap items-center gap-2">
-                  <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400 dark:text-[#777a70]">
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-fg-subtle">
                     Active
                   </span>
                   {activeCategory !== "all" && (
-                    <span className="rounded-full border border-[#cf795d]/25 bg-[#cf795d]/10 px-2.5 py-1 text-[10px] font-semibold text-[#cf795d]">
+                    <span className="rounded-full border border-accent/25 bg-accent-solid/10 px-2.5 py-1 text-[10px] font-semibold text-accent">
                       {exploreCategories.find((item) => item.id === activeCategory)?.label}
                     </span>
                   )}
                   {activeSubcategory && (
-                    <span className="rounded-full border border-[#cf795d]/25 bg-[#cf795d]/10 px-2.5 py-1 text-[10px] font-semibold text-[#cf795d]">
+                    <span className="rounded-full border border-accent/25 bg-accent-solid/10 px-2.5 py-1 text-[10px] font-semibold text-accent">
                       {activeSubcategory}
                     </span>
                   )}
                   {selectedTag && (
-                    <span className="rounded-full border border-[#cf795d]/25 bg-[#cf795d]/10 px-2.5 py-1 text-[10px] font-semibold text-[#cf795d]">
+                    <span className="rounded-full border border-accent/25 bg-accent-solid/10 px-2.5 py-1 text-[10px] font-semibold text-accent">
                       #{selectedTag}
                     </span>
                   )}
                   <button
                     type="button"
                     onClick={handleResetAllFilters}
-                    className="ml-1 text-[10px] font-medium text-slate-500 underline hover:text-slate-950 dark:text-[#888b7e] dark:hover:text-white"
+                    className="ml-1 text-[10px] font-medium text-slate-500 underline hover:text-slate-950 dark:text-fg-muted dark:hover:text-white"
                   >
                     Clear filters
                   </button>
@@ -2122,10 +2122,10 @@ function getTemplateParent(template: TemplateItem): string {
           <aside className="hidden lg:block">
             <div className="sticky top-32">
               <div className="mb-4">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-[#888b7e]">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-fg-muted">
                   Categories
                 </p>
-                <p className="mt-1 text-sm font-semibold text-slate-950 dark:text-[#f1eadf]">
+                <p className="mt-1 text-sm font-semibold text-fg">
                   Find the right motion
                 </p>
               </div>
@@ -2149,15 +2149,15 @@ function getTemplateParent(template: TemplateItem): string {
                         }}
                         className={`group flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-sm transition-all ${
                           active
-                            ? "bg-[#cf795d]/12 text-[#cf795d]"
-                            : "text-slate-700 hover:bg-black/[0.035] hover:text-slate-950 dark:text-[#b8b5a8] dark:hover:bg-white/[0.045] dark:hover:text-white"
+                            ? "bg-accent-solid/12 text-accent"
+                            : "text-slate-700 hover:bg-black/[0.035] hover:text-slate-950 dark:text-fg-muted dark:hover:bg-white/[0.045] dark:hover:text-white"
                         }`}
                       >
-                        <Icon className={`h-4 w-4 shrink-0 ${active ? "text-[#cf795d]" : "opacity-70"}`} />
+                        <Icon className={`h-4 w-4 shrink-0 ${active ? "text-accent" : "opacity-70"}`} />
                         <span className={`min-w-0 flex-1 truncate ${active ? "font-semibold" : "font-medium"}`}>
                           {category.label}
                         </span>
-                        <span className={`font-mono text-[9px] ${active ? "text-[#cf795d]/80" : "text-slate-400 dark:text-[#777a70]"}`}>
+                        <span className={`font-mono text-[9px] ${active ? "text-accent/80" : "text-fg-subtle"}`}>
                           {categoryCount}
                         </span>
                         {category.subcategories.length > 0 && (
@@ -2189,8 +2189,8 @@ function getTemplateParent(template: TemplateItem): string {
                                 }}
                                 className={`flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-[11px] transition-colors ${
                                   subActive
-                                    ? "font-semibold text-[#cf795d]"
-                                    : "text-slate-500 hover:text-slate-900 dark:text-[#8f9188] dark:hover:text-white"
+                                    ? "font-semibold text-accent"
+                                    : "text-slate-500 hover:text-slate-900 dark:text-fg-muted dark:hover:text-white"
                                 }`}
                               >
                                 <span className="min-w-0 flex-1 truncate">{subcategory}</span>
@@ -2209,17 +2209,17 @@ function getTemplateParent(template: TemplateItem): string {
 
               <div className="mt-6 rounded-2xl border border-black/[0.06] bg-black/[0.02] p-3 dark:border-white/[0.06] dark:bg-white/[0.025]">
                 <div className="flex items-center gap-2">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#cf795d]/10 text-[#cf795d]">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent-solid/10 text-accent">
                     <FiZap className="h-3.5 w-3.5" />
                   </div>
                   <div>
-                    <p className="text-[11px] font-semibold text-slate-900 dark:text-[#eee8dc]">Need something custom?</p>
-                    <p className="text-[10px] text-slate-500 dark:text-[#888b7e]">Generate it in Studio.</p>
+                    <p className="text-[11px] font-semibold text-fg">Need something custom?</p>
+                    <p className="text-[10px] text-fg-muted">Generate it in Studio.</p>
                   </div>
                 </div>
                 <Link
                   href="/workspace"
-                  className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-[#cf795d] px-3 py-2 text-[11px] font-semibold text-white transition hover:brightness-110"
+                  className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-accent-solid px-3 py-2 text-[11px] font-semibold text-white transition hover:brightness-110"
                 >
                   Open Studio
                   <FiArrowRight className="h-3 w-3" />
@@ -2231,19 +2231,19 @@ function getTemplateParent(template: TemplateItem): string {
           <section className="min-w-0">
         {filteredTemplates.length === 0 ? (
           <div className="text-center py-28 space-y-3">
-            <div className="w-12 h-12 mx-auto rounded-full bg-slate-100 dark:bg-white/[0.05] border border-black/10 dark:border-white/10 flex items-center justify-center text-slate-500 dark:text-[#888b7e]">
+            <div className="w-12 h-12 mx-auto rounded-full bg-fg/[0.05] border border-line flex items-center justify-center text-fg-muted">
               <FiSearch className="w-5 h-5" />
             </div>
-            <h3 className="text-base font-semibold text-slate-900 dark:text-[#f1eadf]">
+            <h3 className="text-base font-semibold text-fg">
               No matching motion presets found
             </h3>
-            <p className="text-xs text-slate-500 dark:text-[#b8b5a8] max-w-sm mx-auto">
+            <p className="text-xs text-fg-muted max-w-sm mx-auto">
               Try adjusting your search query, duration, or frame rate filter.
             </p>
             <button
               type="button"
               onClick={handleResetAllFilters}
-              className="mt-2 inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-[#cf795d] text-white text-xs font-semibold hover:brightness-110 transition-colors cursor-pointer"
+              className="mt-2 inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-accent-solid text-white text-xs font-semibold hover:brightness-110 transition-colors cursor-pointer"
             >
               <FiRotateCcw className="w-3.5 h-3.5" />
               <span>Reset All Filters</span>
@@ -2295,7 +2295,7 @@ function getTemplateParent(template: TemplateItem): string {
               return (
                 <div
                   key={item.id}
-                  className={`group relative rounded-2xl overflow-hidden bg-[#10120e] border border-black/10 dark:border-white/[0.08] hover:border-[#cf795d]/60 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-[#cf795d]/10 ${cardAspectClass} cursor-pointer select-none`}
+                  className={`group relative rounded-2xl overflow-hidden bg-surface-2 border border-line hover:border-accent/60 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-accent/10 ${cardAspectClass} cursor-pointer select-none`}
                   onMouseEnter={() => setHoveredId(item.id)}
                   onMouseLeave={handleMouseLeave}
                   onClick={() => setSelectedItem(item)}
@@ -2316,11 +2316,11 @@ function getTemplateParent(template: TemplateItem): string {
                   {/* Top Bar Badges & Quick Action Buttons */}
                   <div className="absolute top-2 left-2 right-2 flex items-center justify-between pointer-events-none z-10 transition-opacity duration-200">
                     <div className="flex items-center gap-1">
-                      <span className="px-2 py-0.5 rounded-md bg-black/75 backdrop-blur-md text-[9px] font-semibold text-[#f1eadf] border border-white/10 flex items-center gap-1 shadow-xs">
-                        <FiLayers className="w-2.5 h-2.5 text-[#cf795d]" />
+                      <span className="px-2 py-0.5 rounded-md bg-black/75 backdrop-blur-md text-[9px] font-semibold text-fg border border-white/10 flex items-center gap-1 shadow-xs">
+                        <FiLayers className="w-2.5 h-2.5 text-accent" />
                         <span className="truncate max-w-[70px]">{item.category}</span>
                       </span>
-                      <span className="px-1.5 py-0.5 rounded-md bg-black/75 backdrop-blur-md text-[9px] font-mono text-[#e5987d] border border-white/10 font-bold">
+                      <span className="px-1.5 py-0.5 rounded-md bg-black/75 backdrop-blur-md text-[9px] font-mono text-accent border border-white/10 font-bold">
                         {motionFormat === "vertical" ? "9:16" : item.aspectRatio}
                       </span>
                     </div>
@@ -2364,7 +2364,7 @@ function getTemplateParent(template: TemplateItem): string {
                       >
                         <FiBookmark
                           className={`w-3 h-3 ${
-                            isSaved ? "fill-current text-[#cf795d]" : ""
+                            isSaved ? "fill-current text-accent" : ""
                           }`}
                         />
                       </button>
@@ -2391,7 +2391,7 @@ function getTemplateParent(template: TemplateItem): string {
                   {/* Interactive Horizontal Scrub Bar Indicator */}
                   <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/40 z-20 pointer-events-none">
                     <div
-                      className="h-full bg-gradient-to-r from-[#cf795d] via-[#e5987d] to-[#a4778c] transition-all duration-75"
+                      className="h-full bg-gradient-to-r from-accent-solid via-accent to-accent transition-all duration-75"
                       style={{
                         width: isScrubbing ? `${progress * 100}%` : isHovered ? "100%" : "0%",
                       }}
@@ -2400,7 +2400,7 @@ function getTemplateParent(template: TemplateItem): string {
 
                   {/* Scrubbing Timestamp Overlay Pill */}
                   {isScrubbing && (
-                    <div className="absolute bottom-2.5 left-2.5 z-20 px-1.5 py-0.5 rounded bg-black/90 text-[9px] font-mono text-[#e5987d] border border-[#cf795d]/40 shadow-md">
+                    <div className="absolute bottom-2.5 left-2.5 z-20 px-1.5 py-0.5 rounded bg-black/90 text-[9px] font-mono text-accent border border-accent/40 shadow-md">
                       {currentTime}s / {item.durationSec}s
                     </div>
                   )}
@@ -2417,7 +2417,7 @@ function getTemplateParent(template: TemplateItem): string {
                         <span className="text-xs font-semibold text-white drop-shadow-md truncate block">
                           {item.title}
                         </span>
-                        <div className="flex items-center justify-between text-[10px] text-[#b8b5a8] font-mono">
+                        <div className="flex items-center justify-between text-[10px] text-fg-muted font-mono">
                           <span>
                             {item.duration} • {item.fps}fps
                           </span>
@@ -2444,7 +2444,7 @@ function getTemplateParent(template: TemplateItem): string {
                             item.category
                           )}&text=${encodeURIComponent(item.defaultText)}`}
                           onClick={(e) => e.stopPropagation()}
-                          className="flex-1 inline-flex items-center justify-center gap-1 py-1.5 px-2 rounded-lg bg-gradient-to-r from-[#cf795d] to-[#e5987d] text-slate-950 font-bold text-xs shadow-md hover:brightness-110 active:scale-95 transition-all"
+                          className="flex-1 inline-flex items-center justify-center gap-1 py-1.5 px-2 rounded-lg bg-gradient-to-r from-accent-solid to-accent text-slate-950 font-bold text-xs shadow-md hover:brightness-110 active:scale-95 transition-all"
                           title="Remix this template in Studio"
                         >
                           <FiZap className="w-3 h-3 fill-slate-950" />
@@ -2485,13 +2485,13 @@ function getTemplateParent(template: TemplateItem): string {
           </div>
 
           {/* Load More Presets Control Center */}
-          <div className="mt-8 pt-6 border-t border-black/[0.06] dark:border-white/[0.06] flex flex-col items-center justify-center gap-3">
+          <div className="mt-8 pt-6 border-t border-line flex flex-col items-center justify-center gap-3">
             {/* Progress / Status Summary */}
-            <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-[#888b7e] font-mono">
+            <div className="flex items-center gap-2 text-xs text-fg-muted font-mono">
               <span>Showing {displayedTemplates.length} of {filteredTemplates.length} presets</span>
-              <div className="w-24 h-1.5 rounded-full bg-black/10 dark:bg-white/10 overflow-hidden">
+              <div className="w-24 h-1.5 rounded-full bg-fg/10 overflow-hidden">
                 <div
-                  className="h-full bg-gradient-to-r from-[#cf795d] to-[#e5987d] transition-all duration-300"
+                  className="h-full bg-gradient-to-r from-accent-solid to-accent transition-all duration-300"
                   style={{
                     width: `${Math.min(100, (displayedTemplates.length / Math.max(1, filteredTemplates.length)) * 100)}%`,
                   }}
@@ -2507,7 +2507,7 @@ function getTemplateParent(template: TemplateItem): string {
                   type="button"
                   onClick={handleLoadMore}
                   disabled={isLoadingMore}
-                  className="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#cf795d] to-[#e5987d] hover:brightness-110 text-slate-950 text-xs font-bold shadow-md shadow-[#cf795d]/20 active:scale-95 transition-all cursor-pointer disabled:opacity-75"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-accent-solid to-accent hover:brightness-110 text-slate-950 text-xs font-bold shadow-md shadow-accent/20 active:scale-95 transition-all cursor-pointer disabled:opacity-75"
                 >
                   {isLoadingMore ? (
                     <>
@@ -2526,7 +2526,7 @@ function getTemplateParent(template: TemplateItem): string {
                 <button
                   type="button"
                   onClick={handleLoadAll}
-                  className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-black/[0.04] dark:bg-white/[0.06] hover:bg-black/[0.08] dark:hover:bg-white/[0.1] border border-black/10 dark:border-white/10 text-slate-700 dark:text-[#eee8dc] text-xs font-semibold transition-all cursor-pointer"
+                  className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-fg/[0.04] hover:bg-black/[0.08] dark:hover:bg-white/[0.1] border border-line text-fg text-xs font-semibold transition-all cursor-pointer"
                   title="Display all remaining templates at once"
                 >
                   <span>Show All ({filteredTemplates.length})</span>
@@ -2534,7 +2534,7 @@ function getTemplateParent(template: TemplateItem): string {
               </div>
             ) : (
               <div className="flex flex-col sm:flex-row items-center gap-3 pt-1">
-                <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-success border border-emerald-500/20">
                   <FiCheck className="w-3.5 h-3.5" />
                   <span>All {filteredTemplates.length} Presets Loaded</span>
                 </span>
@@ -2542,7 +2542,7 @@ function getTemplateParent(template: TemplateItem): string {
                 <button
                   type="button"
                   onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-                  className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs text-slate-500 dark:text-[#888b7e] hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
+                  className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs text-fg-muted hover:text-fg transition-colors cursor-pointer"
                 >
                   <FiArrowUp className="w-3 h-3" />
                   <span>Back to Top</span>
@@ -2563,25 +2563,25 @@ function getTemplateParent(template: TemplateItem): string {
           onClick={() => setSelectedItem(null)}
         >
           <div
-            className="relative w-full max-w-5xl rounded-3xl bg-white dark:bg-[#1a1d17] border border-black/10 dark:border-white/10 shadow-2xl overflow-hidden flex flex-col text-slate-900 dark:text-[#eee8dc] my-auto max-h-[92vh] transition-colors"
+            className="relative w-full max-w-5xl rounded-3xl bg-surface border border-line shadow-2xl overflow-hidden flex flex-col text-fg my-auto max-h-[92vh] transition-colors"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div className="p-4 sm:p-6 border-b border-black/[0.08] dark:border-white/[0.08] flex items-center justify-between bg-[#f8f5ee] dark:bg-[#151712]">
+            <div className="p-4 sm:p-6 border-b border-line flex items-center justify-between bg-canvas-subtle dark:bg-surface-2">
               <div className="flex items-center gap-3.5">
-                <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#cf795d] to-[#e5987d] text-slate-950 font-bold flex items-center justify-center shadow-md">
+                <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-accent-solid to-accent text-slate-950 font-bold flex items-center justify-center shadow-md">
                   <FiZap className="w-5 h-5 fill-slate-950" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h2 className="text-base sm:text-lg font-bold text-slate-950 dark:text-[#f1eadf] font-headline">
+                    <h2 className="text-base sm:text-lg font-bold text-fg font-headline">
                       {selectedItem.title}
                     </h2>
-                    <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-[#cf795d]/15 text-[#cf795d] border border-[#cf795d]/25">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-accent-solid/15 text-accent border border-accent/25">
                       {selectedItem.category}
                     </span>
                   </div>
-                  <p className="text-xs text-slate-500 dark:text-[#888b7e] mt-0.5">
+                  <p className="text-xs text-fg-muted mt-0.5">
                     Authored by {selectedItem.author.name} • {selectedItem.views} views • {selectedItem.remixes} remixes
                   </p>
                 </div>
@@ -2595,7 +2595,7 @@ function getTemplateParent(template: TemplateItem): string {
                   )}&style=${encodeURIComponent(
                     selectedItem.category
                   )}&text=${encodeURIComponent(modalCustomText || selectedItem.defaultText)}`}
-                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#cf795d] to-[#e5987d] text-slate-950 text-xs font-bold hover:brightness-110 transition-all flex items-center gap-1.5 shadow-lg shadow-[#cf795d]/20 active:scale-95"
+                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-accent-solid to-accent text-slate-950 text-xs font-bold hover:brightness-110 transition-all flex items-center gap-1.5 shadow-lg shadow-accent/20 active:scale-95"
                 >
                   <FiZap className="w-3.5 h-3.5 fill-slate-950" />
                   <span>Remix in Studio</span>
@@ -2604,26 +2604,26 @@ function getTemplateParent(template: TemplateItem): string {
                 <button
                   type="button"
                   onClick={() => shareTemplateLink(selectedItem)}
-                  className="p-2 rounded-xl bg-black/5 hover:bg-black/10 dark:bg-white/[0.06] dark:hover:bg-white/[0.12] text-slate-600 dark:text-[#b8b5a8] hover:text-slate-950 dark:hover:text-white transition-colors cursor-pointer"
+                  className="p-2 rounded-xl bg-black/5 hover:bg-black/10 dark:bg-white/[0.06] dark:hover:bg-white/[0.12] text-fg-muted hover:text-fg transition-colors cursor-pointer"
                   title="Share template link"
                 >
-                  {copiedShareLink ? <FiCheck className="w-4 h-4 text-emerald-500 dark:text-emerald-400" /> : <FiShare2 className="w-4 h-4" />}
+                  {copiedShareLink ? <FiCheck className="w-4 h-4 text-success" /> : <FiShare2 className="w-4 h-4" />}
                 </button>
 
                 <button
                   type="button"
                   onClick={() => downloadJsonPreset(selectedItem)}
-                  className="px-3.5 py-2 rounded-xl bg-black/5 hover:bg-black/10 dark:bg-white/10 dark:hover:bg-white/15 text-slate-800 dark:text-[#eee8dc] text-xs font-semibold border border-black/10 dark:border-white/15 transition-colors flex items-center gap-1.5 cursor-pointer"
+                  className="px-3.5 py-2 rounded-xl bg-black/5 hover:bg-fg/10 dark:hover:bg-white/15 text-fg text-xs font-semibold border border-line-strong transition-colors flex items-center gap-1.5 cursor-pointer"
                   title="Download preset JSON"
                 >
-                  <FiDownload className="w-3.5 h-3.5 text-slate-600 dark:text-[#b8b5a8]" />
+                  <FiDownload className="w-3.5 h-3.5 text-fg-muted" />
                   <span className="hidden sm:inline">JSON</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setSelectedItem(null)}
-                  className="p-2 rounded-xl bg-black/5 hover:bg-black/10 dark:bg-white/[0.06] dark:hover:bg-white/[0.12] text-slate-500 hover:text-slate-950 dark:text-[#888b7e] dark:hover:text-white transition-colors cursor-pointer"
+                  className="p-2 rounded-xl bg-black/5 hover:bg-black/10 dark:bg-white/[0.06] dark:hover:bg-white/[0.12] text-slate-500 hover:text-slate-950 dark:text-fg-muted dark:hover:text-white transition-colors cursor-pointer"
                 >
                   <FiX className="w-5 h-5" />
                 </button>
@@ -2633,7 +2633,7 @@ function getTemplateParent(template: TemplateItem): string {
             {/* Modal Body: Split Interactive View */}
             <div className="grid grid-cols-1 lg:grid-cols-12 overflow-y-auto">
               {/* Left Column: Interactive Cinematic Canvas Player */}
-              <div className="lg:col-span-7 bg-[#10120e] flex flex-col border-b lg:border-b-0 lg:border-r border-black/[0.08] dark:border-white/[0.08]">
+              <div className="lg:col-span-7 bg-surface-2 flex flex-col border-b lg:border-b-0 lg:border-r border-line">
                 {/* Canvas Container with dynamic 9:16 vertical support */}
                 <div
                   className={`relative w-full flex items-center justify-center overflow-hidden bg-[#0c0e0a] ${
@@ -2650,18 +2650,18 @@ function getTemplateParent(template: TemplateItem): string {
                   />
 
                   {/* Corner Badges */}
-                  <div className="absolute bottom-3 right-3 px-2.5 py-1 rounded-md bg-black/80 backdrop-blur-md text-[10px] font-mono text-[#e5987d] border border-white/10">
+                  <div className="absolute bottom-3 right-3 px-2.5 py-1 rounded-md bg-black/80 backdrop-blur-md text-[10px] font-mono text-accent border border-white/10">
                     60 FPS REAL-TIME • {selectedItem.resolution}
                   </div>
                 </div>
 
                 {/* Player Controls Toolbar */}
-                <div className="p-4 bg-slate-100 dark:bg-[#151712] border-t border-black/[0.08] dark:border-white/[0.08] flex items-center justify-between text-xs">
+                <div className="p-4 bg-slate-100 dark:bg-surface-2 border-t border-line flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
                       onClick={() => setModalPlaying(!modalPlaying)}
-                      className="px-3 py-1.5 rounded-lg bg-black/5 hover:bg-black/10 dark:bg-white/10 dark:hover:bg-white/20 text-slate-800 dark:text-[#eee8dc] transition-colors flex items-center gap-1.5 font-medium cursor-pointer"
+                      className="px-3 py-1.5 rounded-lg bg-black/5 hover:bg-fg/10 dark:hover:bg-white/20 text-fg transition-colors flex items-center gap-1.5 font-medium cursor-pointer"
                     >
                       {modalPlaying ? (
                         <>
@@ -2676,15 +2676,15 @@ function getTemplateParent(template: TemplateItem): string {
                       )}
                     </button>
 
-                    <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white dark:bg-white/[0.05] border border-black/10 dark:border-white/10 text-slate-700 dark:text-[#b8b5a8] font-mono text-[11px] shadow-xs">
-                      <FiClock className="w-3 h-3 text-slate-500 dark:text-[#888b7e]" />
+                    <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white dark:bg-white/[0.05] border border-line text-fg-muted font-mono text-[11px] shadow-xs">
+                      <FiClock className="w-3 h-3 text-fg-muted" />
                       <span>{selectedItem.duration}</span>
                     </div>
                   </div>
 
                   {/* Playback speed toggle */}
                   <div className="flex items-center gap-1">
-                    <span className="text-[11px] text-slate-500 dark:text-[#888b7e] font-mono mr-1">
+                    <span className="text-[11px] text-fg-muted font-mono mr-1">
                       Speed:
                     </span>
                     {[0.5, 1, 1.5, 2].map((s) => (
@@ -2694,8 +2694,8 @@ function getTemplateParent(template: TemplateItem): string {
                         onClick={() => setModalSpeed(s)}
                         className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold transition-colors cursor-pointer ${
                           modalSpeed === s
-                            ? "bg-[#cf795d] text-white"
-                            : "bg-black/5 dark:bg-white/[0.05] text-slate-600 dark:text-[#888b7e] hover:text-slate-950 dark:hover:text-white"
+                            ? "bg-accent-solid text-white"
+                            : "bg-fg/[0.06] text-fg-muted hover:text-fg"
                         }`}
                       >
                         {s}x
@@ -2706,16 +2706,16 @@ function getTemplateParent(template: TemplateItem): string {
               </div>
 
               {/* Right Column: Prompt, Custom Text & Specs */}
-              <div className="lg:col-span-5 p-5 sm:p-6 space-y-5 bg-white dark:bg-[#1a1d17]">
+              <div className="lg:col-span-5 p-5 sm:p-6 space-y-5 bg-surface">
                 {/* Navigation Tabs */}
-                <div className="flex items-center gap-2 border-b border-black/[0.08] dark:border-white/[0.08] pb-3">
+                <div className="flex items-center gap-2 border-b border-line pb-3">
                   <button
                     type="button"
                     onClick={() => setModalTab("specs")}
                     className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer ${
                       modalTab === "specs"
-                        ? "bg-[#cf795d]/15 text-[#cf795d] border border-[#cf795d]/30 font-semibold"
-                        : "text-slate-500 hover:text-slate-950 dark:text-[#888b7e] dark:hover:text-white"
+                        ? "bg-accent-solid/15 text-accent border border-accent/30 font-semibold"
+                        : "text-slate-500 hover:text-slate-950 dark:text-fg-muted dark:hover:text-white"
                     }`}
                   >
                     <FiSliders className="w-3.5 h-3.5" />
@@ -2726,8 +2726,8 @@ function getTemplateParent(template: TemplateItem): string {
                     onClick={() => setModalTab("json")}
                     className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer ${
                       modalTab === "json"
-                        ? "bg-[#cf795d]/15 text-[#cf795d] border border-[#cf795d]/30 font-semibold"
-                        : "text-slate-500 hover:text-slate-950 dark:text-[#888b7e] dark:hover:text-white"
+                        ? "bg-accent-solid/15 text-accent border border-accent/30 font-semibold"
+                        : "text-slate-500 hover:text-slate-950 dark:text-fg-muted dark:hover:text-white"
                     }`}
                   >
                     <FiCode className="w-3.5 h-3.5" />
@@ -2739,11 +2739,11 @@ function getTemplateParent(template: TemplateItem): string {
                   <>
                     {/* Live Custom Text Input */}
                     <div className="space-y-2">
-                      <div className="flex items-center justify-between text-xs text-slate-500 dark:text-[#888b7e]">
-                        <span className="font-semibold uppercase tracking-wider font-mono text-[10px] text-[#cf795d]">
+                      <div className="flex items-center justify-between text-xs text-fg-muted">
+                        <span className="font-semibold uppercase tracking-wider font-mono text-[10px] text-accent">
                           Custom text
                         </span>
-                        <span className="text-[10px] text-slate-400 dark:text-[#888b7e]">
+                        <span className="text-[10px] text-fg-subtle">
                           Live preview
                         </span>
                       </div>
@@ -2753,21 +2753,21 @@ function getTemplateParent(template: TemplateItem): string {
                           value={modalCustomText}
                           onChange={(e) => setModalCustomText(e.target.value)}
                           placeholder={selectedItem.defaultText}
-                          className="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-white/[0.04] border border-black/10 dark:border-white/10 focus:border-[#cf795d] text-xs text-slate-900 dark:text-[#eee8dc] placeholder-slate-400 dark:placeholder-[#888b7e] focus:outline-none font-mono"
+                          className="w-full px-3.5 py-2 rounded-xl bg-fg/[0.04] border border-line focus:border-accent text-xs text-fg placeholder-slate-400 dark:placeholder-fg-subtle focus:outline-none font-mono"
                         />
                       </div>
                     </div>
 
                     {/* Prompt Box */}
                     <div className="space-y-2">
-                      <div className="flex items-center justify-between text-xs text-slate-500 dark:text-[#888b7e]">
-                        <span className="font-semibold uppercase tracking-wider font-mono text-[10px] text-[#cf795d]">
+                      <div className="flex items-center justify-between text-xs text-fg-muted">
+                        <span className="font-semibold uppercase tracking-wider font-mono text-[10px] text-accent">
                           Motion prompt
                         </span>
                         <button
                           type="button"
                           onClick={() => copyPromptText(selectedItem.prompt)}
-                          className="inline-flex items-center gap-1 text-[#cf795d] hover:brightness-110 font-medium cursor-pointer"
+                          className="inline-flex items-center gap-1 text-accent hover:brightness-110 font-medium cursor-pointer"
                         >
                           {copiedPrompt ? (
                             <>
@@ -2782,40 +2782,40 @@ function getTemplateParent(template: TemplateItem): string {
                           )}
                         </button>
                       </div>
-                      <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-black/10 dark:border-white/10 text-xs font-mono text-slate-800 dark:text-[#eee8dc] leading-relaxed">
+                      <div className="p-3.5 rounded-xl bg-fg/[0.025] border border-line text-xs font-mono text-fg leading-relaxed">
                         &quot;{selectedItem.prompt}&quot;
                       </div>
                     </div>
 
                     {/* Animation Technical Specs */}
                     <div className="space-y-2">
-                      <span className="font-semibold uppercase tracking-wider font-mono text-[10px] text-slate-500 dark:text-[#888b7e]">
+                      <span className="font-semibold uppercase tracking-wider font-mono text-[10px] text-fg-muted">
                         Animation Parameters
                       </span>
                       <div className="grid grid-cols-2 gap-2 text-xs">
-                        <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/[0.06]">
+                        <div className="p-2.5 rounded-xl bg-fg/[0.025] border border-line">
                           <div className="text-[10px] text-slate-500 font-mono">
                             RESOLUTION
                           </div>
-                          <div className="text-slate-900 dark:text-[#f1eadf] font-semibold mt-0.5">
+                          <div className="text-fg font-semibold mt-0.5">
                             {selectedItem.resolution}
                           </div>
                         </div>
 
-                        <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/[0.06]">
+                        <div className="p-2.5 rounded-xl bg-fg/[0.025] border border-line">
                           <div className="text-[10px] text-slate-500 font-mono">
                             FRAME RATE
                           </div>
-                          <div className="text-[#cf795d] font-semibold mt-0.5">
+                          <div className="text-accent font-semibold mt-0.5">
                             {selectedItem.fps} FPS Continuous
                           </div>
                         </div>
 
-                        <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-white/[0.03] border border-black/[0.06] dark:border-white/[0.06] col-span-2">
+                        <div className="p-2.5 rounded-xl bg-fg/[0.025] border border-line col-span-2">
                           <div className="text-[10px] text-slate-500 font-mono">
                             EASING EQUATION
                           </div>
-                          <div className="text-[#a4778c] font-mono text-[11px] mt-0.5">
+                          <div className="text-accent font-mono text-[11px] mt-0.5">
                             {selectedItem.easing}
                           </div>
                         </div>
@@ -2824,7 +2824,7 @@ function getTemplateParent(template: TemplateItem): string {
 
                     {/* Color Scheme Palette Swatches */}
                     <div className="space-y-2">
-                      <span className="font-semibold uppercase tracking-wider font-mono text-[10px] text-slate-500 dark:text-[#888b7e]">
+                      <span className="font-semibold uppercase tracking-wider font-mono text-[10px] text-fg-muted">
                         Color Palette
                       </span>
                       <div className="flex items-center gap-2 flex-wrap">
@@ -2836,7 +2836,7 @@ function getTemplateParent(template: TemplateItem): string {
                               navigator.clipboard.writeText(color);
                               success("Copied Color", `Hex code ${color} copied.`);
                             }}
-                            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50 dark:bg-white/[0.04] border border-black/10 dark:border-white/10 hover:border-black/20 dark:hover:border-white/20 text-xs font-mono text-slate-700 dark:text-[#eee8dc] transition-colors cursor-pointer"
+                            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-fg/[0.04] border border-line hover:border-line-strong text-xs font-mono text-fg transition-colors cursor-pointer"
                           >
                             <span
                               className="w-3 h-3 rounded-full border border-black/20"
@@ -2851,8 +2851,8 @@ function getTemplateParent(template: TemplateItem): string {
                 ) : (
                   /* Keyframe Preset JSON Code View */
                   <div className="space-y-2">
-                    <div className="flex items-center justify-between text-xs text-slate-500 dark:text-[#888b7e]">
-                      <span className="font-semibold uppercase tracking-wider font-mono text-[10px] text-[#cf795d]">
+                    <div className="flex items-center justify-between text-xs text-fg-muted">
+                      <span className="font-semibold uppercase tracking-wider font-mono text-[10px] text-accent">
                         Preset JSON Definition
                       </span>
                       <button
@@ -2877,7 +2877,7 @@ function getTemplateParent(template: TemplateItem): string {
                           success("JSON Copied", "Preset configuration copied.");
                           setTimeout(() => setCopiedJson(false), 2000);
                         }}
-                        className="inline-flex items-center gap-1 text-[#cf795d] hover:brightness-110 font-medium cursor-pointer"
+                        className="inline-flex items-center gap-1 text-accent hover:brightness-110 font-medium cursor-pointer"
                       >
                         {copiedJson ? (
                           <>
@@ -2893,7 +2893,7 @@ function getTemplateParent(template: TemplateItem): string {
                       </button>
                     </div>
 
-                    <pre className="p-3.5 rounded-xl bg-slate-900 dark:bg-black/60 border border-black/10 dark:border-white/10 text-[11px] font-mono text-slate-200 dark:text-[#eee8dc] overflow-x-auto max-h-72 leading-relaxed">
+                    <pre className="p-3.5 rounded-xl bg-slate-900 dark:bg-black/60 border border-line text-[11px] font-mono text-fg overflow-x-auto max-h-72 leading-relaxed">
                       {JSON.stringify(
                         {
                           id: selectedItem.id,
@@ -2922,7 +2922,7 @@ function getTemplateParent(template: TemplateItem): string {
                     )}&style=${encodeURIComponent(
                       selectedItem.category
                     )}&text=${encodeURIComponent(modalCustomText || selectedItem.defaultText)}`}
-                    className="w-full py-3 rounded-xl bg-gradient-to-r from-[#cf795d] to-[#e5987d] text-slate-950 font-bold text-sm hover:brightness-110 transition-all flex items-center justify-center gap-2 shadow-xl shadow-[#cf795d]/20 active:scale-[0.99]"
+                    className="w-full py-3 rounded-xl bg-gradient-to-r from-accent-solid to-accent text-slate-950 font-bold text-sm hover:brightness-110 transition-all flex items-center justify-center gap-2 shadow-xl shadow-accent/20 active:scale-[0.99]"
                   >
                     <FiZap className="w-4 h-4 fill-slate-950" />
                     <span>Open &amp; Remix in byreel Studio</span>

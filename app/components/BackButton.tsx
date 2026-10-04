@@ -16,7 +16,7 @@ export default function BackButton({
   label = "Back to Studio",
   fallbackUrl = "/workspace",
   className,
-  iconClassName = "w-3.5 h-3.5 text-cyan-400",
+  iconClassName = "w-3.5 h-3.5",
   iconOnly = false,
 }: BackButtonProps) {
   const router = useRouter();
@@ -36,7 +36,7 @@ export default function BackButton({
       onClick={handleBack}
       className={
         className ||
-        "inline-flex items-center gap-2 text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white transition-colors bg-black/[0.04] dark:bg-white/[0.04] hover:bg-black/[0.08] dark:hover:bg-white/[0.08] border border-black/[0.08] dark:border-white/[0.08] backdrop-blur-md px-3.5 py-1.5 rounded-xl cursor-pointer shadow-xs"
+        "btn btn-sm btn-ghost -ml-3"
       }
       title={label}
     >

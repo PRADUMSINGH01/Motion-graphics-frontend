@@ -1,489 +1,361 @@
 "use client";
+
+import React, { memo, useState } from "react";
 import Link from "next/link";
-import { FiArrowRight, FiCheck, FiZap, FiStar, FiTrendingUp, FiYoutube, FiAward, FiShield } from "react-icons/fi";
-import { formatInr, MOTION_CREDIT_PRICE_INR } from "../lib/motionBilling";
+import { IconArrowRight, IconCheck, IconShield, IconChevronDown } from "./Icons";
 
-const plans = [
-  {
-    name: "Starter",
-    priceInr: 199,
-    badge: null,
-    tagline: "Perfect to start",
-    description: "For YouTubers getting started with AI-powered motion graphics.",
-    credits: 20,
-    creditsLabel: "20 Motion Credits / mo",
-    features: [
-      "20 motion generations",
-      "1080p MP4 exports",
-      "Kinetic text, diagrams & explainers",
-      "Standard render queue",
-      "Commercial use license",
-    ],
-    notIncluded: ["4K exports", "Priority rendering", "Brand presets"],
-    href: "/register?plan=starter",
-    featured: false,
-    accentColor: "var(--accent-tertiary)",
-  },
-  {
-    name: "Creator",
-    priceInr: 499,
-    badge: "Most popular",
-    tagline: "Best value",
-    description: "For YouTubers creating polished motion graphics for videos every week.",
-    credits: 60,
-    creditsLabel: "60 Motion Credits / mo",
-    features: [
-      "60 motion generations",
-      "1080p & 4K MP4 exports",
-      "Advanced diagrams & explainer animations",
-      "Priority render queue",
-      "Brand colors, fonts & reusable styles",
-      "Transparent WebM exports",
-    ],
-    notIncluded: [],
-    href: "/register?plan=creator",
-    featured: true,
-    accentColor: "var(--accent-primary)",
-  },
-  {
-    name: "Pro",
-    priceInr: 799,
-    badge: "Power users",
-    tagline: "High volume",
-    description: "For high-volume creators producing motion graphics across multiple videos.",
-    credits: 100,
-    creditsLabel: "100 Motion Credits / mo",
-    features: [
-      "100 motion generations",
-      "4K MP4 exports",
-      "Advanced motion graphics & data visualizations",
-      "Priority rendering",
-      "Reusable brand presets",
-      "Multiple YouTube channels",
-    ],
-    notIncluded: [],
-    href: "/register?plan=pro",
-    featured: false,
-    accentColor: "var(--accent-secondary)",
-  },
-] as const;
+type BillingInterval = "monthly" | "annual";
 
-const socialProof = [
-  { icon: <FiYoutube className="h-3.5 w-3.5" />, text: "10k+ YouTube creators" },
-  { icon: <FiAward className="h-3.5 w-3.5" />, text: "Broadcast-quality output" },
-  { icon: <FiShield className="h-3.5 w-3.5" />, text: "Commercial license included" },
-  { icon: <FiZap className="h-3.5 w-3.5" />, text: "No render limits on queue" },
-];
-
-function CreditBar({ credits, accentColor }: { credits: number; accentColor: string }) {
-  const max = 100;
-  const pct = Math.round((credits / max) * 100);
-  return (
-    <div className="mt-3">
-      <div
-        className="h-1.5 w-full rounded-full overflow-hidden"
-        style={{ background: "color-mix(in srgb, var(--border-strong) 60%, transparent)" }}
-      >
-        <div
-          className="h-full rounded-full transition-all duration-700 relative overflow-hidden"
-          style={{
-            width: `${pct}%`,
-            background: `linear-gradient(90deg, ${accentColor}, color-mix(in srgb, ${accentColor} 60%, var(--accent-secondary)))`,
-          }}
-        >
-          {/* Shimmer effect on bar */}
-          <span
-            className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent"
-            style={{ animation: "shimmerLaser 2.4s ease-in-out infinite" }}
-          />
-        </div>
-      </div>
-    </div>
-  );
+interface PlanFeature {
+  text: string;
+  highlight?: boolean;
 }
 
-export default function PricingSection() {
+interface Plan {
+  id: string;
+  name: string;
+  badge?: string;
+  tagline: string;
+  priceMonthly: number;
+  priceAnnual: number;
+  periodLabel: string;
+  ctaText: string;
+  ctaHref: string;
+  popular?: boolean;
+  features: PlanFeature[];
+}
+
+const PLANS: Plan[] = [
+  {
+    id: "free",
+    name: "Free",
+    tagline: "For individuals and creators exploring autonomous video generation.",
+    priceMonthly: 0,
+    priceAnnual: 0,
+    periodLabel: "Free forever",
+    ctaText: "Get Started Free",
+    ctaHref: "/register",
+    features: [
+      { text: "10 video renders per month" },
+      { text: "720p 60 FPS video export" },
+      { text: "Autonomous natural language prompts" },
+      { text: "Core kinetic typography engine" },
+      { text: "Standard cloud rendering queue" },
+      { text: "Community Slack support" },
+    ],
+  },
+  {
+    id: "pro",
+    name: "Pro Studio",
+    badge: "Most Popular",
+    tagline: "For professional creators and motion designers needing broadcast quality.",
+    priceMonthly: 20,
+    priceAnnual: 16,
+    periodLabel: "per editor / month",
+    ctaText: "Upgrade to Pro",
+    ctaHref: "/register?plan=pro",
+    popular: true,
+    features: [
+      { text: "250 video renders per month", highlight: true },
+      { text: "4K UHD 60 FPS lossless export", highlight: true },
+      { text: "ProRes 4444 & transparent WebM", highlight: true },
+      { text: "Priority GPU rendering cluster (3x faster)" },
+      { text: "Custom brand fonts, colors & audio stems" },
+      { text: "Full commercial usage rights" },
+      { text: "Priority email & Discord support" },
+    ],
+  },
+  {
+    id: "team",
+    name: "Team & Studio",
+    tagline: "For creative teams, agencies, and high-volume automated pipelines.",
+    priceMonthly: 80,
+    priceAnnual: 64,
+    periodLabel: "per team / month (5 seats)",
+    ctaText: "Start Team Trial",
+    ctaHref: "/register?plan=team",
+    features: [
+      { text: "1,000 video renders per month", highlight: true },
+      { text: "Unlimited 4K 60 FPS exports", highlight: true },
+      { text: "REST API & Webhook automation access", highlight: true },
+      { text: "Dedicated GPU render instance" },
+      { text: "Shared workspace & asset library" },
+      { text: "Custom SSO & team permission controls" },
+      { text: "Dedicated account manager & 99.9% SLA" },
+    ],
+  },
+];
+
+const COMPARISON_ROWS = [
+  {
+    category: "Video Generation & Rendering",
+    features: [
+      { name: "Monthly video renders", free: "10", pro: "250", team: "1,000" },
+      { name: "Max resolution", free: "720p HD", pro: "4K UHD", team: "4K UHD" },
+      { name: "Frame rate", free: "60 FPS", pro: "60 FPS", team: "60 FPS" },
+      { name: "ProRes 4444 export", free: false, pro: true, team: true },
+      { name: "Transparent alpha WebM", free: false, pro: true, team: true },
+      { name: "GPU queue priority", free: "Standard", pro: "High Priority", team: "Dedicated Cluster" },
+    ],
+  },
+  {
+    category: "Workflow & Customization",
+    features: [
+      { name: "Autonomous prompt agent", free: true, pro: true, team: true },
+      { name: "Custom brand typography", free: false, pro: true, team: true },
+      { name: "Audio stems & music sync", free: "Basic", pro: "Advanced", team: "Advanced" },
+      { name: "Watermark removal", free: true, pro: true, team: true },
+      { name: "REST API & Webhooks", free: false, pro: false, team: true },
+    ],
+  },
+  {
+    category: "Collaboration & Support",
+    features: [
+      { name: "Team seats included", free: "1", pro: "1", team: "5 included" },
+      { name: "Commercial rights", free: "Personal only", pro: "Full Commercial", team: "Full Commercial" },
+      { name: "Support level", free: "Community", pro: "Priority Email", team: "Dedicated Manager" },
+      { name: "Uptime SLA", free: false, pro: false, team: "99.9% SLA" },
+    ],
+  },
+];
+
+const FAQS = [
+  {
+    q: "How does the monthly render quota work?",
+    a: "Every time our AI generates or re-renders an animation or export, it counts as 1 render. Draft previews and live timeline scrubber edits do not deduct from your render quota.",
+  },
+  {
+    q: "Can I use generated videos commercially?",
+    a: "Yes! Pro and Team plans include full commercial usage rights with zero attribution required. Videos can be published on YouTube, client broadcasts, social media ads, and TV.",
+  },
+  {
+    q: "Can I upgrade, downgrade, or cancel at any time?",
+    a: "Yes. You can change your plan or cancel with one click directly from your billing dashboard. If you cancel, your subscription remains active until the end of your billing cycle.",
+  },
+  {
+    q: "What video formats are supported for export?",
+    a: "Free exports standard MP4 at 720p 60FPS. Pro and Team export uncompressed ProRes 4444, transparent alpha-channel WebM, and pristine H.264/H.265 MP4 at up to 4K 60FPS.",
+  },
+  {
+    q: "Do you offer custom enterprise pricing?",
+    a: "Yes. For studios needing custom on-premise deployments, higher API limits, or volume rendering, reach out to our team at enterprise@byreel.ai.",
+  },
+];
+
+function Cell({ value, highlight }: { value: string | boolean; highlight?: boolean }) {
+  if (typeof value === "boolean") {
+    return value ? (
+      <IconCheck className={`w-4 h-4 mx-auto ${highlight ? "text-accent" : "text-fg"}`} />
+    ) : (
+      <span className="text-fg-subtle/60">—</span>
+    );
+  }
+  return <>{value}</>;
+}
+
+export const PricingSection = memo(function PricingSection() {
+  const [interval, setInterval] = useState<BillingInterval>("annual");
+  const [openFaq, setOpenFaq] = useState<number | null>(0);
+
+  const isAnnual = interval === "annual";
+
   return (
-    <section
-      id="pricing"
-      className="relative border-y border-[var(--border-subtle)] bg-[var(--background)] px-5 py-24 text-[var(--text-primary)] sm:px-8 sm:py-32 lg:px-10 overflow-hidden"
-    >
-      {/* Background glow accents */}
-      <div
-        className="pointer-events-none absolute -top-40 left-1/2 -translate-x-1/2 w-[900px] h-[500px] opacity-[0.07]"
-        aria-hidden="true"
-        style={{
-          background: "radial-gradient(ellipse 70% 60% at 50% 0%, var(--accent-primary), transparent 70%)",
-        }}
-      />
-      <div
-        className="pointer-events-none absolute bottom-0 right-0 w-[500px] h-[400px] opacity-[0.05]"
-        aria-hidden="true"
-        style={{
-          background: "radial-gradient(ellipse 80% 60% at 100% 100%, var(--accent-secondary), transparent 70%)",
-        }}
-      />
-      {/* Subtle grid */}
-      <div
-        className="pointer-events-none absolute inset-0 opacity-[0.03]"
-        aria-hidden="true"
-        style={{
-          backgroundImage: "linear-gradient(var(--border-strong) 1px, transparent 1px), linear-gradient(90deg, var(--border-strong) 1px, transparent 1px)",
-          backgroundSize: "60px 60px",
-        }}
-      />
-
-      <div className="mx-auto max-w-6xl relative">
-
-        {/* ── Section header ── */}
-        <div className="mx-auto max-w-2xl text-center mb-16">
-          <div
-            className="mb-5 inline-flex items-center gap-2 rounded-full border border-[var(--border-strong)] bg-[var(--surface-glass)] px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.22em] text-[var(--accent-primary)] backdrop-blur-sm"
-            style={{ boxShadow: "0 0 16px color-mix(in srgb, var(--accent-primary) 12%, transparent)" }}
-          >
-            <FiZap className="h-3 w-3" aria-hidden="true" />
-            Pricing for creators
-          </div>
-
-          <h2
-            className="mt-4 font-bold tracking-[-0.05em] text-[var(--text-primary)]"
-            style={{
-              fontSize: "clamp(2rem, 5.5vw, 3.5rem)",
-              lineHeight: "0.95",
-              fontFamily: "var(--font-headline)",
-            }}
-          >
-            Make more videos.{" "}
-            <br />
-            <span
-              style={{
-                backgroundImage: "linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-              }}
-            >
-              Animate more ideas.
-            </span>
+    <section id="pricing" className="relative w-full py-24 sm:py-28 border-t border-line scroll-mt-16">
+      <div className="container-page">
+        {/* ── Header ── */}
+        <div className="text-center max-w-2xl mx-auto mb-14">
+          <span className="eyebrow mb-4">Pricing</span>
+          <h2 className="text-4xl sm:text-5xl font-semibold tracking-[-0.04em] text-fg">
+            Simple, predictable pricing.
           </h2>
-
-          <p className="mx-auto mt-6 max-w-xl text-base leading-7 text-[var(--text-secondary)]">
-            Every plan gives you Motion Credits for generating production-ready graphics for YouTube.
-            Start small and upgrade when your content volume grows.
+          <p className="mt-5 text-base sm:text-lg text-fg-muted leading-relaxed max-w-xl mx-auto">
+            Start free. Upgrade when you need 4K output, higher render volume and team collaboration.
           </p>
 
-          {/* Social proof strip */}
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            {socialProof.map((item, i) => (
-              <div
-                key={i}
-                className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold"
-                style={{
-                  color: "var(--text-muted)",
-                  border: "1px solid var(--border-subtle)",
-                  background: "color-mix(in srgb, var(--accent-primary) 4%, transparent)",
-                }}
+          {/* Billing switch */}
+          <div
+            role="tablist"
+            aria-label="Billing interval"
+            className="mt-8 inline-flex items-center p-1 rounded-lg border border-line bg-surface-3/60"
+          >
+            {(["monthly", "annual"] as const).map((value) => (
+              <button
+                key={value}
+                type="button"
+                role="tab"
+                aria-selected={interval === value}
+                onClick={() => setInterval(value)}
+                className={`inline-flex items-center gap-2 h-8 px-3.5 rounded-md text-[13px] font-medium transition-all cursor-pointer ${
+                  interval === value ? "bg-surface text-fg shadow-soft" : "text-fg-muted hover:text-fg"
+                }`}
               >
-                <span style={{ color: "var(--accent-primary)" }}>{item.icon}</span>
-                {item.text}
-              </div>
+                {value === "monthly" ? "Monthly" : "Annual"}
+                {value === "annual" && <span className="text-[11px] font-semibold text-accent">−20%</span>}
+              </button>
             ))}
           </div>
         </div>
 
-        {/* ── Pricing cards ── */}
-        <div className="mx-auto grid max-w-6xl gap-5 lg:grid-cols-3 lg:items-start">
-          {plans.map((plan) => (
-            <article
-              key={plan.name}
-              className="relative flex flex-col rounded-2xl transition-all duration-500 hover:-translate-y-2 group"
-              style={{
-                padding: plan.featured ? "2px" : "1px",
-                background: plan.featured
-                  ? `linear-gradient(135deg, ${plan.accentColor}, var(--accent-secondary), var(--accent-tertiary))`
-                  : "var(--border-strong)",
-                boxShadow: plan.featured
-                  ? `0 32px 80px color-mix(in srgb, var(--accent-primary) 28%, transparent), 0 8px 32px rgba(0,0,0,0.25)`
-                  : "0 4px 20px rgba(0,0,0,0.14)",
-              }}
-            >
-              {/* Most popular label above featured card */}
-              {plan.featured && (
-                <div
-                  className="absolute -top-4 left-1/2 -translate-x-1/2 z-10 inline-flex items-center gap-1.5 rounded-full px-4 py-1 text-[11px] font-bold uppercase tracking-[0.18em] whitespace-nowrap"
-                  style={{
-                    background: "linear-gradient(135deg, var(--accent-primary), var(--accent-secondary))",
-                    color: "var(--background)",
-                    boxShadow: "0 4px 16px color-mix(in srgb, var(--accent-primary) 40%, transparent)",
-                  }}
-                >
-                  <FiStar className="h-2.5 w-2.5" />
-                  Most popular
-                </div>
-              )}
+        {/* ── Plans ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-stretch max-w-6xl mx-auto mb-24">
+          {PLANS.map((plan) => {
+            const price = isAnnual ? plan.priceAnnual : plan.priceMonthly;
 
-              {/* Inner card */}
+            return (
               <div
-                className="relative flex flex-col flex-1 rounded-[calc(1rem-1px)] overflow-hidden"
-                style={{
-                  background: plan.featured
-                    ? "var(--surface-card)"
-                    : "var(--surface-primary)",
-                  minHeight: 580,
-                }}
+                key={plan.id}
+                className={`relative flex flex-col rounded-2xl p-7 border bg-surface ${
+                  plan.popular ? "border-accent/60 shadow-elevated ring-1 ring-accent/20" : "border-line shadow-soft"
+                }`}
               >
-                {/* Glow overlay inside featured card */}
-                {plan.featured && (
-                  <div
-                    className="pointer-events-none absolute inset-0 opacity-[0.04]"
-                    aria-hidden="true"
-                    style={{
-                      background: `radial-gradient(ellipse 80% 50% at 50% -10%, ${plan.accentColor}, transparent)`,
-                    }}
-                  />
-                )}
-
-                {/* Top section */}
-                <div className="relative p-7 pb-0">
-                  {/* Badge (non-featured) */}
-                  {plan.badge && !plan.featured && (
-                    <div className="absolute right-5 top-5 flex items-center gap-1.5">
-                      <span
-                        className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em]"
-                        style={{
-                          background: "color-mix(in srgb, var(--accent-secondary) 15%, transparent)",
-                          color: "var(--accent-secondary)",
-                          border: "1px solid color-mix(in srgb, var(--accent-secondary) 30%, transparent)",
-                        }}
-                      >
-                        {plan.name === "Pro" && <FiTrendingUp className="h-2.5 w-2.5" />}
-                        {plan.badge}
-                      </span>
-                    </div>
-                  )}
-
-                  {/* Plan name & tagline */}
-                  <div className="mb-5">
-                    <p
-                      className="text-[11px] font-bold uppercase tracking-[0.2em] mb-1.5"
-                      style={{ color: plan.accentColor, fontFamily: "var(--font-headline)" }}
-                    >
-                      {plan.tagline}
-                    </p>
-                    <h3
-                      className="text-2xl font-bold tracking-[-0.03em] text-[var(--text-primary)]"
-                      style={{ fontFamily: "var(--font-headline)" }}
-                    >
-                      {plan.name}
-                    </h3>
-                    <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)] max-w-[220px]">
-                      {plan.description}
-                    </p>
-                  </div>
-
-                  {/* Price block */}
-                  <div
-                    className="rounded-xl p-4 mb-6 relative overflow-hidden"
-                    style={{
-                      background: plan.featured
-                        ? `color-mix(in srgb, ${plan.accentColor} 8%, var(--surface-glass))`
-                        : "color-mix(in srgb, var(--border-subtle) 50%, transparent)",
-                      border: plan.featured
-                        ? `1px solid color-mix(in srgb, ${plan.accentColor} 20%, transparent)`
-                        : "none",
-                    }}
-                  >
-                    <div className="flex items-end gap-1.5">
-                      <span
-                        className="font-bold tracking-[-0.05em] leading-none"
-                        style={{
-                          fontSize: "clamp(2.2rem, 5vw, 2.8rem)",
-                          backgroundImage: `linear-gradient(135deg, var(--text-primary) 30%, ${plan.accentColor})`,
-                          WebkitBackgroundClip: "text",
-                          WebkitTextFillColor: "transparent",
-                          backgroundClip: "text",
-                        }}
-                      >
-                        {formatInr(plan.priceInr)}
-                      </span>
-                      <span className="mb-1.5 text-xs text-[var(--text-muted)] font-medium">/ month</span>
-                    </div>
-
-                    {/* Credits label */}
-                    <div className="mt-2.5 flex items-center gap-1.5">
-                      <FiZap className="h-3 w-3 flex-shrink-0" style={{ color: plan.accentColor }} aria-hidden="true" />
-                      <span className="text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-[0.1em]">
-                        {plan.creditsLabel}
-                      </span>
-                    </div>
-
-                    {/* Credits bar */}
-                    <CreditBar credits={plan.credits} accentColor={plan.accentColor} />
-                  </div>
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-lg font-semibold text-fg">{plan.name}</h3>
+                  {plan.popular && <span className="badge badge-accent">{plan.badge}</span>}
                 </div>
 
-                {/* Divider */}
-                <div
-                  className="mx-7 h-px"
-                  style={{
-                    background: plan.featured
-                      ? `linear-gradient(90deg, transparent, color-mix(in srgb, ${plan.accentColor} 40%, transparent), transparent)`
-                      : "var(--border-subtle)",
-                  }}
-                />
+                <p className="text-sm text-fg-muted leading-relaxed mb-6 min-h-[44px]">{plan.tagline}</p>
 
-                {/* Features */}
-                <div className="flex-1 p-7 pt-5">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)] mb-3">
-                    What&apos;s included
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-5xl font-semibold tracking-[-0.045em] text-fg">${price}</span>
+                  {price > 0 && <span className="text-sm text-fg-subtle">/ month</span>}
+                </div>
+                <p className="mt-1.5 mb-6 text-[13px] text-fg-subtle">
+                  {price === 0
+                    ? plan.periodLabel
+                    : isAnnual
+                      ? `${plan.periodLabel} · billed $${price * 12}/yr`
+                      : `${plan.periodLabel} · billed monthly`}
+                </p>
+
+                <Link href={plan.ctaHref} className={`btn w-full mb-7 ${plan.popular ? "btn-accent" : "btn-secondary"}`}>
+                  {plan.ctaText}
+                  <IconArrowRight className="w-4 h-4" />
+                </Link>
+
+                <div className="border-t border-line pt-6">
+                  <p className="text-[13px] font-medium text-fg mb-4">
+                    {plan.id === "free" ? "What's included" : `Everything in ${plan.id === "pro" ? "Free" : "Pro"}, plus:`}
                   </p>
-                  <ul className="space-y-2.5 text-sm text-[var(--text-secondary)]">
-                    {plan.features.map((feature) => (
-                      <li key={feature} className="flex items-start gap-2.5 leading-6">
-                        <span
-                          className="mt-0.5 flex h-4.5 w-4.5 flex-shrink-0 items-center justify-center rounded-full"
-                          style={{
-                            background: `color-mix(in srgb, ${plan.accentColor} 18%, transparent)`,
-                            width: "18px",
-                            height: "18px",
-                          }}
-                        >
-                          <FiCheck className="h-2.5 w-2.5" style={{ color: plan.accentColor }} aria-hidden="true" />
-                        </span>
-                        {feature}
+                  <ul className="space-y-3 text-sm">
+                    {plan.features.map((feature, idx) => (
+                      <li key={idx} className="flex items-start gap-2.5">
+                        <IconCheck
+                          className={`w-4 h-4 mt-0.5 shrink-0 ${plan.popular ? "text-accent" : "text-fg-subtle"}`}
+                        />
+                        <span className={feature.highlight ? "text-fg" : "text-fg-muted"}>{feature.text}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
-
-                {/* CTA */}
-                <div className="p-7 pt-0">
-                  <Link
-                    href={plan.href}
-                    className="group/btn relative w-full inline-flex min-h-[50px] items-center justify-center gap-2 overflow-hidden rounded-xl text-sm font-bold transition-all duration-300 hover:-translate-y-0.5"
-                    style={
-                      plan.featured
-                        ? {
-                            background: `linear-gradient(135deg, ${plan.accentColor} 0%, color-mix(in srgb, ${plan.accentColor} 75%, var(--accent-secondary)) 100%)`,
-                            color: "var(--background)",
-                            boxShadow: `0 4px 20px color-mix(in srgb, ${plan.accentColor} 38%, transparent), inset 0 1px 0 rgba(255,255,255,0.18)`,
-                            letterSpacing: "0.01em",
-                          }
-                        : {
-                            border: "1px solid var(--border-strong)",
-                            background: "var(--surface-glass)",
-                            color: "var(--text-primary)",
-                            letterSpacing: "0.01em",
-                          }
-                    }
-                  >
-                    <span className="relative z-10">Start with {plan.name}</span>
-                    <FiArrowRight className="relative z-10 h-4 w-4 transition-transform duration-200 group-hover/btn:translate-x-1" aria-hidden="true" />
-                    {plan.featured && (
-                      <span
-                        className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/15 to-transparent group-hover/btn:translate-x-full transition-transform duration-700"
-                        aria-hidden="true"
-                      />
-                    )}
-                  </Link>
-
-                  {/* Micro trust text */}
-                  <p className="mt-2.5 text-center text-[10px] text-[var(--text-muted)]">
-                    No credit card required &nbsp;·&nbsp; Cancel anytime
-                  </p>
-                </div>
               </div>
-            </article>
-          ))}
+            );
+          })}
         </div>
 
-        {/* ── Add-on credits block ── */}
-        <div
-          className="mx-auto mt-8 max-w-6xl rounded-2xl overflow-hidden"
-          style={{
-            border: "1px solid var(--border-subtle)",
-            background: "var(--surface-primary)",
-          }}
-        >
-          <div
-            className="h-px w-full"
-            style={{
-              background: "linear-gradient(90deg, transparent, var(--accent-primary), var(--accent-secondary), transparent)",
-            }}
-          />
-          <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between p-6 sm:p-8">
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-2">
-                <FiZap className="h-4 w-4" style={{ color: "var(--accent-primary)" }} />
-                <p
-                  className="text-[11px] font-bold uppercase tracking-[0.2em]"
-                  style={{ color: "var(--accent-primary)" }}
-                >
-                  Top-up anytime
-                </p>
-              </div>
-              <p className="text-base font-bold tracking-[-0.02em] text-[var(--text-primary)]" style={{ fontFamily: "var(--font-headline)" }}>
-                Need more motion graphics this month?
-              </p>
-              <p className="mt-1.5 max-w-lg text-sm leading-6 text-[var(--text-secondary)]">
-                Buy additional Motion Credits whenever you need them. Your subscription stays the same
-                and unused monthly credits remain separate from top-ups.
-              </p>
-            </div>
+        {/* ── Comparison table ── */}
+        <div className="max-w-6xl mx-auto mb-24">
+          <div className="text-center mb-10">
+            <h3 className="text-2xl sm:text-3xl font-semibold tracking-[-0.03em] text-fg">Compare plans</h3>
+            <p className="mt-2 text-sm text-fg-muted">A detailed breakdown of what each tier includes.</p>
+          </div>
 
-            <div
-              className="flex items-center gap-6 rounded-xl px-6 py-4 shrink-0"
-              style={{
-                border: "1px solid var(--border-subtle)",
-                background: "color-mix(in srgb, var(--accent-primary) 5%, transparent)",
-              }}
-            >
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">Per credit</p>
-                <p
-                  className="mt-1 font-bold tracking-[-0.04em]"
-                  style={{
-                    fontSize: "clamp(1.6rem, 3vw, 2.2rem)",
-                    backgroundImage: "linear-gradient(135deg, var(--text-primary) 0%, var(--accent-primary) 100%)",
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
-                    backgroundClip: "text",
-                  }}
-                >
-                  {formatInr(MOTION_CREDIT_PRICE_INR)}
-                </p>
-                <p className="mt-0.5 text-xs text-[var(--text-secondary)]">One motion generation</p>
-              </div>
-              <Link
-                href="/register"
-                className="group inline-flex items-center gap-1.5 rounded-lg px-4 py-2.5 text-xs font-bold uppercase tracking-[0.12em] transition-all duration-200 hover:-translate-y-0.5"
-                style={{
-                  background: "linear-gradient(135deg, var(--accent-primary), var(--accent-secondary))",
-                  color: "var(--background)",
-                  boxShadow: "0 2px 12px color-mix(in srgb, var(--accent-primary) 35%, transparent)",
-                }}
-              >
-                Buy now
-                <FiArrowRight className="h-3 w-3 transition-transform duration-200 group-hover:translate-x-0.5" />
-              </Link>
-            </div>
+          <div className="overflow-x-auto rounded-2xl border border-line bg-surface">
+            <table className="w-full min-w-[640px] text-left border-collapse text-sm">
+              <thead>
+                <tr className="border-b border-line">
+                  <th className="p-4 sm:px-6 font-medium text-fg-subtle w-2/5">Feature</th>
+                  <th className="p-4 font-semibold text-fg text-center w-1/5">Free</th>
+                  <th className="p-4 font-semibold text-accent text-center w-1/5 bg-accent-soft">Pro Studio</th>
+                  <th className="p-4 font-semibold text-fg text-center w-1/5">Team &amp; Studio</th>
+                </tr>
+              </thead>
+              <tbody>
+                {COMPARISON_ROWS.map((group) => (
+                  <React.Fragment key={group.category}>
+                    <tr className="bg-canvas-subtle border-b border-line">
+                      <td
+                        colSpan={4}
+                        className="py-2.5 px-4 sm:px-6 text-xs font-medium uppercase tracking-wider text-fg-subtle"
+                      >
+                        {group.category}
+                      </td>
+                    </tr>
+                    {group.features.map((row) => (
+                      <tr key={row.name} className="border-b border-line last:border-b-0">
+                        <td className="p-4 sm:px-6 text-fg-muted">{row.name}</td>
+                        <td className="p-4 text-center text-fg-muted">
+                          <Cell value={row.free} />
+                        </td>
+                        <td className="p-4 text-center text-fg font-medium bg-accent-soft">
+                          <Cell value={row.pro} highlight />
+                        </td>
+                        <td className="p-4 text-center text-fg font-medium">
+                          <Cell value={row.team} />
+                        </td>
+                      </tr>
+                    ))}
+                  </React.Fragment>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
 
-        {/* ── Fine print ── */}
-        <div className="mt-8 flex flex-col items-center gap-3 text-center">
-          <p className="text-xs leading-5 text-[var(--text-muted)] max-w-xl">
-            One Generate action creates one billable motion job. Multiple visual variations generated
-            inside that job still use one Motion Credit.
-          </p>
-          <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
-            <span className="inline-block h-1 w-1 rounded-full bg-[var(--accent-tertiary)]" />
-            Built for YouTube explainers, coding videos, documentaries, education and commentary.
-            <span className="inline-block h-1 w-1 rounded-full bg-[var(--accent-tertiary)]" />
+        {/* ── FAQ ── */}
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-10">
+            <h3 className="text-2xl sm:text-3xl font-semibold tracking-[-0.03em] text-fg">
+              Frequently asked questions
+            </h3>
+            <p className="mt-2 text-sm text-fg-muted">Everything you need to know about plans and billing.</p>
+          </div>
+
+          <div className="rounded-2xl border border-line bg-surface divide-y divide-line">
+            {FAQS.map((faq, idx) => {
+              const isOpen = openFaq === idx;
+              return (
+                <div key={idx}>
+                  <button
+                    type="button"
+                    onClick={() => setOpenFaq(isOpen ? null : idx)}
+                    aria-expanded={isOpen}
+                    className="w-full flex items-center justify-between gap-4 px-5 sm:px-6 py-4 text-left text-[15px] font-medium text-fg cursor-pointer"
+                  >
+                    <span>{faq.q}</span>
+                    <IconChevronDown
+                      className={`w-4 h-4 text-fg-subtle shrink-0 transition-transform duration-200 ${
+                        isOpen ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+                  {isOpen && (
+                    <div className="px-5 sm:px-6 pb-5 -mt-1 text-sm text-fg-muted leading-relaxed animate-fade-up">
+                      {faq.a}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-6 text-[13px] text-fg-subtle">
+            <span className="inline-flex items-center gap-2">
+              <IconShield className="w-3.5 h-3.5" />
+              Cancel anytime
+            </span>
+            <span className="hidden sm:inline" aria-hidden="true">
+              ·
+            </span>
+            <span>Commercial rights on paid plans</span>
+            <span className="hidden sm:inline" aria-hidden="true">
+              ·
+            </span>
+            <span>Secure checkout via Stripe</span>
           </div>
         </div>
       </div>
     </section>
   );
-}
+});
 
+export default PricingSection;

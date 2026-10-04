@@ -17,7 +17,7 @@ export default function FuturisticSynthesisOverlay({
   activeStyle = "Kinetic Typography",
 }: FuturisticSynthesisOverlayProps) {
   return (
-    <div className="absolute inset-0 bg-[#040509]/85 backdrop-blur-md flex flex-col items-center justify-center p-6 z-30 select-none animate-fadeIn transition-all duration-300">
+    <div className="absolute inset-0 bg-canvas/85 backdrop-blur-md flex flex-col items-center justify-center p-6 z-30 select-none animate-fadeIn transition-all duration-300">
       {/* 1. Sleek Minimalist Spinner & Core */}
       <div className="relative flex items-center justify-center w-16 h-16 mb-4">
         {/* Outer minimal rotating ring */}
@@ -46,7 +46,7 @@ export default function FuturisticSynthesisOverlay({
       <div className="w-56 mt-4 space-y-1.5">
         <div className="w-full h-1 bg-white/[0.08] rounded-full overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-cyan-400 to-sky-400 rounded-full transition-all duration-300 shadow-[0_0_8px_rgba(0,240,255,0.4)]"
+            className="h-full bg-gradient-to-r from-cyan-400 to-sky-400 rounded-full transition-all duration-300 shadow-elevated"
             style={{ width: `${Math.max(8, generationProgress)}%` }}
           />
         </div>

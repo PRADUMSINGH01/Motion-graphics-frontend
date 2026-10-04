@@ -87,11 +87,11 @@ function GoogleCallbackContent() {
   }, [searchParams, router, refreshUser, success, failure]);
 
   return (
-    <div className="relative min-h-screen flex flex-col justify-center items-center px-4 py-12 font-poppins text-slate-100 bg-[#090a0f] overflow-hidden">
+    <div className="relative min-h-screen flex flex-col justify-center items-center px-4 py-12 font-poppins text-slate-100 bg-canvas overflow-hidden">
       {/* Background glow overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-cyan-950/20 via-[#090a0f] to-[#090a0f] pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-b from-cyan-950/20 via-canvas to-canvas pointer-events-none" />
 
-      <div className="relative z-10 w-full max-w-md bg-[#121319]/90 backdrop-blur-2xl border border-white/[0.08] rounded-3xl shadow-2xl p-8 text-center space-y-6">
+      <div className="relative z-10 w-full max-w-md bg-surface/90 backdrop-blur-2xl border border-white/[0.08] rounded-3xl shadow-2xl p-8 text-center space-y-6">
         <div className="w-14 h-14 rounded-2xl bg-white/10 border border-white/15 backdrop-blur-md text-white flex items-center justify-center mx-auto shadow-xl">
           <FiLayers className="w-7 h-7 text-cyan-400" />
         </div>
@@ -133,7 +133,7 @@ export default function GoogleCallbackPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-[#090a0f] flex items-center justify-center text-slate-400">
+        <div className="min-h-screen bg-canvas flex items-center justify-center text-slate-400">
           Loading authentication status...
         </div>
       }

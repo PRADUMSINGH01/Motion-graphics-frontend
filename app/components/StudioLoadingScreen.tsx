@@ -16,7 +16,7 @@ export default function StudioLoadingScreen({
 }: StudioLoadingScreenProps) {
   return (
     <div
-      className={`flex flex-col items-center justify-center select-none bg-[#08090e] text-slate-100 ${
+      className={`flex flex-col items-center justify-center select-none bg-canvas text-slate-100 ${
         fullScreen ? "fixed inset-0 z-50 min-h-screen" : "w-full py-16"
       }`}
     >
@@ -33,12 +33,12 @@ export default function StudioLoadingScreen({
           <div className="absolute inset-2.5 rounded-full border border-indigo-400/50 border-t-cyan-300 border-b-purple-400 animate-spin-reverse-slow" />
 
           {/* Pulsing Quantum Center Orb */}
-          <div className="relative w-14 h-14 rounded-2xl bg-[#0c0f1a] border border-cyan-400/50 flex items-center justify-center animate-quantum-pulse shadow-lg">
+          <div className="relative w-14 h-14 rounded-2xl bg-surface-2 border border-cyan-400/50 flex items-center justify-center animate-quantum-pulse shadow-lg">
             <Logo size={36} />
           </div>
 
           {/* Micro satellite node */}
-          <div className="absolute -top-1 w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_#00f0ff] animate-ping" />
+          <div className="absolute -top-1 w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
         </div>
 
         {/* Status Typography */}

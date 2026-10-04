@@ -1,21 +1,57 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
 import "./globals.css";
-import Navbar from "./navbar/navbar";
+import React, { Suspense } from "react";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+/* ── Fonts via next/font (zero render-blocking external requests) ── */
+const geist = Geist({
+  variable: "--font-geist",
   subsets: ["latin"],
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  display: "swap",
 });
 
+/* Display serif used by the landing page headlines. */
+const instrumentSerif = Instrument_Serif({
+  variable: "--font-serif",
+  subsets: ["latin"],
+  weight: "400",
+  style: ["normal", "italic"],
+  display: "swap",
+});
+
+/* Applies the stored theme before first paint so light-mode users never see a dark flash. */
+const themeInitScript = `(function(){try{var t=localStorage.getItem("animagent_theme")||"dark";if(t==="system"){t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}var r=document.documentElement;r.classList.add(t);r.setAttribute("data-theme",t);r.style.colorScheme=t}catch(e){}})();`;
+
+const siteDescription =
+  "Describe a scene in plain language and byreel writes, animates and exports broadcast-ready 60 FPS motion graphics — no timeline required.";
+
 export const metadata: Metadata = {
-  title: "byreel - Autonomous Motion Graphics AI Agent",
-  description: "Generate broadcast-grade 60FPS motion graphics, procedural physics, and SVG animations from natural language prompts with byreel AI.",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://byreel.ai"),
+  title: {
+    default: "byreel — The AI agent for motion graphics",
+    template: "%s · byreel",
+  },
+  description: siteDescription,
+  keywords: ["motion graphics", "AI video", "kinetic typography", "video generation", "animation agent"],
+  openGraph: {
+    type: "website",
+    siteName: "byreel",
+    title: "byreel — The AI agent for motion graphics",
+    description: siteDescription,
+    images: [{ url: "/favicon-icon.jpg", width: 512, height: 512, alt: "byreel" }],
+  },
+  twitter: {
+    card: "summary",
+    title: "byreel — The AI agent for motion graphics",
+    description: siteDescription,
+    images: ["/favicon-icon.jpg"],
+  },
   icons: {
     icon: [
       { url: "/favicon-icon.jpg", type: "image/jpeg", sizes: "512x512" },
@@ -27,12 +63,12 @@ export const metadata: Metadata = {
   },
 };
 
-import React, { Suspense } from "react";
+import { ThemeProvider } from "./context/ThemeContext";
 import { AlertProvider } from "./context/AlertContext";
 import { AuthProvider } from "./context/AuthContext";
-import { ThemeProvider } from "./context/ThemeContext";
-import RouteProgressBar from "./components/RouteProgressBar";
+import Navbar from "./navbar/navbar";
 import Footer from "./components/Footer";
+import RouteProgressBar from "./components/RouteProgressBar";
 
 export default function RootLayout({
   children,
@@ -43,38 +79,12 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geist.variable} ${geistMono.variable} ${instrumentSerif.variable} h-full antialiased`}
     >
       <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                try {
-                  var stored = localStorage.getItem('animagent_theme');
-                  var theme = stored === 'light' || stored === 'dark' ? stored : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-                  document.documentElement.classList.add(theme);
-                  document.documentElement.setAttribute('data-theme', theme);
-                  document.documentElement.style.colorScheme = theme;
-                } catch (e) {
-                  document.documentElement.classList.add('dark');
-                }
-              })();
-            `,
-          }}
-        />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Comic+Relief:wght@400;700&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,600&display=swap"
-          rel="stylesheet"
-        />
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
-      <body className="min-h-full flex flex-col bg-[var(--background)] text-[var(--foreground)] transition-colors duration-200">
+      <body className="min-h-full flex flex-col bg-canvas text-fg">
         <Suspense fallback={null}>
           <RouteProgressBar />
         </Suspense>
@@ -93,4 +103,3 @@ export default function RootLayout({
     </html>
   );
 }
-

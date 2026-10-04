@@ -145,8 +145,8 @@ function TemplateCanvasCard({
       }}
       className={`group relative flex flex-col rounded-2xl overflow-hidden transition-all duration-300 cursor-pointer border ${
         isActive
-          ? "bg-white dark:bg-[#11131c] border-cyan-500 dark:border-cyan-400 shadow-[0_0_24px_rgba(0,240,255,0.22)] ring-1 ring-cyan-400/50"
-          : "bg-white dark:bg-[#0b0c13]/90 border-black/10 dark:border-white/[0.08] hover:border-cyan-500/40 hover:shadow-[0_0_20px_rgba(0,240,255,0.12)] hover:-translate-y-0.5"
+          ? "bg-surface border-accent shadow-elevated ring-1 ring-cyan-400/50"
+          : "bg-surface border-line hover:border-cyan-500/40 hover:shadow-elevated hover:-translate-y-0.5"
       }`}
     >
       {/* 1. Canvas Preview Stage */}
@@ -199,7 +199,7 @@ function TemplateCanvasCard({
           <button
             type="button"
             onClick={onSelect}
-            className="px-3 py-1.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-semibold text-xs transition-transform active:scale-95 flex items-center gap-1.5 shadow-[0_0_15px_rgba(0,240,255,0.4)] cursor-pointer"
+            className="px-3 py-1.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-semibold text-xs transition-transform active:scale-95 flex items-center gap-1.5 shadow-elevated cursor-pointer"
             title="Open in Studio Canvas Player"
           >
             <FiMaximize2 className="w-3.5 h-3.5" />
@@ -217,7 +217,7 @@ function TemplateCanvasCard({
       <div className="p-3.5 flex flex-col justify-between flex-1 space-y-2.5">
         <div>
           <div className="flex items-center justify-between gap-2">
-            <h3 className="text-xs font-semibold text-slate-900 dark:text-white truncate tracking-wide group-hover:text-cyan-600 dark:group-hover:text-cyan-300 transition-colors">
+            <h3 className="text-xs font-semibold text-fg truncate tracking-wide group-hover:text-accent transition-colors">
               {template.name}
             </h3>
             <span
@@ -227,13 +227,13 @@ function TemplateCanvasCard({
             />
           </div>
 
-          <p className="text-[11px] text-slate-600 dark:text-slate-400 line-clamp-2 mt-1 leading-relaxed font-sans">
+          <p className="text-[11px] text-fg-muted line-clamp-2 mt-1 leading-relaxed font-sans">
             &ldquo;{template.prompt}&rdquo;
           </p>
         </div>
 
         {/* Footer with Quick Action Icons */}
-        <div className="pt-2 border-t border-black/[0.06] dark:border-white/[0.06] flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+        <div className="pt-2 border-t border-line flex items-center justify-between text-xs text-fg-muted">
           <div className="flex items-center gap-2">
             <span className="text-[10px] font-mono text-slate-500">
               {template.text ? `TEXT: ${template.text}` : "PROCEDURAL"}
@@ -244,28 +244,28 @@ function TemplateCanvasCard({
             <button
               type="button"
               onClick={handleCopyPrompt}
-              className="p-1.5 rounded-lg hover:text-slate-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/[0.08] transition-colors cursor-pointer"
+              className="p-1.5 rounded-lg hover:text-fg hover:bg-fg/[0.06] transition-colors cursor-pointer"
               title="Copy Prompt"
             >
-              {copied ? <FiCheck className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" /> : <FiCopy className="w-3.5 h-3.5" />}
+              {copied ? <FiCheck className="w-3.5 h-3.5 text-success" /> : <FiCopy className="w-3.5 h-3.5" />}
             </button>
 
             <button
               type="button"
               onClick={handleRemix}
-              className="p-1.5 rounded-lg hover:text-cyan-600 dark:hover:text-cyan-300 hover:bg-cyan-500/10 transition-colors cursor-pointer"
+              className="p-1.5 rounded-lg hover:text-accent hover:bg-cyan-500/10 transition-colors cursor-pointer"
               title="Remix Prompt"
             >
-              <FiRefreshCw className="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" />
+              <FiRefreshCw className="w-3.5 h-3.5 text-accent" />
             </button>
 
             <button
               type="button"
               onClick={handleDelete}
-              className="p-1.5 rounded-lg hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
+              className="p-1.5 rounded-lg hover:text-danger hover:bg-rose-500/10 transition-colors cursor-pointer"
               title="Remove Template"
             >
-              <FiTrash2 className="w-3.5 h-3.5 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400" />
+              <FiTrash2 className="w-3.5 h-3.5 text-slate-400 hover:text-danger" />
             </button>
           </div>
         </div>
@@ -313,21 +313,21 @@ export default function GeneratedTemplatesGrid({
   return (
     <div className="w-full space-y-4 pt-2">
       {/* 1. Header Bar: Title, Count, Category Filter & Search */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-black/[0.08] dark:border-white/[0.08]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-line">
         <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-xl bg-cyan-500/10 border border-cyan-500/30 dark:border-cyan-400/30 text-cyan-600 dark:text-cyan-400 shadow-xs">
+          <div className="p-2 rounded-xl bg-cyan-500/10 border border-accent/35 text-accent shadow-xs">
             <FiZap className="w-4 h-4" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-sm font-bold tracking-tight text-slate-900 dark:text-white uppercase font-sans">
+              <h2 className="text-sm font-bold tracking-tight text-fg uppercase font-sans">
                 Generated Templates
               </h2>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-cyan-500/15 text-cyan-700 dark:text-cyan-300 border border-cyan-500/25 dark:border-cyan-400/30">
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-cyan-500/15 text-accent border border-cyan-500/25 dark:border-cyan-400/30">
                 {templates.length} Ready
               </span>
             </div>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400">
+            <p className="text-[11px] text-fg-muted">
               60 FPS procedural templates generated via backend prompt API
             </p>
           </div>
@@ -337,13 +337,13 @@ export default function GeneratedTemplatesGrid({
         <div className="flex items-center gap-2">
           {/* Search Input */}
           <div className="relative">
-            <FiSearch className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
+            <FiSearch className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-fg-subtle" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Filter templates..."
-              className="pl-8 pr-2.5 py-1.5 rounded-xl text-xs bg-black/[0.03] dark:bg-white/[0.03] border border-black/10 dark:border-white/[0.08] text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-cyan-500 w-36 sm:w-44 transition-all"
+              className="pl-8 pr-2.5 py-1.5 rounded-xl text-xs bg-black/[0.03] dark:bg-white/[0.03] border border-line text-fg placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-cyan-500 w-36 sm:w-44 transition-all"
             />
           </div>
 
@@ -351,7 +351,7 @@ export default function GeneratedTemplatesGrid({
             <button
               type="button"
               onClick={onClearAll}
-              className="px-2.5 py-1.5 rounded-xl text-[11px] font-medium text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-300 hover:bg-rose-500/10 border border-black/10 dark:border-white/[0.08] hover:border-rose-500/30 transition-all cursor-pointer"
+              className="px-2.5 py-1.5 rounded-xl text-[11px] font-medium text-fg-muted hover:text-danger hover:bg-rose-500/10 border border-line hover:border-rose-500/30 transition-all cursor-pointer"
               title="Clear all generated templates"
             >
               Clear Grid
@@ -369,8 +369,8 @@ export default function GeneratedTemplatesGrid({
             onClick={() => setSelectedCategory(cat)}
             className={`px-3 py-1 rounded-xl text-xs font-medium whitespace-nowrap transition-all cursor-pointer ${
               selectedCategory === cat
-                ? "bg-cyan-500/15 dark:bg-cyan-500/20 text-cyan-700 dark:text-cyan-300 border border-cyan-500/30 dark:border-cyan-400/40 shadow-xs font-semibold"
-                : "bg-black/[0.03] dark:bg-white/[0.02] hover:bg-black/[0.06] dark:hover:bg-white/[0.06] text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white border border-black/[0.06] dark:border-white/[0.06]"
+                ? "bg-accent-soft text-accent border border-accent/35 shadow-xs font-semibold"
+                : "bg-black/[0.03] dark:bg-white/[0.02] hover:bg-black/[0.06] dark:hover:bg-white/[0.06] text-fg-muted hover:text-fg border border-line"
             }`}
           >
             {cat}
@@ -380,15 +380,15 @@ export default function GeneratedTemplatesGrid({
 
       {/* 3. Templates Grid Content */}
       {filteredTemplates.length === 0 ? (
-        <div className="py-12 px-4 rounded-2xl bg-white/60 dark:bg-white/[0.015] border border-dashed border-black/10 dark:border-white/[0.08] text-center space-y-3">
-          <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-white/[0.03] border border-black/10 dark:border-white/10 flex items-center justify-center mx-auto text-cyan-600 dark:text-cyan-400 shadow-inner">
+        <div className="py-12 px-4 rounded-2xl bg-white/60 dark:bg-white/[0.015] border border-dashed border-line text-center space-y-3">
+          <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-white/[0.03] border border-line flex items-center justify-center mx-auto text-accent shadow-inner">
             <FiZap className="w-6 h-6" />
           </div>
           <div className="max-w-md mx-auto space-y-1">
-            <h4 className="text-sm font-semibold text-slate-900 dark:text-white">
+            <h4 className="text-sm font-semibold text-fg">
               {templates.length === 0 ? "No Generated Templates Yet" : "No Matching Templates Found"}
             </h4>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
+            <p className="text-xs text-fg-muted">
               {templates.length === 0
                 ? "Type any creative prompt above and click Generate Motion. The backend API will synthesize 60 FPS motion templates and display them in this grid."
                 : `No templates matched "${searchQuery}" or category "${selectedCategory}". Try changing filters.`}
@@ -407,7 +407,7 @@ export default function GeneratedTemplatesGrid({
                   key={sample.label}
                   type="button"
                   onClick={() => onRemixTemplate(sample.prompt, sample.style)}
-                  className="px-3 py-1.5 rounded-xl text-xs font-medium bg-white dark:bg-white/[0.03] hover:bg-slate-100 dark:hover:bg-white/[0.08] text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white border border-black/10 dark:border-white/[0.08] hover:border-cyan-500/40 dark:hover:border-cyan-400/40 transition-all cursor-pointer"
+                  className="px-3 py-1.5 rounded-xl text-xs font-medium bg-fg/[0.025] hover:bg-slate-100 dark:hover:bg-white/[0.08] text-fg-muted hover:text-fg border border-line hover:border-cyan-500/40 dark:hover:border-cyan-400/40 transition-all cursor-pointer"
                 >
                   {sample.label}
                 </button>

@@ -24,35 +24,35 @@ export default function VectorizerTab({
   onCancel,
 }: VectorizerTabProps) {
   return (
-    <div className="max-w-2xl mx-auto p-6 rounded-3xl bg-white dark:bg-[#0d0f17] border border-black/10 dark:border-white/[0.12] shadow-xl dark:shadow-2xl space-y-5 my-auto">
+    <div className="max-w-2xl mx-auto p-6 rounded-3xl bg-surface border border-black/10 dark:border-white/[0.12] shadow-xl dark:shadow-2xl space-y-5 my-auto">
       <div className="space-y-1">
-        <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-          <FiType className="text-cyan-600 dark:text-cyan-400" />
+        <h3 className="text-base font-bold text-fg flex items-center gap-2">
+          <FiType className="text-accent" />
           Character Vectorizer Engine
         </h3>
-        <p className="text-xs text-slate-500 dark:text-slate-400">
+        <p className="text-xs text-fg-muted">
           Convert any raw typography or words into procedural vector glyph keyframes with physics.
         </p>
       </div>
 
       <form onSubmit={onRunVectorizer} className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
         <div className="sm:col-span-2 space-y-1">
-          <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Text Characters</label>
+          <label className="text-xs font-semibold text-fg-muted">Text Characters</label>
           <input
             type="text"
             value={charInput}
             onChange={(e) => setCharInput(e.target.value)}
             placeholder="e.g. BYREEL"
-            className="w-full bg-slate-50 dark:bg-[#12141d] border border-black/10 dark:border-white/10 focus:border-cyan-500 rounded-xl px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none font-mono"
+            className="w-full bg-canvas-subtle border border-line focus:border-cyan-500 rounded-xl px-3 py-2 text-sm text-fg focus:outline-none font-mono"
           />
         </div>
 
         <div className="space-y-1">
-          <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">Animation Effect</label>
+          <label className="text-xs font-semibold text-fg-muted">Animation Effect</label>
           <select
             value={charEffect}
             onChange={(e) => setCharEffect(e.target.value as CharEffect)}
-            className="w-full bg-slate-50 dark:bg-[#12141d] border border-black/10 dark:border-white/10 rounded-xl px-3 py-2 text-sm text-slate-900 dark:text-slate-200 focus:outline-none"
+            className="w-full bg-canvas-subtle border border-line rounded-xl px-3 py-2 text-sm text-fg focus:outline-none"
           >
             <option value="kinetic_split">Kinetic Split</option>
             <option value="neon_glow">Neon Glow</option>
@@ -66,7 +66,7 @@ export default function VectorizerTab({
           <button
             type="button"
             onClick={onCancel}
-            className="px-3.5 py-2 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white bg-black/[0.04] dark:bg-white/[0.04] border border-black/10 dark:border-white/10 cursor-pointer"
+            className="px-3.5 py-2 rounded-xl text-xs font-medium text-fg-muted hover:text-fg bg-fg/[0.04] border border-line cursor-pointer"
           >
             Cancel
           </button>

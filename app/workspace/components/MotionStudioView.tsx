@@ -104,7 +104,7 @@ export default function MotionStudioView({
 
       {/* 2. Generating Status Overlay (if generating without active canvas) */}
       {!hasActiveAnimation && isGenerating && (
-        <div className="w-full max-w-2xl flex flex-col items-center justify-center p-8 rounded-2xl bg-[#090b13]/90 border border-cyan-500/30 shadow-[0_0_50px_rgba(0,240,255,0.15)] animate-fadeIn select-none">
+        <div className="w-full max-w-2xl flex flex-col items-center justify-center p-8 rounded-2xl bg-canvas/90 border border-cyan-500/30 shadow-elevated animate-fadeIn select-none">
           {/* Rotating Ring & Core */}
           <div className="relative flex items-center justify-center w-16 h-16 mb-4">
             <div className="absolute inset-0 rounded-full border-2 border-cyan-400/20 border-t-cyan-400 animate-spin" />
@@ -129,7 +129,7 @@ export default function MotionStudioView({
           <div className="w-64 mt-5 space-y-1.5">
             <div className="w-full h-1 bg-white/[0.08] rounded-full overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-cyan-400 to-sky-400 rounded-full transition-all duration-300 shadow-[0_0_8px_rgba(0,240,255,0.5)]"
+                className="h-full bg-gradient-to-r from-cyan-400 to-sky-400 rounded-full transition-all duration-300 shadow-elevated"
                 style={{ width: `${Math.max(10, generationProgress)}%` }}
               />
             </div>

@@ -130,10 +130,10 @@ export default function GoogleAuthButton({
         type="button"
         onClick={handleGoogleAuth}
         disabled={loading}
-        className="w-full py-2.5 px-4 text-xs font-medium text-slate-200 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] active:bg-white/[0.1] border border-white/[0.09] hover:border-white/20 rounded-xl flex items-center justify-center gap-3 transition-all duration-200 cursor-pointer shadow-sm group disabled:opacity-70"
+        className="btn btn-secondary w-full gap-3"
       >
         {loading ? (
-          <div className="w-4 h-4 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
+          <div className="w-4 h-4 border-2 border-fg-muted border-t-transparent rounded-full animate-spin" />
         ) : (
           <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24">
             <path
@@ -155,7 +155,7 @@ export default function GoogleAuthButton({
           </svg>
         )}
 
-        <span className="tracking-wide">
+        <span>
           {loading
             ? "Connecting to Google..."
             : mode === "login"
