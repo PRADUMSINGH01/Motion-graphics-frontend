@@ -1,66 +1,356 @@
 "use client";
 
-import React from "react";
-import Logo from "./Logo";
+import React, { useState, useEffect } from "react";
+import Image from "next/image";
+import "./landing/landing.css";
 
 interface StudioLoadingScreenProps {
   message?: string;
   subMessage?: string;
   fullScreen?: boolean;
+  theme?: "dark" | "light";
+  showProgress?: boolean;
+  onFinish?: () => void;
 }
 
+const MAIN_LETTERS = ["b", "y", "r", "e", "e", "l"];
+
+const LOADING_STEPS = [
+  {
+    id: "motion",
+    shortLabel: "Motion graphics",
+    label: "Preparing 60fps kinetic typography & motion rigs",
+    sub: "Calibrating cubic-bezier camera curves and layout grids",
+  },
+  {
+    id: "broll",
+    shortLabel: "Animated B-rolls",
+    label: "Loading documentary & YouTube B-roll cutaways",
+    sub: "Mounting Vox-style highlighters, telemetry charts, and alpha overlays",
+  },
+  {
+    id: "launch",
+    shortLabel: "Product launch",
+    label: "Staging SaaS & app launch trailer scenes",
+    sub: "Preparing 16:9 widescreen and isometric UI deck templates",
+  },
+  {
+    id: "shorts",
+    shortLabel: "9:16 Short videos",
+    label: "Synchronizing vertical Reels, Shorts & TikTok studio",
+    sub: "Ready to direct and export in 1080p & 4K at 60fps",
+  },
+];
+
 export default function StudioLoadingScreen({
-  message = "INITIALIZING BYREEL STUDIO...",
-  subMessage = "Allocating GPU Shaders & Neural Pipeline",
+  message,
+  subMessage,
   fullScreen = true,
+  showProgress = true,
+  onFinish,
 }: StudioLoadingScreenProps) {
+  const [progress, setProgress] = useState(14);
+  const [stepIndex, setStepIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 98) {
+          clearInterval(interval);
+          if (onFinish) onFinish();
+          return 100;
+        }
+        const next = prev + Math.floor(Math.random() * 8) + 4;
+        return next > 98 ? 98 : next;
+      });
+    }, 170);
+
+    return () => clearInterval(interval);
+  }, [onFinish]);
+
+  useEffect(() => {
+    if (progress < 28) {
+      setStepIndex(0);
+    } else if (progress < 56) {
+      setStepIndex(1);
+    } else if (progress < 84) {
+      setStepIndex(2);
+    } else {
+      setStepIndex(3);
+    }
+  }, [progress]);
+
+  const currentStep = LOADING_STEPS[stepIndex];
+  const activeMessage = message || currentStep.label;
+  const activeSubMessage = subMessage || currentStep.sub;
+
+  // Format progress as a 60fps timecode (00:00:00:00 -> 00:00:01:30)
+  const frameNum = String(Math.floor((progress / 100) * 59)).padStart(2, "0");
+  const secNum = progress === 100 ? "01" : "00";
+
   return (
     <div
-      className={`flex flex-col items-center justify-center select-none bg-canvas text-slate-100 ${
-        fullScreen ? "fixed inset-0 z-50 min-h-screen" : "w-full py-16"
-      }`}
+      role="status"
+      aria-label="Loading byreel.in notebook studio"
+      className={`lp-loading-root ${fullScreen ? "is-fullscreen" : ""}`}
     >
-      {/* Background ambient radial illumination */}
-      <div className="absolute w-96 h-96 rounded-full bg-gradient-to-tr from-cyan-500/15 via-indigo-600/10 to-purple-600/15 blur-3xl pointer-events-none" />
+      {/* Layer 1: High-DPI Cotton Paper Fiber SVG Filter */}
+      <svg className="lp-paper-svg" aria-hidden="true">
+        <defs>
+          <filter
+            id="loading-cotton-paper"
+            x="0%"
+            y="0%"
+            width="100%"
+            height="100%"
+          >
+            <feTurbulence
+              type="fractalNoise"
+              baseFrequency="0.65"
+              numOctaves="5"
+              seed="14"
+              stitchTiles="stitch"
+              result="fineFibers"
+            />
+            <feDiffuseLighting
+              in="fineFibers"
+              lightingColor="#fffdf8"
+              surfaceScale="0.82"
+              diffuseConstant="1.05"
+              result="paperRelief"
+            >
+              <feDistantLight azimuth="135" elevation="68" />
+            </feDiffuseLighting>
+          </filter>
+        </defs>
+        <rect width="100%" height="100%" filter="url(#loading-cotton-paper)" />
+      </svg>
 
-      <div className="relative flex flex-col items-center space-y-6 z-10">
-        {/* Holographic Quantum Orbital Halo */}
-        <div className="relative flex items-center justify-center w-28 h-28">
-          {/* Outer rotating dashed ring */}
-          <div className="absolute inset-0 rounded-full border-2 border-dashed border-cyan-400/40 animate-spin-slow" />
+      {/* Layer 2: Crisp Notebook Horizontal Ruled Lines */}
+      <div className="lp-notebook-rules" aria-hidden="true" />
 
-          {/* Inner counter-rotating ring */}
-          <div className="absolute inset-2.5 rounded-full border border-indigo-400/50 border-t-cyan-300 border-b-purple-400 animate-spin-reverse-slow" />
+      {/* Layer 3: Left-Side Double Vertical Dark Navy Margin Lines */}
+      <div className="lp-notebook-blue-margins" aria-hidden="true" />
 
-          {/* Pulsing Quantum Center Orb */}
-          <div className="relative w-14 h-14 rounded-2xl bg-surface-2 border border-cyan-400/50 flex items-center justify-center animate-quantum-pulse shadow-lg">
-            <Logo size={36} />
+      {/* Layer 4: Laid Paper Micro-Weave & Subtle Sheet Vignette */}
+      <div className="lp-paper-weave" aria-hidden="true" />
+      <div className="lp-paper-vignette" aria-hidden="true" />
+
+      {/* Left-Margin Notebook Index Stub */}
+      <aside className="lp-margin-sidebar" aria-hidden="true">
+        <div className="lp-margin-header">STUDIO</div>
+        <div className="lp-margin-nav">
+          {LOADING_STEPS.map((s, idx) => (
+            <div
+              key={s.id}
+              className={`lp-pen-link ${idx === stepIndex ? "is-active" : ""}`}
+              style={{ pointerEvents: "none" }}
+            >
+              <span className="lp-pen-num">0{idx + 1}.</span>
+              <span className="lp-pen-word">{s.shortLabel.split(" ")[0]}</span>
+            </div>
+          ))}
+        </div>
+      </aside>
+
+      {/* Center Transparent Notebook Loading Card */}
+      <div className="lp-loading-stage">
+        <span
+          className="lp-washi-tape is-lime"
+          style={{ "--tape-rot": "-1deg" } as React.CSSProperties}
+          aria-hidden="true"
+        />
+
+        {/* Flat 2D Animated byreel.in — IDEAS IN MOTION Lockup */}
+        <div className="lp-motion-logo" style={{ padding: "4px 8px" }}>
+          <div className="lp-ribbon-mark">
+            <Image
+              src="/byreel-mark.png"
+              alt="byreel mark"
+              width={44}
+              height={44}
+              priority
+              className="lp-ribbon-img"
+            />
           </div>
 
-          {/* Micro satellite node */}
-          <div className="absolute -top-1 w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
+          <div className="lp-wordmark-stack">
+            <div className="lp-wordmark-row">
+              <span className="lp-wordmark-main" aria-hidden="true">
+                {MAIN_LETTERS.map((char, i) => (
+                  <span
+                    key={i}
+                    className="lp-glyph-clip"
+                    style={{ "--i": i } as React.CSSProperties}
+                  >
+                    <span className="lp-glyph">{char}</span>
+                  </span>
+                ))}
+              </span>
+
+              <span className="lp-tld-group" aria-hidden="true">
+                <span className="lp-tld-dot" />
+                <span
+                  className="lp-glyph-clip"
+                  style={{ "--i": 6 } as React.CSSProperties}
+                >
+                  <span className="lp-glyph">i</span>
+                </span>
+                <span
+                  className="lp-glyph-clip"
+                  style={{ "--i": 7 } as React.CSSProperties}
+                >
+                  <span className="lp-glyph">n</span>
+                </span>
+              </span>
+            </div>
+
+            <div className="lp-subcaption-row" aria-hidden="true">
+              <span className="lp-subcaption-text">IDEAS IN MOTION</span>
+            </div>
+          </div>
         </div>
 
-        {/* Status Typography */}
-        <div className="text-center space-y-2 max-w-sm px-4">
-          <h3 className="text-xs sm:text-sm font-mono uppercase tracking-[0.22em] text-transparent bg-clip-text bg-gradient-to-r from-white via-cyan-200 to-indigo-300 font-bold">
-            {message}
-          </h3>
-          <p className="text-[10px] sm:text-xs font-mono text-slate-500 tracking-wider">
-            {subMessage}
-          </p>
+        {/* 4-Frame Storyboard Filmstrip (Motion Graphics · B-Rolls · Launch · Shorts) */}
+        <div className="lp-loading-filmstrip" aria-hidden="true">
+          {LOADING_STEPS.map((s, idx) => {
+            const isActive = idx === stepIndex;
+            const isDone = idx < stepIndex;
+            return (
+              <div
+                key={s.id}
+                className={`lp-loading-cell ${isActive ? "is-active" : ""} ${
+                  isDone ? "is-done" : ""
+                }`}
+              >
+                {s.id === "motion" && (
+                  <svg viewBox="0 0 40 30" className="lp-loading-cell-svg">
+                    <rect
+                      x="4"
+                      y="6"
+                      width="24"
+                      height="6"
+                      rx="2"
+                      fill="rgba(152,206,0,0.45)"
+                      stroke="#07142e"
+                      strokeWidth="1.4"
+                    />
+                    <rect
+                      x="4"
+                      y="16"
+                      width="32"
+                      height="6"
+                      rx="2"
+                      fill="rgba(7,20,46,0.18)"
+                      stroke="#07142e"
+                      strokeWidth="1.4"
+                    />
+                  </svg>
+                )}
+                {s.id === "broll" && (
+                  <svg viewBox="0 0 40 30" className="lp-loading-cell-svg">
+                    <line
+                      x1="4"
+                      y1="25"
+                      x2="36"
+                      y2="25"
+                      stroke="#07142e"
+                      strokeWidth="1.4"
+                    />
+                    <rect
+                      x="7"
+                      y="15"
+                      width="6"
+                      height="10"
+                      fill="rgba(7,20,46,0.2)"
+                      stroke="#07142e"
+                      strokeWidth="1.2"
+                    />
+                    <rect
+                      x="17"
+                      y="10"
+                      width="6"
+                      height="15"
+                      fill="rgba(7,20,46,0.3)"
+                      stroke="#07142e"
+                      strokeWidth="1.2"
+                    />
+                    <rect
+                      x="27"
+                      y="4"
+                      width="6"
+                      height="21"
+                      fill="rgba(152,206,0,0.5)"
+                      stroke="#07142e"
+                      strokeWidth="1.2"
+                    />
+                  </svg>
+                )}
+                {s.id === "launch" && (
+                  <svg viewBox="0 0 40 30" className="lp-loading-cell-svg">
+                    <polygon
+                      points="20,4 34,11 20,18 6,11"
+                      fill="rgba(152,206,0,0.45)"
+                      stroke="#07142e"
+                      strokeWidth="1.4"
+                    />
+                    <polygon
+                      points="6,11 20,18 20,27 6,20"
+                      fill="rgba(7,20,46,0.2)"
+                      stroke="#07142e"
+                      strokeWidth="1.4"
+                    />
+                    <polygon
+                      points="34,11 20,18 20,27 34,20"
+                      fill="none"
+                      stroke="#07142e"
+                      strokeWidth="1.4"
+                    />
+                  </svg>
+                )}
+                {s.id === "shorts" && (
+                  <svg viewBox="0 0 40 30" className="lp-loading-cell-svg">
+                    <rect
+                      x="12"
+                      y="2"
+                      width="16"
+                      height="26"
+                      rx="3"
+                      fill="rgba(152,206,0,0.3)"
+                      stroke="#07142e"
+                      strokeWidth="1.5"
+                    />
+                    <polygon points="18,11 24,15 18,19" fill="#07142e" />
+                  </svg>
+                )}
+                <span className="lp-loading-cell-lbl">{s.shortLabel}</span>
+              </div>
+            );
+          })}
         </div>
 
-        {/* High-Tech Shimmer Bar */}
-        <div className="w-48 h-1 bg-white/[0.08] rounded-full overflow-hidden relative shadow-inner">
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-400 to-transparent animate-shimmer-laser" />
+        {/* Status Copy */}
+        <div className="lp-loading-copy">
+          <h2 className="lp-loading-title">{activeMessage}</h2>
+          <p className="lp-loading-sub">{activeSubMessage}</p>
         </div>
 
-        {/* Live Technical Metadata Tag */}
-        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.03] border border-white/[0.08] text-[9px] font-mono text-slate-400">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-          <span>60 FPS GPU PIPELINE ACTIVE</span>
-        </div>
+        {/* Progress Track & Timecode Readout */}
+        {showProgress && (
+          <div className="lp-loading-progress-wrap">
+            <div className="lp-loading-track">
+              <div
+                className="lp-loading-fill"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+
+            <div className="lp-loading-meta-row">
+              <span>00:00:{secNum}:{frameNum} · 60 FPS</span>
+              <span>{progress}%</span>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

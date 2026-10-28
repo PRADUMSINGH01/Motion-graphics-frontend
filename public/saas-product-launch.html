@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SaaS 3.0 Product Launch Trailer</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 100%; height: 100%; overflow: hidden;
+    background: radial-gradient(ellipse at 50% 25%, #0e1f45 0%, #060d1f 62%, #030711 100%);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #f8fafc;
+  }
+  .grid-bg {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(to right, rgba(152, 206, 0, 0.07) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(152, 206, 0, 0.07) 1px, transparent 1px);
+    background-size: 48px 48px;
+    transform: perspective(700px) rotateX(52deg) translateY(120px) scale(1.5);
+    transform-origin: center bottom;
+    opacity: 0.65;
+  }
+  .glow-orb {
+    position: absolute; left: 50%; top: 38%;
+    width: 560px; height: 320px;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(152, 206, 0, 0.24) 0%, rgba(37, 99, 235, 0.14) 45%, transparent 72%);
+    filter: blur(28px);
+    pointer-events: none;
+  }
+  .stage {
+    position: relative; width: 100vw; height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 24px; padding: 36px;
+  }
+  .top-pill {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 6px 16px; border-radius: 999px;
+    background: rgba(152, 206, 0, 0.14);
+    border: 1px solid rgba(152, 206, 0, 0.45);
+    font-family: monospace; font-size: 13px; font-weight: 700;
+    letter-spacing: 0.18em; color: #c5ef26; text-transform: uppercase;
+    animation: pulsePill 3s ease-in-out infinite;
+  }
+  .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #c5ef26; box-shadow: 0 0 12px #c5ef26;
+  }
+  .headline {
+    font-size: clamp(36px, 4.6vw, 64px);
+    font-weight: 900; letter-spacing: -0.035em;
+    text-align: center; line-height: 1.04;
+  }
+  .headline span {
+    color: #c5ef26;
+    text-shadow: 0 0 28px rgba(197, 239, 38, 0.35);
+  }
+  .deck {
+    position: relative;
+    width: min(860px, 86vw); height: 300px;
+    display: grid; grid-template-columns: 1.35fr 1fr; gap: 18px;
+    animation: floatDeck 4.2s ease-in-out infinite;
+  }
+  .glass-card {
+    background: rgba(12, 25, 56, 0.78);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 18px; padding: 22px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255,255,255,0.15);
+    display: flex; flex-direction: column; justify-content: space-between;
+    position: relative; overflow: hidden;
+  }
+  .card-kicker {
+    font-family: monospace; font-size: 11px; letter-spacing: 0.14em;
+    color: #94a3b8; text-transform: uppercase;
+  }
+  .bars {
+    display: flex; align-items: flex-end; gap: 12px; height: 150px; padding-top: 16px;
+  }
+  .bar {
+    flex: 1; border-radius: 6px 6px 2px 2px;
+    background: linear-gradient(180deg, rgba(197, 239, 38, 0.92), rgba(101, 163, 13, 0.28));
+    transform-origin: bottom;
+    animation: barRise 2.8s cubic-bezier(0.16, 1, 0.3, 1) infinite alternate;
+  }
+  .bar:nth-child(1) { height: 42%; animation-delay: 0.1s; }
+  .bar:nth-child(2) { height: 58%; animation-delay: 0.2s; }
+  .bar:nth-child(3) { height: 51%; animation-delay: 0.3s; }
+  .bar:nth-child(4) { height: 76%; animation-delay: 0.4s; }
+  .bar:nth-child(5) { height: 94%; animation-delay: 0.5s; box-shadow: 0 0 24px rgba(197, 239, 38, 0.45); }
+  .metric-big {
+    font-family: monospace; font-size: 54px; font-weight: 900;
+    color: #c5ef26; letter-spacing: -0.04em; line-height: 1;
+  }
+  .metric-sub {
+    font-size: 14px; color: #cbd5e1; margin-top: 6px;
+  }
+  .cta-pill {
+    margin-top: auto;
+    display: inline-flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px; border-radius: 12px;
+    background: #c5ef26; color: #07142e;
+    font-weight: 800; font-size: 14px; letter-spacing: 0.02em;
+  }
+  @keyframes floatDeck {
+    0%, 100% { transform: translateY(0px) rotateX(4deg); }
+    50% { transform: translateY(-10px) rotateX(0deg); }
+  }
+  @keyframes barRise {
+    0% { transform: scaleY(0.45); }
+    100% { transform: scaleY(1); }
+  }
+  @keyframes pulsePill {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.04); }
+  }
+</style>
+</head>
+<body>
+  <div class="grid-bg"></div>
+  <div class="glow-orb"></div>
+  <div class="stage">
+    <div class="top-pill"><span class="dot"></span> PRODUCT LAUNCH 3.0 · 60 FPS</div>
+    <h1 class="headline">Ship Your Next Launch in <span>60 FPS Motion.</span></h1>
+    <div class="deck">
+      <div class="glass-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span class="card-kicker">LIVE TELEMETRY THROUGHPUT</span>
+          <span style="font-family:monospace;font-size:12px;color:#c5ef26;font-weight:700;">+340% YoY</span>
+        </div>
+        <div class="bars">
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+        </div>
+      </div>
+      <div class="glass-card">
+        <span class="card-kicker">QUERY LATENCY BENCHMARK</span>
+        <div>
+          <div class="metric-big">7.4ms</div>
+          <div class="metric-sub">Zero frame drops · Deterministic GPU sync</div>
+        </div>
+        <div class="cta-pill">
+          <span>DEPLOY WORKSPACE</span>
+          <span>→</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+

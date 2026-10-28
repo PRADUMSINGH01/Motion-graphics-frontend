@@ -45,7 +45,7 @@ export default function MainSection() {
 
       <div className="relative container-page flex flex-col items-center text-center">
         <Link
-          href="/product"
+          href="/dashboard?section=product-launch"
           style={{ animationDelay: "0ms" }}
           className="animate-fade-up group inline-flex items-center gap-2 h-7 pl-1 pr-3 rounded-full border border-line bg-surface/70 backdrop-blur text-[12.5px] text-fg-muted hover:text-fg hover:border-line-strong transition-colors"
         >
@@ -75,11 +75,11 @@ export default function MainSection() {
           style={{ animationDelay: "210ms" }}
           className="animate-fade-up mt-9 flex flex-col sm:flex-row items-center gap-3"
         >
-          <Link href="/workspace" className="btn btn-lg btn-primary min-w-[170px]">
+          <Link href="/dashboard" className="btn btn-lg btn-primary min-w-[170px]">
             Open Studio
             <IconArrowRight className="w-4 h-4" />
           </Link>
-          <Link href="/explore" className="btn btn-lg btn-secondary min-w-[170px]">
+          <Link href="/templates" className="btn btn-lg btn-secondary min-w-[170px]">
             Browse templates
           </Link>
         </div>
@@ -183,7 +183,7 @@ export default function MainSection() {
             {/* Viewport + timeline */}
             <div className="lg:col-span-9 flex flex-col">
               {/* Video viewport — intentionally dark in both themes, like any editor canvas */}
-              <div className="relative flex items-center justify-center min-h-[300px] sm:min-h-[400px] p-6 bg-[#0b0b0e] overflow-hidden group">
+              <div className="relative flex items-center justify-center min-h-[300px] sm:min-h-[400px] p-6 bg-surf-0b0b0e overflow-hidden group">
                 <div
                   aria-hidden="true"
                   className="absolute inset-0"

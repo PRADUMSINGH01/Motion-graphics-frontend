@@ -58,7 +58,7 @@ export default function RouteProgressBar() {
         style={{ width: `${progress}%` }}
       >
         {/* Leading glowing spark beam */}
-        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-8 h-3 bg-white blur-[2px] rounded-full opacity-80" />
+        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-8 h-3 bg-surf-ffffff blur-[2px] rounded-full opacity-80" />
       </div>
     </div>
   );

@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=1280, initial-scale=1.0" />
+<title>Faceless Video Storytelling Engine</title>
+<style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  html, body {
+    width: 1280px;
+    height: 720px;
+    overflow: hidden;
+    background: #07142e;
+    color: #ffffff;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    user-select: none;
+  }
+
+  .stage {
+    position: relative;
+    width: 1280px;
+    height: 720px;
+    background:
+      radial-gradient(circle at 78% 22%, rgba(0, 245, 212, 0.14), transparent 42%),
+      radial-gradient(circle at 20% 78%, rgba(163, 230, 53, 0.14), transparent 46%),
+      #07142e;
+    overflow: hidden;
+  }
+
+  .grid-bg {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(to right, rgba(255,255,255,0.045) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255,255,255,0.045) 1px, transparent 1px);
+    background-size: 64px 64px;
+    pointer-events: none;
+  }
+
+  /* Chapter Top Bar */
+  .chapter-bar {
+    position: absolute;
+    top: 24px;
+    left: 36px;
+    right: 36px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    z-index: 25;
+  }
+  .chap-pill {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1.5px solid rgba(255, 255, 255, 0.16);
+    border-radius: 12px;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    color: rgba(255, 255, 255, 0.65);
+    position: relative;
+    overflow: hidden;
+  }
+  .chap-pill.active {
+    border-color: #a3e635;
+    color: #ffffff;
+    background: rgba(163, 230, 53, 0.12);
+  }
+  .chap-fill {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: #a3e635;
+    width: 0%;
+  }
+
+  /* Main Faceless Visual Stage */
+  .canvas-area {
+    position: absolute;
+    top: 92px;
+    left: 36px;
+    right: 36px;
+    bottom: 158px;
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 24px;
+    z-index: 10;
+  }
+
+  .story-card-left {
+    background: rgba(255, 253, 248, 0.05);
+    border: 2px solid rgba(255, 255, 255, 0.18);
+    border-radius: 24px;
+    padding: 28px 32px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .faceless-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    align-self: flex-start;
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: #a3e635;
+    color: #07142e;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+  }
+
+  .story-headline {
+    font-size: 52px;
+    font-weight: 900;
+    line-height: 1.02;
+    letter-spacing: -0.035em;
+    color: #ffffff;
+  }
+  .story-headline .accent {
+    color: #00f5d4;
+  }
+
+  /* Node Diagram inside Left Card */
+  .node-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 8px;
+  }
+  .node-box {
+    flex: 1;
+    padding: 14px 16px;
+    border-radius: 16px;
+    background: rgba(7, 20, 46, 0.85);
+    border: 1.5px solid rgba(255, 255, 255, 0.22);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    will-change: transform, border-color;
+  }
+  .node-step {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11px;
+    font-weight: 800;
+    color: #a3e635;
+    letter-spacing: 0.08em;
+  }
+  .node-label {
+    font-size: 17px;
+    font-weight: 800;
+    color: #ffffff;
+  }
+
+  /* Right Evidence & Retention Graph Card */
+  .story-card-right {
+    background: #fffdf8;
+    color: #07142e;
+    border: 3px solid #07142e;
+    border-radius: 24px;
+    padding: 26px 28px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 20px 45px rgba(0,0,0,0.35);
+    will-change: transform;
+  }
+  .evidence-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .evidence-tag {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    padding: 5px 12px;
+    border-radius: 8px;
+    background: #07142e;
+    color: #ffffff;
+  }
+  .metric-big {
+    font-size: 62px;
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    color: #07142e;
+  }
+  .metric-sub {
+    font-size: 14px;
+    font-weight: 700;
+    color: rgba(7, 20, 46, 0.68);
+  }
+
+  /* Synchronized Voiceover + Kinetic Word-by-Word Captions Dock */
+  .caption-dock {
+    position: absolute;
+    left: 36px;
+    right: 36px;
+    bottom: 24px;
+    height: 112px;
+    border-radius: 22px;
+    background: rgba(7, 20, 46, 0.92);
+    border: 2px solid rgba(255, 255, 255, 0.24);
+    padding: 0 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    z-index: 30;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
+  }
+
+  .vo-module {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding-right: 24px;
+    border-right: 1.5px solid rgba(255, 255, 255, 0.16);
+  }
+  .vo-waves {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    height: 36px;
+  }
+  .vo-bar {
+    width: 5px;
+    border-radius: 99px;
+    background: #a3e635;
+    height: 12px;
+    will-change: height;
+  }
+  .vo-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .vo-title {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    color: #a3e635;
+  }
+  .vo-sub {
+    font-size: 13px;
+    font-weight: 700;
+    color: #ffffff;
+    white-space: nowrap;
+  }
+
+  /* Word-by-Word Kinetic Captions */
+  .caption-words {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .cap-word {
+    font-size: 31px;
+    font-weight: 900;
+    letter-spacing: -0.025em;
+    padding: 5px 14px;
+    border-radius: 12px;
+    color: rgba(255, 255, 255, 0.45);
+    transition: transform 0.12s ease, background 0.12s ease, color 0.12s ease;
+  }
+  .cap-word.spoken {
+    color: #ffffff;
+  }
+  .cap-word.active {
+    background: #ffbe0b;
+    color: #07142e;
+    transform: scale(1.1) translateY(-2px);
+    box-shadow: 0 8px 20px rgba(255, 190, 11, 0.35);
+  }
+</style>
+</head>
+<body>
+  <div class="stage">
+    <div class="grid-bg"></div>
+
+    <!-- Top Chapter Progression -->
+    <div class="chapter-bar">
+      <div class="chap-pill" id="ch1">
+        <span>CH.01 // THE VISUAL HOOK</span>
+        <span>00:00</span>
+        <div class="chap-fill" id="chFill1"></div>
+      </div>
+      <div class="chap-pill" id="ch2">
+        <span>CH.02 // AUTOMATED B-ROLL</span>
+        <span>00:03</span>
+        <div class="chap-fill" id="chFill2"></div>
+      </div>
+      <div class="chap-pill" id="ch3">
+        <span>CH.03 // HIGH RETENTION</span>
+        <span>00:06</span>
+        <div class="chap-fill" id="chFill3"></div>
+      </div>
+    </div>
+
+    <!-- Main Faceless Storytelling Stage -->
+    <div class="canvas-area">
+      <div class="story-card-left">
+        <div class="faceless-badge">
+          ✦ FACELESS YOUTUBE &amp; REELS ENGINE · ZERO CAMERA NEEDED
+        </div>
+
+        <div class="story-headline" id="storyTitle">
+          How <span class="accent">Faceless Channels</span> Scale To 1M+ Views Automatically.
+        </div>
+
+        <div class="node-row">
+          <div class="node-box" id="node1">
+            <span class="node-step">STEP 01</span>
+            <span class="node-label">Script or Prompt</span>
+          </div>
+          <div class="node-box" id="node2">
+            <span class="node-step">STEP 02</span>
+            <span class="node-label">Auto Scene B-Roll</span>
+          </div>
+          <div class="node-box" id="node3">
+            <span class="node-step">STEP 03</span>
+            <span class="node-label">Kinetic Captions</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="story-card-right" id="rightCard">
+        <div class="evidence-top">
+          <span class="evidence-tag">RETENTION TELEMETRY</span>
+          <span style="font-family: monospace; font-weight: 800; font-size: 13px;">9:16 &amp; 16:9</span>
+        </div>
+
+        <div>
+          <div class="metric-big" id="retCounter">84.2%</div>
+          <div class="metric-sub">Average Viewer Hold Rate @ 30 Seconds</div>
+        </div>
+
+        <svg viewBox="0 0 380 150" style="width: 100%; height: 145px; overflow: visible;">
+          <line x1="0" y1="130" x2="380" y2="130" stroke="rgba(7,20,46,0.2)" stroke-width="2" />
+          <line x1="0" y1="75" x2="380" y2="75" stroke="rgba(7,20,46,0.12)" stroke-dasharray="4 4" stroke-width="1.5" />
+          <!-- Bars -->
+          <rect x="18" y="68" width="42" height="62" rx="6" fill="rgba(7,20,46,0.14)" stroke="#07142e" stroke-width="2"/>
+          <rect x="82" y="52" width="42" height="78" rx="6" fill="rgba(7,20,46,0.22)" stroke="#07142e" stroke-width="2"/>
+          <rect x="146" y="38" width="42" height="92" rx="6" fill="#00f5d4" stroke="#07142e" stroke-width="2"/>
+          <rect x="210" y="24" width="42" height="106" rx="6" fill="#ffbe0b" stroke="#07142e" stroke-width="2"/>
+          <rect id="barPeak" x="274" y="10" width="56" height="120" rx="6" fill="#a3e635" stroke="#07142e" stroke-width="2.5"/>
+          <!-- Trend line -->
+          <polyline points="39,62 103,46 167,30 231,18 302,6" fill="none" stroke="#ff2e63" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="302" cy="6" r="7" fill="#ff2e63" stroke="#ffffff" stroke-width="2.5"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Bottom Synchronized Voiceover + Word-by-Word Kinetic Captions -->
+    <div class="caption-dock">
+      <div class="vo-module">
+        <div class="vo-waves" id="voWaves">
+          <div class="vo-bar"></div>
+          <div class="vo-bar"></div>
+          <div class="vo-bar"></div>
+          <div class="vo-bar"></div>
+          <div class="vo-bar"></div>
+          <div class="vo-bar"></div>
+          <div class="vo-bar"></div>
+        </div>
+        <div class="vo-meta">
+          <span class="vo-title">FACELESS NARRATION</span>
+          <span class="vo-sub">Auto-Synced Captions</span>
+        </div>
+      </div>
+
+      <div class="caption-words" id="captionWords">
+        <span class="cap-word">Turn</span>
+        <span class="cap-word">any</span>
+        <span class="cap-word">script</span>
+        <span class="cap-word">into</span>
+        <span class="cap-word">a</span>
+        <span class="cap-word">faceless</span>
+        <span class="cap-word">story</span>
+        <span class="cap-word">video</span>
+        <span class="cap-word">in</span>
+        <span class="cap-word">seconds.</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const words = Array.from(document.querySelectorAll('.cap-word'));
+    const bars = Array.from(document.querySelectorAll('.vo-bar'));
+    const nodes = [
+      document.getElementById('node1'),
+      document.getElementById('node2'),
+      document.getElementById('node3')
+    ];
+    const chPills = [
+      document.getElementById('ch1'),
+      document.getElementById('ch2'),
+      document.getElementById('ch3')
+    ];
+    const chFills = [
+      document.getElementById('chFill1'),
+      document.getElementById('chFill2'),
+      document.getElementById('chFill3')
+    ];
+    const retCounter = document.getElementById('retCounter');
+    const rightCard = document.getElementById('rightCard');
+
+    const LOOP_MS = 7500;
+
+    function tick(now) {
+      const t = now % LOOP_MS;
+      const progress = t / LOOP_MS;
+
+      // Active word index
+      const activeWordIdx = Math.floor(progress * words.length);
+      words.forEach((w, idx) => {
+        w.classList.toggle('active', idx === activeWordIdx);
+        w.classList.toggle('spoken', idx < activeWordIdx);
+      });
+
+      // Voiceover waveform animation (visual only, 100% silent)
+      bars.forEach((b, i) => {
+        const h = 10 + Math.abs(Math.sin(now * 0.012 + i * 0.9)) * 26;
+        b.style.height = `${h.toFixed(1)}px`;
+      });
+
+      // Active chapter & node highlight
+      const stageIdx = Math.min(2, Math.floor(progress * 3));
+      const stageLocal = (progress * 3) - stageIdx;
+
+      chPills.forEach((pill, i) => {
+        pill.classList.toggle('active', i === stageIdx);
+        if (i < stageIdx) chFills[i].style.width = '100%';
+        else if (i === stageIdx) chFills[i].style.width = `${(stageLocal * 100).toFixed(1)}%`;
+        else chFills[i].style.width = '0%';
+      });
+
+      nodes.forEach((node, i) => {
+        const isCurrent = i === stageIdx;
+        node.style.borderColor = isCurrent ? '#a3e635' : 'rgba(255,255,255,0.22)';
+        node.style.transform = isCurrent ? 'translateY(-4px) scale(1.03)' : 'none';
+      });
+
+      // Counter & subtle card float
+      const val = (78 + progress * 14.4).toFixed(1);
+      retCounter.textContent = `${val}%`;
+      rightCard.style.transform = `translateY(${Math.sin(now * 0.003) * 4}px)`;
+
+      requestAnimationFrame(tick);
+    }
+
+    requestAnimationFrame(tick);
+  </script>
+</body>
+</html>
+

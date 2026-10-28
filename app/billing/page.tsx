@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import BackButton from "../components/BackButton";
 import StudioLoadingScreen from "../components/StudioLoadingScreen";
 import {
   FiZap,
@@ -198,6 +197,14 @@ export default function BillingPage() {
       if (user) {
         // Live backend call to update plan
         const res = await api.user.updatePlan(tier, billingInterval);
+        // Paid plans go through Dodo's secure checkout (downgrades through its billing portal);
+        // the plan changes once Dodo confirms the payment.
+        const redirectUrl = res.checkoutUrl || res.portalUrl;
+        if (redirectUrl) {
+          success("Redirecting", res.message || "Opening secure checkout…");
+          window.location.href = redirectUrl;
+          return;
+        }
         await refreshUser();
         success(
           "Subscription Updated",
@@ -261,40 +268,8 @@ export default function BillingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-canvas text-fg font-poppins selection:bg-cyan-500 selection:text-black pt-20">
-      {/* Breadcrumb Header */}
-      <div className="border-b border-line bg-surface/90 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <BackButton fallbackUrl="/workspace" label="Back" />
-            <span className="text-fg-subtle hidden sm:inline">•</span>
-            <Link
-              href="/workspace"
-              className="hidden sm:flex items-center gap-2 text-xs text-fg-muted hover:text-fg transition-colors"
-            >
-              <FiLayers className="text-accent" />
-              <span>Studio Workspace</span>
-            </Link>
-            <span className="text-fg-subtle hidden sm:inline">/</span>
-            <span className="text-xs font-semibold text-fg font-mono">
-              PLANS &amp; BILLING
-            </span>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <ThemeToggle />
-            <Link
-              href="/workspace"
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200 transition-all shadow-xs cursor-pointer"
-            >
-              <FiZap className="w-3.5 h-3.5 text-cyan-400 dark:text-cyan-500" />
-              <span>Open Studio</span>
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-12">
+    <div className="min-h-screen bg-canvas text-fg font-poppins selection:bg-cyan-500 selection:text-black pt-10 sm:pt-14">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-12">
         {/* ================================================================== */}
         {/* 1. TOP HERO SECTION */}
         {/* ================================================================== */}
@@ -320,7 +295,7 @@ export default function BillingPage() {
               onClick={() => setBillingInterval("monthly")}
               className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all cursor-pointer ${
                 billingInterval === "monthly"
-                  ? "bg-white text-slate-950 font-bold shadow-md"
+                  ? "bg-surf-ffffff text-slate-950 font-bold shadow-md"
                   : "text-fg-muted hover:text-fg"
               }`}
             >
@@ -331,7 +306,7 @@ export default function BillingPage() {
               onClick={() => setBillingInterval("annual")}
               className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all flex items-center gap-2 cursor-pointer ${
                 billingInterval === "annual"
-                  ? "bg-white text-slate-950 font-bold shadow-md"
+                  ? "bg-surf-ffffff text-slate-950 font-bold shadow-md"
                   : "text-fg-muted hover:text-fg"
               }`}
             >
@@ -347,7 +322,7 @@ export default function BillingPage() {
         {/* 2. ACTIVE ACCOUNT & LIVE USAGE QUOTAS (If User Logged In) */}
         {/* ================================================================== */}
         {user && (
-          <div className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-gradient-to-b dark:from-white/[0.05] dark:to-white/[0.02] border border-line shadow-xl dark:shadow-2xl space-y-6">
+          <div className="p-6 sm:p-8 rounded-3xl bg-surf-ffffff dark:bg-gradient-to-b dark:from-white/[0.05] dark:to-white/[0.02] border border-line shadow-xl dark:shadow-2xl space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-line pb-6">
               <div className="space-y-1">
                 <div className="flex items-center gap-2.5">
@@ -480,7 +455,7 @@ export default function BillingPage() {
                 key={tier.id}
                 className={`relative flex flex-col justify-between p-6 rounded-3xl transition-all duration-300 ${
                   tier.highlighted
-                    ? "bg-white dark:bg-gradient-to-b dark:from-white/[0.08] dark:to-white/[0.02] border-2 border-cyan-500 dark:border-cyan-400/50 shadow-2xl shadow-cyan-500/10 lg:-translate-y-2"
+                    ? "bg-surf-ffffff dark:bg-gradient-to-b dark:from-white/[0.08] dark:to-white/[0.02] border-2 border-cyan-500 dark:border-cyan-400/50 shadow-2xl shadow-cyan-500/10 lg:-translate-y-2"
                     : "bg-fg/[0.025] border border-line hover:border-line-strong hover:bg-slate-50/50 dark:hover:bg-white/[0.05] shadow-xl"
                 }`}
               >

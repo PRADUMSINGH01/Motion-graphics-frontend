@@ -15,7 +15,9 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-const THEME_STORAGE_KEY = "animagent_theme";
+// "byreel_theme": the old key ("animagent_theme") was written as "dark" on every visit, before dark
+// mode covered the whole app, so it does not say what anyone chose.
+const THEME_STORAGE_KEY = "byreel_theme";
 
 function getSystemTheme(): ResolvedTheme {
   if (typeof window === "undefined") return "dark";
@@ -23,22 +25,22 @@ function getSystemTheme(): ResolvedTheme {
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<ThemeMode>("dark");
-  const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>("dark");
+  const [theme, setThemeState] = useState<ThemeMode>("light");
+  const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>("light");
   const [mounted, setMounted] = useState(false);
 
   // Initialize theme from localStorage or system on mount
   useEffect(() => {
     try {
       const stored = localStorage.getItem(THEME_STORAGE_KEY) as ThemeMode | null;
-      const initialTheme = stored && ["dark", "light", "system"].includes(stored) ? stored : "dark";
+      const initialTheme = stored && ["dark", "light", "system"].includes(stored) ? stored : "light";
       setThemeState(initialTheme);
       const initialResolved = initialTheme === "system" ? getSystemTheme() : initialTheme;
       setResolvedTheme(initialResolved);
     } catch {
       // Fallback if localStorage is inaccessible
-      setThemeState("dark");
-      setResolvedTheme("dark");
+      setThemeState("light");
+      setResolvedTheme("light");
     }
     setMounted(true);
   }, []);

@@ -19,8 +19,8 @@ export const ExtensionCarousel = memo(function ExtensionCarousel() {
               <div className="flex items-center justify-between mb-3.5">
                 <div className="flex items-center gap-2.5">
                   {/* Linear Logo Squircle */}
-                  <div className="w-8 h-8 rounded-[8px] bg-[#1a1733] border border-white/10 flex items-center justify-center shadow-xs">
-                    <svg className="w-4 h-4 text-[#8F99F8]" viewBox="0 0 100 100" fill="currentColor">
+                  <div className="w-8 h-8 rounded-[8px] bg-surf-1a1733 border border-white/10 flex items-center justify-center shadow-xs">
+                    <svg className="w-4 h-4 text-ink-8f99f8" viewBox="0 0 100 100" fill="currentColor">
                       <path d="M50 0C22.386 0 0 22.386 0 50s22.386 50 50 50 50-22.386 50-50S77.614 0 50 0zm-8.87 86.87C21.737 83.242 8.758 70.263 5.13 50.87L50.87 5.13C70.263 8.758 83.242 21.737 86.87 41.13L41.13 86.87zm16.53-6.19l31.21-31.21c-.81 4.54-2.48 8.8-4.87 12.59l-13.75 13.75c-3.79 2.39-8.05 4.06-12.59 4.87zm14.15-20.34l12.7-12.7c-2.45-3.87-5.73-7.15-9.6-9.6l-12.7 12.7c3.87 2.45 7.15 5.73 9.6 9.6z" />
                     </svg>
                   </div>
@@ -86,7 +86,7 @@ export const ExtensionCarousel = memo(function ExtensionCarousel() {
                   <div className="w-1/2 h-full bg-amber-400" />
                 </div>
                 {/* 4. Filled Blue Circle with Checkmark (Done) */}
-                <div className="w-6 h-6 rounded-full bg-[#5E6AD2] flex items-center justify-center text-white text-[11px] font-bold shadow-md">
+                <div className="w-6 h-6 rounded-full bg-surf-5e6ad2 flex items-center justify-center text-white text-[11px] font-bold shadow-md">
                   ✓
                 </div>
               </div>
@@ -100,7 +100,7 @@ export const ExtensionCarousel = memo(function ExtensionCarousel() {
               <div className="flex items-center justify-between mb-3.5">
                 <div className="flex items-center gap-2.5">
                   {/* Google Translate Squircle */}
-                  <div className="w-8 h-8 rounded-[8px] bg-[#141e34] border border-white/10 flex items-center justify-center shadow-xs">
+                  <div className="w-8 h-8 rounded-[8px] bg-surf-141e34 border border-white/10 flex items-center justify-center shadow-xs">
                     <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
                       <path d="M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z" fill="#4285F4" />
                     </svg>
@@ -173,8 +173,8 @@ export const ExtensionCarousel = memo(function ExtensionCarousel() {
               <div className="flex items-center justify-between mb-3.5">
                 <div className="flex items-center gap-2.5">
                   {/* Spotify Logo Squircle */}
-                  <div className="w-8 h-8 rounded-[8px] bg-[#0c2415] border border-white/10 flex items-center justify-center shadow-xs">
-                    <svg className="w-4 h-4 text-[#1DB954]" viewBox="0 0 24 24" fill="currentColor">
+                  <div className="w-8 h-8 rounded-[8px] bg-surf-0c2415 border border-white/10 flex items-center justify-center shadow-xs">
+                    <svg className="w-4 h-4 text-ink-1db954" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z" />
                     </svg>
                   </div>
@@ -231,7 +231,7 @@ export const ExtensionCarousel = memo(function ExtensionCarousel() {
                 <button
                   type="button"
                   onClick={() => setIsPlaying(!isPlaying)}
-                  className="w-9 h-9 rounded-full bg-white text-black flex items-center justify-center shadow-xl hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                  className="w-9 h-9 rounded-full bg-surf-ffffff text-black flex items-center justify-center shadow-xl hover:scale-105 active:scale-95 transition-all cursor-pointer"
                   aria-label={isPlaying ? "Pause" : "Play"}
                 >
                   {isPlaying ? (
@@ -266,7 +266,7 @@ export const ExtensionCarousel = memo(function ExtensionCarousel() {
               <div className="flex items-center justify-between mb-3.5">
                 <div className="flex items-center gap-2.5">
                   {/* Arc Logo Squircle */}
-                  <div className="w-8 h-8 rounded-[8px] bg-[#221332] border border-white/10 flex items-center justify-center shadow-xs">
+                  <div className="w-8 h-8 rounded-[8px] bg-surf-221332 border border-white/10 flex items-center justify-center shadow-xs">
                     <svg className="w-4 h-4 text-accent" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" />
                     </svg>
@@ -317,7 +317,7 @@ export const ExtensionCarousel = memo(function ExtensionCarousel() {
                 </svg>
 
                 {/* Floating Translucent Spaces Dropdown (Exact Match to Screenshot 3) */}
-                <div className="absolute bottom-1 right-1 bg-[#191122]/90 backdrop-blur-xl border border-white/15 rounded-xl p-2 shadow-2xl text-[11px] min-w-[85px] z-20">
+                <div className="absolute bottom-1 right-1 bg-surf-191122/90 backdrop-blur-xl border border-white/15 rounded-xl p-2 shadow-2xl text-[11px] min-w-[85px] z-20">
                   <div className="text-zinc-500 font-semibold uppercase tracking-wider text-[9px] px-2 py-0.5">
                     Spaces
                   </div>
@@ -346,7 +346,7 @@ export const ExtensionCarousel = memo(function ExtensionCarousel() {
         {/* ── BOTTOM BROWSE BAR (EXACT MATCH TO REFERENCE SCREENSHOT 3) ── */}
         <div className="mt-8 flex items-center justify-between text-[13px] text-zinc-400">
           <Link
-            href="/workspace"
+            href="/templates"
             className="inline-flex items-center gap-1.5 hover:text-white transition-colors group font-normal text-[13px]"
           >
             <span>Browse thousands more</span>

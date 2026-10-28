@@ -1,0 +1,1730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Byreel Studio — Backend API Implementation Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #090b0e;
+      --bg-surface: #10131a;
+      --bg-card: #141822;
+      --bg-card-hover: #191e2b;
+      --border: #222736;
+      --border-focus: #39425a;
+      --ink: #f4f6fa;
+      --ink-muted: #8e95a5;
+      --ink-faint: #565d6e;
+      --accent: #c5ef26;
+      --accent-glow: rgba(197, 239, 38, 0.35);
+      --accent-bg: rgba(197, 239, 38, 0.12);
+      --accent-border: rgba(197, 239, 38, 0.3);
+      --method-get: #38bdf8;
+      --method-get-bg: rgba(56, 189, 248, 0.12);
+      --method-post: #4ade80;
+      --method-post-bg: rgba(74, 222, 128, 0.12);
+      --method-patch: #fbbf24;
+      --method-patch-bg: rgba(251, 191, 36, 0.12);
+      --method-delete: #f87171;
+      --method-delete-bg: rgba(248, 113, 113, 0.12);
+      --p0-badge: #ff4d4f;
+      --p1-badge: #faad14;
+      --p2-badge: #52c41a;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-serif: 'Instrument Serif', Georgia, serif;
+      --font-mono: 'JetBrains Mono', Consolas, Menlo, monospace;
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-full: 9999px;
+      --transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    [data-theme="light"] {
+      --bg: #fcfbf7;
+      --bg-surface: #f3f0e6;
+      --bg-card: #ffffff;
+      --bg-card-hover: #faf9f5;
+      --border: #dedad0;
+      --border-focus: #b5b0a2;
+      --ink: #111110;
+      --ink-muted: #646158;
+      --ink-faint: #9c988e;
+      --accent: #78a300;
+      --accent-glow: rgba(120, 163, 0, 0.25);
+      --accent-bg: #f2fac2;
+      --accent-border: #d0e85d;
+      --method-get: #0284c7;
+      --method-get-bg: #e0f2fe;
+      --method-post: #16a34a;
+      --method-post-bg: #dcfce7;
+      --method-patch: #d97706;
+      --method-patch-bg: #fef3c7;
+      --method-delete: #dc2626;
+      --method-delete-bg: #fee2e2;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--ink);
+      font-family: var(--font-sans);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    /* Ambient Background Mesh */
+    .ambient-glow {
+      position: fixed;
+      top: -120px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 1000px;
+      height: 480px;
+      background: radial-gradient(ellipse at center, rgba(197, 239, 38, 0.08) 0%, rgba(9, 11, 14, 0) 70%);
+      pointer-events-none;
+      z-index: 0;
+    }
+
+    [data-theme="light"] .ambient-glow {
+      background: radial-gradient(ellipse at center, rgba(197, 239, 38, 0.2) 0%, rgba(252, 251, 247, 0) 70%);
+    }
+
+    .container {
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 32px 24px 80px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Top Navigation Header */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 32px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      border-radius: var(--radius-sm);
+      background: #111110;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+      position: relative;
+    }
+
+    .brand-mark::after {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 10px var(--accent);
+    }
+
+    .brand-text h1 {
+      font-family: var(--font-serif);
+      font-size: 26px;
+      font-weight: 400;
+      line-height: 1;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-text span {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: var(--radius-full);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--ink);
+      transition: var(--transition);
+      text-decoration: none;
+    }
+
+    .btn:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--border-focus);
+    }
+
+    .btn-primary {
+      background: var(--ink);
+      color: var(--bg);
+      border-color: var(--ink);
+      font-weight: 600;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #111110;
+      box-shadow: 0 0 16px var(--accent-glow);
+    }
+
+    /* Overall Hero Progress Banner */
+    .hero-banner {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px 32px;
+      margin-bottom: 32px;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.2);
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 32px;
+      align-items: center;
+    }
+
+    @media (max-width: 860px) {
+      .hero-banner {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .hero-title h2 {
+      font-family: var(--font-serif);
+      font-size: 38px;
+      font-weight: 400;
+      line-height: 1.1;
+      margin-bottom: 8px;
+    }
+
+    .hero-title p {
+      color: var(--ink-muted);
+      font-size: 14.5px;
+      max-width: 580px;
+    }
+
+    .progress-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 20px;
+    }
+
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 12px;
+    }
+
+    .progress-number {
+      font-family: var(--font-mono);
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    .progress-percent {
+      font-family: var(--font-mono);
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    .progress-bar-track {
+      width: 100%;
+      height: 10px;
+      background: var(--bg-surface);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      margin-bottom: 12px;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #9ec900, var(--accent));
+      border-radius: var(--radius-full);
+      width: 0%;
+      transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 0 12px var(--accent-glow);
+    }
+
+    .progress-subtext {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--ink-muted);
+    }
+
+    /* Filter & Search Bar */
+    .controls-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 24px;
+      position: sticky;
+      top: 16px;
+      z-index: 10;
+      background: rgba(9, 11, 14, 0.85);
+      backdrop-filter: blur(16px);
+      padding: 12px 18px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
+
+    [data-theme="light"] .controls-bar {
+      background: rgba(252, 251, 247, 0.85);
+    }
+
+    .search-wrapper {
+      position: relative;
+      flex: 1;
+      min-width: 260px;
+    }
+
+    .search-input {
+      width: 100%;
+      height: 40px;
+      padding: 0 16px 0 38px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-full);
+      color: var(--ink);
+      font-family: var(--font-sans);
+      font-size: 13.5px;
+      outline: none;
+      transition: var(--transition);
+    }
+
+    .search-input:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(197, 239, 38, 0.1);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--ink-faint);
+      pointer-events-none;
+      font-size: 14px;
+    }
+
+    .filter-tabs {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      overflow-x: auto;
+    }
+
+    .filter-tab {
+      padding: 6px 14px;
+      border-radius: var(--radius-full);
+      font-size: 12.5px;
+      font-weight: 500;
+      cursor: pointer;
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--ink-muted);
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+
+    .filter-tab:hover {
+      color: var(--ink);
+      background: var(--bg-card);
+    }
+
+    .filter-tab.active {
+      background: var(--bg-card);
+      border-color: var(--border);
+      color: var(--ink);
+      font-weight: 600;
+    }
+
+    /* Phase Sections */
+    .phase-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      margin-bottom: 28px;
+      overflow: hidden;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+      transition: var(--transition);
+    }
+
+    .phase-header {
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      cursor: pointer;
+      user-select: none;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-card);
+    }
+
+    .phase-info {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .phase-badge {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .badge-p0 {
+      background: rgba(255, 77, 79, 0.15);
+      color: #ff7875;
+      border: 1px solid rgba(255, 77, 79, 0.3);
+    }
+
+    .badge-p1 {
+      background: rgba(250, 173, 20, 0.15);
+      color: #ffc53d;
+      border: 1px solid rgba(250, 173, 20, 0.3);
+    }
+
+    .badge-p2 {
+      background: rgba(82, 196, 26, 0.15);
+      color: #73d13d;
+      border: 1px solid rgba(82, 196, 26, 0.3);
+    }
+
+    .phase-title h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 2px;
+    }
+
+    .phase-title p {
+      font-size: 12.5px;
+      color: var(--ink-muted);
+    }
+
+    .phase-stats {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .phase-count {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--ink-muted);
+    }
+
+    .toggle-icon {
+      font-size: 14px;
+      color: var(--ink-faint);
+      transition: transform 0.2s ease;
+    }
+
+    .phase-card.collapsed .toggle-icon {
+      transform: rotate(-90deg);
+    }
+
+    .phase-card.collapsed .items-list {
+      display: none;
+    }
+
+    /* Endpoint Item Rows */
+    .items-list {
+      divide-y: 1px solid var(--border);
+    }
+
+    .endpoint-item {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: background-color 0.15s ease;
+    }
+
+    .endpoint-item:last-child {
+      border-bottom: none;
+    }
+
+    .endpoint-item:hover {
+      background: var(--bg-card-hover);
+    }
+
+    .endpoint-item.completed {
+      opacity: 0.75;
+    }
+
+    .endpoint-item.completed .endpoint-path {
+      text-decoration: line-through;
+      color: var(--ink-muted);
+    }
+
+    .item-main-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .item-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex: 1;
+      min-width: 280px;
+    }
+
+    /* Custom Checkbox */
+    .checkbox-container {
+      position: relative;
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+
+    .checkbox-container input {
+      position: absolute;
+      opacity: 0;
+      cursor: pointer;
+      height: 100%;
+      width: 100%;
+      z-index: 2;
+    }
+
+    .custom-check {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 20px;
+      width: 20px;
+      background-color: var(--bg-card);
+      border: 2px solid var(--border-focus);
+      border-radius: 6px;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .checkbox-container:hover input ~ .custom-check {
+      border-color: var(--accent);
+    }
+
+    .checkbox-container input:checked ~ .custom-check {
+      background-color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .custom-check::after {
+      content: "✓";
+      color: #111110;
+      font-size: 13px;
+      font-weight: 900;
+      display: none;
+    }
+
+    .checkbox-container input:checked ~ .custom-check::after {
+      display: block;
+    }
+
+    /* Method Badges */
+    .method-badge {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .method-GET {
+      color: var(--method-get);
+      background: var(--method-get-bg);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+
+    .method-POST {
+      color: var(--method-post);
+      background: var(--method-post-bg);
+      border: 1px solid rgba(74, 222, 128, 0.3);
+    }
+
+    .method-PATCH {
+      color: var(--method-patch);
+      background: var(--method-patch-bg);
+      border: 1px solid rgba(251, 191, 36, 0.3);
+    }
+
+    .method-PUT {
+      color: #a78bfa;
+      background: rgba(167, 139, 250, 0.12);
+      border: 1px solid rgba(167, 139, 250, 0.3);
+    }
+
+    .method-DELETE {
+      color: var(--method-delete);
+      background: var(--method-delete-bg);
+      border: 1px solid rgba(248, 113, 113, 0.3);
+    }
+
+    .endpoint-path {
+      font-family: var(--font-mono);
+      font-size: 14.5px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    .controller-badge {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--ink-faint);
+      background: var(--bg);
+      padding: 2px 8px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+
+    .item-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .source-tag {
+      font-size: 12px;
+      color: var(--ink-muted);
+      background: var(--bg);
+      padding: 3px 10px;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--border);
+    }
+
+    .btn-detail {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--ink-muted);
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
+      font-size: 11.5px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .btn-detail:hover {
+      background: var(--bg-card);
+      color: var(--ink);
+      border-color: var(--border-focus);
+    }
+
+    /* Expanded Details Panel */
+    .details-panel {
+      display: none;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-top: 6px;
+      font-size: 13px;
+    }
+
+    .endpoint-item.expanded .details-panel {
+      display: block;
+    }
+
+    .details-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 768px) {
+      .details-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .sub-checklist {
+      list-style: none;
+      margin-top: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .sub-check-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12.5px;
+      color: var(--ink-muted);
+    }
+
+    .code-preview {
+      background: #000000;
+      border: 1px solid #1f2430;
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: #9cdcfe;
+      overflow-x: auto;
+      position: relative;
+    }
+
+    .copy-code-btn {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: #ffffff;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      cursor: pointer;
+    }
+
+    .copy-code-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 40px 0 20px;
+      border-top: 1px solid var(--border);
+      color: var(--ink-faint);
+      font-size: 13px;
+    }
+
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="ambient-glow"></div>
+
+  <div class="container">
+    <!-- Top Header -->
+    <header>
+      <a href="/dashboard" class="brand">
+        <div class="brand-mark"></div>
+        <div class="brand-text">
+          <h1>byreel</h1>
+          <span>API Implementation Tracker</span>
+        </div>
+      </a>
+
+      <div class="header-actions">
+        <button id="themeToggleBtn" class="btn" title="Toggle Light/Dark Theme">
+          <span id="themeIcon">☀️</span>
+          <span id="themeLabel">Light Mode</span>
+        </button>
+        <button id="resetAllBtn" class="btn" title="Reset all checkboxes">
+          ↺ Reset
+        </button>
+        <button id="exportReportBtn" class="btn btn-primary" title="Export Progress Report">
+          ⤓ Export Report
+        </button>
+      </div>
+    </header>
+
+    <!-- Hero Progress Overview Banner -->
+    <section class="hero-banner">
+      <div class="hero-title">
+        <h2>Backend Implementation Dashboard</h2>
+        <p>Interactive tracking checklist for all 40 REST endpoints, BullMQ workers, and Cloud APIs powering Byreel Motion Studio.</p>
+      </div>
+
+      <div class="progress-card">
+        <div class="progress-meta">
+          <span class="progress-number"><span id="completedCount">0</span> / 40</span>
+          <span class="progress-percent" id="completedPercent">0%</span>
+        </div>
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" id="progressBarFill"></div>
+        </div>
+        <div class="progress-subtext">
+          <span>Target: 100% Core Coverage</span>
+          <span id="remainingCount">40 remaining</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Filter & Search Controls Bar -->
+    <div class="controls-bar">
+      <div class="search-wrapper">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" class="search-input" placeholder="Filter by endpoint, controller, or method (e.g. /api/prompt, auth)...">
+      </div>
+
+      <div class="filter-tabs">
+        <button class="filter-tab active" data-filter="all">All (40)</button>
+        <button class="filter-tab" data-filter="p0">P0 Critical (16)</button>
+        <button class="filter-tab" data-filter="p1">P1 High (18)</button>
+        <button class="filter-tab" data-filter="p2">P2 Secondary (6)</button>
+        <button class="filter-tab" data-filter="pending">Pending</button>
+        <button class="filter-tab" data-filter="completed">Completed</button>
+      </div>
+    </div>
+
+    <!-- API Phase Lists Container -->
+    <main id="phasesContainer">
+      <!-- Phases rendered via JavaScript -->
+    </main>
+
+    <footer>
+      <p>Byreel Studio &copy; 2026. Designed for pairing with <a href="/BACKEND_APIS.md">BACKEND_APIS.md</a> and <a href="/BACKEND_API_TODO.md">BACKEND_API_TODO.md</a>.</p>
+    </footer>
+  </div>
+
+  <script>
+    // Complete API Endpoint Database
+    const PHASES_DATA = [
+      {
+        id: "phase1",
+        title: "Phase 1: Authentication & Session Management",
+        subtitle: "Required for login, register, OAuth 2.0 popup flows, and secure session cookies.",
+        priority: "p0",
+        priorityLabel: "P0 Critical",
+        endpoints: [
+          {
+            id: "auth-login",
+            method: "POST",
+            path: "/api/login",
+            controller: "AuthController.login",
+            source: "app/login/page.tsx",
+            priority: "p0",
+            desc: "Authenticate via email and password; generate JWT token and set SameSite=Lax session cookies.",
+            subtasks: [
+              "Validate email format and verify password with bcrypt",
+              "Generate signed JWT token containing userId and role",
+              "Set HttpOnly cookies 'token' and 'animagent_token'",
+              "Return user profile and plan quotas"
+            ],
+            sample: {
+              request: { email: "creator@byreel.io", password: "Password123!" },
+              response: { success: true, token: "eyJhbG...", user: { id: "usr_1", email: "creator@byreel.io" } }
+            }
+          },
+          {
+            id: "auth-register",
+            method: "POST",
+            path: "/api/register",
+            controller: "AuthController.register",
+            source: "app/register/page.tsx",
+            priority: "p0",
+            desc: "Register a new user account with initial plan tier (free, creator, pro, enterprise).",
+            subtasks: [
+              "Enforce password minimum length of 8 characters",
+              "Ensure email uniqueness in database",
+              "Initialize default usage counters (generations, renders, storage)",
+              "Issue JWT token and session cookies"
+            ],
+            sample: {
+              request: { name: "Pradum Singh", email: "creator@byreel.io", password: "Password123!", plan: "creator" },
+              response: { success: true, token: "eyJhbG...", user: { id: "usr_1" } }
+            }
+          },
+          {
+            id: "auth-google-auth",
+            method: "GET",
+            path: "/api/google/auth",
+            controller: "AuthController.googleAuth",
+            source: "GoogleAuthButton.tsx",
+            priority: "p0",
+            desc: "Initiates Google OAuth 2.0 consent screen, preserving origin, mode, and plan parameters.",
+            subtasks: [
+              "Construct Google OAuth 2.0 URL with client_id and scopes",
+              "Encode state with origin, mode, and plan",
+              "Redirect user to accounts.google.com"
+            ]
+          },
+          {
+            id: "auth-google-url",
+            method: "GET",
+            path: "/api/google/url",
+            controller: "AuthController.getGoogleUrl",
+            source: "api.ts:258",
+            priority: "p0",
+            desc: "Returns prepared Google OAuth consent URL as JSON payload for clients.",
+            subtasks: [
+              "Return { success: true, url: string }"
+            ]
+          },
+          {
+            id: "auth-google-callback",
+            method: "GET",
+            path: "/api/google/callback",
+            controller: "AuthController.googleCallback",
+            source: "Server Callback",
+            priority: "p0",
+            desc: "Handles authorization code exchange and returns postMessage to popup window.",
+            subtasks: [
+              "Exchange authorization code for Google access token",
+              "Find or create user record by googleId or email",
+              "If popup mode: render HTML with postMessage(GOOGLE_AUTH_SUCCESS)",
+              "If redirect mode: redirect to /dashboard"
+            ]
+          },
+          {
+            id: "auth-google-login",
+            method: "POST",
+            path: "/api/google",
+            controller: "AuthController.googleLogin",
+            source: "api.ts:292",
+            priority: "p0",
+            desc: "Direct Google ID token exchange for backend session JWT.",
+            subtasks: [
+              "Verify Google ID token via Google Auth Client Library",
+              "Find or create user record and issue JWT"
+            ]
+          },
+          {
+            id: "auth-google-register",
+            method: "POST",
+            path: "/api/google/register",
+            controller: "AuthController.googleRegister",
+            source: "api.ts:298",
+            priority: "p0",
+            desc: "Create new user account using verified Google credential.",
+            subtasks: [
+              "Extract Google profile and initialize requested subscription plan"
+            ]
+          },
+          {
+            id: "auth-logout",
+            method: "POST",
+            path: "/api/logout",
+            controller: "AuthController.logout",
+            source: "AuthContext.tsx:390",
+            priority: "p0",
+            desc: "Invalidates server session and clears client authentication cookies.",
+            subtasks: [
+              "Invalidate session or add token to Redis blocklist",
+              "Set cookies token and animagent_token to maxAge: 0",
+              "Return { success: true, message: 'Logged out successfully' }"
+            ]
+          }
+        ]
+      },
+      {
+        id: "phase2",
+        title: "Phase 2: Video Generation Engine & Job Queue",
+        subtitle: "The generative motion core. Connects prompts to BullMQ AGENTQUEUE and GPU workers.",
+        priority: "p0",
+        priorityLabel: "P0 Critical",
+        endpoints: [
+          {
+            id: "prompt-queue",
+            method: "POST",
+            path: "/api/prompt",
+            controller: "PromptController.queuePrompt",
+            source: "useChats.ts:164",
+            priority: "p0",
+            desc: "Check user quotas, push generation job to BullMQ, and initialize job record.",
+            subtasks: [
+              "Verify user quota (usage.generations.monthly < limit)",
+              "Ensure idempotency: return existing job if promptId is duplicate",
+              "Enqueue job payload into BullMQ AGENTQUEUE",
+              "Return { success: true, job: { id, promptId, status: 'queued' } }"
+            ],
+            sample: {
+              request: { prompt: "Kinetic sneaker turntable with neon lime rim lighting", promptId: "p-94812", template: "Product Launch" },
+              response: { success: true, job: { id: "job-1", promptId: "p-94812", status: "queued" } }
+            }
+          },
+          {
+            id: "prompt-status",
+            method: "GET",
+            path: "/api/prompt/:promptId",
+            controller: "PromptController.getStatus",
+            source: "useChats.ts:64",
+            priority: "p0",
+            desc: "Polled every 3 seconds to retrieve live render stage and finished video URLs.",
+            subtasks: [
+              "Fetch job status from database/Redis",
+              "When finished, populate play: [cdnVideoUrl]",
+              "When failed, populate error: errorMessage"
+            ],
+            sample: {
+              response: { success: true, job: { id: "job-1", promptId: "p-94812", status: "done", play: ["https://cdn.byreel.io/renders/video.mp4"], error: null } }
+            }
+          },
+          {
+            id: "exports-create",
+            method: "POST",
+            path: "/api/exports",
+            controller: "ExportController.createExport",
+            source: "ExportsSection.tsx",
+            priority: "p0",
+            desc: "Trigger high-resolution 4K ProRes or MP4 master render on GPU cluster.",
+            subtasks: [
+              "Verify resolution permissions (4K requires Pro/Enterprise plan)",
+              "Deduct render credit from monthly quota",
+              "Queue export job with specified FPS and codec"
+            ]
+          }
+        ]
+      },
+      {
+        id: "phase3",
+        title: "Phase 3: Subscriptions, Billing & Developer Keys",
+        subtitle: "Monetization, tier upgrades, quota resets, and scoped developer secret keys.",
+        priority: "p0",
+        priorityLabel: "P0 Critical",
+        endpoints: [
+          {
+            id: "user-plan",
+            method: "POST",
+            path: "/api/user/plan",
+            controller: "BillingController.updatePlan",
+            source: "BillingSection.tsx:73",
+            priority: "p0",
+            desc: "Upgrade or downgrade user subscription plan and recalculate quotas.",
+            subtasks: [
+              "Update user plan tier and billing interval",
+              "Adjust monthly generation, render, and storage limits",
+              "Return updated BackendUser payload"
+            ]
+          },
+          {
+            id: "billing-checkout",
+            method: "POST",
+            path: "/api/billing/create-checkout-session",
+            controller: "BillingController.createCheckout",
+            source: "BillingPage.tsx",
+            priority: "p0",
+            desc: "Creates Stripe checkout session for paid tiers (Creator / Studio Pro).",
+            subtasks: [
+              "Ensure Stripe customer exists for user email",
+              "Create Stripe Checkout Session with line items",
+              "Listen to Stripe webhook for invoice.payment_succeeded"
+            ]
+          },
+          {
+            id: "keys-list",
+            method: "GET",
+            path: "/api/keys",
+            controller: "ApiKeyController.listKeys",
+            source: "app/api-keys/page.tsx",
+            priority: "p0",
+            desc: "List active developer API keys with masked prefixes.",
+            subtasks: [
+              "Return API keys for user (display prefix only, redact secret)"
+            ]
+          },
+          {
+            id: "keys-create",
+            method: "POST",
+            path: "/api/keys",
+            controller: "ApiKeyController.createKey",
+            source: "app/api-keys/page.tsx",
+            priority: "p0",
+            desc: "Generate new developer secret key (returns unmasked key once).",
+            subtasks: [
+              "Generate random secret key prefixed with byreel_live_sk_",
+              "Hash secret with SHA-256 for database storage",
+              "Return secretKey to client exactly once"
+            ]
+          },
+          {
+            id: "keys-revoke",
+            method: "DELETE",
+            path: "/api/keys/:keyId",
+            controller: "ApiKeyController.revokeKey",
+            source: "api.ts:344",
+            priority: "p0",
+            desc: "Revoke and deactivate developer API key.",
+            subtasks: [
+              "Set status to 'revoked' and block future requests"
+            ]
+          }
+        ]
+      },
+      {
+        id: "phase4",
+        title: "Phase 4: Cloud Media Storage & Asset Management",
+        subtitle: "Enables creators to upload footage, audio soundtracks, custom fonts, and 3D models.",
+        priority: "p0",
+        priorityLabel: "P0 / P1",
+        endpoints: [
+          {
+            id: "assets-upload",
+            method: "POST",
+            path: "/api/assets/upload",
+            controller: "AssetController.uploadAsset",
+            source: "assets.ts:66",
+            priority: "p0",
+            desc: "Multipart form upload or pre-signed S3/GCS PUT URL for media files.",
+            subtasks: [
+              "Validate MIME type (image, video, audio, font, model)",
+              "Check storage quota: usedBytes + size <= limitBytes",
+              "Upload to cloud bucket and save metadata record"
+            ]
+          },
+          {
+            id: "assets-list",
+            method: "GET",
+            path: "/api/assets",
+            controller: "AssetController.listAssets",
+            source: "AssetsSection.tsx",
+            priority: "p1",
+            desc: "List all media assets uploaded by the user with CDN source URLs.",
+            subtasks: [
+              "Return array of assets sorted by createdAt DESC"
+            ]
+          },
+          {
+            id: "assets-delete",
+            method: "DELETE",
+            path: "/api/assets/:id",
+            controller: "AssetController.deleteAsset",
+            source: "AssetsSection.tsx:70",
+            priority: "p1",
+            desc: "Deletes an asset from cloud storage and decrements storage counter.",
+            subtasks: [
+              "Remove file from cloud bucket and delete DB record"
+            ]
+          }
+        ]
+      },
+      {
+        id: "phase5",
+        title: "Phase 5: User Settings, Conversations & Project History",
+        subtitle: "Profile editing, chat conversation sync across devices, and invoice receipts.",
+        priority: "p1",
+        priorityLabel: "P1 High",
+        endpoints: [
+          {
+            id: "user-me",
+            method: "GET",
+            path: "/api/user/me",
+            controller: "UserController.getMe",
+            source: "AuthContext.tsx:87",
+            priority: "p0",
+            desc: "Returns validated user profile, permissions, and live quota metrics.",
+            subtasks: [
+              "Return BackendUser object with active plan and usage limits"
+            ]
+          },
+          {
+            id: "user-profile",
+            method: "PATCH",
+            path: "/api/user/profile",
+            controller: "UserController.updateProfile",
+            source: "AccountSection.tsx:26",
+            priority: "p1",
+            desc: "Update personal display name, role/title, company, and avatar URL.",
+            subtasks: [
+              "Validate fields and update profile object in database"
+            ]
+          },
+          {
+            id: "user-preferences",
+            method: "PATCH",
+            path: "/api/user/preferences",
+            controller: "UserController.updatePreferences",
+            source: "AccountSection.tsx:128",
+            priority: "p1",
+            desc: "Update studio preferences (render completion alerts, WebGPU acceleration).",
+            subtasks: [
+              "Save hardware and notification toggles"
+            ]
+          },
+          {
+            id: "conv-list",
+            method: "GET",
+            path: "/api/conversations",
+            controller: "ConversationController.list",
+            source: "useChats.ts:31",
+            priority: "p1",
+            desc: "Fetch conversation history for authenticated user across devices.",
+            subtasks: [
+              "Query conversations with nested messages and render previews"
+            ]
+          },
+          {
+            id: "conv-create",
+            method: "POST",
+            path: "/api/conversations",
+            controller: "ConversationController.create",
+            source: "useChats.ts:139",
+            priority: "p1",
+            desc: "Create a new short conversation with initial prompt title.",
+            subtasks: [
+              "Insert conversation record and initialize message array"
+            ]
+          },
+          {
+            id: "conv-rename",
+            method: "PATCH",
+            path: "/api/conversations/:id",
+            controller: "ConversationController.rename",
+            source: "useChats.ts:127",
+            priority: "p1",
+            desc: "Rename conversation title.",
+            subtasks: [
+              "Update title field for specified conversation ID"
+            ]
+          },
+          {
+            id: "conv-delete",
+            method: "DELETE",
+            path: "/api/conversations/:id",
+            controller: "ConversationController.delete",
+            source: "useChats.ts:117",
+            priority: "p1",
+            desc: "Delete conversation thread.",
+            subtasks: [
+              "Remove conversation record and cancel any running polling"
+            ]
+          },
+          {
+            id: "projects-list",
+            method: "GET",
+            path: "/api/projects",
+            controller: "ProjectController.list",
+            source: "ProjectsSection.tsx",
+            priority: "p1",
+            desc: "List user projects with thumbnails, duration, and edit timestamps.",
+            subtasks: [
+              "Return projects list for Overview and Projects sections"
+            ]
+          },
+          {
+            id: "projects-delete",
+            method: "DELETE",
+            path: "/api/projects/:id",
+            controller: "ProjectController.delete",
+            source: "ProjectsSection.tsx:82",
+            priority: "p1",
+            desc: "Remove project record.",
+            subtasks: [
+              "Delete project from user account"
+            ]
+          },
+          {
+            id: "exports-list",
+            method: "GET",
+            path: "/api/exports",
+            controller: "ExportController.listExports",
+            source: "ExportsSection.tsx:31",
+            priority: "p1",
+            desc: "List completed exports with CDN download links and byte sizes.",
+            subtasks: [
+              "Return export items history"
+            ]
+          },
+          {
+            id: "billing-invoices",
+            method: "GET",
+            path: "/api/billing/invoices",
+            controller: "BillingController.listInvoices",
+            source: "BillingSection.tsx:8",
+            priority: "p1",
+            desc: "List past billing receipts and PDF download URLs.",
+            subtasks: [
+              "Query user invoices and return paid receipt links"
+            ]
+          }
+        ]
+      },
+      {
+        id: "phase6",
+        title: "Phase 6: Studio Creative Systems & URL Scraper",
+        subtitle: "Powers the Product Launch URL scanner and Global Brand Kit design system.",
+        priority: "p1",
+        priorityLabel: "P1 High",
+        endpoints: [
+          {
+            id: "launch-scan",
+            method: "POST",
+            path: "/api/launch/scan-url",
+            controller: "ProductLaunchController.scanUrl",
+            source: "ProductLaunchSection.tsx:275",
+            priority: "p1",
+            desc: "Scrape landing page URL, extract brand colors and generate a 4-beat storyboard.",
+            subtasks: [
+              "Scrape page HTML and extract title, description, and logo",
+              "Extract dominant brand and accent colors",
+              "Synthesize 4-beat motion storyboard with timecodes"
+            ],
+            sample: {
+              request: { url: "https://linear.app", category: "devtools" },
+              response: { success: true, product: { brandName: "Linear", tagline: "The issue tracker for high velocity teams" } }
+            }
+          },
+          {
+            id: "launch-generate",
+            method: "POST",
+            path: "/api/launch/generate",
+            controller: "ProductLaunchController.generate",
+            source: "SaasLaunchVideoPlayer.tsx",
+            priority: "p1",
+            desc: "Synthesize 30-second kinetic SaaS product launch composition.",
+            subtasks: [
+              "Compile storyboard beats into Remotion video composition"
+            ]
+          },
+          {
+            id: "brandkit-get",
+            method: "GET",
+            path: "/api/brand-kit",
+            controller: "BrandKitController.getKit",
+            source: "BrandKitSection.tsx",
+            priority: "p1",
+            desc: "Fetch user's saved brand colors, typography, tone, and logo.",
+            subtasks: [
+              "Return BrandKit record for authenticated user"
+            ]
+          },
+          {
+            id: "brandkit-save",
+            method: "PUT",
+            path: "/api/brand-kit",
+            controller: "BrandKitController.saveKit",
+            source: "brandKit.ts:66",
+            priority: "p1",
+            desc: "Save updated brand colors, typography fonts, and tone of voice.",
+            subtasks: [
+              "Upsert brand kit record in database"
+            ]
+          },
+          {
+            id: "brandkit-logo",
+            method: "POST",
+            path: "/api/brand-kit/logo",
+            controller: "BrandKitController.uploadLogo",
+            source: "BrandKitSection.tsx:38",
+            priority: "p1",
+            desc: "Upload and optimize brand logo SVG/PNG.",
+            subtasks: [
+              "Upload logo to cloud bucket and update BrandKit logoUrl"
+            ]
+          }
+        ]
+      },
+      {
+        id: "phase7",
+        title: "Phase 7: Catalogs, Motion Glyphs & Webhooks",
+        subtitle: "Template catalog, loopable B-Roll library, vector character synthesis, and webhooks.",
+        priority: "p2",
+        priorityLabel: "P2 Secondary",
+        endpoints: [
+          {
+            id: "templates-list",
+            method: "GET",
+            path: "/api/templates",
+            controller: "TemplateController.list",
+            source: "app/templates/page.tsx",
+            priority: "p2",
+            desc: "Return catalog of motion graphic starter templates with categories.",
+            subtasks: [
+              "Return template items with prompt presets and aspect ratios"
+            ]
+          },
+          {
+            id: "brolls-list",
+            method: "GET",
+            path: "/api/brolls",
+            controller: "BRollController.list",
+            source: "BRollsSection.tsx:33",
+            priority: "p2",
+            desc: "Return curated library of 4K seamless B-Roll loops with tag filters.",
+            subtasks: [
+              "Return B-Roll items with camera metadata and thumbnails"
+            ]
+          },
+          {
+            id: "webhooks-test",
+            method: "POST",
+            path: "/api/webhooks/test",
+            controller: "WebhookController.testWebhook",
+            source: "IntegrationsSection.tsx:49",
+            priority: "p2",
+            desc: "Dispatch test POST payload to registered user webhook endpoint.",
+            subtasks: [
+              "Dispatch HTTP POST to destination and record response status"
+            ]
+          },
+          {
+            id: "motion-char",
+            method: "POST",
+            path: "/api/motion/char-conversion",
+            controller: "MotionController.charConversion",
+            source: "api.ts:357",
+            priority: "p2",
+            desc: "Convert text string into procedural vector glyph paths and keyframes.",
+            subtasks: [
+              "Parse font curves into SVG path data and physics keyframes"
+            ]
+          },
+          {
+            id: "motion-glyphs",
+            method: "GET",
+            path: "/api/motion/glyphs",
+            controller: "MotionController.getGlyphs",
+            source: "api.ts:369",
+            priority: "p2",
+            desc: "Return vector glyph bezier points for text query.",
+            subtasks: [
+              "Extract glyph vectors for canvas renderer"
+            ]
+          }
+        ]
+      }
+    ];
+
+    // Local Storage State Key
+    const STORAGE_KEY = "byreel_api_todo_state_v1";
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? JSON.parse(raw) : {};
+      } catch {
+        return {};
+      }
+    }
+
+    function saveState(state) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch {}
+    }
+
+    let appState = loadState();
+    let currentFilter = "all";
+    let searchQuery = "";
+
+    // DOM Elements
+    const phasesContainer = document.getElementById("phasesContainer");
+    const completedCountEl = document.getElementById("completedCount");
+    const completedPercentEl = document.getElementById("completedPercent");
+    const remainingCountEl = document.getElementById("remainingCount");
+    const progressBarFill = document.getElementById("progressBarFill");
+    const searchInput = document.getElementById("searchInput");
+    const filterTabs = document.querySelectorAll(".filter-tab");
+    const resetAllBtn = document.getElementById("resetAllBtn");
+    const exportReportBtn = document.getElementById("exportReportBtn");
+    const themeToggleBtn = document.getElementById("themeToggleBtn");
+    const themeIcon = document.getElementById("themeIcon");
+    const themeLabel = document.getElementById("themeLabel");
+
+    // Theme Management
+    let currentTheme = localStorage.getItem("byreel_theme") || "dark";
+    document.documentElement.setAttribute("data-theme", currentTheme);
+    updateThemeUI();
+
+    themeToggleBtn.addEventListener("click", () => {
+      currentTheme = currentTheme === "dark" ? "light" : "dark";
+      document.documentElement.setAttribute("data-theme", currentTheme);
+      localStorage.setItem("byreel_theme", currentTheme);
+      updateThemeUI();
+    });
+
+    function updateThemeUI() {
+      if (currentTheme === "dark") {
+        themeIcon.textContent = "☀️";
+        themeLabel.textContent = "Light Mode";
+      } else {
+        themeIcon.textContent = "🌙";
+        themeLabel.textContent = "Dark Mode";
+      }
+    }
+
+    // Render Function
+    function renderPhases() {
+      phasesContainer.innerHTML = "";
+      let totalCount = 0;
+      let completedCount = 0;
+
+      PHASES_DATA.forEach((phase) => {
+        // Filter endpoints
+        const filteredEndpoints = phase.endpoints.filter((item) => {
+          const isCompleted = Boolean(appState[item.id]);
+
+          // Filter by priority / status tab
+          if (currentFilter === "p0" && item.priority !== "p0") return false;
+          if (currentFilter === "p1" && item.priority !== "p1") return false;
+          if (currentFilter === "p2" && item.priority !== "p2") return false;
+          if (currentFilter === "pending" && isCompleted) return false;
+          if (currentFilter === "completed" && !isCompleted) return false;
+
+          // Search query matching
+          if (searchQuery.trim()) {
+            const q = searchQuery.toLowerCase();
+            const textMatch =
+              item.path.toLowerCase().includes(q) ||
+              item.method.toLowerCase().includes(q) ||
+              item.controller.toLowerCase().includes(q) ||
+              item.desc.toLowerCase().includes(q);
+            if (!textMatch) return false;
+          }
+
+          return true;
+        });
+
+        // Compute phase completion
+        const phaseCompleted = phase.endpoints.filter(e => appState[e.id]).length;
+        totalCount += phase.endpoints.length;
+        completedCount += phaseCompleted;
+
+        if (filteredEndpoints.length === 0 && (searchQuery.trim() || currentFilter !== "all")) {
+          return; // Skip phase if no matching endpoints in filter mode
+        }
+
+        const phaseCard = document.createElement("div");
+        phaseCard.className = "phase-card";
+        phaseCard.id = `card-${phase.id}`;
+
+        phaseCard.innerHTML = `
+          <div class="phase-header" onclick="togglePhase('${phase.id}')">
+            <div class="phase-info">
+              <span class="phase-badge badge-${phase.priority}">${phase.priorityLabel}</span>
+              <div class="phase-title">
+                <h3>${phase.title}</h3>
+                <p>${phase.subtitle}</p>
+              </div>
+            </div>
+            <div class="phase-stats">
+              <span class="phase-count">${phaseCompleted}/${phase.endpoints.length} Done</span>
+              <span class="toggle-icon">▾</span>
+            </div>
+          </div>
+          <div class="items-list" id="items-${phase.id}">
+            ${filteredEndpoints.map(renderEndpointRow).join("")}
+          </div>
+        `;
+
+        phasesContainer.appendChild(phaseCard);
+      });
+
+      // Update Global Progress Stats
+      completedCountEl.textContent = completedCount;
+      const percent = Math.round((completedCount / totalCount) * 100) || 0;
+      completedPercentEl.textContent = `${percent}%`;
+      progressBarFill.style.width = `${percent}%`;
+      remainingCountEl.textContent = `${totalCount - completedCount} remaining`;
+    }
+
+    function renderEndpointRow(item) {
+      const isChecked = Boolean(appState[item.id]);
+
+      return `
+        <div class="endpoint-item ${isChecked ? 'completed' : ''}" id="item-row-${item.id}">
+          <div class="item-main-row">
+            <div class="item-left">
+              <label class="checkbox-container">
+                <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleItem('${item.id}', this.checked)">
+                <span class="custom-check"></span>
+              </label>
+              <span class="method-badge method-${item.method}">${item.method}</span>
+              <span class="endpoint-path">${item.path}</span>
+              <span class="controller-badge">${item.controller}</span>
+            </div>
+            <div class="item-right">
+              <span class="source-tag">${item.source}</span>
+              <button type="button" class="btn-detail" onclick="toggleDetails('${item.id}')">
+                Details ▾
+              </button>
+            </div>
+          </div>
+
+          <div class="details-panel" id="details-${item.id}">
+            <div class="details-grid">
+              <div>
+                <p style="font-weight: 600; margin-bottom: 6px;">Implementation Requirements:</p>
+                <p style="color: var(--ink-muted); margin-bottom: 8px;">${item.desc}</p>
+                ${
+                  item.subtasks && item.subtasks.length > 0
+                    ? `<ul class="sub-checklist">
+                        ${item.subtasks.map(t => `<li class="sub-check-item"><span>▹</span> <span>${t}</span></li>`).join("")}
+                      </ul>`
+                    : ''
+                }
+              </div>
+
+              <div>
+                ${
+                  item.sample
+                    ? `<p style="font-weight: 600; margin-bottom: 6px;">Payload Contract:</p>
+                       <div class="code-preview">
+                         <button class="copy-code-btn" onclick="copyJson('${item.id}')">Copy</button>
+                         <pre id="json-${item.id}">${escapeHtml(JSON.stringify(item.sample, null, 2))}</pre>
+                       </div>`
+                    : `<p style="color: var(--ink-faint); font-style: italic;">Standard bearer token authentication. Refer to BACKEND_APIS.md for full specs.</p>`
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    // Toggle Phase Collapse
+    window.togglePhase = function(phaseId) {
+      const card = document.getElementById(`card-${phaseId}`);
+      if (card) {
+        card.classList.toggle("collapsed");
+      }
+    };
+
+    // Toggle Endpoint Checkbox
+    window.toggleItem = function(itemId, checked) {
+      appState[itemId] = checked;
+      saveState(appState);
+      const row = document.getElementById(`item-row-${itemId}`);
+      if (row) {
+        if (checked) {
+          row.classList.add("completed");
+        } else {
+          row.classList.remove("completed");
+        }
+      }
+      renderPhases();
+    };
+
+    // Toggle Endpoint Details Drawer
+    window.toggleDetails = function(itemId) {
+      const row = document.getElementById(`item-row-${itemId}`);
+      if (row) {
+        row.classList.toggle("expanded");
+      }
+    };
+
+    // Copy Sample JSON
+    window.copyJson = function(itemId) {
+      const pre = document.getElementById(`json-${itemId}`);
+      if (pre) {
+        navigator.clipboard.writeText(pre.innerText);
+        alert("JSON contract copied to clipboard!");
+      }
+    };
+
+    // Search and Filtering Listeners
+    searchInput.addEventListener("input", (e) => {
+      searchQuery = e.target.value;
+      renderPhases();
+    });
+
+    filterTabs.forEach((tab) => {
+      tab.addEventListener("click", () => {
+        filterTabs.forEach((t) => t.classList.remove("active"));
+        tab.classList.add("active");
+        currentFilter = tab.dataset.filter;
+        renderPhases();
+      });
+    });
+
+    // Reset Checklist
+    resetAllBtn.addEventListener("click", () => {
+      if (confirm("Reset all 40 checked items? This cannot be undone.")) {
+        appState = {};
+        saveState(appState);
+        renderPhases();
+      }
+    });
+
+    // Export Report
+    exportReportBtn.addEventListener("click", () => {
+      const total = 40;
+      const completed = Object.values(appState).filter(Boolean).length;
+      const percent = Math.round((completed / total) * 100);
+
+      let markdown = `# Byreel Studio — Backend Implementation Report\n\n`;
+      markdown += `Generated on: ${new Date().toLocaleString()}\n`;
+      markdown += `Progress: ${completed} / ${total} endpoints completed (${percent}%)\n\n`;
+
+      PHASES_DATA.forEach((phase) => {
+        markdown += `## ${phase.title}\n`;
+        phase.endpoints.forEach((ep) => {
+          const check = appState[ep.id] ? "[x]" : "[ ]";
+          markdown += `- ${check} **${ep.method} ${ep.path}** (${ep.controller})\n`;
+        });
+        markdown += `\n`;
+      });
+
+      const blob = new Blob([markdown], { type: "text/markdown" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `byreel-api-progress-${new Date().toISOString().slice(0, 10)}.md`;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    // Initial render
+    renderPhases();
+  </script>
+</body>
+</html>

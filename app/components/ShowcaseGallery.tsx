@@ -91,7 +91,7 @@ function ScaledPreview({ src, title }: { src: string; title: string }) {
   }, []);
 
   return (
-    <div ref={boxRef} className="relative aspect-video w-full overflow-hidden bg-[#0b0b0e]">
+    <div ref={boxRef} className="relative aspect-video w-full overflow-hidden bg-surf-0b0b0e">
       {visible && scale > 0 && (
         <iframe
           src={src}

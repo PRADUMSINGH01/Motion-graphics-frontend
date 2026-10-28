@@ -3,23 +3,32 @@
 import React, { memo } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import Logo from "./Logo";
+import { ByreelLogo } from "./landing/ByreelBrand";
 import ThemeToggle from "./ThemeToggle";
 import { IconGithub, IconTwitter, IconYoutube, IconLinkedin } from "./Icons";
 
-// The landing page ("/") ships its own footer.
-const EXCLUDED_ROUTES = ["/", "/login", "/register", "/workspace", "/dashboard"];
+// The landing page ("/") and studio dashboard ship their own chrome.
+const EXCLUDED_ROUTES = [
+  "/",
+  "/templates",
+  "/pricing",
+  "/login",
+  "/register",
+  "/loading",
+  "/dashboard",
+  "/workspace",
+];
 
 type FooterLink = { label: string; href: string; external?: boolean };
 
 const COLUMNS: { title: string; links: FooterLink[] }[] = [
   {
-    title: "Product",
+    title: "Studio & Products",
     links: [
-      { label: "Overview", href: "/product" },
-      { label: "Motion Studio", href: "/workspace" },
-      { label: "Templates", href: "/explore" },
-      { label: "Pricing", href: "/pricing" },
+      { label: "Product Launch Studio", href: "/dashboard?section=product-launch" },
+      { label: "Motion Studio", href: "/dashboard" },
+      { label: "Templates Library", href: "/templates" },
+      { label: "Pricing & Plans", href: "/pricing" },
       { label: "FAQ", href: "/pricing#pricing" },
     ],
   },
@@ -35,8 +44,8 @@ const COLUMNS: { title: string; links: FooterLink[] }[] = [
     title: "Company",
     links: [
       { label: "About", href: "/about" },
-      { label: "Contact", href: "mailto:support@byreel.ai", external: true },
-      { label: "Press kit", href: "/about" },
+      { label: "Contact Support", href: "mailto:support@byreel.ai", external: true },
+      { label: "Media Kit", href: "/about" },
     ],
   },
   {
@@ -68,18 +77,18 @@ export const Footer = memo(function Footer() {
   }
 
   return (
-    <footer className="w-full border-t border-line bg-canvas-subtle">
-      <div className="container-page pt-16 pb-10">
+    <footer className="w-full border-t border-surf-dedad0 bg-surf-faf9f5 text-ink-111110">
+      <div className="mx-auto max-w-7xl px-6 lg:px-8 pt-16 pb-12">
         <div className="grid grid-cols-2 md:grid-cols-6 gap-10">
           {/* Brand */}
           <div className="col-span-2 space-y-4">
             <Link href="/" aria-label="byreel home" className="inline-flex">
-              <Logo size={28} />
+              <ByreelLogo size={28} theme="light" />
             </Link>
-            <p className="text-sm text-fg-muted leading-relaxed max-w-xs">
-              The AI agent that turns plain-language prompts into broadcast-grade motion graphics.
+            <p className="text-[13.5px] text-ink-717069 leading-relaxed max-w-xs">
+              The autonomous AI agent that turns plain-language prompts into broadcast-grade 60 FPS motion graphics.
             </p>
-            <div className="flex items-center gap-1 -ml-2">
+            <div className="flex items-center gap-2 pt-1">
               {SOCIAL.map(({ label, href, icon: Icon }) => (
                 <a
                   key={label}
@@ -87,7 +96,7 @@ export const Footer = memo(function Footer() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={label}
-                  className="w-8 h-8 inline-flex items-center justify-center rounded-md text-fg-subtle hover:text-fg hover:bg-fg/5 transition-colors"
+                  className="w-8 h-8 inline-flex items-center justify-center rounded-xl border border-surf-dedad0 bg-surf-ffffff text-ink-55544e hover:border-surf-111110 hover:text-ink-111110 transition-colors"
                 >
                   <Icon className="w-4 h-4" />
                 </a>
@@ -97,16 +106,24 @@ export const Footer = memo(function Footer() {
 
           {COLUMNS.map((col) => (
             <div key={col.title}>
-              <h4 className="text-[13px] font-medium text-fg mb-4">{col.title}</h4>
-              <ul className="space-y-2.5">
+              <h4 className="text-[13px] font-bold uppercase tracking-wider text-ink-111110 mb-4">
+                {col.title}
+              </h4>
+              <ul className="space-y-2.5 list-none p-0 m-0">
                 {col.links.map((link) => (
                   <li key={link.label}>
                     {link.external ? (
-                      <a href={link.href} className="text-[13.5px] text-fg-muted hover:text-fg transition-colors">
+                      <a
+                        href={link.href}
+                        className="text-[13.5px] text-ink-717069 hover:text-ink-111110 transition-colors"
+                      >
                         {link.label}
                       </a>
                     ) : (
-                      <Link href={link.href} className="text-[13.5px] text-fg-muted hover:text-fg transition-colors">
+                      <Link
+                        href={link.href}
+                        className="text-[13.5px] text-ink-717069 hover:text-ink-111110 transition-colors"
+                      >
                         {link.label}
                       </Link>
                     )}
@@ -117,14 +134,13 @@ export const Footer = memo(function Footer() {
           ))}
         </div>
 
-        <div className="mt-14 pt-6 border-t border-line flex flex-col-reverse sm:flex-row items-center justify-between gap-4 text-[13px] text-fg-subtle">
-          <span>© {new Date().getFullYear()} byreel Inc. All rights reserved.</span>
+        <div className="mt-14 pt-6 border-t border-surf-dedad0 flex flex-col-reverse sm:flex-row items-center justify-between gap-4 text-[12.5px] text-ink-8c8980">
+          <span>© {new Date().getFullYear()} Byreel Inc. All rights reserved.</span>
           <div className="flex items-center gap-4">
-            <span className="inline-flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-success" />
-              All systems operational
+            <span className="inline-flex items-center gap-2 font-mono text-[11.5px] text-ink-658b02">
+              <span className="w-2 h-2 rounded-full bg-surf-c5ef26 animate-pulse" />
+              All systems 60 FPS operational
             </span>
-            <ThemeToggle variant="studio" showLabel />
           </div>
         </div>
       </div>

@@ -5,26 +5,14 @@
 
 import type { MotionBillingQuote } from "./motionBilling";
 
-export const HOSTED_API_URL = "https://motion-backend--background-ab0ec.us-east4.hosted.app";
 export const LOCAL_API_URL = "http://localhost:8080";
 
+/**
+ * The backend (video-harness: auth via Supabase, billing, video generation).
+ * Set NEXT_PUBLIC_API_URL to its public URL when deployed; in development it defaults to localhost:8080.
+ */
 export function getApiBaseUrl(): string {
-  if (typeof window !== "undefined") {
-    const isLocal =
-      window.location.hostname === "localhost" ||
-      window.location.hostname === "127.0.0.1" ||
-      window.location.hostname === "0.0.0.0";
-    if (isLocal) {
-      if (
-        process.env.NEXT_PUBLIC_API_URL &&
-        (process.env.NEXT_PUBLIC_API_URL.includes("localhost") || process.env.NEXT_PUBLIC_API_URL.includes("127.0.0.1"))
-      ) {
-        return process.env.NEXT_PUBLIC_API_URL;
-      }
-      return LOCAL_API_URL;
-    }
-  }
-  return process.env.NEXT_PUBLIC_API_URL || HOSTED_API_URL;
+  return process.env.NEXT_PUBLIC_API_URL || LOCAL_API_URL;
 }
 
 export const API_BASE_URL = getApiBaseUrl();
@@ -93,37 +81,16 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
   let res: Response;
   try {
     res = await executeFetch(primaryUrl);
-  } catch (err: any) {
-    // If primary failed with network error and in browser, attempt fallback URL
-    const isLocal = primaryBase.includes("localhost") || primaryBase.includes("127.0.0.1");
-    const fallbackBase = isLocal ? HOSTED_API_URL : LOCAL_API_URL;
-    const fallbackUrl = `${fallbackBase}/${cleanEndpoint}`;
-
-    try {
-      res = await executeFetch(fallbackUrl);
-    } catch {
-      // If hosted/local backends fail, try local Next.js route if in browser
-      if (typeof window !== "undefined") {
-        const nextUrl = `${window.location.origin}/${cleanEndpoint}`;
-        try {
-          res = await executeFetch(nextUrl);
-        } catch {
-          throw new ApiError(
-            `Unable to reach backend server. Please check your connection or start the backend at ${LOCAL_API_URL}.`,
-            0
-          );
-        }
-      } else {
-        throw new ApiError(
-          `Unable to reach backend server. Please check your connection or start the backend at ${LOCAL_API_URL}.`,
-          0
-        );
-      }
-    }
+  } catch {
+    // One backend only: never retry another server with the user's token.
+    throw new ApiError(`Unable to reach the backend at ${primaryBase}. Please check your connection and try again.`, 0);
   }
 
-  // If response returned 404 (or server error on prompt) and in browser, attempt Next.js route fallback
-  if (!res.ok && (res.status === 404 || cleanEndpoint.startsWith("api/prompt")) && typeof window !== "undefined") {
+  // If response returned 404 and in browser, attempt Next.js route fallback. Not for routes the backend
+  // owns (auth, account, billing, video prompts): its answer is final, and a local stand-in route would
+  // fake success without the user's session.
+  const backendOwned = /^api\/(login|register|logout|user|google|billing|prompt|videos)(\/|$|\?)/.test(cleanEndpoint);
+  if (!res.ok && res.status === 404 && typeof window !== "undefined" && !backendOwned) {
     const nextUrl = `${window.location.origin}/${cleanEndpoint}`;
     if (primaryUrl !== nextUrl) {
       try {
@@ -212,6 +179,37 @@ export interface ApiKeyItem {
   expiresAt: string | null;
 }
 
+export type PromptStatus = "queued" | "running" | "done" | "failed";
+
+export interface PromptJob {
+  id: string;
+  promptId: string;
+  status: PromptStatus;
+  harnessJobId: string | null;
+  /** Pipeline step: queued, preparing, designing, planning, audio, building, assembling, checking, reviewing, rendering, done. */
+  stage?: string;
+  /** One line on what the pipeline is doing now. */
+  activity?: string | null;
+  /** The look this video uses (a design preset name), once chosen. */
+  theme?: string | null;
+  /** Player URLs of the finished video(s). */
+  play: string[];
+  durationS?: number | null;
+  error: string | null;
+  /** Model tokens this video has used so far, every attempt included. */
+  tokens?: PromptTokens | null;
+  /** A failed video can continue from the step it stopped at (api.prompt.retry). */
+  canRetry?: boolean;
+}
+
+export interface PromptTokens {
+  total: number;
+  input: number;
+  /** Input tokens the model provider served from its cache (cheaper). */
+  cachedInput: number;
+  output: number;
+}
+
 // ============================================================================
 // API Endpoints
 // ============================================================================
@@ -231,7 +229,8 @@ export const api = {
       username?: string;
       plan?: "free" | "creator" | "pro" | "enterprise";
     }) =>
-      request<{ success: boolean; message: string; user: BackendUser; token: string }>("/api/register", {
+      // error "EMAIL_CONFIRMATION_REQUIRED": the account was created; the user confirms their email, then signs in.
+      request<{ success: boolean; message: string; user: BackendUser; token: string; error?: string }>("/api/register", {
         method: "POST",
         body: JSON.stringify(payload),
       }),
@@ -301,7 +300,7 @@ export const api = {
       }),
 
     updatePlan: (tier: "free" | "creator" | "pro" | "enterprise", interval: "monthly" | "annual" = "monthly") =>
-      request<{ success: boolean; message: string; user: BackendUser }>("/api/user/plan", {
+      request<{ success: boolean; message: string; user: BackendUser; checkoutUrl?: string; portalUrl?: string }>("/api/user/plan", {
         method: "POST",
         body: JSON.stringify({ tier, interval }),
       }),
@@ -366,6 +365,29 @@ export const api = {
   // Prompt Queue API (adds generation job to BullMQ AGENTQUEUE)
   // ==========================================================================
   prompt: {
+    /** Queue a prompt on the backend as the signed-in user. The caller picks promptId so retries are idempotent. */
+    queue: (payload: {
+      prompt: string;
+      promptId: string;
+      template?: string;
+      ratio?: "9:16" | "16:9" | "1:1";
+      /** Seconds, 15-90. */
+      length?: number;
+      /** A previous video's job id: reuse its exact look (the chat's theme). */
+      themeFrom?: string;
+    }) =>
+      request<{ success: boolean; job: PromptJob }>("/api/prompt", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }),
+
+    status: (promptId: string) =>
+      request<{ success: boolean; job: PromptJob }>(`/api/prompt/${encodeURIComponent(promptId)}`, { method: "GET" }),
+
+    /** Continue a failed video from the step it stopped at; it keeps its finished work and does not count again. */
+    retry: (promptId: string) =>
+      request<{ success: boolean; job: PromptJob }>(`/api/prompt/${encodeURIComponent(promptId)}/retry`, { method: "POST" }),
+
     submit: async (payload: {
       prompt: string;
       userId: string;

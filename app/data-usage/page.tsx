@@ -30,7 +30,7 @@ export default function DataUsagePage() {
       <div className="max-w-4xl mx-auto relative z-10">
         {/* Back navigation & Theme Toggle */}
         <div className="mb-6 flex items-center justify-between">
-          <BackButton fallbackUrl="/workspace" label="Back to Studio" />
+          <BackButton fallbackUrl="/dashboard" label="Back to Studio" />
           <ThemeToggle />
         </div>
 
@@ -58,7 +58,7 @@ export default function DataUsagePage() {
         </div>
 
         {/* Executive Transparency Card */}
-        <div className="my-8 p-6 rounded-2xl bg-gradient-to-r from-purple-100/70 via-white to-blue-100/60 dark:from-purple-950/40 dark:via-surface/80 dark:to-blue-950/30 border border-purple-200 dark:border-purple-500/20 backdrop-blur-xl shadow-lg dark:shadow-2xl space-y-4">
+        <div className="my-8 p-6 rounded-2xl bg-gradient-to-r from-purple-100/70 via-surf-ffffff to-blue-100/60 dark:from-purple-950/40 dark:via-surface/80 dark:to-blue-950/30 border border-purple-200 dark:border-purple-500/20 backdrop-blur-xl shadow-lg dark:shadow-2xl space-y-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-purple-500/15 dark:bg-purple-500/20 border border-purple-400/30 flex items-center justify-center text-purple-600 dark:text-purple-400">
               <FiShield className="w-5 h-5" />
@@ -205,7 +205,7 @@ export default function DataUsagePage() {
             <p>
               If your corporate compliance team requires a customized Data Processing Addendum (DPA) or security architecture review:
             </p>
-            <div className="p-4 rounded-xl bg-white dark:bg-white/[0.04] border border-line shadow-sm flex items-center justify-between gap-4">
+            <div className="p-4 rounded-xl bg-surf-ffffff dark:bg-white/[0.04] border border-line shadow-sm flex items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-lg bg-purple-500/15 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center">
                   <FiDatabase className="w-4 h-4" />

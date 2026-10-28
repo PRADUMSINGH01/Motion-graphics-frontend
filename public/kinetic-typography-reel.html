@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Editorial Kinetic Typography Reel</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 100%; height: 100%; overflow: hidden;
+    background: #07142e;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #faf8f2;
+  }
+  .swiss-grid {
+    position: absolute; inset: 32px;
+    border: 1.5px solid rgba(250, 248, 242, 0.18);
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    grid-template-rows: auto 1fr auto;
+  }
+  .cell {
+    border: 0.5px solid rgba(250, 248, 242, 0.1);
+    padding: 18px 22px;
+    display: flex; align-items: center;
+  }
+  .meta {
+    font-family: monospace; font-size: 12px; letter-spacing: 0.12em;
+    color: rgba(250, 248, 242, 0.65);
+  }
+  .center-stage {
+    grid-column: 1 / -1;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 20px 40px; position: relative; overflow: hidden;
+  }
+  .word-row {
+    overflow: hidden; line-height: 0.96;
+  }
+  .word-inner {
+    display: inline-block;
+    font-size: clamp(54px, 7.2vw, 96px);
+    font-weight: 900; letter-spacing: -0.045em;
+    animation: kineticSlide 3.6s cubic-bezier(0.16, 1, 0.3, 1) infinite alternate;
+  }
+  .word-row:nth-child(2) .word-inner {
+    color: #07142e;
+    background: #c5ef26;
+    padding: 2px 22px 8px;
+    border-radius: 8px;
+    animation-delay: 0.18s;
+  }
+  .word-row:nth-child(3) .word-inner {
+    animation-delay: 0.34s;
+  }
+  .playhead-line {
+    position: absolute; top: 0; bottom: 0; width: 2px;
+    background: rgba(197, 239, 38, 0.7);
+    animation: sweepPlayhead 4.5s linear infinite;
+  }
+  @keyframes kineticSlide {
+    0% { transform: translateY(28%) skewY(3deg); opacity: 0.35; }
+    35%, 100% { transform: translateY(0%) skewY(0deg); opacity: 1; }
+  }
+  @keyframes sweepPlayhead {
+    0% { left: 8%; }
+    100% { left: 92%; }
+  }
+</style>
+</head>
+<body>
+  <div class="swiss-grid">
+    <div class="cell meta">01 / KINETIC ENGINE</div>
+    <div class="cell meta" style="justify-content:center;color:#c5ef26;">60 FPS DETERMINISTIC TYPE</div>
+    <div class="cell meta" style="justify-content:flex-end;">1920 × 1080</div>
+
+    <div class="center-stage">
+      <div class="playhead-line"></div>
+      <div class="word-row"><span class="word-inner">TURN PLAIN TEXT</span></div>
+      <div class="word-row" style="margin: 10px 0;"><span class="word-inner">INTO BROADCAST</span></div>
+      <div class="word-row"><span class="word-inner">MOTION GRAPHICS.</span></div>
+    </div>
+
+    <div class="cell meta">CUBIC-BEZIER(0.16, 1, 0.3, 1)</div>
+    <div class="cell meta" style="justify-content:center;">BYREEL.IN STUDIO</div>
+    <div class="cell meta" style="justify-content:flex-end;color:#c5ef26;">● LIVE RENDER</div>
+  </div>
+</body>
+</html>
+

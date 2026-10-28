@@ -28,7 +28,7 @@ export default function TermsPage() {
       <div className="max-w-4xl mx-auto relative z-10">
         {/* Back navigation */}
         <div className="mb-6 flex items-center justify-between">
-          <BackButton fallbackUrl="/workspace" label="Back to Studio" />
+          <BackButton fallbackUrl="/dashboard" label="Back to Studio" />
           <ThemeToggle />
         </div>
 

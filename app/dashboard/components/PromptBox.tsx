@@ -1,184 +1,175 @@
 "use client";
 
-import React, { useRef, useState } from "react";
-import { FiArrowUp, FiMonitor, FiSmartphone, FiChevronDown } from "react-icons/fi";
-import { CHAT_STYLES } from "../lib/chatStore";
+import React, { useEffect, useRef, useState } from "react";
+import { FiArrowUp, FiClock, FiMaximize2 } from "react-icons/fi";
+import { MAX_PROMPT_LENGTH, type ChatSettings, type Ratio } from "../lib/chatStore";
 
 interface PromptBoxProps {
   onSend: (text: string) => void;
-  format: "9:16" | "16:9";
-  style: string;
-  onFormatChange: (format: "9:16" | "16:9") => void;
-  onStyleChange: (style: string) => void;
-  disabled?: boolean;
-  /** Pre-fills the textarea (used by suggestion cards) */
-  draft?: string;
-  onDraftConsumed?: () => void;
+  initialValue?: string;
+  disabledReason?: string;
+  settings?: ChatSettings;
+  onSettingsChange?: (settings: ChatSettings) => void;
+  placeholder?: string;
+  autoFocus?: boolean;
 }
+
+const MAX_HEIGHT_PX = 180;
+
+const RATIOS: { id: Ratio; label: string; aspectW: number; aspectH: number }[] = [
+  { id: "16:9", label: "16:9", aspectW: 16, aspectH: 9 },
+  { id: "9:16", label: "9:16", aspectW: 9, aspectH: 16 },
+  { id: "1:1", label: "1:1", aspectW: 10, aspectH: 10 },
+];
+
+const LENGTHS = [
+  { s: 15, label: "15s" },
+  { s: 30, label: "30s" },
+  { s: 45, label: "45s" },
+  { s: 60, label: "60s" },
+];
 
 export default function PromptBox({
   onSend,
-  format,
-  style,
-  onFormatChange,
-  onStyleChange,
-  disabled = false,
-  draft,
-  onDraftConsumed,
+  initialValue = "",
+  disabledReason,
+  settings,
+  onSettingsChange,
+  placeholder = "Message Byreel or describe a video...",
+  autoFocus,
 }: PromptBoxProps) {
-  const [value, setValue] = useState("");
-  const [styleOpen, setStyleOpen] = useState(false);
+  const [value, setValue] = useState(initialValue);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const canSend = value.trim().length > 0 && !disabledReason;
 
-  // Sync external draft (suggestion card click)
-  React.useEffect(() => {
-    if (draft !== undefined) {
-      setValue(draft);
-      onDraftConsumed?.();
-      requestAnimationFrame(() => textareaRef.current?.focus());
+  useEffect(() => {
+    if (autoFocus || initialValue) {
+      textareaRef.current?.focus();
     }
-  }, [draft, onDraftConsumed]);
+  }, [autoFocus, initialValue]);
 
-  const autoResize = () => {
+  // Auto-grow textarea height
+  useEffect(() => {
     const el = textareaRef.current;
     if (!el) return;
     el.style.height = "auto";
-    el.style.height = `${Math.min(el.scrollHeight, 180)}px`;
-  };
+    el.style.height = `${Math.min(el.scrollHeight, MAX_HEIGHT_PX)}px`;
+  }, [value]);
 
   const submit = () => {
-    const text = value.trim();
-    if (!text || disabled) return;
-    onSend(text);
+    if (!canSend) return;
+    onSend(value.trim());
     setValue("");
-    requestAnimationFrame(() => {
-      if (textareaRef.current) textareaRef.current.style.height = "auto";
-    });
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      submit();
-    }
   };
 
   return (
-    <div className="shrink-0 px-4 pb-4 pt-2">
-      <div className="max-w-3xl mx-auto">
-        <div
-          className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-glass)]
-            backdrop-blur-xl shadow-lg focus-within:border-[var(--border-strong)] transition-colors"
-        >
-          <textarea
-            ref={textareaRef}
-            value={value}
-            onChange={(e) => {
-              setValue(e.target.value);
-              autoResize();
-            }}
-            onKeyDown={handleKeyDown}
-            rows={1}
-            placeholder="Describe your short… e.g. “24-second kinetic typography on compound interest”"
-            className="w-full bg-transparent px-4 pt-3.5 pb-1 text-[13.5px] leading-relaxed text-[var(--text-primary)]
-              placeholder:text-[var(--text-muted)] outline-none resize-none min-h-[44px]"
-          />
+    <div className="w-full">
+      {/* Modern Claude / GPT-style composer container */}
+      <div className="relative rounded-2xl border border-surf-dedad0 bg-surf-ffffff p-3 shadow-xs transition-all focus-within:border-surf-111110 focus-within:ring-2 focus-within:ring-surf-111110/10">
+        <textarea
+          ref={textareaRef}
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
+              e.preventDefault();
+              submit();
+            }
+          }}
+          rows={2}
+          maxLength={MAX_PROMPT_LENGTH}
+          aria-label="Describe your video prompt"
+          placeholder={placeholder}
+          className="block min-h-[44px] w-full resize-none bg-transparent px-1 text-[14px] sm:text-[14.5px] leading-relaxed text-ink-111110 outline-none placeholder:text-ink-9c9990"
+        />
 
-          {/* Controls row */}
-          <div className="flex items-center gap-2 px-2.5 pb-2.5 pt-1">
-            {/* Format toggle */}
-            <div className="flex items-center rounded-lg border border-[var(--border-subtle)] overflow-hidden">
-              <button
-                onClick={() => onFormatChange("9:16")}
-                title="Vertical — Reels / Shorts / TikTok"
-                className={`flex items-center gap-1.5 h-7 px-2.5 text-[11.5px] font-medium transition-colors cursor-pointer
-                  ${
-                    format === "9:16"
-                      ? "bg-[var(--accent-primary)]/15 text-[var(--accent-primary)]"
-                      : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
-                  }`}
-              >
-                <FiSmartphone size={12} /> 9:16
-              </button>
-              <button
-                onClick={() => onFormatChange("16:9")}
-                title="Landscape — YouTube"
-                className={`flex items-center gap-1.5 h-7 px-2.5 text-[11.5px] font-medium transition-colors cursor-pointer
-                  ${
-                    format === "16:9"
-                      ? "bg-[var(--accent-primary)]/15 text-[var(--accent-primary)]"
-                      : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
-                  }`}
-              >
-                <FiMonitor size={12} /> 16:9
-              </button>
-            </div>
-
-            {/* Style select */}
-            <div className="relative">
-              <button
-                onClick={() => setStyleOpen((v) => !v)}
-                className="flex items-center gap-1.5 h-7 px-2.5 rounded-lg border border-[var(--border-subtle)]
-                  text-[11.5px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
-              >
-                {style}
-                <FiChevronDown size={11} className={`transition-transform ${styleOpen ? "rotate-180" : ""}`} />
-              </button>
-              {styleOpen && (
-                <>
-                  <div className="fixed inset-0 z-10" onClick={() => setStyleOpen(false)} />
-                  <div className="absolute bottom-9 left-0 z-20 w-48 py-1 rounded-xl border border-[var(--border-subtle)]
-                    bg-[var(--surface-primary)] shadow-xl overflow-hidden">
-                    {CHAT_STYLES.map((s) => (
-                      <button
-                        key={s}
-                        onClick={() => {
-                          onStyleChange(s);
-                          setStyleOpen(false);
+        {/* Minimal Controls Row */}
+        <div className="mt-2.5 flex items-center justify-between gap-2 border-t border-surf-f4f2ec pt-2.5">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {/* Aspect Ratio Selector */}
+            {settings && onSettingsChange ? (
+              <div className="flex items-center gap-0.5 rounded-lg bg-surf-f8f7f2 p-0.5 border border-surf-e8e5dc">
+                {RATIOS.map((r) => {
+                  const isActive = settings.ratio === r.id;
+                  return (
+                    <button
+                      key={r.id}
+                      type="button"
+                      onClick={() => onSettingsChange({ ...settings, ratio: r.id })}
+                      title={r.label}
+                      className={`flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium transition ${
+                        isActive
+                          ? "bg-surf-111110 text-white shadow-xs"
+                          : "text-ink-66655e hover:text-ink-111110"
+                      }`}
+                    >
+                      <span
+                        className="inline-block border border-current rounded-[1px]"
+                        style={{
+                          width: r.aspectW > r.aspectH ? "10px" : r.aspectW === r.aspectH ? "8px" : "6px",
+                          height: r.aspectH > r.aspectW ? "10px" : r.aspectW === r.aspectH ? "8px" : "6px",
                         }}
-                        className={`w-full text-left px-3 py-1.5 text-[12px] transition-colors cursor-pointer
-                          ${
-                            s === style
-                              ? "text-[var(--accent-primary)] bg-[var(--accent-primary)]/10"
-                              : "text-[var(--text-secondary)] hover:bg-[var(--surface-card)] hover:text-[var(--text-primary)]"
-                          }`}
-                      >
-                        {s}
-                      </button>
-                    ))}
-                  </div>
-                </>
-              )}
-            </div>
+                      />
+                      <span>{r.id}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            ) : settings ? (
+              <span className="inline-flex items-center gap-1 rounded-lg border border-surf-e8e5dc bg-surf-f8f7f2 px-2.5 py-1 text-[11px] font-mono text-ink-55544e">
+                <FiMaximize2 size={11} /> {settings.ratio}
+              </span>
+            ) : null}
 
-            <span className="ml-auto text-[10.5px] text-[var(--text-muted)] hidden sm:block">
-              <kbd className="px-1 py-0.5 rounded border border-[var(--border-subtle)] bg-[var(--surface-card)]">⏎</kbd>{" "}
-              send ·{" "}
-              <kbd className="px-1 py-0.5 rounded border border-[var(--border-subtle)] bg-[var(--surface-card)]">⇧⏎</kbd>{" "}
-              newline
-            </span>
+            {/* Duration Selector */}
+            {settings && onSettingsChange ? (
+              <div className="flex items-center gap-0.5 rounded-lg bg-surf-f8f7f2 p-0.5 border border-surf-e8e5dc">
+                {LENGTHS.map((l) => {
+                  const isActive = settings.length === l.s;
+                  return (
+                    <button
+                      key={l.s}
+                      type="button"
+                      onClick={() => onSettingsChange({ ...settings, length: l.s })}
+                      className={`rounded-md px-2 py-1 text-[11px] font-mono font-medium transition ${
+                        isActive
+                          ? "bg-surf-111110 text-white shadow-xs"
+                          : "text-ink-66655e hover:text-ink-111110"
+                      }`}
+                    >
+                      {l.label}
+                    </button>
+                  );
+                })}
+              </div>
+            ) : settings ? (
+              <span className="inline-flex items-center gap-1 rounded-lg border border-surf-e8e5dc bg-surf-f8f7f2 px-2.5 py-1 text-[11px] font-mono text-ink-55544e">
+                <FiClock size={11} /> {settings.length}s
+              </span>
+            ) : null}
+          </div>
 
-            {/* Send */}
+          {/* Send / Generate Button */}
+          <div className="flex items-center gap-2">
             <button
+              type="button"
               onClick={submit}
-              disabled={!value.trim() || disabled}
-              title="Send"
-              className={`w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer
-                ${
-                  value.trim() && !disabled
-                    ? "bg-[var(--accent-primary)] text-white hover:bg-[var(--accent-secondary)] shadow-md"
-                    : "bg-[var(--surface-card)] text-[var(--text-muted)] cursor-not-allowed"
-                }`}
+              disabled={!canSend}
+              aria-label="Send prompt"
+              className="flex h-8 w-8 items-center justify-center rounded-xl bg-surf-111110 text-white shadow-xs transition-all hover:bg-surf-2c2b28 active:scale-95 disabled:cursor-not-allowed disabled:bg-surf-ebe8e0 disabled:text-ink-a8a59d disabled:shadow-none"
             >
-              <FiArrowUp size={14} />
+              <FiArrowUp size={16} strokeWidth={2.5} />
             </button>
           </div>
         </div>
-
-        <p className="mt-2 text-center text-[10.5px] text-[var(--text-muted)]">
-          byreel can make mistakes — review generated shorts before publishing.
-        </p>
       </div>
+
+      {/* Subtle footer hint only when needed */}
+      {disabledReason ? (
+        <div className="mt-1.5 px-1 text-[11.5px] text-ink-b45309">
+          {disabledReason}
+        </div>
+      ) : null}
     </div>
   );
 }

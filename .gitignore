@@ -44,3 +44,6 @@ next-env.d.ts
 # reports & benchmarks
 *.report.html
 
+# scratch & tool files
+.claude/
+scratch_*.ps1

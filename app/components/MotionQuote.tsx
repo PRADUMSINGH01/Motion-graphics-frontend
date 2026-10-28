@@ -335,7 +335,7 @@ export function FieldBackground() {
       className="w-full h-[100%]"
       style={{
         display: "block",
-        background: "#111214",
+        background: "var(--surf-111214)",
       }}
     />
   );

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vox Documentary B-Roll Cutaway</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 100%; height: 100%; overflow: hidden;
+    background: #f4f1e8;
+    font-family: Georgia, "Times New Roman", serif;
+    color: #07142e;
+  }
+  .paper-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(to bottom, rgba(7, 20, 46, 0.12) 1px, transparent 1px),
+      linear-gradient(to right, rgba(7, 20, 46, 0.06) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+  .camera-rig {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    animation: voxPan 5.5s cubic-bezier(0.22, 1, 0.36, 1) infinite alternate;
+  }
+  .clipping {
+    width: min(820px, 84vw);
+    background: #fffdf8;
+    border: 2px solid #07142e;
+    border-radius: 12px;
+    padding: 34px 42px;
+    box-shadow: 16px 18px 0 rgba(7, 20, 46, 0.14);
+    position: relative;
+  }
+  .masthead {
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 2px solid #07142e;
+    padding-bottom: 12px; margin-bottom: 22px;
+    font-family: monospace; font-size: 12px; font-weight: 800;
+    letter-spacing: 0.14em; text-transform: uppercase;
+  }
+  .quote-line {
+    font-size: clamp(24px, 3.1vw, 38px);
+    font-weight: 700; line-height: 1.32;
+    position: relative;
+  }
+  .highlight-wrap {
+    position: relative; display: inline-block; z-index: 1;
+  }
+  .highlight-bar {
+    position: absolute; left: -4px; right: -4px; bottom: 2px; height: 82%;
+    background: rgba(152, 206, 0, 0.55);
+    z-index: -1; transform-origin: left center;
+    animation: sweepMarker 2.8s cubic-bezier(0.16, 1, 0.3, 1) infinite alternate;
+  }
+  .sub-lines {
+    margin-top: 22px; display: flex; flex-direction: column; gap: 10px;
+  }
+  .skeleton {
+    height: 10px; border-radius: 4px; background: rgba(7, 20, 46, 0.14);
+  }
+  .callout-pill {
+    position: absolute; right: 28px; bottom: -18px;
+    background: #07142e; color: #faf8f2;
+    padding: 8px 16px; border-radius: 8px;
+    font-family: monospace; font-size: 12px; font-weight: 800;
+    letter-spacing: 0.1em;
+    box-shadow: 0 10px 24px rgba(7, 20, 46, 0.25);
+  }
+  @keyframes sweepMarker {
+    0% { transform: scaleX(0.05); }
+    45%, 100% { transform: scaleX(1); }
+  }
+  @keyframes voxPan {
+    0% { transform: scale(0.96) rotate(-1deg) translateY(8px); }
+    100% { transform: scale(1.04) rotate(0.6deg) translateY(-6px); }
+  }
+</style>
+</head>
+<body>
+  <div class="paper-grid"></div>
+  <div class="camera-rig">
+    <div class="clipping">
+      <div class="masthead">
+        <span>EXHIBIT 04 · ARCHIVAL REPORT</span>
+        <span>60 FPS DOCUMENTARY CUTAWAY</span>
+      </div>
+      <div class="quote-line">
+        &ldquo;Creators who pair spoken narrative with
+        <span class="highlight-wrap">
+          <span class="highlight-bar"></span>
+          animated visual B-roll cutaways
+        </span>
+        retain 68% more viewer attention.&rdquo;
+      </div>
+      <div class="sub-lines">
+        <div class="skeleton" style="width: 92%"></div>
+        <div class="skeleton" style="width: 78%"></div>
+        <div class="skeleton" style="width: 64%"></div>
+      </div>
+      <div class="callout-pill">★ VOX-STYLE HIGHLIGHT RIG</div>
+    </div>
+  </div>
+</body>
+</html>
+

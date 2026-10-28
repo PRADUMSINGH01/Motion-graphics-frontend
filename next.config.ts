@@ -29,10 +29,7 @@ const nextConfig: NextConfig = {
     ];
   },
 
-  /* ── Experimental optimizations ── */
-  experimental: {
-    optimizeCss: true,
-  },
+
 };
 
 export default nextConfig;

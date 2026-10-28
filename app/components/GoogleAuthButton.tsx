@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { api, openGoogleAuthPopup } from "../lib/api";
+import { api, openGoogleAuthPopup, getApiBaseUrl } from "../lib/api";
 import { useAlert } from "../context/AlertContext";
 import { useAuth } from "../context/AuthContext";
 
@@ -71,6 +71,8 @@ export default function GoogleAuthButton({
 
       // 2. Listen for postMessage from server-side callback HTML
       const handleMessage = (event: MessageEvent) => {
+        // Only the backend's sign-in page may hand over a session.
+        if (event.origin !== new URL(getApiBaseUrl()).origin) return;
         const data = event.data;
         if (!data || typeof data !== "object") return;
 
@@ -90,7 +92,7 @@ export default function GoogleAuthButton({
             );
 
             setTimeout(() => {
-              router.push("/workspace");
+              router.push("/dashboard");
             }, 600);
           } else {
             setLoading(false);

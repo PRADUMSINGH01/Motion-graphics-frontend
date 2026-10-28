@@ -1,5 +1,6 @@
 @import "tailwindcss";
 
+@import "./theme-palette.css";
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* ==========================================================================
@@ -140,6 +141,7 @@ html.light {
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-danger: var(--danger);
+  --color-button-primary: var(--surf-111110);
 
   --font-headline: var(--font-headline);
   --font-sans: var(--font-body);
@@ -153,53 +155,53 @@ html.light {
    every blue-ish family through the brand accent, so older utility classes
    (text-slate-400, bg-cyan-500/10 …) stay on-palette without per-file rewrites. */
 @theme {
-  --color-slate-50: #fafafa;
-  --color-slate-100: #f4f4f5;
-  --color-slate-200: #e7e7ea;
-  --color-slate-300: #d4d4d8;
-  --color-slate-400: #a0a0ab;
-  --color-slate-500: #71717a;
-  --color-slate-600: #52525b;
-  --color-slate-700: #3a3a42;
-  --color-slate-800: #26262c;
-  --color-slate-900: #18181c;
-  --color-slate-950: #0e0e11;
+  --color-slate-50: var(--grey-fafafa);
+  --color-slate-100: var(--grey-f4f4f5);
+  --color-slate-200: var(--grey-e7e7ea);
+  --color-slate-300: var(--grey-d4d4d8);
+  --color-slate-400: var(--grey-a0a0ab);
+  --color-slate-500: var(--grey-71717a);
+  --color-slate-600: var(--grey-52525b);
+  --color-slate-700: var(--grey-3a3a42);
+  --color-slate-800: var(--grey-26262c);
+  --color-slate-900: var(--grey-18181c);
+  --color-slate-950: var(--grey-0e0e11);
 
-  --color-zinc-50: #fafafa;
-  --color-zinc-100: #f4f4f5;
-  --color-zinc-200: #e7e7ea;
-  --color-zinc-300: #d4d4d8;
-  --color-zinc-400: #a0a0ab;
-  --color-zinc-500: #71717a;
-  --color-zinc-600: #52525b;
-  --color-zinc-700: #3a3a42;
-  --color-zinc-800: #26262c;
-  --color-zinc-900: #18181c;
-  --color-zinc-950: #0e0e11;
+  --color-zinc-50: var(--grey-fafafa);
+  --color-zinc-100: var(--grey-f4f4f5);
+  --color-zinc-200: var(--grey-e7e7ea);
+  --color-zinc-300: var(--grey-d4d4d8);
+  --color-zinc-400: var(--grey-a0a0ab);
+  --color-zinc-500: var(--grey-71717a);
+  --color-zinc-600: var(--grey-52525b);
+  --color-zinc-700: var(--grey-3a3a42);
+  --color-zinc-800: var(--grey-26262c);
+  --color-zinc-900: var(--grey-18181c);
+  --color-zinc-950: var(--grey-0e0e11);
 
-  --color-gray-50: #fafafa;
-  --color-gray-100: #f4f4f5;
-  --color-gray-200: #e7e7ea;
-  --color-gray-300: #d4d4d8;
-  --color-gray-400: #a0a0ab;
-  --color-gray-500: #71717a;
-  --color-gray-600: #52525b;
-  --color-gray-700: #3a3a42;
-  --color-gray-800: #26262c;
-  --color-gray-900: #18181c;
-  --color-gray-950: #0e0e11;
+  --color-gray-50: var(--grey-fafafa);
+  --color-gray-100: var(--grey-f4f4f5);
+  --color-gray-200: var(--grey-e7e7ea);
+  --color-gray-300: var(--grey-d4d4d8);
+  --color-gray-400: var(--grey-a0a0ab);
+  --color-gray-500: var(--grey-71717a);
+  --color-gray-600: var(--grey-52525b);
+  --color-gray-700: var(--grey-3a3a42);
+  --color-gray-800: var(--grey-26262c);
+  --color-gray-900: var(--grey-18181c);
+  --color-gray-950: var(--grey-0e0e11);
 
-  --color-neutral-50: #fafafa;
-  --color-neutral-100: #f4f4f5;
-  --color-neutral-200: #e7e7ea;
-  --color-neutral-300: #d4d4d8;
-  --color-neutral-400: #a0a0ab;
-  --color-neutral-500: #71717a;
-  --color-neutral-600: #52525b;
-  --color-neutral-700: #3a3a42;
-  --color-neutral-800: #26262c;
-  --color-neutral-900: #18181c;
-  --color-neutral-950: #0e0e11;
+  --color-neutral-50: var(--grey-fafafa);
+  --color-neutral-100: var(--grey-f4f4f5);
+  --color-neutral-200: var(--grey-e7e7ea);
+  --color-neutral-300: var(--grey-d4d4d8);
+  --color-neutral-400: var(--grey-a0a0ab);
+  --color-neutral-500: var(--grey-71717a);
+  --color-neutral-600: var(--grey-52525b);
+  --color-neutral-700: var(--grey-3a3a42);
+  --color-neutral-800: var(--grey-26262c);
+  --color-neutral-900: var(--grey-18181c);
+  --color-neutral-950: var(--grey-0e0e11);
 
   --color-blue-50: #eef4ff;
   --color-blue-100: #dbe7ff;

@@ -31,18 +31,20 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   login: (email: string, pass: string) => Promise<boolean>;
+  /** true: signed in · "confirm": account created, the user must confirm their email first · false: failed. */
   register: (
     name: string,
     email: string,
     pass: string,
     plan?: "free" | "creator" | "pro" | "enterprise"
-  ) => Promise<boolean>;
+  ) => Promise<boolean | "confirm">;
   loginWithGoogle: (credential: string) => Promise<boolean>;
   registerWithGoogle: (credential: string) => Promise<boolean>;
   applyOAuthSession: (token: string, backendUser: BackendUser) => void;
   logout: () => void;
   refreshUser: () => Promise<void>;
   triggerDemoAlert: (type: "success" | "failure" | "error") => void;
+  loginAsDemo: (tier?: "free" | "creator" | "pro") => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -130,7 +132,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
 
         // If a token exists, validate it with the backend before completing loading
-        if (storedToken) {
+        if (storedToken === "demo-session-token") {
+          // Self-contained demo session for frontend preview
+          if (stored) {
+            try {
+              const parsed = JSON.parse(stored);
+              if (isMounted) setUser(parsed);
+            } catch {}
+          }
+        } else if (storedToken) {
           try {
             const res = await api.user.getMe();
             if (res.success && res.user && isMounted) {
@@ -213,7 +223,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       );
 
       setTimeout(() => {
-        router.push("/workspace");
+        router.push("/dashboard");
       }, 700);
 
       return true;
@@ -233,7 +243,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     emailVal: string,
     passVal: string,
     plan?: "free" | "creator" | "pro" | "enterprise"
-  ): Promise<boolean> => {
+  ): Promise<boolean | "confirm"> => {
     const trimmedName = nameVal.trim();
     const trimmedEmail = emailVal.trim();
     const trimmedPass = passVal.trim();
@@ -260,6 +270,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         password: trimmedPass,
         plan: plan || "free",
       });
+
+      // Supabase requires email confirmation: the account exists, but there is no session yet.
+      if (res.error === "EMAIL_CONFIRMATION_REQUIRED") {
+        success("Check your inbox", res.message || "Confirm your email, then sign in.");
+        return "confirm";
+      }
 
       if (!res.success || !res.user) {
         failure("Registration Failed", res.message || "Failed to create account.");
@@ -288,7 +304,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       );
 
       setTimeout(() => {
-        router.push("/workspace");
+        router.push("/dashboard");
       }, 700);
 
       return true;
@@ -318,7 +334,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         }
         success("Google Sign-In Successful", `Welcome back, ${loggedUser.name}!`);
-        setTimeout(() => router.push("/workspace"), 700);
+        setTimeout(() => router.push("/dashboard"), 700);
         return true;
       }
       return false;
@@ -343,7 +359,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         }
         success("Google Registration Successful", `Welcome to byreel AI, ${newUser.name}!`);
-        setTimeout(() => router.push("/workspace"), 700);
+        setTimeout(() => router.push("/dashboard"), 700);
         return true;
       }
       return false;
@@ -419,6 +435,49 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const loginAsDemo = (tier: "free" | "creator" | "pro" = "pro") => {
+    const demoUser: User = {
+      id: "demo-creator-01",
+      name: "Pradum Singh",
+      email: "pradum@byreel.ai",
+      username: "pradum",
+      role: "creator",
+      plan: {
+        tier,
+        status: "active",
+        billingInterval: "monthly",
+        features: [
+          "4K UHD Video Rendering",
+          "Octane 3D Motion Engine",
+          "All Motion Templates",
+          "Unlimited Drafts",
+        ],
+      },
+      usage: {
+        generations: { daily: 4, monthly: 48, lifetime: 120, limit: 300 },
+        renders: { daily: 2, monthly: 18, lifetime: 64, limit: 100 },
+        apiCalls: { daily: 15, monthly: 180, lifetime: 520, limit: 1000 },
+        storage: { usedBytes: 1024 * 1024 * 480, limitBytes: 1024 * 1024 * 1024 * 10 },
+      },
+      token: "demo-session-token",
+    };
+
+    setUser(demoUser);
+    try {
+      localStorage.setItem("animagent_user", JSON.stringify(demoUser));
+      localStorage.setItem("animagent_token", "demo-session-token");
+      if (typeof document !== "undefined") {
+        document.cookie = `token=demo-session-token; path=/; max-age=604800; SameSite=Lax`;
+        document.cookie = `animagent_token=demo-session-token; path=/; max-age=604800; SameSite=Lax`;
+      }
+    } catch {}
+
+    success("Demo Studio Activated", "Welcome to byreel AI Studio preview workspace!");
+    setTimeout(() => {
+      router.push("/dashboard");
+    }, 400);
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -432,6 +491,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         logout,
         refreshUser,
         triggerDemoAlert,
+        loginAsDemo,
       }}
     >
       {children}

@@ -14,7 +14,7 @@ interface BackButtonProps {
 
 export default function BackButton({
   label = "Back to Studio",
-  fallbackUrl = "/workspace",
+  fallbackUrl = "/dashboard",
   className,
   iconClassName = "w-3.5 h-3.5",
   iconOnly = false,

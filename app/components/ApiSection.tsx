@@ -63,7 +63,7 @@ export const ApiSection = memo(function ApiSection() {
         </div>
 
         <div className="lg:col-span-7 min-w-0">
-          <div className="rounded-xl border border-line bg-[#0b0b0e] shadow-elevated overflow-hidden">
+          <div className="rounded-xl border border-line bg-surf-0b0b0e shadow-elevated overflow-hidden">
             <div className="flex items-center justify-between h-10 px-4 border-b border-white/10">
               <span className="flex items-center gap-2 text-xs font-mono text-white/60">
                 <IconTerminal className="w-3.5 h-3.5" />

@@ -46,7 +46,7 @@ export default function Command() {
   };
 
   return (
-    <section className="relative w-full py-28 px-4 sm:px-6 lg:px-8 bg-[#09090c] text-white overflow-hidden border-t border-white/5">
+    <section className="relative w-full py-28 px-4 sm:px-6 lg:px-8 bg-surf-09090c text-white overflow-hidden border-t border-white/5">
       {/* Background Glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-red-600/10 blur-[130px] pointer-events-none" />
 
@@ -97,9 +97,9 @@ export default function Command() {
             {/* Window Titlebar */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-black/40 text-xs">
               <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-[#FF5F56] border border-black/20" />
-                <span className="w-3 h-3 rounded-full bg-[#FFBD2E] border border-black/20" />
-                <span className="w-3 h-3 rounded-full bg-[#27C93F] border border-black/20" />
+                <span className="w-3 h-3 rounded-full bg-surf-ff5f56 border border-black/20" />
+                <span className="w-3 h-3 rounded-full bg-surf-ffbd2e border border-black/20" />
+                <span className="w-3 h-3 rounded-full bg-surf-27c93f border border-black/20" />
                 <div className="flex items-center gap-2 ml-4">
                   <button
                     onClick={() => setActiveFile("api")}

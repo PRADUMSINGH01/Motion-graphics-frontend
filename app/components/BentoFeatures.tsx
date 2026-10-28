@@ -61,7 +61,7 @@ export const BentoFeatures = memo(function BentoFeatures() {
 
             <div className="relative z-10 flex flex-col justify-between h-full">
               <div className="max-w-md mb-8">
-                <div className="w-10 h-10 rounded-xl bg-[#ec4899]/20 border border-[#ec4899]/30 flex items-center justify-center text-[#ec4899] mb-4 shadow-inner">
+                <div className="w-10 h-10 rounded-xl bg-surf-ec4899/20 border border-surf-ec4899/30 flex items-center justify-center text-ink-ec4899 mb-4 shadow-inner">
                   <IconSparkles className="w-5 h-5" />
                 </div>
                 <h3 className="text-2xl font-bold text-white mb-2 tracking-tight">
@@ -74,7 +74,7 @@ export const BentoFeatures = memo(function BentoFeatures() {
               </div>
 
               {/* Interactive AI Preview Terminal */}
-              <div className="w-full rounded-2xl bg-[#18181b]/90 border border-white/10 p-4 shadow-xl font-mono text-xs">
+              <div className="w-full rounded-2xl bg-surf-18181b/90 border border-white/10 p-4 shadow-xl font-mono text-xs">
                 <div className="flex items-center justify-between pb-3 border-b border-white/5 text-zinc-500">
                   <div className="flex items-center gap-2">
                     <span className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
@@ -116,7 +116,7 @@ export const BentoFeatures = memo(function BentoFeatures() {
           {/* Card 2: 1,000+ Extensions Store (Col-span 1) */}
           <div className="relative rounded-3xl border border-white/10 bg-gradient-to-b from-surface to-canvas p-8 overflow-hidden group hover:border-white/20 transition-all shadow-2xl flex flex-col justify-between">
             <div>
-              <div className="w-10 h-10 rounded-xl bg-[#3b82f6]/20 border border-[#3b82f6]/30 flex items-center justify-center text-[#3b82f6] mb-4 shadow-inner">
+              <div className="w-10 h-10 rounded-xl bg-surf-3b82f6/20 border border-surf-3b82f6/30 flex items-center justify-center text-ink-3b82f6 mb-4 shadow-inner">
                 <IconBox className="w-5 h-5" />
               </div>
               <h3 className="text-2xl font-bold text-white mb-2 tracking-tight">
@@ -152,7 +152,7 @@ export const BentoFeatures = memo(function BentoFeatures() {
           {/* Card 3: Window Management & Canvas Snapping */}
           <div className="relative rounded-3xl border border-white/10 bg-gradient-to-b from-surface to-canvas p-8 overflow-hidden group hover:border-white/20 transition-all shadow-2xl flex flex-col justify-between">
             <div>
-              <div className="w-10 h-10 rounded-xl bg-[#0284c7]/20 border border-[#0284c7]/30 flex items-center justify-center text-[#0284c7] mb-4 shadow-inner">
+              <div className="w-10 h-10 rounded-xl bg-surf-0284c7/20 border border-surf-0284c7/30 flex items-center justify-center text-ink-0284c7 mb-4 shadow-inner">
                 <IconLayout className="w-5 h-5" />
               </div>
               <h3 className="text-2xl font-bold text-white mb-2 tracking-tight">
@@ -177,7 +177,7 @@ export const BentoFeatures = memo(function BentoFeatures() {
           {/* Card 4: Clipboard History */}
           <div className="relative rounded-3xl border border-white/10 bg-gradient-to-b from-surface to-canvas p-8 overflow-hidden group hover:border-white/20 transition-all shadow-2xl flex flex-col justify-between">
             <div>
-              <div className="w-10 h-10 rounded-xl bg-[#10b981]/20 border border-[#10b981]/30 flex items-center justify-center text-[#10b981] mb-4 shadow-inner">
+              <div className="w-10 h-10 rounded-xl bg-surf-10b981/20 border border-surf-10b981/30 flex items-center justify-center text-ink-10b981 mb-4 shadow-inner">
                 <IconClipboard className="w-5 h-5" />
               </div>
               <h3 className="text-2xl font-bold text-white mb-2 tracking-tight">
@@ -207,7 +207,7 @@ export const BentoFeatures = memo(function BentoFeatures() {
           {/* Card 5: Speed of Light Performance */}
           <div className="relative rounded-3xl border border-white/10 bg-gradient-to-b from-surface to-canvas p-8 overflow-hidden group hover:border-white/20 transition-all shadow-2xl flex flex-col justify-between">
             <div>
-              <div className="w-10 h-10 rounded-xl bg-[#f59e0b]/20 border border-[#f59e0b]/30 flex items-center justify-center text-[#f59e0b] mb-4 shadow-inner">
+              <div className="w-10 h-10 rounded-xl bg-surf-f59e0b/20 border border-surf-f59e0b/30 flex items-center justify-center text-ink-f59e0b mb-4 shadow-inner">
                 <IconZap className="w-5 h-5" />
               </div>
               <h3 className="text-2xl font-bold text-white mb-2 tracking-tight">

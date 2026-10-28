@@ -1,0 +1,419 @@
+/* ==========================================================================
+   byreel dashboard: editorial luxury design system.
+   Warm ivory paper, black obsidian ink, electric lime accent, serif display type,
+   mono labels, hairline rules. Scoped under .db so it cannot leak.
+   ========================================================================== */
+
+.db {
+  --db-paper: var(--flip-fcfbf7);
+  --db-paper-2: var(--flip-f7f6f0);
+  --db-white: var(--flip-ffffff);
+  --db-ink: var(--flip-111110);
+  --db-ink-2: var(--flip-2d2c28);
+  --db-muted: var(--flip-6b6962);
+  --db-faint: var(--flip-9c9990);
+  --db-rule: var(--flip-e5e2d8);
+  --db-accent: var(--flip-a4d400);
+  --db-lime: var(--flip-c5ef26);
+  --db-lime-glow: rgba(197, 239, 38, 0.4);
+
+  background: var(--db-paper);
+  color: var(--db-ink);
+  font-family: var(--font-geist), system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+html:has(.db) {
+  color-scheme: light;
+  scrollbar-color: var(--surf-d8d5cb) var(--surf-fcfbf7);
+}
+html.dark:has(.db) {
+  color-scheme: dark;
+  scrollbar-color: var(--surf-3a3935) var(--surf-fcfbf7);
+}
+html:has(.db) body {
+  background: var(--surf-fcfbf7) !important;
+}
+
+.db-alpha-grid {
+  background-image:
+    linear-gradient(45deg, rgba(255, 255, 255, 0.04) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(255, 255, 255, 0.04) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(255, 255, 255, 0.04) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(255, 255, 255, 0.04) 75%);
+  background-size: 14px 14px;
+  background-position: 0 0, 0 7px, 7px -7px, -7px 0;
+}
+
+.db :focus-visible {
+  outline: 2px solid var(--db-ink);
+  outline-offset: 2px;
+}
+
+.db-serif {
+  font-family: var(--font-serif), "Instrument Serif", Georgia, serif;
+  font-weight: 400;
+}
+.db-mono {
+  font-family: var(--font-geist-mono), ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+.db-label {
+  font-family: var(--font-geist-mono), ui-monospace, Menlo, monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--db-muted);
+}
+.db-acc {
+  color: var(--db-accent);
+}
+
+/* Black pill: the primary button. */
+.db-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 18px;
+  border-radius: 999px;
+  background: var(--db-ink);
+  color: var(--ink-ffffff);
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: 1px solid transparent;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+.db-btn:hover {
+  background: var(--surf-23242a);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+}
+.db-btn:active {
+  transform: translateY(0);
+}
+
+/* Electric lime pill button */
+.db-btn-lime {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 18px;
+  border-radius: 999px;
+  background: var(--db-lime);
+  color: var(--ink-111110);
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: 1px solid transparent;
+  box-shadow: 0 2px 10px rgba(197, 239, 38, 0.35);
+}
+.db-btn-lime:hover {
+  background: var(--surf-b5dc22);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(197, 239, 38, 0.45);
+}
+
+.db-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--db-rule);
+  background: var(--db-white);
+  color: var(--db-ink);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+.db-btn-ghost:hover {
+  border-color: var(--db-ink);
+  background: var(--surf-fdfdfc);
+  transform: translateY(-0.5px);
+}
+
+.db-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  color: var(--db-muted);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.db-icon-btn:hover {
+  background: rgba(17, 17, 16, 0.06);
+  color: var(--db-ink);
+}
+
+/* Film-frame corner marks. */
+.db-crop {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border: 0 solid var(--db-ink);
+}
+
+/* Account settings modal (native <dialog>, centred). */
+.db-dialog {
+  margin: auto;
+  max-width: none;
+  max-height: none;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--db-ink);
+}
+.db-dialog::backdrop {
+  background: rgba(17, 17, 16, 0.45);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+.db-dialog[open] {
+  animation: db-rise 0.26s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.db-sheet {
+  width: min(560px, calc(100vw - 32px));
+  overflow: hidden;
+  border-radius: 20px;
+  background: var(--db-paper-2);
+  border: 1px solid var(--db-rule);
+  box-shadow: 0 30px 70px -20px rgba(17, 17, 16, 0.3);
+}
+
+@keyframes db-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.db-rise {
+  animation: db-rise 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .db-rise {
+    animation: none;
+  }
+}
+
+/* ==========================================================================
+   Multi-section dashboard utilities
+   ========================================================================== */
+
+/* Section navigation item (left sidebar) */
+.db-nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  height: 38px;
+  padding: 0 12px;
+  border-radius: 10px;
+  font-size: 13.5px;
+  color: var(--db-ink-2);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  border: 1px solid transparent;
+}
+.db-nav:hover {
+  background: rgba(17, 17, 16, 0.04);
+  color: var(--db-ink);
+}
+.db-nav[aria-current="page"] {
+  background: var(--db-white);
+  color: var(--db-ink);
+  font-weight: 600;
+  border-color: var(--db-rule);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+.db-nav svg {
+  color: var(--db-muted);
+  flex: none;
+}
+.db-nav[aria-current="page"] svg {
+  color: var(--ink-a4d400);
+}
+.db-nav-count {
+  margin-left: auto;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 11px;
+  color: var(--db-faint);
+  background: rgba(17, 17, 16, 0.05);
+  padding: 1px 6px;
+  border-radius: 999px;
+}
+.db-nav[aria-current="page"] .db-nav-count {
+  background: rgba(164, 212, 0, 0.15);
+  color: var(--ink-556b02);
+}
+
+/* Cards */
+.db-card {
+  border: 1px solid var(--db-rule);
+  border-radius: 16px;
+  background: var(--db-white);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.db-card-pad {
+  padding: 22px;
+}
+
+/* Inputs */
+.db-input,
+.db-textarea {
+  width: 100%;
+  border: 1px solid var(--db-rule);
+  border-radius: 12px;
+  background: var(--db-white);
+  padding: 10px 14px;
+  font-size: 14px;
+  color: var(--db-ink);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.db-input::placeholder,
+.db-textarea::placeholder {
+  color: var(--db-faint);
+}
+.db-input:focus,
+.db-textarea:focus {
+  outline: none;
+  border-color: var(--db-ink);
+  box-shadow: 0 0 0 3px rgba(197, 239, 38, 0.25);
+}
+.db-textarea {
+  resize: vertical;
+  min-height: 88px;
+  line-height: 1.5;
+}
+.db-field-label {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--db-ink-2);
+  margin-bottom: 6px;
+}
+
+/* Tags / badges */
+.db-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid var(--db-rule);
+  background: var(--db-paper);
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--db-ink-2);
+  white-space: nowrap;
+}
+.db-tag-accent {
+  border-color: rgba(164, 212, 0, 0.35);
+  background: rgba(197, 239, 38, 0.18);
+  color: var(--ink-3b4902);
+  font-weight: 600;
+}
+.db-tag-ok {
+  border-color: rgba(22, 101, 52, 0.25);
+  background: rgba(22, 101, 52, 0.08);
+  color: var(--ink-166534);
+}
+
+/* Table */
+.db-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+.db-table th {
+  text-align: left;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--db-muted);
+  font-weight: 500;
+  padding: 0 18px 12px;
+  border-bottom: 1px solid var(--db-ink);
+}
+.db-table td {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--db-rule);
+  color: var(--db-ink-2);
+  vertical-align: middle;
+}
+.db-table tbody tr:hover td {
+  background: rgba(17, 17, 16, 0.02);
+}
+
+/* Section header block */
+.db-eyebrow {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--db-faint);
+}
+
+/* Swatch (brand kit) */
+.db-swatch {
+  width: 100%;
+  aspect-ratio: 1.6;
+  border-radius: 10px;
+  border: 1px solid rgba(17, 17, 16, 0.08);
+}
+
+.db-nav-aside {
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ==========================================================================
+   Cinema Viewport & Live Studio Animations
+   ========================================================================== */
+
+@keyframes cinema-scan {
+  0% {
+    transform: translateY(-80%);
+  }
+  100% {
+    transform: translateY(240%);
+  }
+}
+
+@keyframes cinema-glow {
+  0%, 100% {
+    opacity: 0.25;
+    transform: scale(0.98);
+  }
+  50% {
+    opacity: 0.55;
+    transform: scale(1.04);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-spin,
+  .animate-pulse,
+  .animate-ping {
+    animation: none !important;
+  }
+}
+

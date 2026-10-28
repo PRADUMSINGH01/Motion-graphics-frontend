@@ -4,62 +4,47 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   type Chat,
   type ChatMessage,
+  type ChatSettings,
   type PipelineStage,
-  CHAT_STYLES,
   createChat,
   createId,
   deriveTitle,
   loadChats,
   saveChats,
+  themePending,
 } from "../lib/chatStore";
+import { api, ApiError, type PromptJob } from "../../lib/api";
 
-const PIPELINE_TEMPLATE: Omit<PipelineStage, "state">[] = [
-  { id: "plan", label: "Planning shots & script" },
-  { id: "assets", label: "Resolving visual assets" },
-  { id: "compose", label: "Composing motion scenes" },
-  { id: "preview", label: "Rendering preview" },
+const POLL_INTERVAL_MS = 3000;
+// A render takes minutes; a backend that is briefly unreachable should not end the wait.
+const MAX_CONSECUTIVE_POLL_FAILURES = 10;
+
+// The backend's pipeline steps, grouped into what the chat shows.
+const STAGE_GROUPS: { id: string; label: string; steps: string[] }[] = [
+  { id: "look", label: "Choosing the look", steps: ["queued", "preparing", "designing"] },
+  { id: "story", label: "Writing the storyboard", steps: ["planning"] },
+  { id: "sound", label: "Music and sound", steps: ["audio"] },
+  { id: "scenes", label: "Building the scenes", steps: ["building"] },
+  { id: "checks", label: "Quality checks", steps: ["assembling", "checking", "reviewing", "awaiting_approval"] },
+  { id: "render", label: "Rendering the video", steps: ["rendering"] },
 ];
 
-const SUGGESTIONS = [
-  "Kinetic typography short on compound interest",
-  "Data explainer: why startups fail in year one",
-  "Product promo for a minimalist habit tracker app",
-  "60-second tech news vertical on the AI race",
-];
+const stagesFor = (stage = "queued"): PipelineStage[] => {
+  const at = stage === "done" ? STAGE_GROUPS.length : Math.max(0, STAGE_GROUPS.findIndex((g) => g.steps.includes(stage)));
+  return STAGE_GROUPS.map((g, i) => ({ id: g.id, label: g.label, state: i < at ? "done" : i === at ? "running" : "pending" }));
+};
 
-/** Delays (ms) between pipeline stage transitions for the simulated reply. */
-const STAGE_DELAYS = [900, 1400, 1200, 1500];
-
-export function useChats() {
-  const [chats, setChats] = useState<Chat[]>([]);
+export function useChats(userId: string) {
+  // Only rendered client-side, after sign-in, so reading storage during the first render is safe.
+  const [chats, setChats] = useState<Chat[]>(() => loadChats(userId));
+  // null means the Home view; a chat opens when the user picks one or sends a prompt from Home.
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSending, setIsSending] = useState(false);
-  const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const pollers = useRef(new Map<string, ReturnType<typeof setTimeout>>());
 
-  // Hydrate from storage (client only)
-  useEffect(() => {
-    const stored = loadChats();
-    setChats(stored);
-    setActiveId(stored[0]?.id ?? null);
-    setIsLoading(false);
+  const stopPolling = useCallback((messageId: string) => {
+    clearTimeout(pollers.current.get(messageId));
+    pollers.current.delete(messageId);
   }, []);
-
-  // Persist on every change (skip pre-hydration)
-  useEffect(() => {
-    if (!isLoading) saveChats(chats);
-  }, [chats, isLoading]);
-
-  // Clear pending simulation timers on unmount
-  useEffect(() => {
-    const timers = timersRef.current;
-    return () => timers.forEach(clearTimeout);
-  }, []);
-
-  const activeChat = useMemo(
-    () => chats.find((c) => c.id === activeId) ?? null,
-    [chats, activeId]
-  );
 
   const updateChat = useCallback((chatId: string, updater: (chat: Chat) => Chat) => {
     setChats((prev) =>
@@ -67,163 +52,207 @@ export function useChats() {
     );
   }, []);
 
-  const handleNewChat = useCallback(
-    (format: "9:16" | "16:9" = "9:16", style: string = CHAT_STYLES[0]) => {
-      const chat = createChat(format, style);
-      setChats((prev) => [chat, ...prev]);
-      setActiveId(chat.id);
-    },
-    []
+  const patchMessage = useCallback(
+    (chatId: string, messageId: string, patch: Partial<ChatMessage>) =>
+      updateChat(chatId, (c) => ({
+        ...c,
+        messages: c.messages.map((m) => (m.id === messageId ? { ...m, ...patch } : m)),
+      })),
+    [updateChat]
   );
 
-  const handleSelectChat = useCallback((chatId: string) => setActiveId(chatId), []);
+  /** Follow a queued prompt until the backend reports it done or failed. */
+  const track = useCallback(
+    (chatId: string, messageId: string, promptId: string, title: string) => {
+      let failures = 0;
+      const fail = (content: string) => patchMessage(chatId, messageId, { isStreaming: false, isError: true, content });
 
-  const handleDeleteChat = useCallback((chatId: string) => {
-    setChats((prev) => {
-      const next = prev.filter((c) => c.id !== chatId);
-      setActiveId((current) =>
-        current === chatId ? (next[0]?.id ?? null) : current
-      );
-      return next;
-    });
-  }, []);
+      const poll = async () => {
+        try {
+          const { job } = await api.prompt.status(promptId);
+          failures = 0;
+          const tokens = job.tokens?.total ?? undefined;
+          // The chat's first video to settle a look sets the chat's theme; every later video reuses it.
+          if (job.theme && job.harnessJobId) {
+            updateChat(chatId, (c) => (c.theme ? c : { ...c, theme: { jobId: job.harnessJobId!, name: job.theme! } }));
+          }
+          if (job.status === "done") {
+            const url = job.play[0];
+            if (url) {
+              patchMessage(chatId, messageId, {
+                isStreaming: false,
+                stages: stagesFor("done"),
+                activity: undefined,
+                harnessJobId: job.harnessJobId ?? undefined,
+                content: "Your video is ready.",
+                preview: { title, url },
+                tokens,
+              });
+            } else {
+              fail("The render finished but produced no playable video.");
+            }
+            return;
+          }
+          if (job.status === "failed") {
+            patchMessage(chatId, messageId, { tokens });
+            return fail(`Generation failed: ${job.error ?? "unknown error"}`);
+          }
+          patchMessage(chatId, messageId, {
+            stages: stagesFor(job.stage),
+            activity: job.activity ?? undefined,
+            harnessJobId: job.harnessJobId ?? undefined,
+            tokens,
+          });
+        } catch (err) {
+          // 4xx means retrying cannot help: the prompt is gone or the session ended.
+          if (err instanceof ApiError && err.statusCode >= 400 && err.statusCode < 500) return fail(err.message);
+          if (++failures >= MAX_CONSECUTIVE_POLL_FAILURES) return fail("Lost contact with the server. Try again.");
+        }
+        pollers.current.set(messageId, setTimeout(poll, POLL_INTERVAL_MS));
+      };
+      pollers.current.set(messageId, setTimeout(poll, 0));
+    },
+    [patchMessage, updateChat]
+  );
 
-  const handleRenameChat = useCallback(
+  // Resume any render that was still running at the last reload.
+  useEffect(() => {
+    for (const chat of loadChats(userId)) {
+      chat.messages.forEach((m, i) => {
+        if (m.isStreaming && m.promptId) track(chat.id, m.id, m.promptId, deriveTitle(chat.messages[i - 1]?.content ?? ""));
+      });
+    }
+    const active = pollers.current;
+    return () => {
+      active.forEach(clearTimeout);
+      active.clear();
+    };
+  }, [userId, track]);
+
+  useEffect(() => {
+    saveChats(userId, chats);
+  }, [userId, chats]);
+
+  const activeChat = useMemo(() => chats.find((c) => c.id === activeId) ?? null, [chats, activeId]);
+
+  const goHome = useCallback(() => setActiveId(null), []);
+
+  const deleteChat = useCallback(
+    (chatId: string) => {
+      chats.find((c) => c.id === chatId)?.messages.forEach((m) => stopPolling(m.id));
+      const remaining = chats.filter((c) => c.id !== chatId);
+      setChats(remaining);
+      if (activeId === chatId) setActiveId(remaining[0]?.id ?? null);
+    },
+    [chats, activeId, stopPolling]
+  );
+
+  const renameChat = useCallback(
     (chatId: string, title: string) => {
       const clean = title.trim();
-      if (!clean) return;
-      updateChat(chatId, (c) => ({ ...c, title: clean }));
+      if (clean) updateChat(chatId, (c) => ({ ...c, title: clean }));
     },
     [updateChat]
   );
 
-  const handleSetFormat = useCallback(
-    (format: "9:16" | "16:9") => {
-      if (!activeId) return;
-      updateChat(activeId, (c) => ({ ...c, format }));
-    },
-    [activeId, updateChat]
-  );
-
-  const handleSetStyle = useCallback(
-    (style: string) => {
-      if (!activeId) return;
-      updateChat(activeId, (c) => ({ ...c, style }));
-    },
-    [activeId, updateChat]
-  );
+  /** Open an empty chat: a new theme for the next video, with the given format and length. */
+  const newChat = useCallback((settings?: ChatSettings) => {
+    const chat = createChat(settings);
+    setChats((prev) => [chat, ...prev]);
+    setActiveId(chat.id);
+    return chat;
+  }, []);
 
   /**
-   * Send a prompt: appends the user message, then animates an assistant
-   * reply through the generation pipeline stages. Replace `simulateReply`
-   * internals with a real `/api/prompt` (SSE/fetch) call when the backend
-   * is wired to this UI.
+   * Make a video in the open chat (or a new one with `settings`). Every video in a chat uses the
+   * chat's theme: the look its first video settled on, passed as `themeFrom`.
    */
-  const handleSend = useCallback(
-    (text: string) => {
+  const send = useCallback(
+    async (text: string, settings?: ChatSettings) => {
       const prompt = text.trim();
-      if (!prompt || isSending) return;
+      if (!prompt) return;
 
-      const chat = activeChat ?? createChat();
+      const chat = activeChat ?? createChat(settings);
       if (!activeChat) {
         setChats((prev) => [chat, ...prev]);
         setActiveId(chat.id);
       }
-      const chatId = chat.id;
+      // The first video is still choosing the look: wait, or this one would get a different theme.
+      if (themePending(chat)) return;
 
-      const userMsg: ChatMessage = {
-        id: createId("m"),
-        role: "user",
-        content: prompt,
-        createdAt: new Date().toISOString(),
-      };
-      const assistantMsg: ChatMessage = {
+      const now = new Date().toISOString();
+      const promptId = createId("p");
+      const title = deriveTitle(prompt);
+      const assistant: ChatMessage = {
         id: createId("m"),
         role: "assistant",
         content: "",
-        createdAt: new Date().toISOString(),
-        stages: PIPELINE_TEMPLATE.map((s, i) => ({
-          ...s,
-          state: i === 0 ? "running" : "pending",
-        })),
+        createdAt: now,
+        promptId,
+        stages: stagesFor("queued"),
         isStreaming: true,
       };
-
-      updateChat(chatId, (c) => ({
+      updateChat(chat.id, (c) => ({
         ...c,
-        title: c.messages.length === 0 ? deriveTitle(prompt) : c.title,
-        messages: [...c.messages, userMsg, assistantMsg],
+        title: c.messages.length === 0 ? title : c.title,
+        messages: [...c.messages, { id: createId("m"), role: "user", content: prompt, createdAt: now }, assistant],
       }));
-      setIsSending(true);
 
-      const patchAssistant = (patch: Partial<ChatMessage>) => {
-        updateChat(chatId, (c) => ({
-          ...c,
-          messages: c.messages.map((m) => (m.id === assistantMsg.id ? { ...m, ...patch } : m)),
-        }));
-      };
-
-      const patchStage = (index: number, state: PipelineStage["state"]) => {
-        updateChat(chatId, (c) => ({
-          ...c,
-          messages: c.messages.map((m) =>
-            m.id === assistantMsg.id && m.stages
-              ? {
-                  ...m,
-                  stages: m.stages.map((s, i) => (i === index ? { ...s, state } : s)),
-                }
-              : m
-          ),
-        }));
-      };
-
-      // Animate the pipeline: each stage starts as the previous one completes.
-      let elapsed = 0;
-      PIPELINE_TEMPLATE.forEach((_, i) => {
-        const delay = STAGE_DELAYS[i] ?? 1000;
-        timersRef.current.push(
-          setTimeout(() => {
-            if (i > 0) {
-              patchStage(i - 1, "done");
-              patchStage(i, "running");
-            }
-          }, elapsed)
-        );
-        elapsed += delay;
-      });
-
-      // Finish: mark streaming complete + attach preview card
-      timersRef.current.push(
-        setTimeout(() => {
-          patchAssistant({
-            isStreaming: false,
-            content: `Your short is ready. I composed a ${chat.format} motion graphics scene from your prompt in the **${chat.style}** style. Open it in the Studio to refine timing, voice-over, or export.`,
-            preview: {
-              format: chat.format,
-              title: deriveTitle(prompt),
-              style: chat.style,
-            },
-          });
-          setIsSending(false);
-        }, elapsed + 400)
-      );
+      try {
+        const { ratio, length } = chat.settings ?? settings ?? { ratio: "9:16" as const, length: 30 };
+        await api.prompt.queue({ prompt, promptId, ratio, length, ...(chat.theme ? { themeFrom: chat.theme.jobId } : {}) });
+        track(chat.id, assistant.id, promptId, title);
+      } catch (err) {
+        patchMessage(chat.id, assistant.id, {
+          isStreaming: false,
+          isError: true,
+          content: err instanceof Error ? err.message : "Could not submit your prompt.",
+        });
+      }
     },
-    [activeChat, isSending, updateChat]
+    [activeChat, updateChat, patchMessage, track]
   );
 
-  return {
-    chats,
-    activeChat,
-    activeId,
-    isLoading,
-    isSending,
-    suggestions: SUGGESTIONS,
-    newChat: handleNewChat,
-    selectChat: handleSelectChat,
-    deleteChat: handleDeleteChat,
-    renameChat: handleRenameChat,
-    setFormat: handleSetFormat,
-    setStyle: handleSetStyle,
-    send: handleSend,
-  };
+  /**
+   * Retry a failed reply in place. A video that failed on the backend continues from the step it
+   * stopped at (its storyboard and finished scenes are kept, and it does not use another video
+   * from the plan); one that never reached the backend is queued again with the same promptId; one
+   * still running (the connection dropped) is simply followed again.
+   */
+  const retry = useCallback(
+    async (chatId: string, messageId: string) => {
+      const chat = chats.find((c) => c.id === chatId);
+      const index = chat?.messages.findIndex((m) => m.id === messageId) ?? -1;
+      const message = chat?.messages[index];
+      const prompt = chat?.messages[index - 1]?.content ?? "";
+      if (!chat || !message?.promptId || message.isStreaming) return;
+      const { promptId } = message;
+      const title = deriveTitle(prompt);
+      patchMessage(chatId, messageId, { isStreaming: true, isError: false, content: "", stages: stagesFor("queued"), activity: undefined });
+      try {
+        let status: PromptJob | null = null;
+        try {
+          status = (await api.prompt.status(promptId)).job;
+        } catch (err) {
+          if (!(err instanceof ApiError && err.statusCode === 404)) throw err;
+        }
+        if (!status) {
+          const { ratio, length } = chat.settings ?? { ratio: "9:16" as const, length: 30 };
+          await api.prompt.queue({ prompt, promptId, ratio, length, ...(chat.theme ? { themeFrom: chat.theme.jobId } : {}) });
+        } else if (status.status === "failed") {
+          await api.prompt.retry(promptId);
+        }
+        track(chatId, messageId, promptId, title);
+      } catch (err) {
+        patchMessage(chatId, messageId, {
+          isStreaming: false,
+          isError: true,
+          content: err instanceof Error ? err.message : "Could not retry this video.",
+        });
+      }
+    },
+    [chats, patchMessage, track]
+  );
+
+  return { chats, activeChat, activeId, goHome, selectChat: setActiveId, deleteChat, renameChat, send, newChat, retry };
 }

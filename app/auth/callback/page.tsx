@@ -71,14 +71,14 @@ function GoogleCallbackContent() {
         );
 
         setTimeout(() => {
-          router.replace("/workspace");
+          router.replace("/dashboard");
         }, 800);
       } catch (err: any) {
         console.error("[GoogleCallback] Error finalizing session:", err);
         // Even if getMe temporarily fails, token is stored; proceed to workspace
         setStatus("success");
         setTimeout(() => {
-          router.replace("/workspace");
+          router.replace("/dashboard");
         }, 1000);
       }
     };

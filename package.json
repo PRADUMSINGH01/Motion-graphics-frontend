@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "theme:palette": "node scripts/dark-palette.mjs"
   },
   "dependencies": {
     "@remotion/player": "^4.0.526",

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
+import { Geist, Geist_Mono, Instrument_Serif, Caveat } from "next/font/google";
 import "./globals.css";
 import React, { Suspense } from "react";
 
@@ -25,8 +25,16 @@ const instrumentSerif = Instrument_Serif({
   display: "swap",
 });
 
+/* Authentic handwritten fountain-pen font for notebook margin annotations & links. */
+const caveat = Caveat({
+  variable: "--font-pen",
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  display: "swap",
+});
+
 /* Applies the stored theme before first paint so light-mode users never see a dark flash. */
-const themeInitScript = `(function(){try{var t=localStorage.getItem("animagent_theme")||"dark";if(t==="system"){t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}var r=document.documentElement;r.classList.add(t);r.setAttribute("data-theme",t);r.style.colorScheme=t}catch(e){}})();`;
+const themeInitScript = `(function(){try{var t=localStorage.getItem("byreel_theme")||"light";if(t==="system"){t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}var r=document.documentElement;r.classList.add(t);r.setAttribute("data-theme",t);r.style.colorScheme=t}catch(e){}})();`;
 
 const siteDescription =
   "Describe a scene in plain language and byreel writes, animates and exports broadcast-ready 60 FPS motion graphics — no timeline required.";
@@ -44,22 +52,22 @@ export const metadata: Metadata = {
     siteName: "byreel",
     title: "byreel — The AI agent for motion graphics",
     description: siteDescription,
-    images: [{ url: "/favicon-icon.jpg", width: 512, height: 512, alt: "byreel" }],
+    images: [{ url: "/byreel-mark.png", width: 512, height: 512, alt: "byreel" }],
   },
   twitter: {
     card: "summary",
     title: "byreel — The AI agent for motion graphics",
     description: siteDescription,
-    images: ["/favicon-icon.jpg"],
+    images: ["/byreel-mark.png"],
   },
   icons: {
     icon: [
-      { url: "/favicon-icon.jpg", type: "image/jpeg", sizes: "512x512" },
-      { url: "/light.png", type: "image/png", sizes: "any" },
+      { url: "/byreel-mark.png", type: "image/png", sizes: "512x512" },
       { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico", sizes: "any" },
     ],
-    shortcut: "/favicon-icon.jpg",
-    apple: "/favicon-icon.jpg",
+    shortcut: "/byreel-mark.png",
+    apple: "/byreel-mark.png",
   },
 };
 
@@ -79,7 +87,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${geist.variable} ${geistMono.variable} ${instrumentSerif.variable} h-full antialiased`}
+      className={`${geist.variable} ${geistMono.variable} ${instrumentSerif.variable} ${caveat.variable} h-full antialiased`}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />

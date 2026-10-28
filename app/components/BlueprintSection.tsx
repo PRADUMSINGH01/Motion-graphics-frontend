@@ -6,7 +6,7 @@ import { IconArrowUpRight } from "./Icons";
 
 export const BlueprintSection = memo(function BlueprintSection() {
   return (
-    <section className="relative w-full py-28 px-4 sm:px-6 lg:px-8 bg-[#050508] text-white overflow-hidden border-t border-white/10 select-none">
+    <section className="relative w-full py-28 px-4 sm:px-6 lg:px-8 bg-surf-050508 text-white overflow-hidden border-t border-white/10 select-none">
       {/* ── TECHNICAL ENGINEERING GRID PATTERN (EXACT TO SCREENSHOT 5) ── */}
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.18]"
@@ -99,7 +99,7 @@ export const BlueprintSection = memo(function BlueprintSection() {
                 </div>
 
                 {/* 2. Middle Layer: List Content Rows */}
-                <div className="absolute inset-x-2 inset-y-3 rounded-xl border border-zinc-600/60 bg-[#121216]/80 p-3 space-y-2 translate-y-[-28px] shadow-2xl backdrop-blur-md">
+                <div className="absolute inset-x-2 inset-y-3 rounded-xl border border-zinc-600/60 bg-surf-121216/80 p-3 space-y-2 translate-y-[-28px] shadow-2xl backdrop-blur-md">
                   <div className="h-4 rounded bg-white/5 border border-white/5 w-3/4" />
                   <div className="h-4 rounded bg-white/5 border border-white/5 w-1/2" />
                   <div className="h-4 rounded bg-white/5 border border-white/5 w-2/3" />
@@ -108,7 +108,7 @@ export const BlueprintSection = memo(function BlueprintSection() {
                 {/* 3. Glowing Blue Selected Item Layer (FIG_01 Highlight) */}
                 <div className="absolute inset-x-4 top-12 h-8 rounded-lg bg-gradient-to-r from-blue-600 via-sky-400 to-blue-500 border border-sky-300 shadow-[0_0_30px_rgba(56,189,248,0.7)] translate-y-[-56px] flex items-center px-3 justify-between z-20">
                   <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-white shadow-xs" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-surf-ffffff shadow-xs" />
                     <span className="text-[10px] font-mono font-bold text-black uppercase tracking-wider">Active Command</span>
                   </div>
                   <span className="text-[9px] font-mono text-black font-semibold">↵</span>

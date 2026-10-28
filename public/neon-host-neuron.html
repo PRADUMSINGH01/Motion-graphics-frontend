@@ -126,20 +126,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script>
 const stage = document.getElementById('stage');
-// ---------- Audio: 'ding' ----------
-let actx;
-function ding(freq = 1568, dur = 0.9){
-  actx = actx || new (window.AudioContext||window.webkitAudioContext)();
-  const t = actx.currentTime;
-  [1, 2.76].forEach((mult, i) => {           // bell-like partials
-    const o = actx.createOscillator(), g = actx.createGain();
-    o.type = 'sine';
-    o.frequency.value = freq * mult;
-    g.gain.setValueAtTime(i ? 0.12 : 0.3, t);
-    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-    o.connect(g).connect(actx.destination);
-    o.start(t); o.stop(t + dur);
-  });
+// ---------- Audio: muted ----------
+function ding(){
+  // Silent in preview
 }
 
 // ---------- Scene 1: neon box pops in next to head ----------
