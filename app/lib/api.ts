@@ -139,7 +139,7 @@ export interface BackendUser {
     timezone: string;
   };
   auth: {
-    provider: "email" | "google" | "github" | "apple";
+    provider: "email" | "google" | "email+google" | "github" | "apple";
     emailVerified: boolean;
     role: "user" | "creator" | "admin" | "moderator" | "superadmin";
     status: "active" | "pending" | "suspended" | "deactivated";
@@ -161,6 +161,11 @@ export interface BackendUser {
     storage: { usedBytes: number; limitBytes: number };
     lastResetAt: string;
     nextResetAt: string;
+  };
+  preferences?: {
+    renderCompletionAlerts: boolean;
+    hardwareAcceleration: boolean;
+    productUpdates: boolean;
   };
   createdAt: string;
   lastLoginAt: string;
@@ -200,6 +205,13 @@ export interface PromptJob {
   tokens?: PromptTokens | null;
   /** A failed video can continue from the step it stopped at (api.prompt.retry). */
   canRetry?: boolean;
+  /** Raw agent/tool event trace for this run. Only present while the server that ran it is up. */
+  logs?: Array<{ ts: string; line: string }>;
+  title?: string;
+  prompt?: string;
+  ratio?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface PromptTokens {
@@ -299,6 +311,31 @@ export const api = {
         method: "GET",
       }),
 
+    updateProfile: (profile: {
+      displayName?: string;
+      email?: string;
+      company?: string;
+      bio?: string;
+      avatarUrl?: string;
+      role?: string;
+      currentPassword?: string;
+      newPassword?: string;
+    }) =>
+      request<{ success: boolean; message: string; user: BackendUser }>("/api/user/profile", {
+        method: "PATCH",
+        body: JSON.stringify(profile),
+      }),
+
+    updatePreferences: (preferences: {
+      renderCompletionAlerts?: boolean;
+      hardwareAcceleration?: boolean;
+      productUpdates?: boolean;
+    }) =>
+      request<{ success: boolean; message?: string; preferences: any }>("/api/user/preferences", {
+        method: "PATCH",
+        body: JSON.stringify(preferences),
+      }),
+
     updatePlan: (tier: "free" | "creator" | "pro" | "enterprise", interval: "monthly" | "annual" = "monthly") =>
       request<{ success: boolean; message: string; user: BackendUser; checkoutUrl?: string; portalUrl?: string }>("/api/user/plan", {
         method: "POST",
@@ -387,6 +424,9 @@ export const api = {
     /** Continue a failed video from the step it stopped at; it keeps its finished work and does not count again. */
     retry: (promptId: string) =>
       request<{ success: boolean; job: PromptJob }>(`/api/prompt/${encodeURIComponent(promptId)}/retry`, { method: "POST" }),
+
+    /** Every job the backend knows about (in-memory + indexed from disk), newest first. */
+    list: () => request<{ success: boolean; jobs: PromptJob[]; videos: PromptJob[] }>("/api/jobs", { method: "GET" }),
 
     submit: async (payload: {
       prompt: string;
