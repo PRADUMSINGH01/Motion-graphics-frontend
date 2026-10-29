@@ -28,7 +28,7 @@ import AccountSection from "./sections/AccountSection";
 export default function DashboardShell({ user }: { user: User & { id: string } }) {
   const { logout, refreshUser } = useAuth();
   const chatsApi = useChats(user.id);
-  const { chats, activeChat, send, retry, newChat, selectChat, goHome, deleteChat, renameChat } = chatsApi;
+  const { chats, activeChat, send, retry, newChat, selectChat, goHome, deleteChat, renameChat, updateChatSettings } = chatsApi;
 
   const [section, setSectionState] = useState<SectionId>("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -164,6 +164,7 @@ export default function DashboardShell({ user }: { user: User & { id: string } }
               onDelete={deleteChat}
               onRename={renameChat}
               onBack={goHome}
+              onUpdateChatSettings={updateChatSettings}
             />
           )}
 

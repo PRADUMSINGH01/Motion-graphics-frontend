@@ -66,6 +66,7 @@ interface LaunchesSectionProps {
   onDelete: (id: string) => void;
   onRename: (id: string, title: string) => void;
   onBack: () => void;
+  onUpdateChatSettings?: (chatId: string, settings: ChatSettings) => void;
 }
 
 export default function LaunchesSection({
@@ -78,9 +79,13 @@ export default function LaunchesSection({
   onDelete,
   onRename,
   onBack,
+  onUpdateChatSettings,
 }: LaunchesSectionProps) {
   const [selectedRatio, setSelectedRatio] = useState<Ratio>(DEFAULT_SETTINGS.ratio);
   const [selectedLength, setSelectedLength] = useState(DEFAULT_SETTINGS.length);
+  const [selectedProvider, setSelectedProvider] = useState<string>(DEFAULT_SETTINGS.provider || "azure");
+  const [selectedModel, setSelectedModel] = useState<string>(DEFAULT_SETTINGS.model || "qwen--qwen38-27b");
+  const [selectedEffort, setSelectedEffort] = useState<string>(DEFAULT_SETTINGS.effort || "xhigh");
   const [draftPrompt, setDraftPrompt] = useState("");
   const [showHistory, setShowHistory] = useState(false);
   const [renaming, setRenaming] = useState(false);
@@ -94,7 +99,13 @@ export default function LaunchesSection({
     }
   }, [messages]);
 
-  const chatSettings = activeChat?.settings ?? { ratio: selectedRatio, length: selectedLength };
+  const chatSettings: ChatSettings = activeChat?.settings ?? {
+    ratio: selectedRatio,
+    length: selectedLength,
+    provider: selectedProvider,
+    model: selectedModel,
+    effort: selectedEffort,
+  };
   const hasMessages = !!activeChat && activeChat.messages.length > 0;
   const isRendering = activeChat?.messages.some((m) => m.isStreaming);
   const hasPreview = activeChat?.messages.some((m) => m.preview);
@@ -278,8 +289,18 @@ export default function LaunchesSection({
           <div className="shrink-0 border-t border-[rgba(7,20,46,0.18)] bg-[rgba(250,248,242,0.95)] backdrop-blur-md p-3.5 sm:p-5">
             <div className="mx-auto max-w-3xl">
               <PromptBox
-                onSend={(text) => onSend(text)}
+                onSend={(text) => onSend(text, chatSettings)}
                 settings={chatSettings}
+                onSettingsChange={(st) => {
+                  setSelectedRatio(st.ratio);
+                  setSelectedLength(st.length);
+                  if (st.provider) setSelectedProvider(st.provider);
+                  if (st.model) setSelectedModel(st.model);
+                  if (st.effort) setSelectedEffort(st.effort);
+                  if (activeChat && onUpdateChatSettings) {
+                    onUpdateChatSettings(activeChat.id, st);
+                  }
+                }}
                 placeholder="Request timing edits, typography changes, or describe the next scene..."
                 disabledReason={
                   waitingForTheme
@@ -330,13 +351,28 @@ export default function LaunchesSection({
                 key={draftPrompt}
                 autoFocus
                 initialValue={draftPrompt}
-                settings={{ ratio: selectedRatio, length: selectedLength }}
+                settings={{
+                  ratio: selectedRatio,
+                  length: selectedLength,
+                  provider: selectedProvider,
+                  model: selectedModel,
+                  effort: selectedEffort,
+                }}
                 onSettingsChange={(st) => {
                   setSelectedRatio(st.ratio);
                   setSelectedLength(st.length);
+                  if (st.provider) setSelectedProvider(st.provider);
+                  if (st.model) setSelectedModel(st.model);
+                  if (st.effort) setSelectedEffort(st.effort);
                 }}
                 onSend={(text) => {
-                  onSend(text, { ratio: selectedRatio, length: selectedLength });
+                  onSend(text, {
+                    ratio: selectedRatio,
+                    length: selectedLength,
+                    provider: selectedProvider,
+                    model: selectedModel,
+                    effort: selectedEffort,
+                  });
                 }}
               />
             </div>

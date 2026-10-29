@@ -293,5 +293,15 @@ export function useChats(userId: string) {
     [chats, patchMessage, track]
   );
 
-  return { chats, activeChat, activeId, goHome, selectChat: setActiveId, deleteChat, renameChat, send, newChat, retry };
+  const updateChatSettings = useCallback(
+    (chatId: string, settings: ChatSettings) => {
+      updateChat(chatId, (c) => ({
+        ...c,
+        settings,
+      }));
+    },
+    [updateChat]
+  );
+
+  return { chats, activeChat, activeId, goHome, selectChat: setActiveId, deleteChat, renameChat, send, newChat, retry, updateChatSettings };
 }
