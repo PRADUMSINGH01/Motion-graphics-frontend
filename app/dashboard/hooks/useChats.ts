@@ -72,6 +72,9 @@ export function useChats(userId: string) {
           const { job } = await api.prompt.status(promptId);
           failures = 0;
           const tokens = job.tokens?.total ?? undefined;
+          const tokenDetails = job.tokens ?? undefined;
+          const logs = job.logs ?? undefined;
+          const thought = (job as any).thought ?? undefined;
           // The chat's first video to settle a look sets the chat's theme; every later video reuses it.
           if (job.theme && job.harnessJobId) {
             updateChat(chatId, (c) => (c.theme ? c : { ...c, theme: { jobId: job.harnessJobId!, name: job.theme! } }));
@@ -87,6 +90,9 @@ export function useChats(userId: string) {
                 content: "Your video is ready.",
                 preview: { title, url },
                 tokens,
+                tokenDetails,
+                logs,
+                thought,
               });
             } else {
               fail("The render finished but produced no playable video.");
@@ -94,7 +100,7 @@ export function useChats(userId: string) {
             return;
           }
           if (job.status === "failed") {
-            patchMessage(chatId, messageId, { tokens });
+            patchMessage(chatId, messageId, { tokens, tokenDetails, logs });
             return fail(`Generation failed: ${job.error ?? "unknown error"}`);
           }
           patchMessage(chatId, messageId, {
@@ -102,6 +108,9 @@ export function useChats(userId: string) {
             activity: job.activity ?? undefined,
             harnessJobId: job.harnessJobId ?? undefined,
             tokens,
+            tokenDetails,
+            logs,
+            thought,
           });
         } catch (err) {
           // 4xx means retrying cannot help: the prompt is gone or the session ended.

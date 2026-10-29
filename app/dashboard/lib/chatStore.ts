@@ -38,6 +38,14 @@ export interface ChatMessage {
   isError?: boolean;
   /** Assistant only: model tokens the video has used so far, every attempt included. */
   tokens?: number;
+  tokenDetails?: {
+    total: number;
+    input: number;
+    cachedInput?: number;
+    output: number;
+  };
+  logs?: Array<{ ts: string; line: string }>;
+  thought?: string;
 }
 
 /** "850 tokens", "12.4k tokens", "1.25M tokens". */
