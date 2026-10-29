@@ -46,6 +46,9 @@ export interface ChatMessage {
   };
   logs?: Array<{ ts: string; line: string }>;
   thought?: string;
+  provider?: string;
+  model?: string;
+  effort?: string;
 }
 
 /** "850 tokens", "12.4k tokens", "1.25M tokens". */
@@ -61,6 +64,9 @@ export interface ChatSettings {
   ratio: Ratio;
   /** Seconds. */
   length: number;
+  provider?: string;
+  model?: string;
+  effort?: string;
 }
 
 /**
@@ -82,7 +88,13 @@ export interface Chat {
   theme?: ChatTheme;
 }
 
-export const DEFAULT_SETTINGS: ChatSettings = { ratio: "9:16", length: 30 };
+export const DEFAULT_SETTINGS: ChatSettings = {
+  ratio: "9:16",
+  length: 30,
+  provider: "azure",
+  model: "qwen--qwen38-27b",
+  effort: "xhigh",
+};
 
 export const MAX_PROMPT_LENGTH = 4000;
 const MAX_STORED_CHATS = 100;

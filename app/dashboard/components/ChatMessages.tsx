@@ -30,6 +30,8 @@ function VideoPlayerCard({
   tokens,
   tokenDetails,
   logs,
+  model,
+  effort,
 }: {
   title: string;
   url: string;
@@ -37,6 +39,8 @@ function VideoPlayerCard({
   tokens?: number;
   tokenDetails?: { total: number; input: number; output: number };
   logs?: Array<{ ts: string; line: string }>;
+  model?: string;
+  effort?: string;
 }) {
   const [showLogs, setShowLogs] = useState(false);
   const isVertical = ratio === "9:16";
@@ -73,6 +77,11 @@ function VideoPlayerCard({
           <span className="font-mono text-[10px] font-bold text-[rgba(7,20,46,0.7)] bg-[rgba(7,20,46,0.06)] border border-[rgba(7,20,46,0.14)] px-1.5 py-0.5 rounded-md">
             {ratio}
           </span>
+          {model && (
+            <span className="font-mono text-[10px] font-medium text-[#07142e] bg-[rgba(7,20,46,0.06)] border border-[rgba(7,20,46,0.14)] px-1.5 py-0.5 rounded-md">
+              🤖 {model} {effort ? `· ${effort}` : ""}
+            </span>
+          )}
           {totalTokens != null && (
             <span
               className="inline-flex items-center gap-1 font-mono text-[10px] font-semibold text-[#07142e] bg-[rgba(7,20,46,0.06)] border border-[rgba(7,20,46,0.14)] px-2 py-0.5 rounded-md"
@@ -147,6 +156,9 @@ function AssistantMessage({
             tokens={message.tokens}
             tokenDetails={message.tokenDetails}
             logs={message.logs}
+            provider={message.provider}
+            model={message.model}
+            effort={message.effort}
           />
         )}
 
@@ -187,6 +199,8 @@ function AssistantMessage({
             tokens={message.tokens}
             tokenDetails={message.tokenDetails}
             logs={message.logs}
+            model={message.model}
+            effort={message.effort}
           />
         )}
       </div>

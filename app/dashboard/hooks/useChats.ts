@@ -8,6 +8,7 @@ import {
   type PipelineStage,
   createChat,
   createId,
+  DEFAULT_SETTINGS,
   deriveTitle,
   loadChats,
   saveChats,
@@ -93,6 +94,9 @@ export function useChats(userId: string) {
                 tokenDetails,
                 logs,
                 thought,
+                provider: (job as any).provider,
+                model: (job as any).model,
+                effort: (job as any).effort,
               });
             } else {
               fail("The render finished but produced no playable video.");
@@ -111,6 +115,9 @@ export function useChats(userId: string) {
             tokenDetails,
             logs,
             thought,
+            provider: (job as any).provider,
+            model: (job as any).model,
+            effort: (job as any).effort,
           });
         } catch (err) {
           // 4xx means retrying cannot help: the prompt is gone or the session ended.
@@ -192,6 +199,9 @@ export function useChats(userId: string) {
       const now = new Date().toISOString();
       const promptId = createId("p");
       const title = deriveTitle(prompt);
+      const effectiveSettings = chat.settings ?? settings ?? DEFAULT_SETTINGS;
+      const { ratio, length, provider, model, effort } = effectiveSettings;
+
       const assistant: ChatMessage = {
         id: createId("m"),
         role: "assistant",
@@ -200,6 +210,9 @@ export function useChats(userId: string) {
         promptId,
         stages: stagesFor("queued"),
         isStreaming: true,
+        provider,
+        model,
+        effort,
       };
       updateChat(chat.id, (c) => ({
         ...c,
@@ -208,8 +221,16 @@ export function useChats(userId: string) {
       }));
 
       try {
-        const { ratio, length } = chat.settings ?? settings ?? { ratio: "9:16" as const, length: 30 };
-        await api.prompt.queue({ prompt, promptId, ratio, length, ...(chat.theme ? { themeFrom: chat.theme.jobId } : {}) });
+        await api.prompt.queue({
+          prompt,
+          promptId,
+          ratio,
+          length,
+          provider,
+          model,
+          effort,
+          ...(chat.theme ? { themeFrom: chat.theme.jobId } : {})
+        });
         track(chat.id, assistant.id, promptId, title);
       } catch (err) {
         patchMessage(chat.id, assistant.id, {
@@ -246,8 +267,17 @@ export function useChats(userId: string) {
           if (!(err instanceof ApiError && err.statusCode === 404)) throw err;
         }
         if (!status) {
-          const { ratio, length } = chat.settings ?? { ratio: "9:16" as const, length: 30 };
-          await api.prompt.queue({ prompt, promptId, ratio, length, ...(chat.theme ? { themeFrom: chat.theme.jobId } : {}) });
+          const { ratio, length, provider, model, effort } = chat.settings ?? DEFAULT_SETTINGS;
+          await api.prompt.queue({
+            prompt,
+            promptId,
+            ratio,
+            length,
+            provider: message.provider ?? provider,
+            model: message.model ?? model,
+            effort: message.effort ?? effort,
+            ...(chat.theme ? { themeFrom: chat.theme.jobId } : {})
+          });
         } else if (status.status === "failed") {
           await api.prompt.retry(promptId);
         }

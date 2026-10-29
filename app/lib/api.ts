@@ -412,6 +412,9 @@ export const api = {
       length?: number;
       /** A previous video's job id: reuse its exact look (the chat's theme). */
       themeFrom?: string;
+      provider?: string;
+      model?: string;
+      effort?: string;
     }) =>
       request<{ success: boolean; job: PromptJob }>("/api/prompt", {
         method: "POST",

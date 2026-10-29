@@ -19,6 +19,9 @@ interface RenderLoaderProps {
     output: number;
   };
   logs?: Array<{ ts: string; line: string }>;
+  provider?: string;
+  model?: string;
+  effort?: string;
 }
 
 export default function RenderLoader({
@@ -30,6 +33,9 @@ export default function RenderLoader({
   tokens,
   tokenDetails,
   logs,
+  provider,
+  model,
+  effort,
 }: RenderLoaderProps) {
   const [seconds, setSeconds] = useState(0);
   const [showLogs, setShowLogs] = useState(true);
@@ -105,6 +111,11 @@ export default function RenderLoader({
             <span className="font-mono text-[10.5px] font-semibold tracking-wider text-[#c5ef26] uppercase">
               {currentAgentRole} Active
             </span>
+            {model && (
+              <span className="hidden sm:inline-block font-mono text-[9.5px] text-white/70 bg-white/10 px-1.5 py-0.5 rounded border border-white/10">
+                {model} {effort ? `· ${effort}` : ""}
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-1.5">
             {totalTokens != null && (
