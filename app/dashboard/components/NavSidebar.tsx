@@ -10,43 +10,45 @@ import {
   FiFilm,
   FiGrid,
   FiPlayCircle,
-  FiFolder,
-  FiImage,
-  FiUpload,
-  FiDroplet,
-  FiCpu,
+  FiTerminal,
   FiSettings,
+  FiDroplet,
   FiChevronsLeft,
-  FiArrowRight,
 } from "react-icons/fi";
 import type { IconType } from "react-icons";
-import { ByreelLogo } from "../../components/landing/ByreelBrand";
-import { SECTION_LABELS, type SectionId } from "../lib/sections";
+import type { SectionId } from "../lib/sections";
+import type { User } from "../../context/AuthContext";
 
 interface NavItemConfig {
   id: SectionId;
+  num: string;
   label: string;
   icon: IconType;
-  badge?: string;
 }
 
 const PRIMARY_NAV: NavItemConfig[] = [
-  { id: "dashboard", label: "Dashboard", icon: FiHome },
-  { id: "create", label: "Create Video", icon: FiVideo },
-  { id: "product-launch", label: "Product Launch", icon: FiZap, badge: "New" },
-  { id: "brolls", label: "B-Rolls", icon: FiFilm, badge: "AI" },
-  { id: "templates", label: "Templates", icon: FiGrid },
-  { id: "your-videos", label: "Your Videos", icon: FiPlayCircle },
-  { id: "projects", label: "Projects", icon: FiFolder },
-  { id: "media", label: "Media Library", icon: FiImage },
-  { id: "exports", label: "Exports", icon: FiUpload },
+  { id: "dashboard", num: "00", label: "Dashboard", icon: FiHome },
+  { id: "create", num: "01", label: "Studio Editor", icon: FiVideo },
+  { id: "product-launch", num: "02", label: "Product Launch", icon: FiZap },
+  { id: "brolls", num: "03", label: "Animated B-Rolls", icon: FiFilm },
+  { id: "templates", num: "04", label: "Templates", icon: FiGrid },
+  { id: "your-videos", num: "05", label: "Your Videos", icon: FiPlayCircle },
+  { id: "agent-console", num: "06", label: "Agent Console", icon: FiTerminal },
 ];
 
 const SECONDARY_NAV: NavItemConfig[] = [
-  { id: "brandkit", label: "Brand Kit", icon: FiDroplet },
-  { id: "integrations", label: "Integrations", icon: FiCpu },
-  { id: "settings", label: "Settings", icon: FiSettings },
+  { id: "brandkit", num: "07", label: "Brand Kit", icon: FiDroplet },
+  { id: "settings", num: "08", label: "Settings", icon: FiSettings },
 ];
+
+/** Monthly generation quota: one credit per queued prompt (billing.creditsPerGeneration). */
+function computeCompute(usage: User["usage"]): { used: number; limit: number; pct: number } {
+  const gens = usage?.generations;
+  const used = gens?.monthly ?? 0;
+  const limit = gens?.limit ?? 0;
+  const pct = limit > 0 ? Math.min(100, Math.round((used / limit) * 100)) : 0;
+  return { used, limit, pct };
+}
 
 interface NavSidebarProps {
   section: SectionId;
@@ -58,6 +60,7 @@ interface NavSidebarProps {
   userName: string;
   userEmail: string;
   planLabel: string;
+  usage: User["usage"];
 }
 
 export default function NavSidebar({
@@ -67,38 +70,71 @@ export default function NavSidebar({
   onClose,
   onNavigate,
   onNewLaunch,
-  userName,
-  userEmail,
   planLabel,
+  usage,
 }: NavSidebarProps) {
+  const compute = computeCompute(usage);
   // Normalize section to active key
   const activeId: SectionId =
-    section === "overview" ? "dashboard" :
-    section === "launches" ? "create" :
-    section === "account" || section === "billing" || section === "membership" ? "settings" :
-    section;
+    section === "overview"
+      ? "dashboard"
+      : section === "launches"
+      ? "create"
+      : section === "account" || section === "billing" || section === "membership"
+      ? "settings"
+      : section;
 
   return (
     <aside
-      aria-label="Dashboard navigation"
-      className={`fixed md:static inset-y-0 left-0 z-30 flex h-full shrink-0 flex-col border-r border-surf-eceae3 bg-surf-fcfbf7 transition-all duration-300 ${
+      aria-label="Notebook studio navigation"
+      className={`fixed md:static inset-y-0 left-0 z-30 flex h-full shrink-0 flex-col bg-[#faf8f2]/95 backdrop-blur-sm db-double-margins transition-all duration-300 ${
         isOpen
           ? "w-[240px] translate-x-0 opacity-100"
           : "w-0 -translate-x-full md:w-0 md:translate-x-0 opacity-0 overflow-hidden border-none pointer-events-none"
       }`}
     >
-      {/* Top brand header */}
-      <div className="flex h-16 shrink-0 items-center justify-between px-5">
-        <Link href="/" aria-label="byreel home" className="flex items-center">
-          <ByreelLogo size={26} theme="light" />
+      {/* Top brand header matching notebook style */}
+      <div className="flex h-16 shrink-0 items-center justify-between px-5 border-b border-[rgba(7,20,46,0.18)]">
+        <Link href="/" aria-label="byreel.in home" className="flex items-center gap-2.5 no-underline">
+          <Image
+            src="/byreel-mark.png"
+            alt="byreel"
+            width={28}
+            height={28}
+            priority
+            className="shrink-0"
+          />
+          <div className="flex flex-col">
+            <div className="flex items-baseline font-bold text-[18px] tracking-[-0.04em] text-[#07142e] leading-none">
+              <span>byreel</span>
+              <span className="text-[#84cc16] font-extrabold">.in</span>
+            </div>
+            <span className="text-[7.5px] font-bold tracking-[0.24em] text-[rgba(7,20,46,0.65)] mt-0.5 uppercase">
+              Ideas in Motion
+            </span>
+          </div>
         </Link>
-        <button type="button" onClick={onClose} aria-label="Close navigation" className="db-icon-btn" title="Close sidebar">
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close navigation"
+          className="db-icon-btn text-[#07142e] hover:bg-[rgba(7,20,46,0.08)] md:hidden"
+          title="Close sidebar"
+        >
           <FiChevronsLeft size={16} />
         </button>
       </div>
 
       {/* Nav links scrollable list */}
-      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-3 py-2">
+      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-3 py-3.5">
+        {/* Notebook Index Tag */}
+        <div className="px-2 mb-2.5">
+          <span className="font-mono text-[10px] font-bold tracking-[0.14em] text-[rgba(7,20,46,0.5)] uppercase">
+            STUDIO INDEX
+          </span>
+        </div>
+
+        {/* Primary Studio Navigation */}
         <ul className="space-y-1">
           {PRIMARY_NAV.map((item) => {
             const Icon = item.icon;
@@ -117,38 +153,33 @@ export default function NavSidebar({
                     }
                   }}
                   aria-current={isActive ? "page" : undefined}
-                  className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-[13.5px] font-medium transition-all duration-150 ${
+                  className={`group flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] font-medium transition-all duration-150 cursor-pointer ${
                     isActive
-                      ? "bg-surf-111110 text-white shadow-sm"
-                      : "text-ink-55544e hover:bg-surf-f2efe6 hover:text-ink-111110"
+                      ? "bg-[#07142e] text-[#faf8f2] shadow-xs font-semibold"
+                      : "text-[#07142e] hover:bg-[rgba(255,253,248,0.18)] hover:border-[rgba(7,20,46,0.2)] border border-transparent"
                   }`}
                 >
+                  <span
+                    className={`font-mono text-[11px] font-bold shrink-0 ${
+                      isActive ? "text-[#c5ef26]" : "text-[rgba(7,20,46,0.45)] group-hover:text-[#07142e]"
+                    }`}
+                  >
+                    {item.num}.
+                  </span>
                   <Icon
-                    size={17}
+                    size={16}
                     className={`shrink-0 transition-colors ${
-                      isActive ? "text-ink-c5ef26" : "text-ink-717069"
+                      isActive ? "text-[#c5ef26]" : "text-[rgba(7,20,46,0.65)] group-hover:text-[#07142e]"
                     }`}
                   />
                   <span className="truncate">{item.label}</span>
 
-                  {item.badge && !count && (
-                    <span
-                      className={`ml-auto rounded-full px-1.5 py-0.2 text-[9.5px] font-mono font-semibold ${
-                        isActive
-                          ? "bg-[rgba(197,239,38,0.25)] text-ink-c5ef26"
-                          : "bg-surf-f2fac2 text-ink-658b02"
-                      }`}
-                    >
-                      {item.badge}
-                    </span>
-                  )}
-
                   {typeof count === "number" && count > 0 && (
                     <span
-                      className={`ml-auto rounded-full px-2 py-0.5 text-[11px] font-mono ${
+                      className={`ml-auto rounded-full px-2 py-0.2 font-mono text-[10px] font-bold ${
                         isActive
-                          ? "bg-[rgba(197,239,38,0.2)] text-ink-c5ef26"
-                          : "bg-surf-e8e6de text-ink-55544e"
+                          ? "bg-[#c5ef26] text-[#07142e]"
+                          : "bg-[rgba(7,20,46,0.08)] text-[rgba(7,20,46,0.7)]"
                       }`}
                     >
                       {count}
@@ -160,9 +191,10 @@ export default function NavSidebar({
           })}
         </ul>
 
-        {/* Hairline Divider */}
-        <div className="my-3 border-t border-surf-ebe8df" />
+        {/* Notebook Ruled Divider */}
+        <div className="my-3 border-t border-[rgba(7,20,46,0.16)]" />
 
+        {/* Secondary Configuration Navigation */}
         <ul className="space-y-1">
           {SECONDARY_NAV.map((item) => {
             const Icon = item.icon;
@@ -174,16 +206,23 @@ export default function NavSidebar({
                   type="button"
                   onClick={() => onNavigate(item.id)}
                   aria-current={isActive ? "page" : undefined}
-                  className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-[13.5px] font-medium transition-all duration-150 ${
+                  className={`group flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] font-medium transition-all duration-150 cursor-pointer ${
                     isActive
-                      ? "bg-surf-111110 text-white shadow-sm"
-                      : "text-ink-55544e hover:bg-surf-f2efe6 hover:text-ink-111110"
+                      ? "bg-[#07142e] text-[#faf8f2] shadow-xs font-semibold"
+                      : "text-[#07142e] hover:bg-[rgba(255,253,248,0.18)] hover:border-[rgba(7,20,46,0.2)] border border-transparent"
                   }`}
                 >
+                  <span
+                    className={`font-mono text-[11px] font-bold shrink-0 ${
+                      isActive ? "text-[#c5ef26]" : "text-[rgba(7,20,46,0.45)] group-hover:text-[#07142e]"
+                    }`}
+                  >
+                    {item.num}.
+                  </span>
                   <Icon
-                    size={17}
+                    size={16}
                     className={`shrink-0 transition-colors ${
-                      isActive ? "text-ink-c5ef26" : "text-ink-717069"
+                      isActive ? "text-[#c5ef26]" : "text-[rgba(7,20,46,0.65)] group-hover:text-[#07142e]"
                     }`}
                   />
                   <span className="truncate">{item.label}</span>
@@ -193,63 +232,27 @@ export default function NavSidebar({
           })}
         </ul>
 
-        {/* Bottom Sidebar Cards */}
-        <div className="mt-auto space-y-3 pt-4">
-          {/* Free Plan Usage Card */}
-          <div className="rounded-2xl border border-surf-ebe8df bg-surf-f8f7f2 p-3.5">
-            <div className="flex items-center justify-between">
-              <span className="text-[12.5px] font-semibold text-ink-111110 capitalize">{planLabel}</span>
-              <span className="font-mono text-[9.5px] font-bold px-1.5 py-0.2 rounded bg-surf-f2fac2 text-ink-658b02">
-                ACTIVE
-              </span>
-            </div>
-            <p className="mt-1 text-[11.5px] text-ink-717069">
-              <span className="font-semibold text-ink-111110">180</span> / 300 credits used
-            </p>
-            {/* Progress Bar */}
-            <div className="mt-2.5 flex items-center gap-2">
-              <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-surf-e5e2d8">
-                <div
-                  className="h-full rounded-full bg-surf-c5ef26"
-                  style={{ width: "40%" }}
-                />
-              </div>
-              <span className="text-[10.5px] font-medium text-ink-717069">40%</span>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => onNavigate("membership")}
-              className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg border border-surf-dedad0 bg-surf-ffffff py-1.5 text-[12px] font-medium text-ink-111110 shadow-xs transition hover:bg-surf-fcfbf7"
-            >
-              Upgrade Plan <FiArrowRight size={12} />
-            </button>
+        {/* Bottom Plan & Compute Usage: Clean Notebook Footer */}
+        <div className="mt-auto border-t border-[rgba(7,20,46,0.16)] pt-3 pb-1 px-1.5 space-y-2">
+          <div className="flex items-center justify-between text-[11px] font-mono">
+            <span className="text-[rgba(7,20,46,0.55)] uppercase font-bold text-[9.5px]">PLAN</span>
+            <span className="font-bold text-[#07142e] capitalize text-[11px]">{planLabel}</span>
           </div>
 
-          {/* Dark Limitless Promo Card */}
-          <div className="relative overflow-hidden rounded-2xl bg-surf-0d0f10 p-4 text-white shadow-md">
-            {/* Background graphic */}
-            <div
-              className="pointer-events-none absolute inset-0 bg-cover bg-right opacity-40 mix-blend-screen"
-              style={{ backgroundImage: `url('/dashboard/sidebar-limitless.jpg')` }}
-            />
-            <div className="relative z-10">
-              <h4 className="text-[14px] font-semibold leading-tight text-white">
-                Create <br />
-                without <br />
-                <span className="text-ink-c5ef26">limits.</span>
-              </h4>
-              <p className="mt-1.5 text-[11px] leading-relaxed text-ink-a8a8a2">
-                Upgrade for more credits, premium templates and HD exports.
-              </p>
-
-              <button
-                type="button"
-                onClick={() => onNavigate("membership")}
-                className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-surf-c5ef26 px-3 py-1.5 text-[12px] font-semibold text-ink-111110 shadow-sm transition hover:bg-surf-b6df1e"
-              >
-                Upgrade now <FiArrowRight size={12} />
-              </button>
+          <div className="space-y-1">
+            <div className="flex items-center justify-between text-[10.5px] font-mono text-[rgba(7,20,46,0.65)]">
+              <span>Compute</span>
+              <span className="font-semibold text-[#07142e]">
+                {compute.limit > 0 ? `${compute.used} / ${compute.limit} credits` : "No active plan"}
+              </span>
+            </div>
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-[rgba(7,20,46,0.12)]">
+              <div
+                className={`h-full rounded-full transition-all duration-300 ${
+                  compute.pct >= 90 ? "bg-[#dc2626]" : compute.pct >= 70 ? "bg-[#f59e0b]" : "bg-[#84cc16]"
+                }`}
+                style={{ width: `${compute.pct}%` }}
+              />
             </div>
           </div>
         </div>

@@ -6,12 +6,21 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
 import { useAlert } from "../context/AlertContext";
 import { openGoogleAuthPopup, BackendUser } from "../lib/api";
+import { safeRedirect } from "../lib/safeRedirect";
 import NotebookShell from "../components/landing/NotebookShell";
 
 export default function LoginPage() {
   const router = useRouter();
   const { login, applyOAuthSession, loginAsDemo } = useAuth();
   const { showAlert, success } = useAlert();
+  // Read once on mount: where middleware (or a deep link) wants the user sent after sign-in.
+  const [redirectTarget] = useState(() =>
+    typeof window === "undefined"
+      ? "/dashboard"
+      : safeRedirect(new URLSearchParams(window.location.search).get("redirect"))
+  );
+  // Carried into the "Create account" link so a deep link survives switching forms.
+  const registerHref = redirectTarget === "/dashboard" ? "/register" : `/register?redirect=${encodeURIComponent(redirectTarget)}`;
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -28,7 +37,7 @@ export default function LoginPage() {
         setGoogleLoading(false);
         applyOAuthSession(data.token as string, data.user as BackendUser);
         success("Google Sign-In Successful", "Welcome back to your studio notebook!");
-        router.push("/dashboard");
+        router.push(redirectTarget);
       } else if (data.type === "GOOGLE_AUTH_ERROR") {
         setGoogleLoading(false);
         setError(data.message || "Google authentication failed.");
@@ -36,7 +45,7 @@ export default function LoginPage() {
     };
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
-  }, [applyOAuthSession, router, success]);
+  }, [applyOAuthSession, router, success, redirectTarget]);
 
   const handleSubmit = useCallback(
     async (e: FormEvent) => {
@@ -48,7 +57,7 @@ export default function LoginPage() {
       }
       setLoading(true);
       try {
-        await login(email.trim(), password);
+        await login(email.trim(), password, redirectTarget);
       } catch (err) {
         const message =
           err instanceof Error
@@ -59,7 +68,7 @@ export default function LoginPage() {
         setLoading(false);
       }
     },
-    [email, password, login]
+    [email, password, login, redirectTarget]
   );
 
   const handleGoogleLogin = useCallback(() => {
@@ -255,7 +264,7 @@ export default function LoginPage() {
 
           {/* Right-Bottom Floating Transparent Ink Lottie Pill */}
           <Link
-            href="/register"
+            href={registerHref}
             className="lp-badge-sticker lp-badge-right-bottom"
             title="Create New Account"
           >
@@ -483,7 +492,7 @@ export default function LoginPage() {
 
               <div className="lp-auth-footer-note">
                 New to byreel.in?
-                <Link href="/register" className="lp-auth-footer-link">
+                <Link href={registerHref} className="lp-auth-footer-link">
                   Create a free studio pass →
                 </Link>
               </div>

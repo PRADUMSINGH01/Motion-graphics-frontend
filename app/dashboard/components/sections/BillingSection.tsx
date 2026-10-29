@@ -15,6 +15,14 @@ export default function BillingSection({ user }: { user: User }) {
   const [downloadMsg, setDownloadMsg] = useState<string | null>(null);
   const tier = user.plan?.tier ?? "free";
   const interval = user.plan?.billingInterval ?? "monthly";
+  const gens = user.usage?.generations;
+  const renewalDate = user.raw?.plan?.currentPeriodEnd
+    ? new Date(user.raw.plan.currentPeriodEnd).toLocaleDateString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "2-digit",
+      })
+    : "—";
 
   const downloadPdf = (invId: string) => {
     setDownloadMsg(`Downloading invoice receipt ${invId}.pdf...`);
@@ -57,11 +65,13 @@ export default function BillingSection({ user }: { user: User }) {
           <div className="space-y-2 text-[13px] text-ink-717069 border-t border-surf-f2efe6 pt-3">
             <div className="flex justify-between">
               <span>Next billing renewal:</span>
-              <span className="font-medium text-ink-111110">Nov 01, 2026</span>
+              <span className="font-medium text-ink-111110">{renewalDate}</span>
             </div>
             <div className="flex justify-between">
               <span>Credits allocation:</span>
-              <span className="font-medium text-ink-111110">120 / 300 credits used</span>
+              <span className="font-medium text-ink-111110">
+                {gens ? `${gens.monthly} / ${gens.limit} credits used` : "—"}
+              </span>
             </div>
           </div>
 

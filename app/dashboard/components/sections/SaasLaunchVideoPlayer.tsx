@@ -70,64 +70,10 @@ export default function SaasLaunchVideoPlayer({
   const currentScene =
     currentTime < 6 ? 1 : currentTime < 15 ? 2 : currentTime < 23 ? 3 : 4;
 
-  // Sound FX via Web Audio API
-  const playSoundEffect = (scene: number) => {
-    if (isMuted) return;
-    try {
-      const AudioCtx =
-        window.AudioContext ||
-        (window as unknown as { webkitAudioContext: typeof AudioContext })
-          .webkitAudioContext;
-      if (!AudioCtx) return;
-      if (!audioCtxRef.current) {
-        audioCtxRef.current = new AudioCtx();
-      }
-      const ctx = audioCtxRef.current;
-      if (ctx.state === "suspended") {
-        ctx.resume();
-      }
-
-      const now = ctx.currentTime;
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-
-      if (scene === 1) {
-        // Deep low hum
-        osc.type = "sawtooth";
-        osc.frequency.setValueAtTime(80, now);
-        osc.frequency.exponentialRampToValueAtTime(45, now + 0.4);
-        gain.gain.setValueAtTime(0.08, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
-      } else if (scene === 2) {
-        // Futuristic chord sweep
-        osc.type = "sine";
-        osc.frequency.setValueAtTime(220, now);
-        osc.frequency.exponentialRampToValueAtTime(660, now + 0.35);
-        gain.gain.setValueAtTime(0.12, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
-      } else if (scene === 3) {
-        // High-tech laser tick
-        osc.type = "triangle";
-        osc.frequency.setValueAtTime(880, now);
-        osc.frequency.exponentialRampToValueAtTime(1320, now + 0.2);
-        gain.gain.setValueAtTime(0.1, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
-      } else {
-        // Uplifting finale chime
-        osc.type = "sine";
-        osc.frequency.setValueAtTime(523.25, now);
-        osc.frequency.exponentialRampToValueAtTime(1046.5, now + 0.5);
-        gain.gain.setValueAtTime(0.14, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
-      }
-
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start(now);
-      osc.stop(now + 0.5);
-    } catch {
-      // AudioContext unavailable or restricted
-    }
+  // Sound FX via Web Audio API - zero audio constraint
+  const playSoundEffect = (_scene: number) => {
+    // Explicit studio constraint: completely silent animations (zero audio)
+    return;
   };
 
   // Playback timer engine

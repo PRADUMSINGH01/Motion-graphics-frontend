@@ -1,46 +1,127 @@
 /* ==========================================================================
-   byreel dashboard: editorial luxury design system.
-   Warm ivory paper, black obsidian ink, electric lime accent, serif display type,
-   mono labels, hairline rules. Scoped under .db so it cannot leak.
+   byreel dashboard: Authentic Crisp Notebook Paper Studio
+   Warm cotton paper, deep midnight navy ink (#07142e), horizontal ruled lines,
+   double navy vertical margin lines, electric lime accents, transparent ink cards,
+   and crisp HD typography. Scoped under .db.
    ========================================================================== */
 
 .db {
-  --db-paper: var(--flip-fcfbf7);
-  --db-paper-2: var(--flip-f7f6f0);
-  --db-white: var(--flip-ffffff);
-  --db-ink: var(--flip-111110);
-  --db-ink-2: var(--flip-2d2c28);
-  --db-muted: var(--flip-6b6962);
-  --db-faint: var(--flip-9c9990);
-  --db-rule: var(--flip-e5e2d8);
-  --db-accent: var(--flip-a4d400);
-  --db-lime: var(--flip-c5ef26);
+  --db-paper: #faf8f2;
+  --db-paper-2: #f5f2e8;
+  --db-paper-trans: transparent;
+  --db-paper-trans-hover: rgba(255, 253, 248, 0.16);
+  --db-white: transparent;
+  --db-card-bg: transparent;
+  --db-card-bg-hover: rgba(255, 253, 248, 0.16);
+  --db-ink: #07142e;
+  --db-ink-2: #0e2044;
+  --db-muted: rgba(7, 20, 46, 0.72);
+  --db-faint: rgba(7, 20, 46, 0.48);
+  --db-rule: rgba(7, 20, 46, 0.2);
+  --db-rule-strong: rgba(7, 20, 46, 0.36);
+  --db-accent: #84cc16;
+  --db-lime: #c5ef26;
   --db-lime-glow: rgba(197, 239, 38, 0.4);
 
-  background: var(--db-paper);
+  /* Remap legacy surf and ink variables across all dashboard sub-sections
+     to authentic transparent cotton paper, midnight navy ink, and electric lime */
+  --surf-ffffff: transparent;
+  --surf-faf9f5: rgba(255, 253, 248, 0.08);
+  --surf-f7f6f0: rgba(255, 253, 248, 0.14);
+  --surf-f4f2ea: transparent;
+  --surf-f4f2ec: transparent;
+  --surf-f2efe6: rgba(7, 20, 46, 0.06);
+  --surf-eceae3: rgba(7, 20, 46, 0.2);
+  --surf-ece9e2: rgba(7, 20, 46, 0.2);
+  --surf-dedad0: rgba(7, 20, 46, 0.32);
+  --surf-dfdbcf: rgba(7, 20, 46, 0.32);
+  --surf-d8d5cb: rgba(7, 20, 46, 0.36);
+  --surf-ebe8df: rgba(7, 20, 46, 0.16);
+  --surf-e5e2d8: rgba(7, 20, 46, 0.24);
+  --surf-111110: #07142e;
+  --surf-0e1010: #07142e;
+  --surf-14151a: #040c1c;
+  --surf-1a1b1a: #07142e;
+  --surf-1c1c1a: #0b1c3d;
+  --surf-25262c: #0e2044;
+  --surf-262a34: rgba(7, 20, 46, 0.24);
+  --surf-c5ef26: #c5ef26;
+  --surf-f2fac2: rgba(197, 239, 38, 0.25);
+  --surf-8fb805: #84cc16;
+
+  --ink-111110: #07142e;
+  --ink-2d2c28: #07142e;
+  --ink-4a4944: #162544;
+  --ink-55544e: #20314f;
+  --ink-6b6962: rgba(7, 20, 46, 0.74);
+  --ink-717069: rgba(7, 20, 46, 0.68);
+  --ink-8c8980: rgba(7, 20, 46, 0.58);
+  --ink-9c9990: rgba(7, 20, 46, 0.48);
+  --ink-96968f: rgba(7, 20, 46, 0.54);
+  --ink-c5ef26: #c5ef26;
+  --ink-658b02: #4d7c0f;
+  --ink-556b02: #3f6212;
+
+  background-color: #faf8f2;
+  background-image:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 31px,
+      rgba(7, 20, 46, 0.16) 31px,
+      rgba(7, 20, 46, 0.16) 32px
+    ),
+    radial-gradient(
+      ellipse 92% 78% at 52% 40%,
+      rgba(255, 254, 250, 0.98) 0%,
+      rgba(250, 248, 242, 0.88) 58%,
+      rgba(238, 233, 220, 0.95) 100%
+    );
   color: var(--db-ink);
-  font-family: var(--font-geist), system-ui, -apple-system, sans-serif;
-  -webkit-font-smoothing: antialiased;
+  font-family: var(--font-geist), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: subpixel-antialiased;
+  -moz-osx-font-smoothing: auto;
+  text-rendering: geometricPrecision;
+  font-optical-sizing: auto;
 }
 
 html:has(.db) {
   color-scheme: light;
-  scrollbar-color: var(--surf-d8d5cb) var(--surf-fcfbf7);
+  scrollbar-color: rgba(7, 20, 46, 0.28) #faf8f2;
 }
 html.dark:has(.db) {
-  color-scheme: dark;
-  scrollbar-color: var(--surf-3a3935) var(--surf-fcfbf7);
+  color-scheme: light;
+  scrollbar-color: rgba(7, 20, 46, 0.28) #faf8f2;
 }
 html:has(.db) body {
-  background: var(--surf-fcfbf7) !important;
+  background: #faf8f2 !important;
+}
+
+/* Crisp Notebook Horizontal Ruled Lines */
+.db-notebook-rules {
+  background-color: #faf8f2;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 31px,
+    rgba(7, 20, 46, 0.16) 31px,
+    rgba(7, 20, 46, 0.16) 32px
+  );
+  background-attachment: local;
+}
+
+/* Left-Side Double Vertical Dark Navy Margin Lines */
+.db-double-margins {
+  border-right: 1.5px solid rgba(7, 20, 46, 0.72);
+  box-shadow: 3.5px 0 0 0 rgba(7, 20, 46, 0.72);
 }
 
 .db-alpha-grid {
   background-image:
-    linear-gradient(45deg, rgba(255, 255, 255, 0.04) 25%, transparent 25%),
-    linear-gradient(-45deg, rgba(255, 255, 255, 0.04) 25%, transparent 25%),
-    linear-gradient(45deg, transparent 75%, rgba(255, 255, 255, 0.04) 75%),
-    linear-gradient(-45deg, transparent 75%, rgba(255, 255, 255, 0.04) 75%);
+    linear-gradient(45deg, rgba(7, 20, 46, 0.05) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(7, 20, 46, 0.05) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(7, 20, 46, 0.05) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(7, 20, 46, 0.05) 75%);
   background-size: 14px 14px;
   background-position: 0 0, 0 7px, 7px -7px, -7px 0;
 }
@@ -58,9 +139,10 @@ html:has(.db) body {
   font-family: var(--font-geist-mono), ui-monospace, "SFMono-Regular", Menlo, monospace;
 }
 .db-label {
-  font-family: var(--font-geist-mono), ui-monospace, Menlo, monospace;
-  font-size: 11px;
-  letter-spacing: 0.08em;
+  font-family: var(--font-geist), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--db-muted);
 }
@@ -68,7 +150,7 @@ html:has(.db) body {
   color: var(--db-accent);
 }
 
-/* Black pill: the primary button. */
+/* Midnight Navy Pill / Button: Primary */
 .db-btn {
   display: inline-flex;
   align-items: center;
@@ -76,26 +158,28 @@ html:has(.db) body {
   gap: 8px;
   height: 38px;
   padding: 0 18px;
-  border-radius: 999px;
+  border-radius: 9px;
   background: var(--db-ink);
-  color: var(--ink-ffffff);
+  color: #ffffff;
+  font-family: var(--font-geist), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 13.5px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.15s ease;
-  border: 1px solid transparent;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--db-ink);
+  box-shadow: 0 2px 6px rgba(7, 20, 46, 0.12);
 }
 .db-btn:hover {
-  background: var(--surf-23242a);
+  background: #040c1c;
+  border-color: #040c1c;
   transform: translateY(-1px);
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(7, 20, 46, 0.18);
 }
 .db-btn:active {
   transform: translateY(0);
 }
 
-/* Electric lime pill button */
+/* Electric lime button */
 .db-btn-lime {
   display: inline-flex;
   align-items: center;
@@ -103,41 +187,43 @@ html:has(.db) body {
   gap: 8px;
   height: 38px;
   padding: 0 18px;
-  border-radius: 999px;
+  border-radius: 9px;
   background: var(--db-lime);
-  color: var(--ink-111110);
+  color: var(--db-ink);
+  font-family: var(--font-geist), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 13.5px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.15s ease;
-  border: 1px solid transparent;
+  border: 1px solid rgba(7, 20, 46, 0.35);
   box-shadow: 0 2px 10px rgba(197, 239, 38, 0.35);
 }
 .db-btn-lime:hover {
-  background: var(--surf-b5dc22);
+  background: #b5dc22;
   transform: translateY(-1px);
   box-shadow: 0 4px 14px rgba(197, 239, 38, 0.45);
 }
 
+/* Ghost / Transparent button */
 .db-btn-ghost {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   height: 34px;
   padding: 0 14px;
-  border-radius: 999px;
-  border: 1px solid var(--db-rule);
-  background: var(--db-white);
+  border-radius: 9px;
+  border: 1px solid var(--db-rule-strong);
+  background: rgba(255, 253, 248, 0.5);
   color: var(--db-ink);
+  font-family: var(--font-geist), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.15s ease;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
 }
 .db-btn-ghost:hover {
   border-color: var(--db-ink);
-  background: var(--surf-fdfdfc);
+  background: rgba(255, 253, 248, 0.8);
   transform: translateY(-0.5px);
 }
 
@@ -147,17 +233,17 @@ html:has(.db) body {
   justify-content: center;
   width: 32px;
   height: 32px;
-  border-radius: 999px;
+  border-radius: 8px;
   color: var(--db-muted);
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
 }
 .db-icon-btn:hover {
-  background: rgba(17, 17, 16, 0.06);
+  background: rgba(7, 20, 46, 0.08);
   color: var(--db-ink);
 }
 
-/* Film-frame corner marks. */
+/* Film-frame corner marks */
 .db-crop {
   position: absolute;
   width: 14px;
@@ -165,7 +251,7 @@ html:has(.db) body {
   border: 0 solid var(--db-ink);
 }
 
-/* Account settings modal (native <dialog>, centred). */
+/* Account settings modal */
 .db-dialog {
   margin: auto;
   max-width: none;
@@ -176,7 +262,7 @@ html:has(.db) body {
   color: var(--db-ink);
 }
 .db-dialog::backdrop {
-  background: rgba(17, 17, 16, 0.45);
+  background: rgba(7, 20, 46, 0.45);
   -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
 }
@@ -187,9 +273,9 @@ html:has(.db) body {
   width: min(560px, calc(100vw - 32px));
   overflow: hidden;
   border-radius: 20px;
-  background: var(--db-paper-2);
-  border: 1px solid var(--db-rule);
-  box-shadow: 0 30px 70px -20px rgba(17, 17, 16, 0.3);
+  background: #faf8f2;
+  border: 1.5px solid var(--db-ink);
+  box-shadow: 0 30px 70px -20px rgba(7, 20, 46, 0.3);
 }
 
 @keyframes db-rise {
@@ -213,7 +299,7 @@ html:has(.db) body {
 }
 
 /* ==========================================================================
-   Multi-section dashboard utilities
+   Multi-section dashboard utilities: Transparent Notebook Cards
    ========================================================================== */
 
 /* Section navigation item (left sidebar) */
@@ -224,68 +310,78 @@ html:has(.db) body {
   width: 100%;
   height: 38px;
   padding: 0 12px;
-  border-radius: 10px;
+  border-radius: 9px;
+  font-family: var(--font-geist), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 13.5px;
-  color: var(--db-ink-2);
+  font-weight: 500;
+  color: var(--db-ink);
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
   border: 1px solid transparent;
 }
 .db-nav:hover {
-  background: rgba(17, 17, 16, 0.04);
+  background: rgba(255, 253, 248, 0.55);
+  border-color: rgba(7, 20, 46, 0.22);
   color: var(--db-ink);
 }
 .db-nav[aria-current="page"] {
-  background: var(--db-white);
-  color: var(--db-ink);
+  background: #07142e;
+  color: #ffffff;
   font-weight: 600;
-  border-color: var(--db-rule);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  border-color: #07142e;
+  box-shadow: 0 2px 8px rgba(7, 20, 46, 0.14);
 }
 .db-nav svg {
   color: var(--db-muted);
   flex: none;
 }
 .db-nav[aria-current="page"] svg {
-  color: var(--ink-a4d400);
+  color: var(--db-lime);
 }
 .db-nav-count {
   margin-left: auto;
   font-family: var(--font-geist-mono), ui-monospace, monospace;
   font-size: 11px;
   color: var(--db-faint);
-  background: rgba(17, 17, 16, 0.05);
+  background: rgba(7, 20, 46, 0.08);
   padding: 1px 6px;
   border-radius: 999px;
 }
 .db-nav[aria-current="page"] .db-nav-count {
-  background: rgba(164, 212, 0, 0.15);
-  color: var(--ink-556b02);
+  background: rgba(197, 239, 38, 0.25);
+  color: var(--db-lime);
 }
 
-/* Cards */
+/* Transparent Notebook Cards */
 .db-card {
-  border: 1px solid var(--db-rule);
+  border: 1.5px solid var(--db-rule-strong);
   border-radius: 16px;
-  background: var(--db-white);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  background: transparent;
+  backdrop-filter: blur(2px);
+  box-shadow: 0 2px 10px rgba(7, 20, 46, 0.03);
+  transition: border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+.db-card:hover {
+  border-color: var(--db-ink);
+  background: rgba(255, 253, 248, 0.14);
+  box-shadow: 0 6px 20px rgba(7, 20, 46, 0.07);
 }
 .db-card-pad {
   padding: 22px;
 }
 
-/* Inputs */
+/* Transparent Notebook Inputs */
 .db-input,
 .db-textarea {
   width: 100%;
-  border: 1px solid var(--db-rule);
+  border: 1.5px solid var(--db-rule-strong);
   border-radius: 12px;
-  background: var(--db-white);
+  background: transparent;
   padding: 10px 14px;
+  font-family: var(--font-geist), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 14px;
   color: var(--db-ink);
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
 }
 .db-input::placeholder,
 .db-textarea::placeholder {
@@ -295,7 +391,8 @@ html:has(.db) body {
 .db-textarea:focus {
   outline: none;
   border-color: var(--db-ink);
-  box-shadow: 0 0 0 3px rgba(197, 239, 38, 0.25);
+  background: rgba(255, 253, 248, 0.14);
+  box-shadow: 0 0 0 3px rgba(152, 206, 0, 0.25);
 }
 .db-textarea {
   resize: vertical;
@@ -305,8 +402,8 @@ html:has(.db) body {
 .db-field-label {
   display: block;
   font-size: 12.5px;
-  font-weight: 500;
-  color: var(--db-ink-2);
+  font-weight: 600;
+  color: var(--db-ink);
   margin-bottom: 6px;
 }
 
@@ -317,24 +414,56 @@ html:has(.db) body {
   gap: 6px;
   height: 24px;
   padding: 0 10px;
-  border-radius: 999px;
-  border: 1px solid var(--db-rule);
-  background: var(--db-paper);
+  border-radius: 6px;
+  border: 1px solid var(--db-rule-strong);
+  background: transparent;
+  font-family: var(--font-geist), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 11.5px;
-  font-weight: 500;
-  color: var(--db-ink-2);
+  font-weight: 600;
+  color: var(--db-ink);
   white-space: nowrap;
 }
+
+/* Forced transparent cards across all dashboard modules */
+.db .bg-surf-ffffff,
+.db .bg-surf-faf9f5,
+.db .bg-surf-f7f6f0,
+.db .bg-surf-f4f2ea,
+.db .bg-surf-fcfbf7 {
+  background-color: transparent !important;
+}
+
+.db .hover\:bg-surf-ffffff:hover,
+.db .hover\:bg-surf-faf9f5:hover,
+.db .hover\:bg-surf-f7f6f0:hover {
+  background-color: rgba(255, 253, 248, 0.14) !important;
+}
 .db-tag-accent {
-  border-color: rgba(164, 212, 0, 0.35);
-  background: rgba(197, 239, 38, 0.18);
-  color: var(--ink-3b4902);
-  font-weight: 600;
+  border-color: rgba(7, 20, 46, 0.38);
+  background: rgba(197, 239, 38, 0.3);
+  color: #1f3300;
+  font-weight: 700;
 }
 .db-tag-ok {
-  border-color: rgba(22, 101, 52, 0.25);
-  background: rgba(22, 101, 52, 0.08);
-  color: var(--ink-166534);
+  border-color: rgba(22, 101, 52, 0.35);
+  background: rgba(22, 101, 52, 0.12);
+  color: #14532d;
+}
+.db-tag-danger {
+  border-color: rgba(220, 38, 38, 0.35);
+  background: rgba(220, 38, 38, 0.12);
+  color: #991b1b;
+}
+
+/* Small "this is live" pulse, for a render actively in progress. */
+.db-live-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--db-lime);
+  box-shadow: 0 0 0 3px var(--db-lime-glow);
+  animation: cinema-glow 1.8s ease-in-out infinite;
 }
 
 /* Table */
@@ -345,32 +474,33 @@ html:has(.db) body {
 }
 .db-table th {
   text-align: left;
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
-  font-size: 10.5px;
-  letter-spacing: 0.08em;
+  font-family: var(--font-geist), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--db-muted);
-  font-weight: 500;
+  font-weight: 700;
   padding: 0 18px 12px;
-  border-bottom: 1px solid var(--db-ink);
+  border-bottom: 1.5px solid var(--db-ink);
 }
 .db-table td {
   padding: 14px 18px;
   border-bottom: 1px solid var(--db-rule);
-  color: var(--db-ink-2);
+  color: var(--db-ink);
   vertical-align: middle;
 }
 .db-table tbody tr:hover td {
-  background: rgba(17, 17, 16, 0.02);
+  background: rgba(7, 20, 46, 0.03);
 }
 
 /* Section header block */
 .db-eyebrow {
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
-  font-size: 11px;
+  font-family: var(--font-geist), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 11.5px;
+  font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--db-faint);
+  color: var(--db-muted);
 }
 
 /* Swatch (brand kit) */
@@ -378,7 +508,7 @@ html:has(.db) body {
   width: 100%;
   aspect-ratio: 1.6;
   border-radius: 10px;
-  border: 1px solid rgba(17, 17, 16, 0.08);
+  border: 1px solid rgba(7, 20, 46, 0.18);
 }
 
 .db-nav-aside {
@@ -412,8 +542,36 @@ html:has(.db) body {
 @media (prefers-reduced-motion: reduce) {
   .animate-spin,
   .animate-pulse,
-  .animate-ping {
+  .animate-ping,
+  .db-live-dot,
+  .db-scanline {
     animation: none !important;
   }
 }
 
+/* Agent console */
+.db-terminal {
+  background: #040c1c;
+  border: 1px solid rgba(7, 20, 46, 0.3);
+}
+.db-terminal::-webkit-scrollbar {
+  width: 8px;
+}
+.db-terminal::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+}
+.db-scanline {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(197, 239, 38, 0.06) 45%,
+    rgba(197, 239, 38, 0.1) 50%,
+    rgba(197, 239, 38, 0.06) 55%,
+    transparent 100%
+  );
+  animation: cinema-scan 3.2s linear infinite;
+}

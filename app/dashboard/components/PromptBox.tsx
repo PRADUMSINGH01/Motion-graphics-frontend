@@ -65,7 +65,7 @@ export default function PromptBox({
   return (
     <div className="w-full">
       {/* Modern Claude / GPT-style composer container */}
-      <div className="relative rounded-2xl border border-surf-dedad0 bg-surf-ffffff p-3 shadow-xs transition-all focus-within:border-surf-111110 focus-within:ring-2 focus-within:ring-surf-111110/10">
+      <div className="relative rounded-2xl border-1.5 border-[rgba(7,20,46,0.38)] bg-transparent p-3 shadow-xs backdrop-blur-2xs transition-all focus-within:border-[#07142e] focus-within:bg-[rgba(255,253,248,0.12)] focus-within:ring-2 focus-within:ring-[#07142e]/10">
         <textarea
           ref={textareaRef}
           value={value}
@@ -80,15 +80,15 @@ export default function PromptBox({
           maxLength={MAX_PROMPT_LENGTH}
           aria-label="Describe your video prompt"
           placeholder={placeholder}
-          className="block min-h-[44px] w-full resize-none bg-transparent px-1 text-[14px] sm:text-[14.5px] leading-relaxed text-ink-111110 outline-none placeholder:text-ink-9c9990"
+          className="block min-h-[44px] w-full resize-none bg-transparent px-1 text-[14px] sm:text-[14.5px] leading-relaxed text-[#07142e] outline-none placeholder:text-[rgba(7,20,46,0.5)] font-medium"
         />
 
         {/* Minimal Controls Row */}
-        <div className="mt-2.5 flex items-center justify-between gap-2 border-t border-surf-f4f2ec pt-2.5">
+        <div className="mt-2.5 flex items-center justify-between gap-2 border-t border-[rgba(7,20,46,0.18)] pt-2.5">
           <div className="flex items-center gap-1.5 flex-wrap">
             {/* Aspect Ratio Selector */}
             {settings && onSettingsChange ? (
-              <div className="flex items-center gap-0.5 rounded-lg bg-surf-f8f7f2 p-0.5 border border-surf-e8e5dc">
+              <div className="flex items-center gap-0.5 rounded-lg bg-transparent p-0.5 border border-[rgba(7,20,46,0.24)]">
                 {RATIOS.map((r) => {
                   const isActive = settings.ratio === r.id;
                   return (
@@ -97,11 +97,10 @@ export default function PromptBox({
                       type="button"
                       onClick={() => onSettingsChange({ ...settings, ratio: r.id })}
                       title={r.label}
-                      className={`flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium transition ${
-                        isActive
-                          ? "bg-surf-111110 text-white shadow-xs"
-                          : "text-ink-66655e hover:text-ink-111110"
-                      }`}
+                      className={`flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium transition cursor-pointer ${isActive
+                          ? "bg-[#07142e] text-[#faf8f2] shadow-xs font-semibold"
+                          : "text-[rgba(7,20,46,0.7)] hover:text-[#07142e] hover:bg-[rgba(255,253,248,0.14)]"
+                        }`}
                     >
                       <span
                         className="inline-block border border-current rounded-[1px]"
@@ -116,14 +115,14 @@ export default function PromptBox({
                 })}
               </div>
             ) : settings ? (
-              <span className="inline-flex items-center gap-1 rounded-lg border border-surf-e8e5dc bg-surf-f8f7f2 px-2.5 py-1 text-[11px] font-mono text-ink-55544e">
+              <span className="inline-flex items-center gap-1 rounded-lg border border-[rgba(7,20,46,0.24)] bg-transparent px-2.5 py-1 text-[11px] font-mono text-[#07142e]">
                 <FiMaximize2 size={11} /> {settings.ratio}
               </span>
             ) : null}
 
             {/* Duration Selector */}
             {settings && onSettingsChange ? (
-              <div className="flex items-center gap-0.5 rounded-lg bg-surf-f8f7f2 p-0.5 border border-surf-e8e5dc">
+              <div className="flex items-center gap-0.5 rounded-lg bg-transparent p-0.5 border border-[rgba(7,20,46,0.24)]">
                 {LENGTHS.map((l) => {
                   const isActive = settings.length === l.s;
                   return (
@@ -131,11 +130,10 @@ export default function PromptBox({
                       key={l.s}
                       type="button"
                       onClick={() => onSettingsChange({ ...settings, length: l.s })}
-                      className={`rounded-md px-2 py-1 text-[11px] font-mono font-medium transition ${
-                        isActive
-                          ? "bg-surf-111110 text-white shadow-xs"
-                          : "text-ink-66655e hover:text-ink-111110"
-                      }`}
+                      className={`rounded-md px-2 py-1 text-[11px] font-mono font-medium transition cursor-pointer ${isActive
+                          ? "bg-[#07142e] text-[#faf8f2] shadow-xs font-semibold"
+                          : "text-[rgba(7,20,46,0.7)] hover:text-[#07142e] hover:bg-[rgba(255,253,248,0.14)]"
+                        }`}
                     >
                       {l.label}
                     </button>
@@ -143,7 +141,7 @@ export default function PromptBox({
                 })}
               </div>
             ) : settings ? (
-              <span className="inline-flex items-center gap-1 rounded-lg border border-surf-e8e5dc bg-surf-f8f7f2 px-2.5 py-1 text-[11px] font-mono text-ink-55544e">
+              <span className="inline-flex items-center gap-1 rounded-lg border border-[rgba(7,20,46,0.24)] bg-transparent px-2.5 py-1 text-[11px] font-mono text-[#07142e]">
                 <FiClock size={11} /> {settings.length}s
               </span>
             ) : null}
@@ -156,9 +154,9 @@ export default function PromptBox({
               onClick={submit}
               disabled={!canSend}
               aria-label="Send prompt"
-              className="flex h-8 w-8 items-center justify-center rounded-xl bg-surf-111110 text-white shadow-xs transition-all hover:bg-surf-2c2b28 active:scale-95 disabled:cursor-not-allowed disabled:bg-surf-ebe8e0 disabled:text-ink-a8a59d disabled:shadow-none"
+              className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#07142e] text-[#faf8f2] shadow-xs transition-all hover:bg-[#040c1c] active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none cursor-pointer"
             >
-              <FiArrowUp size={16} strokeWidth={2.5} />
+              <FiArrowUp size={16} strokeWidth={2.5} className="text-[#c5ef26]" />
             </button>
           </div>
         </div>
@@ -166,7 +164,7 @@ export default function PromptBox({
 
       {/* Subtle footer hint only when needed */}
       {disabledReason ? (
-        <div className="mt-1.5 px-1 text-[11.5px] text-ink-b45309">
+        <div className="mt-1.5 px-1 text-[11.5px] text-[#b45309]">
           {disabledReason}
         </div>
       ) : null}

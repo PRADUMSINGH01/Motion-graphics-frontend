@@ -13,6 +13,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
 import { useAlert } from "../context/AlertContext";
 import { openGoogleAuthPopup, BackendUser } from "../lib/api";
+import { safeRedirect } from "../lib/safeRedirect";
 import NotebookShell from "../components/landing/NotebookShell";
 
 const PLAN_LABELS: Record<
@@ -62,6 +63,9 @@ function RegisterFormContent() {
 
   const selectedPlanKey = (searchParams.get("plan") || "free").toLowerCase();
   const selectedPlan = PLAN_LABELS[selectedPlanKey] || PLAN_LABELS.free;
+  const redirectTarget = safeRedirect(searchParams.get("redirect"));
+  // Carried into the "Sign in" link so a deep link survives switching forms.
+  const loginHref = redirectTarget === "/dashboard" ? "/login" : `/login?redirect=${encodeURIComponent(redirectTarget)}`;
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -82,7 +86,7 @@ function RegisterFormContent() {
         setGoogleLoading(false);
         applyOAuthSession(data.token as string, data.user as BackendUser);
         success("Google Sign-Up Successful", "Welcome to your studio notebook!");
-        router.push("/dashboard");
+        router.push(redirectTarget);
       } else if (data.type === "GOOGLE_AUTH_ERROR") {
         setGoogleLoading(false);
         setError(data.message || "Google authentication failed.");
@@ -90,7 +94,7 @@ function RegisterFormContent() {
     };
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
-  }, [applyOAuthSession, router, success]);
+  }, [applyOAuthSession, router, success, redirectTarget]);
 
   const handleSubmit = useCallback(
     async (e: FormEvent) => {
@@ -116,7 +120,7 @@ function RegisterFormContent() {
 
       setLoading(true);
       try {
-        await register(name.trim(), email.trim(), password, selectedPlan.tier);
+        await register(name.trim(), email.trim(), password, selectedPlan.tier, redirectTarget);
       } catch (err) {
         const message =
           err instanceof Error
@@ -127,7 +131,7 @@ function RegisterFormContent() {
         setLoading(false);
       }
     },
-    [name, email, password, agreed, register, selectedPlan.tier]
+    [name, email, password, agreed, register, selectedPlan.tier, redirectTarget]
   );
 
   const handleGoogleSignup = useCallback(() => {
@@ -347,7 +351,7 @@ function RegisterFormContent() {
 
           {/* Right-Bottom Floating Transparent Ink Lottie Pill */}
           <Link
-            href="/login"
+            href={loginHref}
             className="lp-badge-sticker lp-badge-right-bottom"
             title="Sign In"
           >
@@ -652,7 +656,7 @@ function RegisterFormContent() {
 
               <div className="lp-auth-footer-note">
                 Already have a studio pass?
-                <Link href="/login" className="lp-auth-footer-link">
+                <Link href={loginHref} className="lp-auth-footer-link">
                   Sign in →
                 </Link>
               </div>

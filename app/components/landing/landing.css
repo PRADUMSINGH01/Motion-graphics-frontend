@@ -12,24 +12,32 @@
   overflow-x: hidden;
   background-color: #faf8f2;
   background-image:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 31px,
+      rgba(7, 20, 46, 0.16) 31px,
+      rgba(7, 20, 46, 0.16) 32px
+    ),
     radial-gradient(
       ellipse 92% 78% at 52% 40%,
-      rgba(255, 254, 250, 0.96) 0%,
-      rgba(250, 248, 242, 0.82) 58%,
-      rgba(238, 233, 220, 0.9) 100%
+      rgba(255, 254, 250, 0.98) 0%,
+      rgba(250, 248, 242, 0.88) 58%,
+      rgba(238, 233, 220, 0.95) 100%
     );
   font-family: var(--font-geist), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  -webkit-font-smoothing: subpixel-antialiased;
-  -moz-osx-font-smoothing: auto;
-  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
   font-optical-sizing: auto;
 }
 
 .lp-crisp-paper *,
 .lp-crisp-paper *::before,
 .lp-crisp-paper *::after {
-  -webkit-font-smoothing: subpixel-antialiased;
-  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
   filter: none !important;
 }
 
@@ -588,18 +596,20 @@
 
 .lp-clean-prompt-box {
   width: 100%;
-  background: rgba(255, 253, 248, 0.28);
-  border: 1.5px solid rgba(7, 20, 46, 0.48);
+  background: transparent;
+  border: 1.5px solid rgba(7, 20, 46, 0.52);
   border-radius: 16px;
   padding: 18px 22px;
   text-align: left;
-  box-shadow: 0 10px 30px rgba(7, 20, 46, 0.06);
-  transition: border-color 0.2s ease, background 0.2s ease;
+  backdrop-filter: blur(2px);
+  box-shadow: 0 4px 18px rgba(7, 20, 46, 0.04);
+  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
 }
 
 .lp-clean-prompt-box:focus-within {
   border-color: #07142e;
-  background: rgba(255, 253, 248, 0.42);
+  background: rgba(255, 253, 248, 0.12);
+  box-shadow: 0 8px 26px rgba(7, 20, 46, 0.08);
 }
 
 .lp-prompt-meta-bar {
@@ -2021,16 +2031,17 @@
   grid-template-columns: 1.42fr 1fr;
   border: 1.5px solid #07142e;
   border-radius: 16px;
-  background: rgba(255, 253, 248, 0.16);
+  background: transparent;
+  backdrop-filter: blur(2px);
   overflow: hidden;
-  box-shadow: 0 16px 40px rgba(7, 20, 46, 0.09);
+  box-shadow: 0 16px 40px rgba(7, 20, 46, 0.08);
 }
 
 .lp-director-monitor-col {
   display: flex;
   flex-direction: column;
   border-right: 1.5px solid #07142e;
-  background: rgba(7, 20, 46, 0.03);
+  background: transparent;
 }
 
 .lp-director-monitor-frame {
@@ -2045,7 +2056,7 @@
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   border-top: 1.5px solid #07142e;
-  background: rgba(255, 253, 248, 0.18);
+  background: transparent;
 }
 
 .lp-stage-quick-btn {
@@ -2106,6 +2117,7 @@
   flex-direction: column;
   justify-content: space-between;
   gap: 14px;
+  background: transparent;
 }
 
 .lp-director-sheet-top {
@@ -2158,8 +2170,8 @@
   gap: 6px;
   padding: 10px 12px;
   border-radius: 10px;
-  border: 1px solid rgba(7, 20, 46, 0.28);
-  background: rgba(255, 253, 248, 0.14);
+  border: 1px solid rgba(7, 20, 46, 0.25);
+  background: transparent;
 }
 
 .lp-beat-row {
@@ -2421,8 +2433,9 @@
 
 .lp-tpl-card {
   position: relative;
-  background: rgba(255, 253, 248, 0.14);
-  border: 1.5px solid rgba(7, 20, 46, 0.38);
+  background: transparent;
+  backdrop-filter: blur(2px);
+  border: 1.5px solid rgba(7, 20, 46, 0.42);
   border-radius: 14px;
   overflow: hidden;
   display: flex;
@@ -2432,13 +2445,14 @@
 
 .lp-tpl-card:hover {
   border-color: #07142e;
-  background: rgba(255, 253, 248, 0.26);
+  background: rgba(255, 253, 248, 0.12);
 }
 
 .lp-tpl-card.is-on-stage {
   border-color: #07142e;
   border-width: 2px;
-  box-shadow: 0 12px 28px rgba(7, 20, 46, 0.14);
+  background: rgba(255, 253, 248, 0.15);
+  box-shadow: 0 12px 28px rgba(7, 20, 46, 0.12);
 }
 
 /* Live 16:9 Scaled Motion Viewport inside Card */
@@ -2956,7 +2970,8 @@
 }
 
 .lp-home-live-card {
-  background: rgba(255, 253, 248, 0.34);
+  background: transparent;
+  backdrop-filter: blur(2px);
   border: 1.5px solid rgba(7, 20, 46, 0.44);
   border-radius: 16px;
   overflow: hidden;
@@ -2971,15 +2986,15 @@
 .lp-home-live-card:hover {
   transform: translateY(-4px);
   border-color: #07142e;
-  background: rgba(255, 253, 248, 0.52);
-  box-shadow: 0 14px 30px rgba(7, 20, 46, 0.1);
+  background: rgba(255, 253, 248, 0.14);
+  box-shadow: 0 14px 30px rgba(7, 20, 46, 0.08);
 }
 
 .lp-home-live-card.is-active {
   transform: translateY(-4px);
   border-color: #07142e;
-  background: rgba(255, 253, 248, 0.56);
-  box-shadow: 0 0 0 2px #07142e, 0 14px 30px rgba(7, 20, 46, 0.12);
+  background: rgba(255, 253, 248, 0.18);
+  box-shadow: 0 0 0 2px #07142e, 0 14px 30px rgba(7, 20, 46, 0.1);
 }
 
 .lp-home-live-top {
@@ -2989,7 +3004,7 @@
   justify-content: space-between;
   gap: 10px;
   border-bottom: 1px solid rgba(7, 20, 46, 0.22);
-  background: rgba(255, 253, 248, 0.42);
+  background: transparent;
 }
 
 .lp-home-live-num {

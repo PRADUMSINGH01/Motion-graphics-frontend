@@ -18,6 +18,7 @@ import ProjectsSection from "./sections/ProjectsSection";
 import MediaSection from "./sections/MediaSection";
 import AssetsSection from "./sections/AssetsSection";
 import ExportsSection from "./sections/ExportsSection";
+import AgentConsoleSection from "./sections/AgentConsoleSection";
 import BrandKitSection from "./sections/BrandKitSection";
 import IntegrationsSection from "./sections/IntegrationsSection";
 import MembershipSection from "./sections/MembershipSection";
@@ -101,16 +102,16 @@ export default function DashboardShell({ user }: { user: User & { id: string } }
   };
 
   return (
-    <div className="db flex h-screen w-full overflow-hidden bg-surf-fcfbf7">
+    <div className="db flex h-screen w-full overflow-hidden relative selection:bg-[#c5ef26] selection:text-[#07142e]">
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-20 bg-[rgba(17,17,16,0.45)] backdrop-blur-2xs md:hidden"
+          className="fixed inset-0 z-20 bg-[rgba(7,20,46,0.35)] backdrop-blur-2xs md:hidden"
           onClick={() => setSidebarOpen(false)}
           aria-hidden="true"
         />
       )}
 
-      {/* Left Sidebar matching template */}
+      {/* Left Sidebar matching notebook paper margin style */}
       <NavSidebar
         section={section}
         counts={counts}
@@ -121,10 +122,11 @@ export default function DashboardShell({ user }: { user: User & { id: string } }
         userName={user.name}
         userEmail={user.email}
         planLabel={planLabel}
+        usage={user.usage}
       />
 
-      {/* Main Workspace Column */}
-      <main className="flex h-full min-w-0 flex-1 flex-col overflow-hidden bg-surf-fcfbf7">
+      {/* Main Workspace Column with notebook ruled lines */}
+      <main className="flex h-full min-w-0 flex-1 flex-col overflow-hidden db-notebook-rules relative">
         {/* Global Header Bar */}
         <DashboardHeader
           user={user}
@@ -137,8 +139,8 @@ export default function DashboardShell({ user }: { user: User & { id: string } }
           onNavigate={navigate}
         />
 
-        {/* Scrollable Main Area (Full-height flex for chat interface) */}
-        <div className={`min-h-0 flex-1 ${section === "create" || section === "launches" ? "flex flex-col overflow-hidden" : "overflow-y-auto"}`}>
+        {/* Scrollable Main Area (Full-height flex for chat interface) with local notebook rules */}
+        <div className={`min-h-0 flex-1 db-notebook-rules ${section === "create" || section === "launches" ? "flex flex-col overflow-hidden" : "overflow-y-auto"}`}>
           {(section === "dashboard" || section === "overview") && (
             <OverviewSection
               user={user}
@@ -195,6 +197,7 @@ export default function DashboardShell({ user }: { user: User & { id: string } }
           )}
 
           {section === "exports" && <ExportsSection />}
+          {section === "agent-console" && <AgentConsoleSection />}
           {section === "brandkit" && <BrandKitSection userId={user.id} brandName={user.name} />}
           {section === "integrations" && <IntegrationsSection />}
           {section === "membership" && <MembershipSection user={user} />}

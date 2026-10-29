@@ -1,14 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import Image from "next/image";
 import {
   FiPlay,
-  FiPause,
   FiSearch,
   FiArrowRight,
   FiCheck,
-  FiX,
   FiCopy,
   FiSliders,
   FiLayers,
@@ -18,10 +16,10 @@ import {
   FiSmartphone,
   FiActivity,
   FiGrid,
-  FiCompass,
-  FiRotateCcw,
   FiExternalLink,
-  FiCheckCircle,
+  FiX,
+  FiFilm,
+  FiType,
 } from "react-icons/fi";
 import { IconSparkles } from "../../../components/Icons";
 
@@ -29,598 +27,769 @@ interface TemplatesSectionProps {
   onSelectTemplate: (prompt: string) => void;
 }
 
-export interface TemplateItem {
-  id: string;
-  category: string;
-  title: string;
-  ratio: "16:9" | "9:16" | "1:1";
-  duration: string;
-  difficulty: "Beginner" | "Intermediate" | "Pro";
-  image: string;
-  badge?: string;
-  stats?: string;
-  prompt: string;
-  timeline: { time: string; label: string; desc: string }[];
+export type TemplateCategory =
+  | "All reels"
+  | "Text & Transitions"
+  | "Product launch"
+  | "Animated B-rolls"
+  | "Faceless video"
+  | "Vertical 9:16 shorts";
+
+export type AspectFilter = "All" | "16:9" | "9:16";
+
+export interface SceneBeat {
+  time: string;
+  text: string;
 }
 
-const TEMPLATES: TemplateItem[] = [
+export interface LiveStudioTemplate {
+  id: string;
+  src: string;
+  category: Exclude<TemplateCategory, "All reels">;
+  pillarNumber: "01" | "02" | "03" | "04" | null;
+  title: string;
+  shortLabel: string;
+  ratio: "16:9" | "9:16";
+  duration: string;
+  nleReady: string;
+  prompt: string;
+  beats: SceneBeat[];
+}
+
+export const TEMPLATES: LiveStudioTemplate[] = [
   {
-    id: "t1",
-    category: "Product Launch",
-    title: "Velocity Kinetic Sneaker",
+    id: "text-transition-cool",
+    src: "/text-transition-cool.html",
+    category: "Text & Transitions",
+    pillarNumber: "01",
+    title: "Colorful Kinetic Text & Wipe Transitions",
+    shortLabel: "01 · Text & Transitions",
     ratio: "16:9",
-    duration: "15s",
-    difficulty: "Pro",
-    badge: "Trending",
-    stats: "4K 60FPS · Octane 3D",
-    image: "/dashboard/template-sneaker.jpg",
+    duration: "15s · 60fps",
+    nleReady: "16:9 & RGBA Alpha",
     prompt:
-      "High-octane product launch commercial for a luxury running shoe. Neon lime accent lighting sweeps, 360° turntable with glowing dust particles, dynamic camera rolls, and bold kinetic headline 'JUST MOVE FORWARD'.",
-    timeline: [
-      { time: "00:00 - 00:03", label: "Dynamic Macro Sole Reveal", desc: "Extreme close-up rolling across textured rubber tread with lime laser sweep" },
-      { time: "00:03 - 00:10", label: "360° Turntable in Atmospheric Mist", desc: "Suspended shoe rotating smoothly while neon particles radiate from the sole" },
-      { time: "00:10 - 00:15", label: "Bold Kinetic Outro & Pre-Order CTA", desc: "Heavy typographic stamp 'JUST MOVE FORWARD' with brand lockup" },
+      "Create a vibrant, colorful 60 FPS kinetic text animation with spring word pops, diagonal multi-color shutter wipes, and an iris portal reveal.",
+    beats: [
+      { time: "00:00–00:03", text: "Colorful kinetic word chips pop with spring physics" },
+      { time: "00:03–00:06", text: "Multi-color diagonal shutter wipe & iris portal reveal" },
+      { time: "00:06–00:09", text: "Counter-sliding full-spectrum kinetic ribbons" },
     ],
   },
   {
-    id: "t2",
-    category: "SaaS & Tech",
-    title: "Apex Analytics 3.0 Dashboard",
+    id: "saas-product-launch",
+    src: "/saas-product-launch.html",
+    category: "Product launch",
+    pillarNumber: "02",
+    title: "SaaS 3.0 Flagship Launch Trailer",
+    shortLabel: "02 · Product Launch",
     ratio: "16:9",
-    duration: "30s",
-    difficulty: "Pro",
-    badge: "Most Popular",
-    stats: "3D Glass UI · Keynote Ready",
-    image: "/dashboard/project-data.jpg",
+    duration: "30s · 60fps",
+    nleReady: "4K MP4 & WebM",
     prompt:
-      "Keynote-style SaaS product launch commercial for Apex Analytics. Dark obsidian luxury aesthetic with floating 3D glassmorphism widgets, real-time query countdown from 1,400ms down to 8ms in neon lime, and keynote typography.",
-    timeline: [
-      { time: "00:00 - 00:06", label: "Legacy Bottleneck Dissolve", desc: "Complex legacy spreadsheets shattering into dark ambient mist" },
-      { time: "00:06 - 00:15", label: "3D Glassmorphism Dashboard Elevation", desc: "Isometric floating widgets and real-time rising telemetry chart" },
-      { time: "00:15 - 00:23", label: "Sub-8ms Latency Speedometer", desc: "Kinetic countdown counter spinning to 8ms with neon green glow" },
-      { time: "00:23 - 00:30", label: "1-Click Deploy Finale CTA", desc: "Global node mesh lighting up with apex.io/start CTA" },
+      "Keynote SaaS product launch trailer with 3D glass telemetry dashboard, rising +340% YoY benchmark bars, sub-8ms latency counter, and bold CTA.",
+    beats: [
+      { time: "00:00–00:08", text: "Keynote headline reveal over perspective grid" },
+      { time: "00:08–00:20", text: "Isometric glass UI & rising +340% YoY telemetry bars" },
+      { time: "00:20–00:30", text: "7.4ms latency proof & deploy CTA lockup" },
     ],
   },
   {
-    id: "t3",
-    category: "Brand Stories",
-    title: "A Bigger Tomorrow",
+    id: "broll-data-cutaway",
+    src: "/broll-data-cutaway.html",
+    category: "Animated B-rolls",
+    pillarNumber: "03",
+    title: "Vox-Style Archival Highlight Cutaway",
+    shortLabel: "03 · Animated B-Roll",
     ratio: "16:9",
-    duration: "30s",
-    difficulty: "Intermediate",
-    badge: "Cinematic",
-    stats: "2.39:1 Anamorphic · 60FPS",
-    image: "/dashboard/template-hiker.jpg",
+    duration: "12s · 60fps",
+    nleReady: "Premiere & DaVinci",
     prompt:
-      "Inspiring cinematic brand story film with majestic mountain silhouettes, golden hour sun rays, and atmospheric dust particles. Slow camera dolly in on solitary explorer with dramatic orchestral pacing.",
-    timeline: [
-      { time: "00:00 - 00:06", label: "Wide Misty Alpine Ridge", desc: "Establishing landscape with slow cinematic drone pan over snow peaks" },
-      { time: "00:06 - 00:20", label: "Slow Dolly In on Mountain Explorer", desc: "Sun flares catching edge lighting as figure reaches summit" },
-      { time: "00:20 - 00:30", label: "Typography Fade & Brand Callout", desc: "Poetic tagline fading in with minimal monochrome logo mark" },
+      "Vox-style documentary B-roll panning across an archival print clipping with an animated electric lime marker sweep and source citation.",
+    beats: [
+      { time: "00:00–00:03", text: "Smooth camera pan onto archival newspaper clipping" },
+      { time: "00:03–00:08", text: "Electric lime marker sweep across key quote" },
+      { time: "00:08–00:12", text: "Source masthead & exhibit citation stamp" },
     ],
   },
   {
-    id: "t4",
-    category: "Data Visualisation",
-    title: "Turn Data Into Stories",
-    ratio: "16:9",
-    duration: "20s",
-    difficulty: "Pro",
-    badge: "High Tech",
-    stats: "Holographic 3D · 4K",
-    image: "/dashboard/template-data.jpg",
-    prompt:
-      "Futuristic Earth holographic data visualization with rising translucent charts and real-time telemetry arcs. Deep space darkness with high-contrast cyan and lime telemetry vectors.",
-    timeline: [
-      { time: "00:00 - 00:05", label: "Cosmic Orbital Earth Scan", desc: "200+ edge server nodes lighting up interconnected network paths" },
-      { time: "00:05 - 00:14", label: "Holographic 3D Bar Graph Extrusion", desc: "Translucent cyan and lime data pillars rising dynamically" },
-      { time: "00:14 - 00:20", label: "Telemetry Matrix Metrics Summary", desc: "Summary statistics locked in crisp monospace typography" },
-    ],
-  },
-  {
-    id: "t5",
-    category: "Social & Reels 9:16",
-    title: "Create Share Grow",
+    id: "faceless-story-reel",
+    src: "/faceless-story-reel.html",
+    category: "Faceless video",
+    pillarNumber: "04",
+    title: "Faceless Channel Story & Caption Engine",
+    shortLabel: "04 · Faceless Video",
     ratio: "9:16",
-    duration: "15s",
-    difficulty: "Beginner",
-    badge: "Viral Ready",
-    stats: "Vertical 9:16 · Reels/TikTok",
-    image: "/dashboard/template-portrait.jpg",
+    duration: "20s · 60fps",
+    nleReady: "YouTube & Reels",
     prompt:
-      "Editorial vertical portrait reel with natural ambient shadows, warm color grading, and organic transitions designed for TikTok, Instagram Reels, and YouTube Shorts.",
-    timeline: [
-      { time: "00:00 - 00:03", label: "Sub-second Portrait Hook", desc: "Eye-catching subject movement with kinetic typography overlay" },
-      { time: "00:03 - 00:10", label: "Warm Foliage Light Transition", desc: "Fluid lens whip transition through warm ambient sunlight" },
-      { time: "00:10 - 00:15", label: "Dynamic Callout & Social Outro", desc: "Punchy animated handle and subscribe button" },
+      "Generate a complete faceless storytelling video with automated visual B-roll scenes, chapter progression, and synchronized word-by-word kinetic captions.",
+    beats: [
+      { time: "00:00–00:05", text: "Chapter 01 visual hook & retention graph reveal" },
+      { time: "00:05–00:13", text: "Automated scene B-roll nodes & telemetry proof" },
+      { time: "00:13–00:20", text: "Synchronized voiceover wave & word-by-word captions" },
     ],
   },
   {
-    id: "t6",
-    category: "Social & Reels 9:16",
-    title: "Fintech Mobile Core",
+    id: "split-screen-attention",
+    src: "/split-screen-attention.html",
+    category: "Animated B-rolls",
+    pillarNumber: null,
+    title: "Attention Split Documentary B-Roll",
+    shortLabel: "Attention Split",
+    ratio: "16:9",
+    duration: "20s · 60fps",
+    nleReady: "YouTube Essays",
+    prompt:
+      "Split-screen documentary B-roll contrasting monochrome analog deep work on the left against a saturated high-velocity social feed on the right.",
+    beats: [
+      { time: "00:00–00:06", text: "Monochrome film-grain reader scene establishes" },
+      { time: "00:06–00:14", text: "Center divider splits to saturated mobile feed" },
+      { time: "00:14–00:20", text: "Dual-stage contrast caption reveal" },
+    ],
+  },
+  {
+    id: "neon-host-neuron",
+    src: "/neon-host-neuron.html",
+    category: "Animated B-rolls",
+    pillarNumber: null,
+    title: "3D Neon Callout → Neural Synapse Cutaway",
+    shortLabel: "Neon → Neuron",
+    ratio: "16:9",
+    duration: "15s · 60fps",
+    nleReady: "MP4 & WebM",
+    prompt:
+      "3D perspective neon callout card beside the speaker that transitions into a glowing synaptic neuron firing across the axon.",
+    beats: [
+      { time: "00:00–00:05", text: "3D neon callout box pops in beside speaker" },
+      { time: "00:05–00:10", text: "Camera zooms into neural dendrite network" },
+      { time: "00:10–00:15", text: "Glowing impulse travels axon with particle burst" },
+    ],
+  },
+  {
+    id: "aggressive-zoom-flashcuts",
+    src: "/aggressive-zoom-flashcuts.html",
+    category: "Vertical 9:16 shorts",
+    pillarNumber: null,
+    title: "Flash-Cut Zoom & Beat Montage",
+    shortLabel: "Flash-Cut Zoom",
     ratio: "9:16",
-    duration: "15s",
-    difficulty: "Intermediate",
-    badge: "App Showcase",
-    stats: "Vertical 9:16 · 60FPS",
-    image: "/dashboard/project-app.jpg",
+    duration: "15s · 60fps",
+    nleReady: "Reels & Shorts",
     prompt:
-      "Sleek mobile app presentation with hand holding frosted titanium smartphone in moody smoke. Floating debit card contactless tap radiating 3D lime waves and sub-second transaction checkmark.",
-    timeline: [
-      { time: "00:00 - 00:04", label: "Hand Holding Phone in Dramatic Mist", desc: "Device floating forward with reflective screen glow" },
-      { time: "00:04 - 00:11", label: "Contactless Card Tap & Lime Wave", desc: "3D glass card taps phone screen triggering neon ripples" },
-      { time: "00:11 - 00:15", label: "App Store Badge & Download CTA", desc: "Zero Foreign Fees stamped with app store button" },
+      "Aggressive camera zoom punches with high-contrast flash cuts, scanline texture, and bold impact labels on every beat.",
+    beats: [
+      { time: "00:00–00:04", text: "Rapid camera push-in with keylight shift" },
+      { time: "00:04–00:10", text: "Beat-synced full-frame graphic flash cuts" },
+      { time: "00:10–00:15", text: "Scanline overlay & timecode lockup" },
     ],
   },
   {
-    id: "t7",
-    category: "SaaS & Tech",
-    title: "Make Ideas Move",
+    id: "host-intro-text",
+    src: "/host-intro-text.html",
+    category: "Text & Transitions",
+    pillarNumber: null,
+    title: "Bold Kinetic Creator Intro",
+    shortLabel: "Creator Intro",
     ratio: "16:9",
-    duration: "25s",
-    difficulty: "Pro",
-    badge: "3D Motion",
-    stats: "Fluid Dynamics · Octane",
-    image: "/dashboard/template-sphere.jpg",
+    duration: "10s · 60fps",
+    nleReady: "16:9 & 9:16",
     prompt:
-      "3D abstract fluid sphere and ribbon showcase designed for a modern fintech web application. Glossy morphing surfaces, reflective chrome spheres, and crisp vector typography.",
-    timeline: [
-      { time: "00:00 - 00:06", label: "Glossy Fluid Ribbon Morphing", desc: "Organic obsidian and lime ribbon flowing across 3D canvas" },
-      { time: "00:06 - 00:18", label: "Metallic Spheres Colliding with Glow", desc: "Chrome spheres interacting with elastic physics" },
-      { time: "00:18 - 00:25", label: "Product Logo Lockup Reveal", desc: "Ribbon forms the central brand glyph with subtle shine sweep" },
+      "Low-key creator silhouette with lens-glint eyes and giant stacked kinetic typography slamming into frame with subtle camera shake.",
+    beats: [
+      { time: "00:00–00:03", text: "Low-key studio silhouette & eye lens glint" },
+      { time: "00:03–00:07", text: "Heavy stacked title cards slam into place" },
+      { time: "00:07–00:10", text: "Camera micro-shake & vignette settle" },
     ],
   },
   {
-    id: "t8",
-    category: "Product Launch",
-    title: "Minimalist Hardware Drop",
-    ratio: "16:9",
-    duration: "30s",
-    difficulty: "Intermediate",
-    badge: "Keynote Ready",
-    stats: "Exploded 3D · 4K",
-    image: "/dashboard/project-launch.jpg",
+    id: "feed-scroll-macro",
+    src: "/feed-scroll-macro.html",
+    category: "Vertical 9:16 shorts",
+    pillarNumber: null,
+    title: "Macro POV — Thumb Scrolling Feed",
+    shortLabel: "Macro Feed Scroll",
+    ratio: "9:16",
+    duration: "15s · 60fps",
+    nleReady: "9:16 Vertical",
     prompt:
-      "Clean geometric tech hardware turntable with dark luxury lighting, laser rim sweeps, exploded internal components view, and precision specification callouts.",
-    timeline: [
-      { time: "00:00 - 00:08", label: "Laser Rim Lighting Sweep", desc: "Chassis silhouette illuminated by moving laser line" },
-      { time: "00:08 - 00:22", label: "Exploded Internal Components View", desc: "Precision microchips, heatsinks, and glass housing levitating apart" },
-      { time: "00:22 - 00:30", label: "Hero Lockup & Pre-Order Button", desc: "Parts snap back together with magnetic click and CTA" },
+      "Handheld macro POV shot of a smartphone feed scrolling rapidly with jump-cut flashes and kinetic retention hooks.",
+    beats: [
+      { time: "00:00–00:04", text: "Jump-cut flash into macro phone viewport" },
+      { time: "00:04–00:11", text: "Rapid thumb-scroll feed cards with camera shake" },
+      { time: "00:11–00:15", text: "Pattern-interrupt hook card freeze" },
     ],
   },
   {
-    id: "t9",
-    category: "Brand Stories",
-    title: "Canyon Valleys Architecture",
+    id: "flash-cut-broadcast",
+    src: "/flash-cut-broadcast.html",
+    category: "Text & Transitions",
+    pillarNumber: null,
+    title: "Broadcast Lower-Third & Flash Cut",
+    shortLabel: "Broadcast Cut",
     ratio: "16:9",
-    duration: "35s",
-    difficulty: "Pro",
-    badge: "Architectural",
-    stats: "Flythrough · 60FPS",
-    image: "/dashboard/project-explainer.jpg",
+    duration: "15s · 60fps",
+    nleReady: "Broadcast 60fps",
     prompt:
-      "Architectural 3D flythrough through sleek snow-capped minimalist canyons with morning mist, geometric pavilion structures, and atmospheric drone camera movement.",
-    timeline: [
-      { time: "00:00 - 00:10", label: "High Altitude Canyon Flyover", desc: "Sweeping camera angle over snow-dusted ridgelines" },
-      { time: "00:10 - 00:25", label: "Valley Depth Camera Glide", desc: "Smooth descent toward modern glass pavilion" },
-      { time: "00:25 - 00:35", label: "Title Card Minimalist Reveal", desc: "Clean serif brand typography fading in center screen" },
+      "Skewed broadcast news lower-third title bar over studio lighting followed by rapid full-screen editorial flash cuts.",
+    beats: [
+      { time: "00:00–00:05", text: "Studio keylight & skewed lower-third bar slide" },
+      { time: "00:05–00:11", text: "Rapid full-frame editorial cutaways" },
+      { time: "00:11–00:15", text: "Return to host stage with sub-caption" },
     ],
   },
   {
-    id: "t10",
-    category: "Data Visualisation",
-    title: "Metropolis Growth Index",
-    ratio: "16:9",
-    duration: "25s",
-    difficulty: "Intermediate",
-    badge: "Telemetry",
-    stats: "Sunset City · 4K",
-    image: "/dashboard/project-data.jpg",
+    id: "phone-toss-clock",
+    src: "/phone-toss-clock.html",
+    category: "Vertical 9:16 shorts",
+    pillarNumber: null,
+    title: "Phone Toss → Ticking Clock Hook",
+    shortLabel: "Phone Toss Hook",
+    ratio: "9:16",
+    duration: "12s · 60fps",
+    nleReady: "Reels, Shorts & X",
     prompt:
-      "Sunset skyscraper cityscape with holographic 3D bar charts reflecting in calm waters. Rising glowing towers indicating year-over-year revenue growth.",
-    timeline: [
-      { time: "00:00 - 00:07", label: "Golden Hour Reflection Establishing", desc: "Drone perspective over tranquil water reflecting skyline" },
-      { time: "00:07 - 00:18", label: "Rising Glowing Towers Graph", desc: "Data bars extruding upward alongside skyscraper heights" },
-      { time: "00:18 - 00:25", label: "Final Growth Metrics Stamped", desc: "+340% YoY expansion badge highlighted in neon lime" },
+      "A smartphone gets tossed out of frame with motion blur, hard-cutting to a high-contrast ticking analog clock.",
+    beats: [
+      { time: "00:00–00:04", text: "Lockscreen time glow & hand grip" },
+      { time: "00:04–00:07", text: "Phone tossed upward with impact flash cut" },
+      { time: "00:07–00:12", text: "High-contrast analog clock second-hand tick" },
+    ],
+  },
+  {
+    id: "host-dark-text",
+    src: "/host-dark-text.html",
+    category: "Product launch",
+    pillarNumber: null,
+    title: "Keynote Dark Headline Reveal",
+    shortLabel: "Keynote Teaser",
+    ratio: "16:9",
+    duration: "12s · 60fps",
+    nleReady: "4K Keynote MP4",
+    prompt:
+      "Dramatic low-light keynote teaser where bold word-by-word typography ('WE NEED TO TALK.') emerges over a spotlighted stage.",
+    beats: [
+      { time: "00:00–00:04", text: "Spotlight silhouette fade-in from obsidian" },
+      { time: "00:04–00:09", text: "Word-by-word display headline reveal" },
+      { time: "00:09–00:12", text: "Wide-tracked subtitle fade & hold" },
     ],
   },
 ];
 
-const CATEGORIES = [
-  { id: "All", label: "All Templates", icon: FiGrid },
-  { id: "Product Launch", label: "Product Launch", icon: FiZap },
-  { id: "SaaS & Tech", label: "SaaS & Tech", icon: FiServer },
-  { id: "Social & Reels 9:16", label: "Social & Reels", icon: FiSmartphone },
-  { id: "Data Visualisation", label: "Data & Charts", icon: FiActivity },
-  { id: "Brand Stories", label: "Brand Stories", icon: FiLayers },
+const CORE_FOUR_IDS = [
+  "text-transition-cool",
+  "saas-product-launch",
+  "broll-data-cutaway",
+  "faceless-story-reel",
 ];
 
-export default function TemplatesSection({
-  onSelectTemplate,
-}: TemplatesSectionProps) {
-  const [selectedCat, setSelectedCat] = useState("All");
-  const [selectedRatio, setSelectedRatio] = useState<string>("All");
-  const [difficultyFilter, setDifficultyFilter] = useState<string>("All");
-  const [query, setQuery] = useState("");
-  const [activeTemplate, setActiveTemplate] = useState<TemplateItem | null>(null);
-  const [editablePrompt, setEditablePrompt] = useState("");
-  const [isPlayingPreview, setIsPlayingPreview] = useState(false);
-  const [copied, setCopied] = useState(false);
+const CATEGORY_TABS: { id: TemplateCategory; label: string; icon: React.ComponentType<{ size?: number; className?: string }> }[] = [
+  { id: "All reels", label: "All Reels", icon: FiGrid },
+  { id: "Text & Transitions", label: "01 · Text & Transitions", icon: FiType },
+  { id: "Product launch", label: "02 · Product Launch", icon: FiZap },
+  { id: "Animated B-rolls", label: "03 · Animated B-Rolls", icon: FiFilm },
+  { id: "Faceless video", label: "04 · Faceless Video", icon: FiLayers },
+  { id: "Vertical 9:16 shorts", label: "Vertical 9:16 Shorts", icon: FiSmartphone },
+];
 
-  const filtered = TEMPLATES.filter((t) => {
-    if (selectedCat !== "All" && t.category !== selectedCat) return false;
-    if (selectedRatio !== "All" && t.ratio !== selectedRatio) return false;
-    if (difficultyFilter !== "All" && t.difficulty !== difficultyFilter) return false;
-    if (
-      query &&
-      !t.title.toLowerCase().includes(query.toLowerCase()) &&
-      !t.category.toLowerCase().includes(query.toLowerCase()) &&
-      !t.prompt.toLowerCase().includes(query.toLowerCase())
-    ) {
-      return false;
+const RATIO_FILTERS: { id: AspectFilter; label: string }[] = [
+  { id: "All", label: "All ratios" },
+  { id: "16:9", label: "16:9 Landscape" },
+  { id: "9:16", label: "9:16 Portrait" },
+];
+
+const BASE_W = 1280;
+
+/**
+ * Scaled live HTML stage for responsive iframe rendering
+ */
+function LiveScaledStage({
+  src,
+  title,
+  category,
+  duration,
+  hoverLabel,
+  onClick,
+}: {
+  src: string;
+  title: string;
+  category?: string;
+  duration?: string;
+  hoverLabel?: string;
+  onClick?: () => void;
+}) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [scale, setScale] = useState(0.3);
+  const [visible, setVisible] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const updateScale = () => {
+      if (el.clientWidth > 0) {
+        setScale(el.clientWidth / BASE_W);
+      }
+    };
+    updateScale();
+
+    const ro = new ResizeObserver(([entry]) => {
+      if (entry.contentRect.width > 0) {
+        setScale(entry.contentRect.width / BASE_W);
+      }
+    });
+    ro.observe(el);
+
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: "300px" }
+    );
+    io.observe(el);
+
+    return () => {
+      ro.disconnect();
+      io.disconnect();
+    };
+  }, []);
+
+  return (
+    <div
+      ref={containerRef}
+      onClick={onClick}
+      className="relative aspect-video w-full overflow-hidden rounded-xl bg-[#040c1c] border border-[#07142e]/30 cursor-pointer group"
+    >
+      {/* Top HUD */}
+      {category && duration && (
+        <div className="absolute top-2 left-2 right-2 z-10 flex items-center justify-between pointer-events-none">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-[#07142e]/90 px-2 py-0.5 text-[9px] font-mono font-bold text-[#faf8f2] backdrop-blur-xs border border-white/10">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#c5ef26]" />
+            <span>{category}</span>
+          </span>
+          <span className="rounded bg-black/75 px-1.5 py-0.5 font-mono text-[9px] font-semibold text-white/90 backdrop-blur-xs">
+            {duration}
+          </span>
+        </div>
+      )}
+
+      {/* Scaled Iframe */}
+      {visible && (
+        <iframe
+          key={src}
+          src={src}
+          title={title}
+          loading="lazy"
+          sandbox="allow-scripts"
+          tabIndex={-1}
+          aria-hidden="true"
+          onLoad={() => setLoaded(true)}
+          className="pointer-events-none absolute top-0 left-0 w-[1280px] h-[720px] border-0 origin-top-left transition-opacity duration-300"
+          style={{
+            transform: `scale(${scale})`,
+            opacity: loaded ? 1 : 0,
+          }}
+        />
+      )}
+
+      {/* Hover Overlay */}
+      {hoverLabel && (
+        <div className="absolute inset-0 flex items-center justify-center bg-[#07142e]/40 opacity-0 group-hover:opacity-100 transition-opacity duration-150 backdrop-blur-2xs">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-[#c5ef26] px-3.5 py-1.5 font-mono text-[11px] font-bold text-[#07142e] shadow-lg">
+            <FiPlay size={12} className="fill-[#07142e]" />
+            <span>{hoverLabel}</span>
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function TemplatesSection({ onSelectTemplate }: TemplatesSectionProps) {
+  const stageRef = useRef<HTMLDivElement | null>(null);
+
+  const [stageTemplate, setStageTemplate] = useState<LiveStudioTemplate>(TEMPLATES[0]);
+  const [stagePrompt, setStagePrompt] = useState<string>(TEMPLATES[0].prompt);
+  const [copiedStage, setCopiedStage] = useState<boolean>(false);
+
+  const [selectedCategory, setSelectedCategory] = useState<TemplateCategory>("All reels");
+  const [selectedRatio, setSelectedRatio] = useState<AspectFilter>("All");
+  const [searchQuery, setSearchQuery] = useState<string>("");
+
+  const quickStageReels = useMemo(
+    () => CORE_FOUR_IDS.map((id) => TEMPLATES.find((t) => t.id === id) || TEMPLATES[0]),
+    []
+  );
+
+  const filteredTemplates = useMemo(() => {
+    return TEMPLATES.filter((tpl) => {
+      if (selectedCategory !== "All reels" && tpl.category !== selectedCategory) {
+        return false;
+      }
+      if (selectedRatio !== "All" && tpl.ratio !== selectedRatio) {
+        return false;
+      }
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        const matchTitle = tpl.title.toLowerCase().includes(q);
+        const matchCat = tpl.category.toLowerCase().includes(q);
+        const matchPrompt = tpl.prompt.toLowerCase().includes(q);
+        if (!matchTitle && !matchCat && !matchPrompt) {
+          return false;
+        }
+      }
+      return true;
+    });
+  }, [selectedCategory, selectedRatio, searchQuery]);
+
+  const handleSelectForStage = (tpl: LiveStudioTemplate, scrollToTop = false) => {
+    setStageTemplate(tpl);
+    setStagePrompt(tpl.prompt);
+    setCopiedStage(false);
+    if (scrollToTop && stageRef.current) {
+      stageRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
     }
-    return true;
-  });
-
-  const openTemplateModal = (t: TemplateItem) => {
-    setActiveTemplate(t);
-    setEditablePrompt(t.prompt);
-    setIsPlayingPreview(false);
   };
 
-  const copyPrompt = (p: string) => {
-    navigator.clipboard?.writeText(p);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const handleCopyPrompt = () => {
+    navigator.clipboard?.writeText(stagePrompt);
+    setCopiedStage(true);
+    setTimeout(() => setCopiedStage(false), 2000);
   };
 
   return (
-    <div className="mx-auto w-full max-w-7xl p-6 lg:p-8 space-y-8">
-      {/* ── Page Title & Search Bar ── */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+    <div className="mx-auto w-full max-w-7xl p-5 sm:p-7 lg:p-8 space-y-7" ref={stageRef}>
+      {/* ── Page Header Bar ── */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-[rgba(7,20,46,0.18)] pb-5">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="rounded-full bg-surf-f2fac2 px-2.5 py-0.5 font-mono text-[11px] font-semibold text-ink-658b02">
-              MOTION BLUEPRINTS
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="rounded-full bg-[#c5ef26]/35 border border-[#07142e]/30 px-2.5 py-0.5 font-mono text-[10.5px] font-bold text-[#07142e]">
+              STUDIO BLUEPRINTS
             </span>
-            <span className="rounded-full bg-surf-111110 px-2.5 py-0.5 font-mono text-[10.5px] font-semibold text-ink-c5ef26">
-              60 FPS MASTER RIGS
+            <span className="rounded-full bg-[#07142e] px-2.5 py-0.5 font-mono text-[10px] font-bold text-[#c5ef26]">
+              4 CORE RIGS · 60 FPS
             </span>
           </div>
-          <h1 className="mt-1 text-[28px] sm:text-[38px] font-black tracking-tight text-ink-111110">
-            Motion Template Library
+          <h1 className="mt-2 text-[26px] sm:text-[34px] font-extrabold tracking-tight text-[#07142e] leading-tight m-0">
+            Director&apos;s Screening Room &amp; Templates
           </h1>
-          <p className="text-[14px] text-ink-717069 max-w-2xl">
-            Pre-engineered 3D camera paths, kinetic typographic keynotes, and product reveal sequences ready to customize and export.
+          <p className="mt-1 text-[13.5px] text-[rgba(7,20,46,0.7)] max-w-2xl leading-relaxed m-0">
+            Every template below is a live 60fps composition compiled from a prompt. Load any template onto the master screening deck to inspect scene beats, edit the prompt, and open it in the Studio.
           </p>
         </div>
 
         {/* Search Bar */}
         <div className="relative w-full sm:w-80">
-          <FiSearch size={16} className="absolute left-3.5 top-3.5 text-ink-8c8980" />
+          <FiSearch size={15} className="absolute left-3.5 top-3.5 text-[rgba(7,20,46,0.5)]" />
           <input
             type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search templates, scenes, prompts..."
-            className="w-full h-11 rounded-2xl border border-surf-dedad0 bg-surf-ffffff pl-10 pr-4 text-[13.5px] text-ink-111110 placeholder-ink-9c9990 focus:border-surf-111110 focus:outline-none transition shadow-2xs"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search reels, tags, prompts..."
+            className="w-full h-10 rounded-xl border border-[rgba(7,20,46,0.28)] bg-transparent pl-9.5 pr-8 text-[12.5px] text-[#07142e] placeholder-[rgba(7,20,46,0.45)] focus:border-[#07142e] focus:bg-[rgba(255,253,248,0.12)] focus:outline-none transition shadow-2xs"
           />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => setSearchQuery("")}
+              className="absolute right-3 top-2.5 text-[11px] font-bold text-[rgba(7,20,46,0.5)] hover:text-[#07142e]"
+            >
+              ✕
+            </button>
+          )}
         </div>
       </div>
-
-      {/* ── Filter Deck: Category Pills & Ratio Controls ── */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-surf-eceae3 pb-4">
-        {/* Category Icons & Pills */}
-        <div className="flex flex-wrap items-center gap-2">
-          {CATEGORIES.map((cat) => {
-            const IconComponent = cat.icon;
-            const active = selectedCat === cat.id;
-            return (
-              <button
-                key={cat.id}
-                type="button"
-                onClick={() => setSelectedCat(cat.id)}
-                className={`flex items-center gap-1.5 rounded-full px-4 py-2 text-[12.5px] font-semibold transition ${
-                  active
-                    ? "bg-surf-111110 text-ink-c5ef26 shadow-xs"
-                    : "border border-surf-dedad0 bg-surf-ffffff text-ink-55544e hover:border-surf-111110 hover:text-ink-111110"
-                }`}
-              >
-                <IconComponent size={14} />
-                <span>{cat.label}</span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Aspect Ratio & Difficulty Pills */}
-        <div className="flex items-center gap-2">
-          {/* Ratio Toggle */}
-          <div className="flex items-center gap-1 rounded-2xl border border-surf-dedad0 bg-surf-ffffff p-1 shadow-2xs">
-            {["All", "16:9", "9:16", "1:1"].map((r) => (
-              <button
-                key={r}
-                type="button"
-                onClick={() => setSelectedRatio(r)}
-                className={`rounded-xl px-3 py-1 font-mono text-[11px] font-semibold transition ${
-                  selectedRatio === r
-                    ? "bg-surf-111110 text-white shadow-xs"
-                    : "text-ink-717069 hover:text-ink-111110"
-                }`}
-              >
-                {r === "All" ? "All Ratios" : r}
-              </button>
-            ))}
-          </div>
-
-          {/* Difficulty Dropdown */}
-          <select
-            value={difficultyFilter}
-            onChange={(e) => setDifficultyFilter(e.target.value)}
-            className="h-9 rounded-xl border border-surf-dedad0 bg-surf-ffffff px-3 text-[12px] font-medium text-ink-55544e focus:border-surf-111110 focus:outline-none cursor-pointer"
-          >
-            <option value="All">All Levels</option>
-            <option value="Beginner">Beginner</option>
-            <option value="Intermediate">Intermediate</option>
-            <option value="Pro">Pro Rig</option>
-          </select>
-        </div>
-      </div>
-
-      {/* ── Template Cards Grid ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {filtered.map((t) => (
-          <div
-            key={t.id}
-            onClick={() => openTemplateModal(t)}
-            className="group cursor-pointer rounded-3xl border border-surf-dedad0 bg-surf-ffffff p-3.5 shadow-2xs transition-all duration-200 hover:-translate-y-1 hover:border-surf-111110 hover:shadow-lg flex flex-col justify-between"
-          >
-            <div>
-              {/* Media Thumbnail */}
-              <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-surf-111110">
-                <Image
-                  src={t.image}
-                  alt={t.title}
-                  fill
-                  className="object-cover transition-transform duration-300 group-hover:scale-105"
-                  sizes="(max-width: 768px) 100vw, 25vw"
-                />
-
-                {/* Aspect Ratio & Duration Badge */}
-                <span className="absolute bottom-2 left-2 rounded-md bg-black/80 px-2 py-0.5 font-mono text-[10px] text-white backdrop-blur-xs">
-                  {t.ratio} · {t.duration}
-                </span>
-
-                {/* Badge Tag */}
-                {t.badge && (
-                  <span className="absolute top-2 left-2 rounded-full bg-surf-111110 px-2 py-0.5 font-mono text-[9px] font-bold text-ink-c5ef26">
-                    {t.badge}
-                  </span>
-                )}
-
-                {/* Difficulty Pill */}
-                <span className="absolute top-2 right-2 rounded-md bg-black/60 px-2 py-0.5 font-mono text-[9.5px] font-medium text-white/90">
-                  {t.difficulty}
-                </span>
-
-                {/* Hover Play Button Overlay */}
-                <div className="absolute inset-0 flex items-center justify-center bg-black/25 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                  <span className="flex h-11 w-11 items-center justify-center rounded-full bg-surf-c5ef26 text-ink-111110 shadow-md">
-                    <FiPlay size={18} className="ml-0.5 fill-ink-111110" />
-                  </span>
-                </div>
-              </div>
-
-              {/* Text Meta */}
-              <div className="mt-3.5 px-0.5">
-                <span className="font-mono text-[10.5px] font-bold uppercase tracking-wider text-ink-658b02">
-                  {t.category}
-                </span>
-                <h3 className="mt-1 text-[14.5px] font-bold text-ink-111110 group-hover:underline line-clamp-1">
-                  {t.title}
-                </h3>
-                <p className="mt-1 text-[12px] text-ink-717069 line-clamp-2 leading-relaxed">
-                  {t.prompt}
-                </p>
-              </div>
-            </div>
-
-            {/* Bottom Footer Action */}
-            <div className="mt-4 pt-3 border-t border-surf-f2efe6 flex items-center justify-between">
-              <span className="font-mono text-[10.5px] text-ink-8c8980">
-                {t.stats || "60 FPS Master"}
-              </span>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onSelectTemplate(t.prompt);
-                }}
-                className="flex items-center gap-1 text-[12px] font-bold text-ink-111110 hover:text-ink-658b02 transition"
-              >
-                <span>Customize</span>
-                <FiArrowRight size={13} className="text-ink-c5ef26" />
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Empty State */}
-      {filtered.length === 0 && (
-        <div className="rounded-3xl border border-surf-dedad0 bg-surf-ffffff p-12 text-center space-y-3">
-          <p className="font-mono text-[14px] text-ink-717069">
-            No templates matching &ldquo;{query}&rdquo;
-          </p>
-          <button
-            type="button"
-            onClick={() => {
-              setSelectedCat("All");
-              setSelectedRatio("All");
-              setDifficultyFilter("All");
-              setQuery("");
-            }}
-            className="rounded-xl bg-surf-111110 px-4 py-2 text-[12.5px] font-semibold text-white"
-          >
-            Reset Filters
-          </button>
-        </div>
-      )}
 
       {/* =========================================================================
-          DETAIL MODAL: TIMELINE BREAKDOWN & MASTER PROMPT EDITOR
+          HERO STAGE: MASTER SCREENING DECK (Monitor + Notebook Sheet Inspector)
          ========================================================================= */}
-      {activeTemplate && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 p-4 backdrop-blur-xs"
-          onClick={() => setActiveTemplate(null)}
-        >
-          <div
-            className="relative w-full max-w-2xl overflow-hidden rounded-3xl border border-surf-dedad0 bg-surf-ffffff p-6 sm:p-7 shadow-2xl animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto space-y-5"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Modal Header */}
-            <div className="flex items-start justify-between">
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="rounded-full bg-surf-f2fac2 px-2.5 py-0.5 font-mono text-[11px] font-semibold text-ink-658b02">
-                    {activeTemplate.category}
-                  </span>
-                  <span className="rounded-full bg-surf-111110 px-2 py-0.5 font-mono text-[10px] font-bold text-ink-c5ef26">
-                    {activeTemplate.difficulty}
-                  </span>
-                  <span className="font-mono text-[11px] text-ink-8c8980">
-                    {activeTemplate.ratio} · {activeTemplate.duration}
-                  </span>
-                </div>
-                <h2 className="mt-1 text-[22px] font-bold text-ink-111110">
-                  {activeTemplate.title}
-                </h2>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setActiveTemplate(null)}
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-surf-f2efe6 text-ink-717069 hover:bg-surf-dedad0 hover:text-ink-111110"
-              >
-                <FiX size={16} />
-              </button>
-            </div>
-
-            {/* Video Canvas Simulation */}
-            <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-black shadow-inner">
-              <Image
-                src={activeTemplate.image}
-                alt={activeTemplate.title}
-                fill
-                className="object-cover"
-              />
-
-              {/* Play Overlay */}
-              <div
-                onClick={() => setIsPlayingPreview(!isPlayingPreview)}
-                className="absolute inset-0 flex items-center justify-center bg-black/25 cursor-pointer"
-              >
-                <span className="flex h-14 w-14 items-center justify-center rounded-full bg-surf-c5ef26 text-ink-111110 shadow-xl hover:scale-105 transition">
-                  {isPlayingPreview ? (
-                    <FiPause size={22} className="fill-ink-111110" />
-                  ) : (
-                    <FiPlay size={22} className="ml-1 fill-ink-111110" />
-                  )}
-                </span>
-              </div>
-
-              {/* HUD Badge */}
-              <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-white/80 font-mono text-[11px] pointer-events-none">
-                <span className="rounded bg-black/70 px-2 py-0.5 backdrop-blur-xs">
-                  {isPlayingPreview ? "PLAYING SIMULATION · 60 FPS" : "PREVIEW PAUSED"}
-                </span>
-                <span className="rounded bg-black/70 px-2 py-0.5 text-ink-c5ef26 backdrop-blur-xs font-semibold">
-                  {activeTemplate.duration}
-                </span>
-              </div>
-            </div>
-
-            {/* Editable Master Prompt Box */}
-            <div className="rounded-2xl border border-surf-dedad0 bg-surf-faf9f5 p-4 space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-[11px] font-bold uppercase tracking-wider text-ink-55544e">
-                  Editable Master Prompt
-                </span>
-                <button
-                  type="button"
-                  onClick={() => copyPrompt(editablePrompt)}
-                  className="flex items-center gap-1 text-[11.5px] font-semibold text-ink-111110 hover:underline"
-                >
-                  {copied ? <FiCheck size={12} className="text-ink-658b02" /> : <FiCopy size={12} />}
-                  <span>{copied ? "Copied!" : "Copy Prompt"}</span>
-                </button>
-              </div>
-
-              <textarea
-                rows={3}
-                value={editablePrompt}
-                onChange={(e) => setEditablePrompt(e.target.value)}
-                className="w-full rounded-xl border border-surf-dedad0 bg-surf-ffffff p-3 text-[13px] text-ink-111110 leading-relaxed focus:border-surf-111110 focus:outline-none"
-              />
-              <span className="block text-[11px] text-ink-8c8980">
-                Feel free to tweak product names, colors, or camera movements before launching.
+      <section className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+        {/* Left: Live 60fps Screening Monitor + 4 Core Switcher (7 cols) */}
+        <div className="lg:col-span-7 space-y-3">
+          <div className="overflow-hidden rounded-2xl border-2 border-[#07142e] bg-[#07142e] shadow-xl">
+            {/* Monitor Header */}
+            <div className="px-4 py-2.5 bg-[#040c1c] border-b border-white/10 flex items-center justify-between font-mono text-[11px] text-white/90">
+              <span className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-[#c5ef26] animate-pulse" />
+                <span className="font-bold tracking-wide">MASTER SCREENING MONITOR</span>
+              </span>
+              <span className="text-[#c5ef26] font-bold">
+                {stageTemplate.ratio} · 60 FPS
               </span>
             </div>
 
-            {/* Multi-Beat Scene Breakdown */}
-            <div className="space-y-2.5">
-              <h4 className="text-[13.5px] font-bold text-ink-111110">
-                Cinematic Scene Breakdown ({activeTemplate.timeline.length} Beats)
-              </h4>
-              <div className="space-y-2">
-                {activeTemplate.timeline.map((beat, idx) => (
-                  <div
-                    key={idx}
-                    className="flex flex-col sm:flex-row sm:items-center justify-between rounded-xl border border-surf-eceae3 bg-surf-ffffff p-3 text-[12.5px] gap-1"
+            {/* Live Render Viewport */}
+            <div className="relative aspect-video w-full overflow-hidden bg-black">
+              <iframe
+                key={stageTemplate.src}
+                src={stageTemplate.src}
+                title={stageTemplate.title}
+                sandbox="allow-scripts"
+                className="w-full h-full border-0 pointer-events-auto"
+              />
+            </div>
+          </div>
+
+          {/* 4 Core Quick Switcher Bar */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {quickStageReels.map((item) => {
+              const isCurrent = stageTemplate.id === item.id;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => handleSelectForStage(item, false)}
+                  className={`flex flex-col text-left p-2.5 rounded-xl border transition cursor-pointer ${
+                    isCurrent
+                      ? "border-[#07142e] bg-[#07142e] text-[#faf8f2] shadow-sm"
+                      : "border-[rgba(7,20,46,0.28)] bg-transparent text-[#07142e] hover:border-[#07142e] hover:bg-[rgba(255,253,248,0.14)]"
+                  }`}
+                >
+                  <span
+                    className={`font-mono text-[9px] font-bold uppercase tracking-wider ${
+                      isCurrent ? "text-[#c5ef26]" : "text-[rgba(7,20,46,0.65)]"
+                    }`}
                   >
-                    <div>
-                      <span className="font-bold text-ink-111110 mr-2">
-                        Beat 0{idx + 1}: {beat.label}
-                      </span>
-                      <p className="text-[11.5px] text-ink-717069 mt-0.5">
-                        {beat.desc}
-                      </p>
-                    </div>
-                    <span className="font-mono text-[11px] font-semibold text-ink-658b02 shrink-0">
+                    {item.pillarNumber ? `RIG ${item.pillarNumber}` : item.category}
+                  </span>
+                  <span className="text-[12px] font-bold truncate mt-0.5">
+                    {item.shortLabel}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Right: Transparent Notebook Director's Sheet (5 cols) */}
+        <div className="lg:col-span-5 rounded-2xl border-1.5 border-[rgba(7,20,46,0.34)] bg-transparent p-5 sm:p-6 shadow-xs backdrop-blur-xs flex flex-col justify-between space-y-4">
+          <div>
+            <div className="flex items-center justify-between gap-2 border-b border-[rgba(7,20,46,0.18)] pb-3">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#c5ef26]/35 border border-[#07142e]/30 px-2.5 py-0.5 font-mono text-[10px] font-bold text-[#07142e]">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#84cc16]" />
+                <span>NOW SCREENING</span>
+              </span>
+              <span className="font-mono text-[11px] font-semibold text-[rgba(7,20,46,0.7)]">
+                {stageTemplate.ratio} · {stageTemplate.nleReady}
+              </span>
+            </div>
+
+            <h2 className="mt-3 text-[19px] sm:text-[21px] font-extrabold text-[#07142e] leading-snug m-0">
+              {stageTemplate.title}
+            </h2>
+
+            {/* Scene Beats */}
+            <div className="mt-3.5 space-y-1.5">
+              <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-[rgba(7,20,46,0.65)] block">
+                SCENE BEATS &amp; MOTION TIMING:
+              </span>
+              <div className="space-y-1.5">
+                {stageTemplate.beats.map((beat) => (
+                  <div
+                    key={beat.time}
+                    className="flex items-start gap-2.5 rounded-lg border border-[rgba(7,20,46,0.22)] bg-transparent p-2 text-[12px]"
+                  >
+                    <span className="font-mono text-[10.5px] font-bold text-[#4d7c0f] shrink-0 pt-0.5">
                       {beat.time}
+                    </span>
+                    <span className="text-[rgba(7,20,46,0.85)] leading-tight">
+                      {beat.text}
                     </span>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Actions Footer */}
-            <div className="flex items-center justify-end gap-3 border-t border-surf-f2efe6 pt-4">
-              <button
-                type="button"
-                onClick={() => setActiveTemplate(null)}
-                className="rounded-xl border border-surf-dedad0 px-4 py-2.5 text-[13px] font-medium text-ink-55544e hover:bg-surf-faf9f5"
-              >
-                Cancel
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  const p = editablePrompt.trim() || activeTemplate.prompt;
-                  setActiveTemplate(null);
-                  onSelectTemplate(p);
-                }}
-                className="inline-flex items-center gap-2 rounded-xl bg-surf-111110 px-6 py-2.5 text-[13.5px] font-semibold text-white shadow-md hover:bg-surf-272725 transition"
-              >
-                <IconSparkles className="w-4 h-4 text-ink-c5ef26" />
-                <span>Launch in Studio with this Prompt</span>
-                <FiArrowRight size={14} className="text-ink-c5ef26" />
-              </button>
+            {/* Editable Prompt */}
+            <div className="mt-4 space-y-1.5">
+              <div className="flex items-center justify-between">
+                <label
+                  htmlFor="screening-prompt-input"
+                  className="font-mono text-[10.5px] font-bold uppercase tracking-wider text-[rgba(7,20,46,0.7)] cursor-pointer"
+                >
+                  DIRECTOR PROMPT (EDITABLE)
+                </label>
+                <button
+                  type="button"
+                  onClick={handleCopyPrompt}
+                  className="inline-flex items-center gap-1 font-mono text-[11px] font-bold text-[#07142e] hover:underline cursor-pointer"
+                >
+                  {copiedStage ? (
+                    <>
+                      <FiCheck size={12} className="text-[#4d7c0f]" />
+                      <span className="text-[#4d7c0f]">Copied</span>
+                    </>
+                  ) : (
+                    <>
+                      <FiCopy size={12} />
+                      <span>Copy</span>
+                    </>
+                  )}
+                </button>
+              </div>
+              <textarea
+                id="screening-prompt-input"
+                rows={3}
+                value={stagePrompt}
+                onChange={(e) => setStagePrompt(e.target.value)}
+                className="w-full rounded-xl border border-[rgba(7,20,46,0.32)] bg-transparent p-3 text-[12.5px] text-[#07142e] leading-relaxed focus:border-[#07142e] focus:bg-[rgba(255,253,248,0.12)] focus:outline-none transition"
+              />
             </div>
           </div>
+
+          {/* Action Button */}
+          <div className="pt-2 border-t border-[rgba(7,20,46,0.18)]">
+            <button
+              type="button"
+              onClick={() => onSelectTemplate(stagePrompt.trim() || stageTemplate.prompt)}
+              className="w-full inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#07142e] hover:bg-[#040c1c] text-[#faf8f2] text-[13px] font-bold border border-[#07142e] shadow-sm transition active:scale-98 cursor-pointer"
+            >
+              <IconSparkles className="w-4 h-4 text-[#c5ef26]" />
+              <span>Open in Studio with this prompt</span>
+              <FiArrowRight size={14} className="text-[#c5ef26]" />
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* =========================================================================
+          FILTER LEDGER BAR
+         ========================================================================= */}
+      <div className="flex flex-wrap items-center justify-between gap-3 border-y border-[rgba(7,20,46,0.18)] py-3">
+        {/* Category Tabs */}
+        <div className="flex flex-wrap items-center gap-1.5">
+          {CATEGORY_TABS.map((cat) => {
+            const IconComponent = cat.icon;
+            const active = selectedCategory === cat.id;
+            return (
+              <button
+                key={cat.id}
+                type="button"
+                onClick={() => setSelectedCategory(cat.id)}
+                className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11.5px] font-semibold transition cursor-pointer ${
+                  active
+                    ? "bg-[#07142e] text-[#faf8f2] shadow-xs"
+                    : "border border-[rgba(7,20,46,0.24)] bg-transparent text-[rgba(7,20,46,0.85)] hover:border-[#07142e] hover:bg-[rgba(255,253,248,0.14)] hover:text-[#07142e]"
+                }`}
+              >
+                <IconComponent size={13} />
+                <span>{cat.label}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Ratio Toggle */}
+        <div className="flex items-center gap-1 rounded-xl border border-[rgba(7,20,46,0.28)] bg-transparent p-0.5">
+          {RATIO_FILTERS.map((r) => (
+            <button
+              key={r.id}
+              type="button"
+              onClick={() => setSelectedRatio(r.id)}
+              className={`rounded-lg px-2.5 py-1 font-mono text-[10.5px] font-semibold transition cursor-pointer ${
+                selectedRatio === r.id
+                  ? "bg-[#07142e] text-[#faf8f2] shadow-xs"
+                  : "text-[rgba(7,20,46,0.7)] hover:text-[#07142e] hover:bg-[rgba(255,253,248,0.14)]"
+              }`}
+            >
+              {r.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* =========================================================================
+          12-REEL LIVE STORYBOARD GRID
+         ========================================================================= */}
+      {filteredTemplates.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-[rgba(7,20,46,0.38)] bg-transparent p-12 text-center space-y-3">
+          <p className="font-mono text-[14px] text-[rgba(7,20,46,0.8)]">
+            No templates matching &ldquo;{searchQuery}&rdquo;
+          </p>
+          <button
+            type="button"
+            onClick={() => {
+              setSelectedCategory("All reels");
+              setSelectedRatio("All");
+              setSearchQuery("");
+            }}
+            className="rounded-xl bg-[#07142e] px-4 py-2 text-[12px] font-semibold text-[#faf8f2]"
+          >
+            Reset Filters
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {filteredTemplates.map((tpl) => {
+            const isOnStage = stageTemplate.id === tpl.id;
+            return (
+              <div
+                key={tpl.id}
+                className={`group rounded-2xl border-1.5 p-3.5 shadow-xs transition-all duration-200 flex flex-col justify-between backdrop-blur-xs ${
+                  isOnStage
+                    ? "border-[#07142e] bg-[rgba(255,253,248,0.18)] ring-2 ring-[#c5ef26]"
+                    : "border-[rgba(7,20,46,0.32)] bg-transparent hover:-translate-y-1 hover:border-[#07142e] hover:bg-[rgba(255,253,248,0.14)] hover:shadow-md"
+                }`}
+              >
+                <div>
+                  {/* Live scaled stage */}
+                  <LiveScaledStage
+                    src={tpl.src}
+                    title={tpl.title}
+                    category={tpl.category}
+                    duration={`${tpl.ratio} · ${tpl.duration}`}
+                    hoverLabel="Load on stage"
+                    onClick={() => handleSelectForStage(tpl, true)}
+                  />
+
+                  {/* Card Content */}
+                  <div className="mt-3 px-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#4d7c0f]">
+                        {tpl.pillarNumber ? `RIG ${tpl.pillarNumber} · ${tpl.category}` : tpl.category}
+                      </span>
+                      {isOnStage && (
+                        <span className="rounded bg-[#c5ef26] px-1.5 py-0.2 font-mono text-[8.5px] font-bold text-[#07142e]">
+                          ON STAGE
+                        </span>
+                      )}
+                    </div>
+
+                    <h3 className="mt-1 text-[14.5px] font-bold text-[#07142e] leading-snug line-clamp-1 m-0">
+                      {tpl.title}
+                    </h3>
+
+                    <p className="mt-1.5 text-[12px] text-[rgba(7,20,46,0.75)] line-clamp-2 leading-relaxed m-0">
+                      {tpl.prompt}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Card Actions */}
+                <div className="mt-4 pt-3 border-t border-[rgba(7,20,46,0.14)] flex items-center justify-between gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleSelectForStage(tpl, true)}
+                    className="font-mono text-[11px] font-bold text-[rgba(7,20,46,0.75)] hover:text-[#07142e] transition cursor-pointer"
+                  >
+                    {isOnStage ? "Screening above" : "Watch on stage"}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => onSelectTemplate(tpl.prompt)}
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-[#07142e] hover:bg-[#040c1c] px-3.5 py-1.5 text-[11.5px] font-bold text-[#faf8f2] shadow-2xs transition cursor-pointer"
+                  >
+                    <span>Open in Studio</span>
+                    <FiArrowRight size={12} className="text-[#c5ef26]" />
+                  </button>
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

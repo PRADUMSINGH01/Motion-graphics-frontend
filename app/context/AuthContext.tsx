@@ -30,13 +30,14 @@ export interface User {
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
-  login: (email: string, pass: string) => Promise<boolean>;
+  login: (email: string, pass: string, redirectTo?: string) => Promise<boolean>;
   /** true: signed in · "confirm": account created, the user must confirm their email first · false: failed. */
   register: (
     name: string,
     email: string,
     pass: string,
-    plan?: "free" | "creator" | "pro" | "enterprise"
+    plan?: "free" | "creator" | "pro" | "enterprise",
+    redirectTo?: string
   ) => Promise<boolean | "confirm">;
   loginWithGoogle: (credential: string) => Promise<boolean>;
   registerWithGoogle: (credential: string) => Promise<boolean>;
@@ -176,7 +177,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, [purgeSession]);
 
-  const login = async (emailVal: string, passVal: string): Promise<boolean> => {
+  const login = async (emailVal: string, passVal: string, redirectTo = "/dashboard"): Promise<boolean> => {
     const trimmedEmail = emailVal.trim();
     const trimmedPass = passVal.trim();
 
@@ -223,7 +224,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       );
 
       setTimeout(() => {
-        router.push("/dashboard");
+        router.push(redirectTo);
       }, 700);
 
       return true;
@@ -242,7 +243,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     nameVal: string,
     emailVal: string,
     passVal: string,
-    plan?: "free" | "creator" | "pro" | "enterprise"
+    plan?: "free" | "creator" | "pro" | "enterprise",
+    redirectTo = "/dashboard"
   ): Promise<boolean | "confirm"> => {
     const trimmedName = nameVal.trim();
     const trimmedEmail = emailVal.trim();
@@ -304,7 +306,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       );
 
       setTimeout(() => {
-        router.push("/dashboard");
+        router.push(redirectTo);
       }, 700);
 
       return true;

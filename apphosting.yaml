@@ -10,7 +10,7 @@ runConfig:
 
 env:
   - variable: NEXT_PUBLIC_API_URL
-    value: https://motion-backend--background-ab0ec.us-east4.hosted.app
+    value: https://motion-studio-api.eastus2.cloudapp.azure.com
     availability:
       - BUILD
       - RUNTIME

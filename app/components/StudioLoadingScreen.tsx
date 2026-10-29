@@ -18,27 +18,27 @@ const MAIN_LETTERS = ["b", "y", "r", "e", "e", "l"];
 const LOADING_STEPS = [
   {
     id: "motion",
-    shortLabel: "Motion graphics",
-    label: "Preparing 60fps kinetic typography & motion rigs",
-    sub: "Calibrating cubic-bezier camera curves and layout grids",
-  },
-  {
-    id: "broll",
-    shortLabel: "Animated B-rolls",
-    label: "Loading documentary & YouTube B-roll cutaways",
-    sub: "Mounting Vox-style highlighters, telemetry charts, and alpha overlays",
+    shortLabel: "01 · Text & Transitions",
+    label: "Compiling colorful kinetic word pops & shutter wipes",
+    sub: "60 FPS spring physics, counter-sliding ribbons & iris portal reveals",
   },
   {
     id: "launch",
-    shortLabel: "Product launch",
-    label: "Staging SaaS & app launch trailer scenes",
-    sub: "Preparing 16:9 widescreen and isometric UI deck templates",
+    shortLabel: "02 · Product Launch",
+    label: "Staging SaaS flagship launch trailer & 3D telemetry",
+    sub: "Isometric glass UI, +340% YoY benchmark bars, and deploy CTA",
+  },
+  {
+    id: "broll",
+    shortLabel: "03 · Animated B-Rolls",
+    label: "Mounting Vox-style archival cutaways & marker sweeps",
+    sub: "Smooth camera pans, electric lime highlighter, and source citations",
   },
   {
     id: "shorts",
-    shortLabel: "9:16 Short videos",
-    label: "Synchronizing vertical Reels, Shorts & TikTok studio",
-    sub: "Ready to direct and export in 1080p & 4K at 60fps",
+    shortLabel: "04 · Faceless Video",
+    label: "Synchronizing auto-story scenes & kinetic captions",
+    sub: "Automated scene B-roll nodes, chapter hooks, and synchronized voiceover",
   },
 ];
 
@@ -94,46 +94,13 @@ export default function StudioLoadingScreen({
       aria-label="Loading byreel.in notebook studio"
       className={`lp-loading-root ${fullScreen ? "is-fullscreen" : ""}`}
     >
-      {/* Layer 1: High-DPI Cotton Paper Fiber SVG Filter */}
-      <svg className="lp-paper-svg" aria-hidden="true">
-        <defs>
-          <filter
-            id="loading-cotton-paper"
-            x="0%"
-            y="0%"
-            width="100%"
-            height="100%"
-          >
-            <feTurbulence
-              type="fractalNoise"
-              baseFrequency="0.65"
-              numOctaves="5"
-              seed="14"
-              stitchTiles="stitch"
-              result="fineFibers"
-            />
-            <feDiffuseLighting
-              in="fineFibers"
-              lightingColor="#fffdf8"
-              surfaceScale="0.82"
-              diffuseConstant="1.05"
-              result="paperRelief"
-            >
-              <feDistantLight azimuth="135" elevation="68" />
-            </feDiffuseLighting>
-          </filter>
-        </defs>
-        <rect width="100%" height="100%" filter="url(#loading-cotton-paper)" />
-      </svg>
-
-      {/* Layer 2: Crisp Notebook Horizontal Ruled Lines */}
+      {/* Crisp Notebook Horizontal Ruled Lines */}
       <div className="lp-notebook-rules" aria-hidden="true" />
 
-      {/* Layer 3: Left-Side Double Vertical Dark Navy Margin Lines */}
+      {/* Left-Side Double Vertical Dark Navy Margin Lines */}
       <div className="lp-notebook-blue-margins" aria-hidden="true" />
 
-      {/* Layer 4: Laid Paper Micro-Weave & Subtle Sheet Vignette */}
-      <div className="lp-paper-weave" aria-hidden="true" />
+      {/* Sheet Vignette */}
       <div className="lp-paper-vignette" aria-hidden="true" />
 
       {/* Left-Margin Notebook Index Stub */}
