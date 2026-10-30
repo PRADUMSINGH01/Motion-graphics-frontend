@@ -1,0 +1,456 @@
+/* ==========================================================================
+   Home page (app/page.tsx)
+   Stationery palette from landing.css tokens: paper, navy pen ink, graphite
+   for secondary text, pale-blue rules, rose margin, and lime highlighter used
+   only to mark what is selected or annotated.
+   ========================================================================== */
+
+.hm {
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 88px;
+  padding: 24px 0 24px;
+}
+
+.hm-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ── Hero: copy + composer on the left, live render on the right ── */
+
+.hm-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.12fr);
+  align-items: center;
+  gap: 56px;
+}
+
+.hm-hero-copy {
+  min-width: 0;
+  container-type: inline-size;
+}
+
+/* Each sentence holds one line; size follows the column so neither wraps. */
+.hm-title {
+  margin: 0;
+  font-size: clamp(34px, 9.4cqi, 60px);
+  font-weight: 700;
+  line-height: 1.02;
+  letter-spacing: -0.045em;
+  color: var(--lp-ink);
+}
+
+.hm-title-line {
+  display: block;
+  white-space: nowrap;
+}
+
+.hm-lede {
+  margin: 20px 0 0;
+  max-width: 44ch;
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--lp-graphite);
+  text-wrap: pretty;
+}
+
+.hm-composer {
+  margin-top: 32px;
+  background: var(--lp-surface);
+  border: 1px solid var(--lp-line-strong);
+  border-radius: 16px;
+  box-shadow: var(--lp-shadow-lg);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hm-composer:focus-within {
+  border-color: var(--lp-line-ink);
+  box-shadow: var(--lp-shadow-lg), var(--lp-ring);
+}
+
+/* The prompt is written on ruled lines, like the rest of the notebook. */
+.hm-composer-input {
+  display: block;
+  width: 100%;
+  min-height: 112px;
+  padding: 14px 18px 6px;
+  border: 0;
+  resize: none;
+  outline: none;
+  background-color: transparent;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 29px,
+    var(--lp-rule-blue) 29px,
+    var(--lp-rule-blue) 30px
+  );
+  background-position: 0 14px;
+  background-attachment: local;
+  font-family: inherit;
+  font-size: 16px;
+  line-height: 30px;
+  color: var(--lp-ink);
+}
+
+.hm-composer-input:focus-visible {
+  outline: none;
+}
+
+.hm-composer-input::placeholder {
+  color: var(--lp-graphite-light);
+}
+
+.hm-composer-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 10px 10px 12px;
+  border-top: 1px solid var(--lp-line-soft);
+}
+
+.hm-seg {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 10px;
+  background: var(--lp-tray);
+}
+
+.hm-seg-btn {
+  height: 30px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--lp-graphite);
+  cursor: pointer;
+  transition: background 0.16s ease, color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.hm-seg-btn:hover {
+  color: var(--lp-ink);
+}
+
+.hm-seg-btn[aria-checked="true"] {
+  background: var(--lp-surface-hover);
+  color: var(--lp-ink);
+  box-shadow: 0 1px 2px rgba(7, 20, 46, 0.1), 0 0 0 1px var(--lp-line);
+}
+
+.hm-cta {
+  height: 40px;
+  padding: 0 20px;
+  border: 1px solid var(--lp-ink);
+  border-radius: 10px;
+  background: var(--lp-ink);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--lp-paper);
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 6px 16px -8px rgba(7, 20, 46, 0.6);
+  transition: background 0.16s ease, transform 0.16s var(--lp-ease);
+}
+
+.hm-cta:hover:not(:disabled) {
+  background: var(--lp-ink-hover);
+}
+
+.hm-cta:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.hm-cta:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.hm-composer-note {
+  margin: 14px 0 0 2px;
+  font-size: 13.5px;
+  color: var(--lp-graphite);
+}
+
+.hm-link {
+  margin-left: 4px;
+  font-weight: 500;
+  color: var(--lp-ink);
+  text-decoration: underline;
+  text-decoration-color: var(--lp-line-ink);
+  text-underline-offset: 3px;
+  transition: text-decoration-color 0.16s ease;
+}
+
+.hm-link:hover {
+  text-decoration-color: var(--lp-ink);
+}
+
+/* ── Live render monitor ── */
+
+.hm-monitor {
+  margin: 0;
+  min-width: 0;
+}
+
+.hm-monitor-screen {
+  border-radius: 14px;
+  overflow: hidden;
+  background: #050914;
+  box-shadow:
+    0 0 0 1px rgba(7, 20, 46, 0.9),
+    0 2px 4px rgba(7, 20, 46, 0.08),
+    0 32px 64px -24px rgba(7, 20, 46, 0.45);
+}
+
+.hm .lp-tpl-live-viewport {
+  border: 0;
+  cursor: inherit;
+}
+
+.hm-monitor-caption {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  margin: 10px 0 0 18px;
+  color: var(--lp-graphite);
+}
+
+.hm-pen-arrow {
+  width: 46px;
+  height: 30px;
+  flex-shrink: 0;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.hm-pen-note {
+  font-family: var(--font-pen), "Caveat", cursive;
+  font-size: 23px;
+  font-weight: 500;
+  line-height: 1;
+  transform: rotate(-2deg) translateY(4px);
+  background-image: linear-gradient(
+    to top,
+    transparent 0.05em,
+    var(--lp-lime-soft) 0.05em,
+    var(--lp-lime-soft) 0.38em,
+    transparent 0.38em
+  );
+}
+
+/* ── Section headings ── */
+
+.hm-h2 {
+  margin: 0 0 20px;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  color: var(--lp-ink);
+}
+
+/* ── Format picker: selecting one loads its prompt and render above ── */
+
+.hm-format-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.hm-format {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px;
+  border: 1px solid var(--lp-line);
+  border-radius: 14px;
+  background: var(--lp-surface);
+  box-shadow: var(--lp-shadow-xs);
+  font-family: inherit;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.hm-format:hover {
+  border-color: var(--lp-line-ink);
+}
+
+.hm-format[aria-pressed="true"] {
+  border-color: var(--lp-ink);
+  box-shadow: 0 0 0 1px var(--lp-ink), var(--lp-shadow-sm);
+}
+
+.hm-format-thumb {
+  display: block;
+  border-radius: 9px;
+  overflow: hidden;
+}
+
+.hm-format-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 8px 8px;
+}
+
+.hm-format-name {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--lp-ink);
+}
+
+.hm-format[aria-pressed="true"] .hm-format-label {
+  text-decoration: underline;
+  text-decoration-color: var(--lp-lime);
+  text-decoration-thickness: 3px;
+  text-underline-offset: 4px;
+}
+
+.hm-format-ratio {
+  flex-shrink: 0;
+  padding: 1px 7px;
+  border: 1px solid var(--lp-line);
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--lp-graphite);
+}
+
+.hm-format-desc {
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--lp-graphite);
+}
+
+/* ── How it works: a real sequence, so it is numbered ── */
+
+.hm-step-list {
+  list-style: none;
+  margin: 0;
+  padding: 24px 0 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 40px;
+  border-top: 1px solid var(--lp-line);
+}
+
+.hm-step {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  column-gap: 12px;
+  align-items: baseline;
+}
+
+.hm-step-num {
+  grid-row: span 2;
+  font-family: var(--font-pen), "Caveat", cursive;
+  font-size: 40px;
+  font-weight: 600;
+  line-height: 0.8;
+  color: var(--lp-lime-ink);
+}
+
+.hm-step-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--lp-ink);
+}
+
+.hm-step-body {
+  margin: 6px 0 0;
+  max-width: 36ch;
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--lp-graphite);
+}
+
+/* ── Responsive ── */
+
+@media (max-width: 1040px) {
+  .hm-hero {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 40px;
+  }
+
+  .hm-lede {
+    max-width: 56ch;
+  }
+
+  .hm-format-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .hm {
+    gap: 64px;
+    padding-top: 8px;
+  }
+
+  .hm-step-list {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+  }
+}
+
+@media (max-width: 560px) {
+  .hm-format-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .hm-format {
+    flex-direction: row;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .hm-format-thumb {
+    width: 128px;
+    flex-shrink: 0;
+  }
+
+  .hm-format-body {
+    padding: 4px 8px;
+  }
+
+  .hm-composer-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .hm-seg-btn {
+    flex: 1;
+  }
+
+  .hm-monitor-caption {
+    margin-left: 8px;
+  }
+}

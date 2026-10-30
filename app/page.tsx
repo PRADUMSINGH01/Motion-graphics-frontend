@@ -5,61 +5,81 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import NotebookShell from "./components/landing/NotebookShell";
 import "./components/landing/landing.css";
+import "./components/landing/home.css";
 
-const FOUR_SHOWCASE_PILLARS = [
+type Ratio = "16:9" | "9:16" | "RGBA";
+
+const FORMATS: {
+  id: string;
+  name: string;
+  desc: string;
+  src: string;
+  ratio: Ratio;
+  prompt: string;
+}[] = [
   {
     id: "text-transition",
-    num: "01 · TEXT & TRANSITIONS",
-    tabLabel: "Text & Transitions",
-    badge: "COLORFUL 60 FPS",
-    title: "Text Animation & Transitions",
-    desc: "Vibrant kinetic word pops, spring physics, and multi-color shutter & iris wipes.",
+    name: "Kinetic text & transitions",
+    desc: "Word pops, spring physics and colour wipes for intros and title cards.",
     src: "/text-transition-cool.html",
-    ratio: "16:9" as const,
+    ratio: "16:9",
     prompt:
       "Create a vibrant, colorful 60 FPS kinetic text animation with spring word pops, diagonal multi-color shutter wipes, and an iris portal reveal.",
   },
   {
     id: "product-launch",
-    num: "02 · PRODUCT LAUNCH",
-    tabLabel: "Product Launch",
-    badge: "SAAS TRAILER",
-    title: "Product Launch Video",
-    desc: "Multi-scene SaaS & app launch trailers with UI cards, live metrics, and CTA end-cards.",
+    name: "Product launch",
+    desc: "Multi-scene SaaS trailers with UI cards, live metrics and an end card.",
     src: "/saas-product-launch.html",
-    ratio: "16:9" as const,
+    ratio: "16:9",
     prompt:
       "Direct a multi-scene SaaS product launch trailer with isometric UI cards, +340% YoY telemetry bars, sub-8ms latency counter, and a bold CTA end-card.",
   },
   {
     id: "broll",
-    num: "03 · ANIMATED B-ROLL",
-    tabLabel: "Animated B-Roll",
-    badge: "CUTAWAY CLIP",
-    title: "Editorial & Creator B-Roll",
-    desc: "Documentary highlight sweeps, animated data cutaways, and camera pans for YouTube.",
+    name: "Animated B-roll",
+    desc: "Data cutaways and highlight sweeps to drop between talking-head shots.",
     src: "/broll-data-cutaway.html",
-    ratio: "16:9" as const,
+    ratio: "16:9",
     prompt:
       "Create a 10-second animated B-roll cutaway panning across an archival print clipping with an electric lime marker sweep and live telemetry chart.",
   },
   {
     id: "faceless-video",
-    num: "04 · FACELESS VIDEO",
-    tabLabel: "Faceless Video",
-    badge: "AUTO STORY",
-    title: "Faceless Channel Video",
-    desc: "Complete faceless storytelling scenes with synced word-by-word captions & visual hooks.",
+    name: "Faceless video",
+    desc: "Story scenes with word-by-word captions, ready for Shorts and Reels.",
     src: "/faceless-story-reel.html",
-    ratio: "9:16" as const,
+    ratio: "9:16",
     prompt:
       "Generate a complete faceless storytelling video with automated visual B-roll scenes, chapter progression, and synchronized word-by-word kinetic captions.",
   },
-] as const;
+];
 
+const RATIOS: { id: Ratio; label: string }[] = [
+  { id: "16:9", label: "16:9" },
+  { id: "9:16", label: "9:16" },
+  { id: "RGBA", label: "Transparent" },
+];
+
+const STEPS = [
+  {
+    title: "Describe it",
+    body: "Write what happens on screen, the words to animate and the mood. One sentence is enough to start.",
+  },
+  {
+    title: "Review the storyboard",
+    body: "The agent splits your prompt into timed scenes. Change copy, colours or pacing. Edits don't use credits.",
+  },
+  {
+    title: "Export",
+    body: "Render up to 4K at 60 fps as MP4, or as WebM with transparency to layer in Premiere, DaVinci or CapCut.",
+  },
+];
+
+/* The reels are authored on a 1280×720 stage; scale that stage to whatever box holds it. */
 const BASE_W = 1280;
 
-function HomeLiveReelThumb({ src, title }: { src: string; title: string }) {
+function LiveReel({ src, title }: { src: string; title: string }) {
   const boxRef = useRef<HTMLDivElement | null>(null);
   const [scale, setScale] = useState(0.2);
   const [visible, setVisible] = useState(false);
@@ -68,14 +88,9 @@ function HomeLiveReelThumb({ src, title }: { src: string; title: string }) {
   useEffect(() => {
     const el = boxRef.current;
     if (!el) return;
-    const update = () => {
-      if (el.clientWidth > 0) setScale(el.clientWidth / BASE_W);
-    };
-    update();
+    if (el.clientWidth > 0) setScale(el.clientWidth / BASE_W);
     const ro = new ResizeObserver(([entry]) => {
-      if (entry.contentRect.width > 0) {
-        setScale(entry.contentRect.width / BASE_W);
-      }
+      if (entry.contentRect.width > 0) setScale(entry.contentRect.width / BASE_W);
     });
     ro.observe(el);
     const io = new IntersectionObserver(
@@ -95,11 +110,7 @@ function HomeLiveReelThumb({ src, title }: { src: string; title: string }) {
   }, []);
 
   return (
-    <div
-      ref={boxRef}
-      className="lp-tpl-live-viewport"
-      style={{ borderBottom: "1px solid rgba(7, 20, 46, 0.28)" }}
-    >
+    <div ref={boxRef} className="lp-tpl-live-viewport">
       {visible && (
         <iframe
           src={src}
@@ -110,10 +121,7 @@ function HomeLiveReelThumb({ src, title }: { src: string; title: string }) {
           aria-hidden="true"
           onLoad={() => setLoaded(true)}
           className="lp-tpl-live-iframe"
-          style={{
-            transform: `scale(${scale})`,
-            opacity: loaded ? 1 : 0,
-          }}
+          style={{ transform: `scale(${scale})`, opacity: loaded ? 1 : 0 }}
         />
       )}
     </div>
@@ -122,161 +130,147 @@ function HomeLiveReelThumb({ src, title }: { src: string; title: string }) {
 
 export default function Home() {
   const router = useRouter();
-  const [activeId, setActiveId] = useState<string>(FOUR_SHOWCASE_PILLARS[0].id);
-  const [selectedRatio, setSelectedRatio] = useState<"16:9" | "9:16" | "RGBA">(
-    "16:9"
-  );
-  const [prompt, setPrompt] = useState<string>(FOUR_SHOWCASE_PILLARS[0].prompt);
+  const monitorRef = useRef<HTMLElement | null>(null);
+  const [activeId, setActiveId] = useState(FORMATS[0].id);
+  const [ratio, setRatio] = useState<Ratio>(FORMATS[0].ratio);
+  const [prompt, setPrompt] = useState(FORMATS[0].prompt);
 
-  const handleSelectPillar = (
-    id: string,
-    newPrompt: string,
-    ratio: "16:9" | "9:16" | "RGBA" = "16:9"
-  ) => {
-    setActiveId(id);
-    setPrompt(newPrompt);
-    setSelectedRatio(ratio);
+  const active = FORMATS.find((f) => f.id === activeId) ?? FORMATS[0];
+
+  const selectFormat = (f: (typeof FORMATS)[number]) => {
+    setActiveId(f.id);
+    setPrompt(f.prompt);
+    setRatio(f.ratio);
+    // On narrow screens the preview sits above the picker; bring it back into view.
+    const el = monitorRef.current;
+    if (el && el.getBoundingClientRect().bottom < 0) {
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      el.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center" });
+    }
   };
 
-  const handleSubmit = (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
     router.push(
-      `/dashboard?prompt=${encodeURIComponent(prompt)}&ratio=${encodeURIComponent(
-        selectedRatio
-      )}`
+      `/dashboard?prompt=${encodeURIComponent(prompt)}&ratio=${encodeURIComponent(ratio)}`
     );
   };
 
   return (
-    <NotebookShell ariaLabel="byreel.in studio for text animation & transitions, product launches, B-rolls, and faceless videos">
-      <div className="lp-home-sections">
-        {/* =====================================================================
-            1. HERO STAGE + PROMPT COMPOSER
-           ===================================================================== */}
-        <div className="lp-hero-stage-wrap">
-          <div className="lp-hero-block">
-            <div className="lp-saas-eyebrow" style={{ marginBottom: 12 }}>
-              <span className="lp-saas-eyebrow-dot" aria-hidden="true" />
-              <span>
-                TEXT &amp; TRANSITIONS · PRODUCT LAUNCH · ANIMATED B-ROLL · FACELESS VIDEO
-              </span>
-            </div>
-
-            <h1 className="lp-editorial-heading">
-              Turn plain prompts into{" "}
-              <span className="lp-lime-highlight">
-                motion, launches &amp; faceless videos.
-              </span>
+    <NotebookShell ariaLabel="byreel — turn a written prompt into a motion graphics video">
+      <div className="hm">
+        <section className="hm-hero" aria-labelledby="hm-title">
+          <div className="hm-hero-copy">
+            <h1 id="hm-title" className="hm-title">
+              <span className="hm-title-line">Describe the video.</span>{" "}
+              <span className="hm-title-line">byreel animates it.</span>
             </h1>
+            <p className="hm-lede">
+              Kinetic type, launch trailers, B-roll cutaways and faceless shorts, written in plain
+              language and rendered at 60&nbsp;fps.
+            </p>
 
-            <form onSubmit={handleSubmit} className="lp-clean-prompt-box">
-              {/* 4 Mode Tabs + Output Ratio Selector */}
-              <div className="lp-composer-mode-bar">
-                <div
-                  className="lp-composer-modes"
-                  role="tablist"
-                  aria-label="Production format"
-                >
-                  {FOUR_SHOWCASE_PILLARS.map((item) => {
-                    const isActive = activeId === item.id;
-                    return (
-                      <button
-                        key={item.id}
-                        type="button"
-                        role="tab"
-                        aria-selected={isActive}
-                        onClick={() =>
-                          handleSelectPillar(item.id, item.prompt, item.ratio)
-                        }
-                        className={`lp-composer-mode-btn ${
-                          isActive ? "is-active" : ""
-                        }`}
-                      >
-                        {item.tabLabel}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                <div
-                  className="lp-composer-specs-right"
-                  role="group"
-                  aria-label="Output aspect ratio"
-                >
-                  {(["16:9", "9:16", "RGBA"] as const).map((r) => (
+            <form onSubmit={handleSubmit} className="hm-composer">
+              <label htmlFor="hm-prompt" className="hm-sr-only">
+                Describe your video
+              </label>
+              <textarea
+                id="hm-prompt"
+                rows={3}
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                placeholder="A 15-second launch trailer for a note-taking app, bold type, lime on navy…"
+                className="hm-composer-input"
+              />
+              <div className="hm-composer-bar">
+                <div className="hm-seg" role="radiogroup" aria-label="Output format">
+                  {RATIOS.map((r) => (
                     <button
-                      key={r}
+                      key={r.id}
                       type="button"
-                      onClick={() => setSelectedRatio(r)}
-                      className={`lp-composer-ratio-pill ${
-                        selectedRatio === r ? "is-active" : ""
-                      }`}
+                      role="radio"
+                      aria-checked={ratio === r.id}
+                      onClick={() => setRatio(r.id)}
+                      className="hm-seg-btn"
                     >
-                      {r === "RGBA" ? "RGBA Alpha" : r}
+                      {r.label}
                     </button>
                   ))}
                 </div>
-              </div>
-
-              <textarea
-                rows={2}
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                placeholder="Describe your colorful text animation & transition, product launch video, B-roll cutaway, or faceless video..."
-                className="lp-clean-textarea"
-              />
-
-              <div className="lp-prompt-footer-bar">
-                <span className="lp-pen-hint">
-                  Exports 1080p &amp; 4K 60fps .MP4 or transparent RGBA .WebM
-                </span>
-                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <Link href="/templates" className="lp-tpl-inspect-btn">
-                    Templates
-                  </Link>
-                  <button type="submit" className="lp-clean-submit-btn">
-                    <span>Generate Video</span>
-                    <span className="lp-btn-arrow">→</span>
-                  </button>
-                </div>
+                <button type="submit" className="hm-cta" disabled={!prompt.trim()}>
+                  Generate video
+                </button>
               </div>
             </form>
-          </div>
-        </div>
 
-        {/* =====================================================================
-            2. THE FOUR CORE SHOWCASES (Text & Transition · Product Launch · B-Roll · Faceless Video)
-           ===================================================================== */}
-        <section aria-label="Four core studio showcases" style={{ width: "100%" }}>
-          <div className="lp-home-live-grid">
-            {FOUR_SHOWCASE_PILLARS.map((item) => {
-              const isSelected = activeId === item.id;
+            <p className="hm-composer-note">
+              Free plan includes 15 credits a month.{" "}
+              <Link href="/templates" className="hm-link">
+                Browse templates
+              </Link>
+            </p>
+          </div>
+
+          <figure ref={monitorRef} className="hm-monitor">
+            <div className="hm-monitor-screen">
+              <LiveReel key={active.id} src={active.src} title={`${active.name} sample render`} />
+            </div>
+            <figcaption className="hm-monitor-caption">
+              <svg className="hm-pen-arrow" viewBox="0 0 64 40" aria-hidden="true">
+                <path d="M6 34 C 18 30, 34 24, 46 10" />
+                <path d="M36 10 L 47 8 L 47 20" />
+              </svg>
+              <span className="hm-pen-note">live render, not a mockup</span>
+            </figcaption>
+          </figure>
+        </section>
+
+        <section className="hm-formats" aria-labelledby="hm-formats-title">
+          <h2 id="hm-formats-title" className="hm-h2">
+            Start from a format
+          </h2>
+          <div className="hm-format-grid">
+            {FORMATS.map((f) => {
+              const isActive = f.id === activeId;
               return (
                 <button
-                  key={item.id}
+                  key={f.id}
                   type="button"
-                  onClick={() =>
-                    handleSelectPillar(item.id, item.prompt, item.ratio)
-                  }
-                  className={`lp-home-live-card ${
-                    isSelected ? "is-active" : ""
-                  }`}
+                  aria-pressed={isActive}
+                  onClick={() => selectFormat(f)}
+                  className="hm-format"
                 >
-                  <div className="lp-home-live-top">
-                    <span className="lp-home-live-num">{item.num}</span>
-                    <span className="lp-home-live-badge">{item.badge}</span>
-                  </div>
-
-                  <HomeLiveReelThumb src={item.src} title={item.title} />
-
-                  <div className="lp-home-live-foot">
-                    <span className="lp-home-live-name">{item.title}</span>
-                    <span className="lp-home-live-desc">{item.desc}</span>
-                  </div>
+                  <span className="hm-format-thumb">
+                    <LiveReel src={f.src} title={`${f.name} preview`} />
+                  </span>
+                  <span className="hm-format-body">
+                    <span className="hm-format-name">
+                      <span className="hm-format-label">{f.name}</span>
+                      <span className="hm-format-ratio">{f.ratio}</span>
+                    </span>
+                    <span className="hm-format-desc">{f.desc}</span>
+                  </span>
                 </button>
               );
             })}
           </div>
+        </section>
+
+        <section className="hm-steps" aria-labelledby="hm-steps-title">
+          <h2 id="hm-steps-title" className="hm-h2">
+            How a video gets made
+          </h2>
+          <ol className="hm-step-list">
+            {STEPS.map((s, i) => (
+              <li key={s.title} className="hm-step">
+                <span className="hm-step-num" aria-hidden="true">
+                  {i + 1}
+                </span>
+                <h3 className="hm-step-title">{s.title}</h3>
+                <p className="hm-step-body">{s.body}</p>
+              </li>
+            ))}
+          </ol>
         </section>
       </div>
     </NotebookShell>
