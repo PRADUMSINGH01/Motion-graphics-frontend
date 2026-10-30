@@ -277,6 +277,7 @@ export default function AgentConsoleSection() {
                   <video
                     key={detail.play[0]}
                     controls
+                    loop
                     src={detail.play[0]}
                     className="mt-3 w-full rounded-xl bg-[var(--db-ink)]"
                     style={{ maxHeight: 480 }}

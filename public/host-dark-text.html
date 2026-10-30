@@ -47,7 +47,8 @@
 </div>
 
 <script>
-const tl = gsap.timeline({defaults:{ease:"power3.out"}});
+// Loops forever: the scene plays, breathes, clears, and starts again from black.
+const tl = gsap.timeline({defaults:{ease:"power3.out"}, repeat:-1, repeatDelay:0.3});
 
 // host fades in, calm into lens
 tl.fromTo("#host",{opacity:0,scale:.96,y:14},{opacity:1,scale:1,y:0,duration:1.6})
@@ -61,8 +62,12 @@ tl.fromTo("#host",{opacity:0,scale:.96,y:14},{opacity:1,scale:1,y:0,duration:1.6
   // subtle glow push
   .to(".headline",{textShadow:"0 0 60px rgba(255,255,255,.25)",duration:1},"<")
   .to("#sub",{opacity:1,letterSpacing:"0.5em",duration:1.2},"-=0.4")
-  // gentle continuous breathing of host
-  .to("#host",{y:-6,duration:3,ease:"sine.inOut",yoyo:true,repeat:-1},">");
+  // gentle breathing of host (finite, so the timeline can end and repeat)
+  .to("#host",{y:-6,duration:1.5,ease:"sine.inOut",yoyo:true,repeat:1},">")
+  // clear the frame back to the opening state
+  .to([".word","#sub"],{opacity:0,y:-20,duration:.5,stagger:.06,ease:"power2.in"},"+=0.4")
+  .to("#host",{opacity:0,duration:.6,ease:"power2.in"},"<0.2")
+  .to("body",{backgroundColor:"#050505",duration:.6,ease:"power2.inOut"},"<");
 </script>
 </body>
 </html>

@@ -720,6 +720,7 @@ export default function OverviewSection({
                   src={previewProject.videoUrl}
                   controls
                   autoPlay
+                  loop
                   playsInline
                   className="h-full w-full object-contain"
                 />

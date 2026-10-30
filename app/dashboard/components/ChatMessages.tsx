@@ -62,6 +62,7 @@ function VideoPlayerCard({
         <video
           src={url}
           controls
+          loop
           playsInline
           muted
           preload="metadata"

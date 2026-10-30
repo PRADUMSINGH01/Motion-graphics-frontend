@@ -145,7 +145,8 @@ function drawClock(){
 }
 drawClock();
 
-const tl = gsap.timeline();
+// Loops forever: on repeat GSAP rewinds every step, so the arm and phone come back.
+const tl = gsap.timeline({repeat:-1, repeatDelay:0.2});
 
 // SHOT 1 — arm rises into frame holding phone at arm's length
 tl.from('#arm',{y:340,duration:1.1,ease:'power3.out'})
@@ -174,7 +175,9 @@ tl.to('#cutflash',{opacity:1,duration:0.06})
   .from('#clock',{scale:.9,opacity:0,duration:0.6,ease:'power2.out'})
   .from(['#desk','#pencil'],{y:60,opacity:0,duration:0.7,ease:'power3.out'},'<0.1')
   .to('#caption',{opacity:.85,duration:0.8},'-=0.3')
-  .to('#caption',{opacity:0,duration:1},'+=2');
+  .to('#caption',{opacity:0,duration:1},'+=2')
+  // fade the clock shot out to the dark opening frame
+  .to('#shot2',{opacity:0,duration:0.5,ease:'power2.in'});
 
 // clock ticking (frame-by-frame in rAF for the steady shot)
 let running=false;

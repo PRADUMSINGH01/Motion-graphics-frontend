@@ -120,7 +120,8 @@
 </div>
 
 <script>
-const tl = gsap.timeline({ delay: 0.4 });
+// Loops forever: the beat plays, holds, then resets to the opening frame and repeats.
+const tl = gsap.timeline({ delay: 0.4, repeat: -1, repeatDelay: 0.4 });
 
 // 1) Background darkens — host dims into the shadows
 tl.to(".host", {
@@ -160,6 +161,20 @@ tl.to(".word", {
   duration: 0.8,
   ease: "sine.inOut"
 }, 2.2);
+
+// 5) Hold, then clear the line and bring the host back up so the loop restarts cleanly
+tl.to([".word", "#sub"], {
+  opacity: 0,
+  y: -30,
+  duration: 0.45,
+  ease: "power2.in",
+  stagger: 0.06
+}, 5.2);
+tl.to(".host", {
+  filter: "brightness(1) blur(0px)",
+  duration: 0.9,
+  ease: "power2.inOut"
+}, 5.5);
 </script>
 </body>
 </html>

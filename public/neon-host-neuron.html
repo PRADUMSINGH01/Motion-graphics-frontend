@@ -178,9 +178,12 @@ neuron
     }
   }, '<')
   .set('#impulse', {opacity:0})
-  // loop: reset and re-fire
+  // hold, then fade the neuron out before the whole piece repeats
   .to({}, {duration:1.2})
-  .call(() => neuron.restart());
+  .to('#neuronScene', {opacity:0, duration:0.4, ease:'power2.in'});
+
+// Both scenes live on one master timeline that repeats, so the host intro comes back too.
+gsap.timeline({repeat:-1, repeatDelay:0.2}).add(intro, 0).add(neuron, 0);
 </script>
 </body>
 </html>
