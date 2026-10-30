@@ -83,9 +83,9 @@ export default function LaunchesSection({
 }: LaunchesSectionProps) {
   const [selectedRatio, setSelectedRatio] = useState<Ratio>(DEFAULT_SETTINGS.ratio);
   const [selectedLength, setSelectedLength] = useState(DEFAULT_SETTINGS.length);
-  const [selectedProvider, setSelectedProvider] = useState<string>(DEFAULT_SETTINGS.provider || "azure");
-  const [selectedModel, setSelectedModel] = useState<string>(DEFAULT_SETTINGS.model || "qwen--qwen38-27b");
-  const [selectedEffort, setSelectedEffort] = useState<string>(DEFAULT_SETTINGS.effort || "xhigh");
+  const [selectedProvider, setSelectedProvider] = useState<string>(DEFAULT_SETTINGS.provider || "glm");
+  const [selectedModel, setSelectedModel] = useState<string>(DEFAULT_SETTINGS.model || "glm-5.3-flash");
+  const [selectedEffort, setSelectedEffort] = useState<string>(DEFAULT_SETTINGS.effort || "high");
   const [draftPrompt, setDraftPrompt] = useState("");
   const [showHistory, setShowHistory] = useState(false);
   const [renaming, setRenaming] = useState(false);
@@ -99,12 +99,12 @@ export default function LaunchesSection({
     }
   }, [messages]);
 
-  const chatSettings: ChatSettings = activeChat?.settings ?? {
-    ratio: selectedRatio,
-    length: selectedLength,
-    provider: selectedProvider,
-    model: selectedModel,
-    effort: selectedEffort,
+  const chatSettings: ChatSettings = {
+    ratio: activeChat?.settings?.ratio ?? selectedRatio,
+    length: activeChat?.settings?.length ?? selectedLength,
+    provider: activeChat?.settings?.provider ?? selectedProvider,
+    model: activeChat?.settings?.model ?? selectedModel,
+    effort: activeChat?.settings?.effort ?? selectedEffort,
   };
   const hasMessages = !!activeChat && activeChat.messages.length > 0;
   const isRendering = activeChat?.messages.some((m) => m.isStreaming);

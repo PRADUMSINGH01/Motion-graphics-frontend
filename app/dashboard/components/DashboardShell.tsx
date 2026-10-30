@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAuth, type User } from "../../context/AuthContext";
 import { useChats } from "../hooks/useChats";
-import { collectVideos } from "../lib/chatStore";
+import { collectVideos, type ChatSettings } from "../lib/chatStore";
 import { loadAssets } from "../lib/assets";
 import { SECTION_LABELS, isSectionId, type SectionId } from "../lib/sections";
 import NavSidebar from "./NavSidebar";
@@ -75,14 +75,14 @@ export default function DashboardShell({ user }: { user: User & { id: string } }
     if (typeof window !== "undefined") window.location.hash = next;
   };
 
-  const newLaunch = (initialPrompt?: string) => {
+  const newLaunch = (initialPrompt?: string, settings?: ChatSettings) => {
     goHome();
     navigate("create");
     // User explicitly requested: "sidebar will close one we start new video chat"
     setSidebarOpen(false);
     if (initialPrompt) {
       setTimeout(() => {
-        send(initialPrompt);
+        send(initialPrompt, settings);
       }, 100);
     }
   };

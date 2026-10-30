@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import {
   FiArrowRight,
@@ -9,11 +9,13 @@ import {
   FiX,
   FiDownload,
   FiZap,
+  FiChevronDown,
 } from "react-icons/fi";
 import { API_BASE_URL as API_URL } from "../../../lib/api";
 import type { User } from "../../../context/AuthContext";
-import { type Chat } from "../../lib/chatStore";
+import { type Chat, type ChatSettings, type Ratio, DEFAULT_SETTINGS } from "../../lib/chatStore";
 import type { SectionId } from "../../lib/sections";
+import ModelSelectorModal, { AVAILABLE_MODELS, type EffortLevel } from "../ModelSelectorModal";
 
 interface OverviewProps {
   user: User;
@@ -21,7 +23,7 @@ interface OverviewProps {
   assetCount: number;
   onNavigate: (s: SectionId) => void;
   onOpenLaunch: (chatId: string) => void;
-  onNewLaunch: (initialPrompt?: string) => void;
+  onNewLaunch: (initialPrompt?: string, settings?: ChatSettings) => void;
   searchFilter?: string;
 }
 
@@ -47,6 +49,11 @@ export default function OverviewSection({
 }: OverviewProps) {
   const [prompt, setPrompt] = useState("");
   const [aspectRatio, setAspectRatio] = useState<"16:9" | "9:16" | "RGBA">("16:9");
+  const [selectedModel, setSelectedModel] = useState<string>(DEFAULT_SETTINGS.model || "glm-5.3-flash");
+  const [selectedProvider, setSelectedProvider] = useState<string>(DEFAULT_SETTINGS.provider || "glm");
+  const [selectedEffort, setSelectedEffort] = useState<EffortLevel>((DEFAULT_SETTINGS.effort as EffortLevel) || "high");
+  const [showModelModal, setShowModelModal] = useState(false);
+  const modelTriggerRef = useRef<HTMLButtonElement>(null);
   const [activeProjectTab, setActiveProjectTab] = useState<"All" | "Rendered" | "Drafts">("All");
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
 
@@ -229,11 +236,20 @@ export default function OverviewSection({
     return true;
   });
 
+  const currentModelObj =
+    AVAILABLE_MODELS.find((m) => m.id === selectedModel) || AVAILABLE_MODELS[0];
+
   const handleGenerate = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     const finalPrompt =
       prompt.trim() || "Editorial product launch sequence with kinetic typography and 60 FPS motion";
-    onNewLaunch(finalPrompt);
+    onNewLaunch(finalPrompt, {
+      ratio: (aspectRatio === "RGBA" ? "16:9" : aspectRatio) as Ratio,
+      length: 15,
+      provider: selectedProvider,
+      model: selectedModel,
+      effort: selectedEffort,
+    });
   };
 
   const handleSelectTemplate = (t: (typeof FEATURED_TEMPLATES)[0]) => {
@@ -247,6 +263,20 @@ export default function OverviewSection({
           1. HERO MOTION COMPOSER: Clean Transparent Notebook Card
          ========================================================================= */}
       <div className="relative overflow-hidden rounded-2xl border-1.5 border-[rgba(7,20,46,0.34)] bg-transparent backdrop-blur-xs p-6 sm:p-7 shadow-xs">
+        {/* Model Selector Modal */}
+        <ModelSelectorModal
+          isOpen={showModelModal}
+          onClose={() => setShowModelModal(false)}
+          selectedModelId={selectedModel}
+          selectedEffort={selectedEffort}
+          onSelect={(model, effort) => {
+            setSelectedModel(model.id);
+            setSelectedProvider(model.provider);
+            setSelectedEffort(effort);
+          }}
+          triggerRef={modelTriggerRef}
+        />
+
         {/* Top Eyebrow & Ratio Selector */}
         <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-[rgba(7,20,46,0.18)]">
           <div className="flex items-center gap-2">
@@ -256,22 +286,40 @@ export default function OverviewSection({
             </span>
           </div>
 
-          {/* Aspect Ratio Selector Pills */}
-          <div className="flex items-center gap-1">
-            {(["16:9", "9:16", "RGBA"] as const).map((ratio) => (
-              <button
-                key={ratio}
-                type="button"
-                onClick={() => setAspectRatio(ratio)}
-                className={`px-2.5 py-1 rounded-md font-mono text-[11px] font-bold transition cursor-pointer border ${
-                  aspectRatio === ratio
-                    ? "bg-[#07142e] text-[#faf8f2] border-[#07142e] shadow-2xs"
-                    : "bg-transparent text-[rgba(7,20,46,0.7)] border-[rgba(7,20,46,0.24)] hover:text-[#07142e] hover:bg-[rgba(255,253,248,0.14)]"
-                }`}
-              >
-                {ratio === "RGBA" ? "RGBA Alpha" : ratio}
-              </button>
-            ))}
+          {/* Model & Aspect Ratio Controls */}
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Model & Effort Selector Trigger */}
+            <button
+              ref={modelTriggerRef}
+              type="button"
+              onClick={() => setShowModelModal(true)}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-md font-medium text-[11px] border border-[rgba(7,20,46,0.26)] bg-transparent text-[#07142e] hover:border-[#07142e] hover:bg-[rgba(255,253,248,0.2)] transition cursor-pointer shadow-2xs"
+            >
+              <FiZap size={11} className="text-[#84cc16]" />
+              <span className="font-bold">{currentModelObj.name}</span>
+              <span className="font-mono text-[9px] uppercase font-bold px-1 py-0.2 rounded bg-[rgba(7,20,46,0.08)]">
+                {selectedEffort === "xhigh" ? "MAX" : selectedEffort.toUpperCase()}
+              </span>
+              <FiChevronDown size={11} />
+            </button>
+
+            {/* Aspect Ratio Selector Pills */}
+            <div className="flex items-center gap-1">
+              {(["16:9", "9:16", "RGBA"] as const).map((ratio) => (
+                <button
+                  key={ratio}
+                  type="button"
+                  onClick={() => setAspectRatio(ratio)}
+                  className={`px-2.5 py-1 rounded-md font-mono text-[11px] font-bold transition cursor-pointer border ${
+                    aspectRatio === ratio
+                      ? "bg-[#07142e] text-[#faf8f2] border-[#07142e] shadow-2xs"
+                      : "bg-transparent text-[rgba(7,20,46,0.7)] border-[rgba(7,20,46,0.24)] hover:text-[#07142e] hover:bg-[rgba(255,253,248,0.14)]"
+                  }`}
+                >
+                  {ratio === "RGBA" ? "RGBA Alpha" : ratio}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 

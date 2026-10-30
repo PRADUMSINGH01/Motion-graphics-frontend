@@ -91,9 +91,9 @@ export interface Chat {
 export const DEFAULT_SETTINGS: ChatSettings = {
   ratio: "9:16",
   length: 30,
-  provider: "azure",
-  model: "qwen--qwen38-27b",
-  effort: "xhigh",
+  provider: "glm",
+  model: "glm-5.3-flash",
+  effort: "high",
 };
 
 export const MAX_PROMPT_LENGTH = 4000;

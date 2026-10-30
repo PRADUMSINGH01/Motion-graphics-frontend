@@ -199,7 +199,11 @@ export function useChats(userId: string) {
       const now = new Date().toISOString();
       const promptId = createId("p");
       const title = deriveTitle(prompt);
-      const effectiveSettings = chat.settings ?? settings ?? DEFAULT_SETTINGS;
+      const effectiveSettings: ChatSettings = {
+        ...DEFAULT_SETTINGS,
+        ...(chat.settings ?? {}),
+        ...(settings ?? {}),
+      };
       const { ratio, length, provider, model, effort } = effectiveSettings;
 
       const assistant: ChatMessage = {
@@ -216,6 +220,7 @@ export function useChats(userId: string) {
       };
       updateChat(chat.id, (c) => ({
         ...c,
+        settings: effectiveSettings,
         title: c.messages.length === 0 ? title : c.title,
         messages: [...c.messages, { id: createId("m"), role: "user", content: prompt, createdAt: now }, assistant],
       }));
