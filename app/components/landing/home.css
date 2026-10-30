@@ -131,13 +131,13 @@
 
 .hm-wall-wrap {
   position: relative;
-  margin-top: 56px;
+  margin-top: 40px;
 }
 
 .hm-pen-note {
   position: absolute;
   right: 6%;
-  top: -42px;
+  top: -30px;
   margin: 0;
   display: flex;
   align-items: flex-start;
@@ -159,6 +159,49 @@
   stroke-width: 1.6;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+/* Play/pause for the whole wall. */
+.hm-wall-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  margin-bottom: 14px;
+}
+
+.hm-play-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 14px 0 12px;
+  border: 1px solid var(--lp-line-strong);
+  border-radius: 999px;
+  background: var(--lp-surface-hover);
+  box-shadow: var(--lp-shadow-xs);
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--lp-ink);
+  cursor: pointer;
+  transition: border-color 0.16s ease;
+}
+
+.hm-play-toggle:hover {
+  border-color: var(--lp-line-ink);
+}
+
+.hm-play-toggle svg {
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
+}
+
+.hm-motion-note {
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--lp-graphite);
 }
 
 .hm-wall {

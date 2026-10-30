@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import NotebookShell from "./components/landing/NotebookShell";
@@ -17,18 +17,35 @@ function srcOf(item: ShowreelItem) {
   return item.hyperframes ? `/hyperframes/${item.id}.html?autoplay` : `/${item.id}.html`;
 }
 
+const REDUCED_MOTION = "(prefers-reduced-motion: reduce)";
+
+/** Live view of the OS "reduce motion" setting (false during server render). */
+function useReducedMotion() {
+  return useSyncExternalStore(
+    (onChange) => {
+      const mq = window.matchMedia(REDUCED_MOTION);
+      mq.addEventListener("change", onChange);
+      return () => mq.removeEventListener("change", onChange);
+    },
+    () => window.matchMedia(REDUCED_MOTION).matches,
+    () => false
+  );
+}
+
 /**
  * One live reel, scaled to cover its tile. The iframe only exists while the tile is on screen
- * (so a wall of reels never runs all at once), and never for reduced-motion visitors, who
- * get the still poster instead.
+ * (so a wall of reels never runs all at once) and while reels are playing; otherwise the
+ * still poster shows.
  */
 function ReelTile({
   item,
   index,
+  playing,
   onUse,
 }: {
   item: ShowreelItem;
   index: number;
+  playing: boolean;
   onUse: (item: ShowreelItem) => void;
 }) {
   const feature = item.feature;
@@ -36,16 +53,10 @@ function ReelTile({
   const [box, setBox] = useState({ w: 0, h: 0 });
   const [onScreen, setOnScreen] = useState(false);
   const [loaded, setLoaded] = useState(false);
-  const [reduceMotion, setReduceMotion] = useState(false);
 
   useEffect(() => {
     const el = boxRef.current;
     if (!el) return;
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReduceMotion(mq.matches);
-    const onMq = () => setReduceMotion(mq.matches);
-    mq.addEventListener("change", onMq);
-
     const ro = new ResizeObserver(([entry]) => {
       const { width, height } = entry.contentRect;
       setBox({ w: width, h: height });
@@ -60,7 +71,6 @@ function ReelTile({
     );
     io.observe(el);
     return () => {
-      mq.removeEventListener("change", onMq);
       ro.disconnect();
       io.disconnect();
     };
@@ -70,7 +80,7 @@ function ReelTile({
   const scale = box.w ? Math.max(box.w / stage.w, box.h / stage.h) : 0;
   const dx = (box.w - stage.w * scale) / 2;
   const dy = (box.h - stage.h * scale) / 2;
-  const live = onScreen && !reduceMotion && scale > 0;
+  const live = onScreen && playing && scale > 0;
 
   return (
     <figure
@@ -118,6 +128,12 @@ export default function Home() {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [prompt, setPrompt] = useState("");
+
+  /* Reels play for everyone by default. A device set to reduce motion starts them paused
+     (with a note saying why), and anyone can pause or resume them with the toggle. */
+  const reduceMotion = useReducedMotion();
+  const [choice, setChoice] = useState<"auto" | "play" | "pause">("auto");
+  const playing = choice === "play" || (choice === "auto" && !reduceMotion);
 
   const applyReelPrompt = (item: ShowreelItem) => {
     setPrompt(item.prompt);
@@ -178,9 +194,31 @@ export default function Home() {
               <path d="M40 33 L 51 33 L 50 22" />
             </svg>
           </p>
+          <div className="hm-wall-bar">
+            <button
+              type="button"
+              className="hm-play-toggle"
+              aria-pressed={playing}
+              onClick={() => setChoice(playing ? "pause" : "play")}
+            >
+              <svg viewBox="0 0 16 16" aria-hidden="true">
+                {playing ? (
+                  <path d="M4 3h3v10H4zM9 3h3v10H9z" />
+                ) : (
+                  <path d="M4 2.5v11l9.5-5.5z" />
+                )}
+              </svg>
+              {playing ? "Pause reels" : "Play reels"}
+            </button>
+            {!playing && reduceMotion && choice === "auto" && (
+              <p className="hm-motion-note">
+                Paused because this device is set to reduce motion.
+              </p>
+            )}
+          </div>
           <div className="hm-wall">
             {SHOWREEL.map((item, i) => (
-              <ReelTile key={item.id} item={item} index={i} onUse={applyReelPrompt} />
+              <ReelTile key={item.id} item={item} index={i} playing={playing} onUse={applyReelPrompt} />
             ))}
           </div>
           <p className="hm-wall-foot">
