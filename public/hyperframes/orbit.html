@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <meta data-composition-id="orbit" data-width="1920" data-height="1080" />
+    <title>Orbit</title>
+    <link rel="stylesheet" href="fonts/fonts.css" />
+    <script src="vendor/gsap.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1920px; height: 1080px; overflow: hidden; background: #050b18; }
+      #stage {
+        position: relative; width: 1920px; height: 1080px; overflow: hidden;
+        background: radial-gradient(ellipse 60% 55% at 50% 52%, #12285a 0%, #07142e 55%, #03070f 100%);
+      }
+
+      /* Background word for the rack focus. */
+      #bg-word {
+        position: absolute; left: 0; top: 250px; width: 1920px; text-align: center;
+        font-family: "Anton", sans-serif; font-size: 560px; line-height: 1; letter-spacing: 20px;
+        color: rgba(127, 178, 255, 0.13);
+      }
+
+      #cam { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; perspective: 1700px; perspective-origin: 960px 500px; }
+      #world { position: absolute; left: 960px; top: 540px; width: 0; height: 0; transform-style: preserve-3d; }
+
+      /* The product: a frosted glass editor card. */
+      .card {
+        position: absolute; left: -440px; top: -280px; width: 880px; height: 560px; border-radius: 34px;
+        backface-visibility: hidden;
+      }
+      #front {
+        background: linear-gradient(160deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.05));
+        border: 2px solid rgba(255, 255, 255, 0.22);
+        box-shadow: 0 50px 120px -30px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+        padding: 40px 44px;
+      }
+      #back {
+        transform: rotateY(180deg);
+        background: linear-gradient(160deg, #c5ef26, #9fd11a);
+        display: flex; align-items: center; justify-content: center; gap: 30px;
+      }
+      #back svg { width: 120px; height: 132px; }
+      #back span { font-family: "Bricolage Grotesque", sans-serif; font-weight: 700; font-size: 150px; letter-spacing: -7px; color: #07142e; }
+      #sheen {
+        position: absolute; left: -440px; top: -280px; width: 880px; height: 560px; border-radius: 34px;
+        overflow: hidden; pointer-events: none; backface-visibility: hidden;
+      }
+      #glint {
+        position: absolute; top: -50%; left: -60%; width: 40%; height: 200%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.28), transparent);
+        transform: rotate(18deg);
+      }
+
+      .ui-top { display: flex; align-items: center; gap: 12px; }
+      .dot { width: 16px; height: 16px; border-radius: 50%; background: rgba(255, 255, 255, 0.3); }
+      .ui-title { margin-left: 14px; font-family: "Bricolage Grotesque", sans-serif; font-weight: 600; font-size: 26px; color: rgba(247, 245, 239, 0.8); }
+      .prompt {
+        margin-top: 34px; padding: 22px 26px; border-radius: 18px; background: rgba(3, 7, 15, 0.45);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        font-family: "Bricolage Grotesque", sans-serif; font-weight: 500; font-size: 32px; line-height: 1.35; color: #f7f5ef;
+      }
+      .prompt b { color: #c5ef26; font-weight: 600; }
+      #preview {
+        position: absolute; left: 44px; top: 268px; width: 300px; height: 168px; border-radius: 14px; overflow: hidden;
+        background: linear-gradient(135deg, #ff5b45, #8b6cff);
+      }
+      #preview::after {
+        content: "ACTION"; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+        font-family: "Anton", sans-serif; font-size: 64px; letter-spacing: 3px; color: #f7f5ef;
+      }
+      .track { position: absolute; left: 370px; right: 44px; height: 30px; border-radius: 8px; }
+      #t1 { top: 274px; background: linear-gradient(90deg, #c5ef26 0 38%, transparent 38% 42%, #7fb2ff 42% 70%, transparent 70% 74%, #ff5b45 74%); }
+      #t2 { top: 320px; background: linear-gradient(90deg, rgba(247,245,239,0.35) 0 22%, transparent 22% 26%, rgba(247,245,239,0.35) 26% 61%, transparent 61% 65%, rgba(247,245,239,0.35) 65%); }
+      #t3 { top: 366px; background: linear-gradient(90deg, rgba(127,178,255,0.45) 0 54%, transparent 54% 58%, rgba(127,178,255,0.45) 58%); }
+      #playhead { position: absolute; left: 370px; top: 258px; width: 4px; height: 160px; background: #f7f5ef; border-radius: 2px; box-shadow: 0 0 18px rgba(255,255,255,0.7); }
+      .ui-foot { position: absolute; left: 44px; bottom: 36px; font-family: "Bricolage Grotesque", sans-serif; font-weight: 600; font-size: 24px; color: rgba(247, 245, 239, 0.55); }
+
+      /* Camera-move tags floating at different depths. */
+      .chip {
+        position: absolute; padding: 16px 28px; border-radius: 999px; white-space: nowrap;
+        font-family: "Bricolage Grotesque", sans-serif; font-weight: 600; font-size: 34px;
+        background: rgba(7, 20, 46, 0.7); border: 2px solid rgba(255, 255, 255, 0.18); color: #f7f5ef;
+        transform-style: preserve-3d;
+      }
+      .chip i { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 14px; vertical-align: 4px; }
+
+      /* Final frame after the crash zoom. */
+      #final {
+        position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; opacity: 0;
+        background: linear-gradient(135deg, #ff5b45, #8b6cff);
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+      }
+      #final .big { font-family: "Anton", sans-serif; font-size: 360px; letter-spacing: 12px; color: #f7f5ef; line-height: 1; }
+      #final .small { margin-top: 20px; font-family: "Bricolage Grotesque", sans-serif; font-weight: 600; font-size: 52px; color: #07142e; }
+
+      .bar { position: absolute; left: 0; width: 1920px; height: 128px; background: #000; z-index: 20; }
+      #bar-t { top: 0; }
+      #bar-b { bottom: 0; }
+      #grain { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; z-index: 18; opacity: 0.08; mix-blend-mode: overlay; pointer-events: none; }
+      #flash { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; z-index: 19; background: #fff; opacity: 0; }
+      #black { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; z-index: 21; background: #000; }
+    </style>
+  </head>
+  <body>
+    <div id="stage">
+      <div id="bg-word">ORBIT</div>
+      <div id="cam">
+        <div id="world">
+          <div id="product">
+            <div class="card" id="front">
+              <div class="ui-top"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="ui-title">byreel studio</span></div>
+              <div class="prompt">Orbit the product, <b>rack focus</b> to the title, then <b>crash zoom</b> into the shot.</div>
+              <div id="preview"></div>
+              <div class="track" id="t1"></div>
+              <div class="track" id="t2"></div>
+              <div class="track" id="t3"></div>
+              <div id="playhead"></div>
+              <div class="ui-foot">Rendering 4K · 60 fps</div>
+            </div>
+            <div class="card" id="back">
+              <svg viewBox="0 0 210 230" aria-hidden="true"><path d="M18 14 L196 115 L18 216 Z" fill="#07142e" stroke="#07142e" stroke-width="20" stroke-linejoin="round" /></svg>
+              <span>byreel</span>
+            </div>
+            <div id="sheen"><div id="glint"></div></div>
+          </div>
+          <div id="chips"></div>
+        </div>
+      </div>
+      <div id="final"><div class="big">ACTION.</div><div class="small">Your camera crew is a sentence.</div></div>
+
+      <svg id="grain" viewBox="0 0 1920 1080" aria-hidden="true">
+        <filter id="noise"><feTurbulence id="turb" type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="1" /></filter>
+        <rect width="1920" height="1080" filter="url(#noise)" />
+      </svg>
+      <div id="flash"></div>
+      <div class="bar" id="bar-t"></div>
+      <div class="bar" id="bar-b"></div>
+      <div id="black"></div>
+    </div>
+
+    <script src="player.js"></script>
+    <script>
+      /* Chips orbit with the world on a ring; each counter-rotates so it always faces camera. */
+      var CHIPS = [
+        ["Orbit", "#c5ef26", 0], ["Rack focus", "#7fb2ff", 72], ["Crash zoom", "#ff5b45", 144],
+        ["Dolly zoom", "#8b6cff", 216], ["Whip pan", "#f7f5ef", 288],
+      ];
+      var chipsEl = document.getElementById("chips");
+      CHIPS.forEach(function (c, i) {
+        var d = document.createElement("div");
+        d.className = "chip";
+        d.innerHTML = '<i style="background:' + c[1] + '"></i>' + c[0];
+        chipsEl.appendChild(d);
+      });
+      var chips = gsap.utils.toArray(".chip");
+      var R = 760;
+
+      /* One proxy drives the orbit so the card and the chip ring stay locked together.
+         A modifier (not onUpdate) applies it, so frame-accurate seeks render it too. */
+      var orbit = { a: -20 };
+      gsap.set(["#product", "#chips"], { transformStyle: "preserve-3d" });
+      function applyOrbit() {
+        gsap.set("#product", { rotationY: orbit.a });
+        chips.forEach(function (el, i) {
+          var a = ((CHIPS[i][2] - orbit.a) * Math.PI) / 180;
+          gsap.set(el, { x: Math.sin(a) * R - 120, z: Math.cos(a) * R, y: (i % 2 ? 190 : -250), rotationY: 0 });
+        });
+      }
+
+      gsap.set("#world", { z: -900, rotationX: 8 });
+      gsap.set("#bg-word", { filter: "blur(14px)", scale: 1.15 });
+      gsap.set("#playhead", { x: 0 });
+      applyOrbit();
+
+      var tl = gsap.timeline({ paused: true });
+      tl.to("#turb", { attr: { seed: 270 }, duration: 9, ease: "steps(270)" }, 0);
+
+      /* 0–0.6s: fade up; the camera glides in. */
+      tl.to("#black", { opacity: 0, duration: 0.6, ease: "power2.out" }, 0);
+      tl.to("#world", { z: -260, rotationX: 4, duration: 2.2, ease: "power3.out" }, 0);
+
+      /* 0.3–4.8s: a full orbit around the product (card + chip ring), slow-fast-slow. */
+      tl.to(orbit, {
+        a: 360, duration: 4.5, ease: "power2.inOut",
+        modifiers: { a: function (v) { orbit.a = parseFloat(v); applyOrbit(); return v; } },
+      }, 0.3);
+      /* A glint sweeps the glass each time the front comes round to camera. */
+      [0.4, 4.2].forEach(function (t) {
+        tl.fromTo("#glint", { x: 0 }, { x: 1500, duration: 0.9, ease: "power2.inOut", immediateRender: false }, t);
+      });
+      tl.fromTo("#playhead", { x: 0 }, { x: 420, duration: 6, ease: "none" }, 0.3);
+
+      /* 4.9–5.9s: rack focus — the card softens while the background title pulls sharp, then back. */
+      tl.to("#product", { filter: "blur(10px)", duration: 0.6, ease: "power2.inOut" }, 4.9);
+      tl.to("#bg-word", { filter: "blur(0px)", color: "rgba(127,178,255,0.42)", duration: 0.6, ease: "power2.inOut" }, 4.9);
+      tl.to("#product", { filter: "blur(0px)", duration: 0.6, ease: "power2.inOut" }, 5.7);
+      tl.to("#bg-word", { filter: "blur(14px)", color: "rgba(127,178,255,0.13)", duration: 0.6, ease: "power2.inOut" }, 5.7);
+
+      /* 6.4–6.9s: crash zoom into the preview window, flash, hard cut to the shot itself. */
+      tl.to("#chips", { opacity: 0, duration: 0.25 }, 6.3);
+      /* Slide the preview window to frame centre, then push the lens through it. */
+      tl.to("#world", { x: 246, y: -72, rotationX: 0, duration: 0.3, ease: "power2.inOut" }, 6.2);
+      tl.to("#world", { z: 1560, duration: 0.5, ease: "expo.in" }, 6.4);
+      tl.to("#flash", { opacity: 0.85, duration: 0.08, ease: "none" }, 6.86);
+      tl.set("#final", { opacity: 1 }, 6.9);
+      tl.to("#flash", { opacity: 0, duration: 0.35, ease: "power2.out" }, 6.94);
+      tl.fromTo("#final .big", { scale: 1.25 }, { scale: 1, duration: 0.9, ease: "expo.out" }, 6.9);
+      tl.fromTo("#final .small", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 7.2);
+
+      /* 8.3–8.8s: fade to black and reset for the loop. */
+      tl.to("#black", { opacity: 1, duration: 0.5, ease: "power2.in" }, 8.3);
+      tl.set("#final", { opacity: 0 }, 8.85);
+      tl.set("#chips", { opacity: 1 }, 8.85);
+      tl.set("#world", { z: -900, x: 0, y: 0, rotationX: 8 }, 8.85);
+      tl.set({}, {}, 9);
+
+      window.__timelines = window.__timelines || {};
+      window.__timelines["orbit"] = tl;
+    </script>
+  </body>
+</html>

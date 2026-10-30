@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <meta data-composition-id="vertigo" data-width="1920" data-height="1080" />
+    <title>Vertigo</title>
+    <link rel="stylesheet" href="fonts/fonts.css" />
+    <script src="vendor/gsap.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1920px; height: 1080px; overflow: hidden; background: #03060c; }
+      #stage { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: #03060c; }
+
+      /* Camera: CSS perspective is the lens. Animating it while the subject sits at z=0 is a
+         true dolly zoom — the subject holds its size while depth behind it stretches. */
+      #cam {
+        position: absolute; left: 0; top: 0; width: 1920px; height: 1080px;
+        perspective: 700px; perspective-origin: 960px 540px;
+      }
+      #world, #frames { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-style: preserve-3d; }
+      .frame {
+        position: absolute; left: 160px; top: 90px; width: 1600px; height: 900px;
+        border: 3px solid rgba(247, 245, 239, 0.2); border-radius: 26px;
+      }
+      .frame .tag {
+        position: absolute; left: 34px; top: 26px; font-family: "Bricolage Grotesque", sans-serif;
+        font-weight: 600; font-size: 28px; letter-spacing: 1px; color: rgba(247, 245, 239, 0.4);
+      }
+      .frame .rec {
+        position: absolute; right: 34px; top: 34px; width: 18px; height: 18px; border-radius: 50%;
+        background: #ff5b45; opacity: 0.8;
+      }
+      .frame.hot { border-color: rgba(197, 239, 38, 0.6); box-shadow: 0 0 40px rgba(197, 239, 38, 0.12); }
+      #subject {
+        position: absolute; left: 0; top: 340px; width: 1920px; text-align: center;
+        font-family: "Bricolage Grotesque", sans-serif; font-weight: 700; font-size: 168px;
+        line-height: 1.02; letter-spacing: -7px; color: #f7f5ef;
+      }
+      #subject em { font-style: normal; color: #c5ef26; }
+      #rule {
+        position: absolute; left: 620px; top: 700px; width: 680px; height: 8px; border-radius: 4px;
+        background: #c5ef26; transform-origin: left center;
+      }
+
+      /* End card arrives on the whip pan. */
+      #card {
+        position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; background: #07142e;
+        display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px;
+      }
+      #card .logo { display: flex; align-items: center; gap: 36px; }
+      #card svg { width: 150px; height: 165px; }
+      #card .word {
+        font-family: "Bricolage Grotesque", sans-serif; font-weight: 700; font-size: 190px;
+        letter-spacing: -9px; color: #f7f5ef; line-height: 1;
+      }
+      #card .line {
+        font-family: "Bricolage Grotesque", sans-serif; font-weight: 500; font-size: 52px;
+        color: rgba(247, 245, 239, 0.7);
+      }
+      #card .line b { color: #c5ef26; font-weight: 600; }
+
+      /* Film finish: anamorphic letterbox, grain, vignette, fade. */
+      .bar { position: absolute; left: 0; width: 1920px; height: 128px; background: #000; z-index: 20; }
+      #bar-t { top: 0; }
+      #bar-b { bottom: 0; }
+      #grain { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; z-index: 18; opacity: 0.09; mix-blend-mode: overlay; pointer-events: none; }
+      #vignette {
+        position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; z-index: 19; pointer-events: none;
+        background: radial-gradient(ellipse 75% 70% at 50% 50%, transparent 55%, rgba(0, 0, 0, 0.55) 100%);
+      }
+      #black { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; z-index: 21; background: #000; }
+    </style>
+  </head>
+  <body>
+    <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+      <defs>
+        <!-- Horizontal-only blur: the streak of a whip pan. -->
+        <filter id="whip" x="-10%" y="0" width="120%" height="100%">
+          <feGaussianBlur id="whip-blur" stdDeviation="0 0" />
+        </filter>
+      </defs>
+    </svg>
+
+    <div id="stage">
+      <div id="pan">
+        <div id="cam">
+          <div id="world">
+            <div id="frames"></div>
+            <div id="subject">Every shot,<br /><em>directed.</em></div>
+            <div id="rule"></div>
+          </div>
+        </div>
+        <div id="card">
+          <div class="logo">
+            <svg viewBox="0 0 210 230" aria-hidden="true">
+              <path d="M18 14 L196 115 L18 216 Z" fill="#c5ef26" stroke="#c5ef26" stroke-width="20" stroke-linejoin="round" />
+            </svg>
+            <div class="word">byreel</div>
+          </div>
+          <div class="line">Camera moves, <b>written as a sentence.</b></div>
+        </div>
+      </div>
+
+      <svg id="grain" viewBox="0 0 1920 1080" aria-hidden="true">
+        <filter id="noise"><feTurbulence id="turb" type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="1" /></filter>
+        <rect width="1920" height="1080" filter="url(#noise)" />
+      </svg>
+      <div id="vignette"></div>
+      <div class="bar" id="bar-t"></div>
+      <div class="bar" id="bar-b"></div>
+      <div id="black"></div>
+    </div>
+
+    <script src="player.js"></script>
+    <script>
+      /* A tunnel of film frames receding behind the subject (z < 0) and a few in front of it. */
+      var framesEl = document.getElementById("frames");
+      var DEPTHS = [];
+      for (var i = -12; i <= 3; i++) DEPTHS.push(i * 420);
+      DEPTHS.forEach(function (z, i) {
+        var f = document.createElement("div");
+        f.className = "frame" + (i % 5 === 2 ? " hot" : "");
+        f.innerHTML = (i % 3 === 0 ? '<div class="tag">SCENE ' + String(i + 1).padStart(2, "0") + "</div>" : "") + (i % 4 === 1 ? '<div class="rec"></div>' : "");
+        f.style.transform = "translateZ(" + z + "px)";
+        framesEl.appendChild(f);
+      });
+      var frames = gsap.utils.toArray(".frame");
+
+      gsap.set("#card", { x: 1920 });
+      gsap.set("#world", { z: -5200 });
+      gsap.set("#subject", { filter: "blur(22px)", opacity: 0 });
+      gsap.set("#rule", { scaleX: 0 });
+      gsap.set(frames, { opacity: 0 });
+
+      var tl = gsap.timeline({ paused: true });
+
+      /* Film grain re-seeds every frame (deterministic: seed is a function of time). */
+      tl.to("#turb", { attr: { seed: 270 }, duration: 9, ease: "steps(270)" }, 0);
+
+      /* 0–0.6s: fade up from black as the frames light up far to near. */
+      tl.to("#black", { opacity: 0, duration: 0.6, ease: "power2.out" }, 0);
+      tl.to(frames, { opacity: 1, duration: 0.5, ease: "power1.out", stagger: { each: 0.04, from: "start" } }, 0.05);
+
+      /* 0.2–3.0s: FPV push through the tunnel, speed-ramped (fast, then easing into the subject). */
+      tl.to("#world", { z: 0, duration: 2.8, ease: "expo.out" }, 0.2);
+
+      /* 1.9–2.9s: rack focus pulls the headline sharp. */
+      tl.to("#subject", { opacity: 1, duration: 0.6, ease: "power1.out" }, 1.6);
+      tl.to("#subject", { filter: "blur(0px)", duration: 1.0, ease: "power2.inOut" }, 1.9);
+
+      /* 3.1–6.1s: dolly zoom — the lens goes from wide to long while the headline holds still. */
+      tl.to("#cam", { perspective: 4800, duration: 3.0, ease: "power2.inOut" }, 3.1);
+      tl.to("#world", { rotationZ: -2.2, duration: 3.0, ease: "sine.inOut" }, 3.1);
+      tl.to("#rule", { scaleX: 1, duration: 0.7, ease: "power3.inOut" }, 4.6);
+
+      /* 6.3–6.9s: whip pan with directional motion blur onto the end card. */
+      tl.to(["#cam", "#card"], { x: "-=1920", duration: 0.6, ease: "expo.inOut" }, 6.3);
+      tl.to("#whip-blur", { attr: { stdDeviation: "90 0" }, duration: 0.3, ease: "power2.in" }, 6.3);
+      tl.to("#whip-blur", { attr: { stdDeviation: "0 0" }, duration: 0.3, ease: "power2.out" }, 6.6);
+      tl.set("#pan", { filter: "url(#whip)" }, 6.3);
+      tl.set("#pan", { filter: "none" }, 6.9);
+      tl.from("#card .line", { opacity: 0, y: 24, duration: 0.5, ease: "power2.out" }, 6.85);
+
+      /* 8.3–8.8s: fade to black; reset underneath for a seamless loop. */
+      tl.to("#black", { opacity: 1, duration: 0.5, ease: "power2.in" }, 8.3);
+      tl.set("#cam", { x: 0, perspective: 700 }, 8.85);
+      tl.set("#card", { x: 1920 }, 8.85);
+      tl.set("#world", { z: -5200, rotationZ: 0 }, 8.85);
+      tl.set("#subject", { filter: "blur(22px)", opacity: 0 }, 8.85);
+      tl.set("#rule", { scaleX: 0 }, 8.85);
+      tl.set(frames, { opacity: 0 }, 8.85);
+      tl.set({}, {}, 9);
+
+      window.__timelines = window.__timelines || {};
+      window.__timelines["vertigo"] = tl;
+    </script>
+  </body>
+</html>

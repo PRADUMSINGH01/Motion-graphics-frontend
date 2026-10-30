@@ -24,11 +24,25 @@ export const SHOWREEL: ShowreelItem[] = [
       "A handwritten line on ruled notebook paper, 'make the words jump off the page', gets a lime highlighter swipe, then the letters tear off the page into giant multicolour kinetic type that bounces on the beat and resolves into the logo.",
   },
   {
+    id: "vertigo",
+    hyperframes: true,
+    title: "Vertigo, a dolly zoom",
+    prompt:
+      "Cinematic title: an FPV push through a tunnel of film frames, rack focus onto 'Every shot, directed.', then a dolly zoom that holds the headline while the world stretches behind it, and a whip pan to the logo.",
+  },
+  {
     id: "make-it-move",
     hyperframes: true,
     title: "Make it move",
     prompt:
       "Swiss-style kinetic poster: 'MAKE IT MOVE.' in giant condensed type on navy, a lime circle in difference blend sweeping across the letters, glitch slices on the beat, and a six-colour shutter wipe.",
+  },
+  {
+    id: "speed-ramp",
+    hyperframes: true,
+    title: "Speed-ramp whip pans",
+    prompt:
+      "Three-scene reel joined by speed-ramped whip pans with motion blur: a light sweep across a giant 60, camera-move words crash-zooming in on paper, then 'a sentence.' on lime.",
   },
   {
     id: "every-frame",
@@ -45,6 +59,13 @@ export const SHOWREEL: ShowreelItem[] = [
       "Data story on dark navy: a glowing lime line chart draws itself while a counter rolls up to 2.4M views, milestone tags pop along the curve, volume bars rise and the camera pushes in on the peak.",
   },
   {
+    id: "ideas-in-motion",
+    hyperframes: true,
+    title: "Ideas in motion",
+    prompt:
+      "Gooey metaball blobs in lime, coral and sky pop in, fuse and orbit, then part to reveal 'ideas in motion' with bouncing letters before a lime flood swallows the frame.",
+  },
+  {
     id: "text-transition-cool",
     title: "Kinetic text and colour wipes",
     prompt:
@@ -57,16 +78,18 @@ export const SHOWREEL: ShowreelItem[] = [
       "Bold kinetic typography title card: 'Turn plain text into broadcast motion graphics' slamming in line by line on a navy grid with a lime highlight bar.",
   },
   {
+    id: "orbit",
+    feature: "right",
+    hyperframes: true,
+    title: "Orbit, a product shot",
+    prompt:
+      "Premium product shot: the camera orbits a frosted-glass editor card with floating camera-move tags, racks focus to the background title, then crash-zooms into the preview window and cuts to 'ACTION.'",
+  },
+  {
     id: "aggressive-zoom-flashcuts",
     title: "Zoom punches and flash cuts",
     prompt:
       "Aggressive camera zoom punches with high-contrast flash cuts, scanline texture, and bold impact labels on every beat.",
-  },
-  {
-    id: "phone-toss-clock",
-    title: "Phone toss to ticking clock",
-    prompt:
-      "A smartphone gets tossed out of frame with motion blur, hard-cutting to a high-contrast ticking analog clock.",
   },
   {
     id: "host-intro-text",
@@ -75,35 +98,15 @@ export const SHOWREEL: ShowreelItem[] = [
       "Low-key creator silhouette with lens-glint eyes and giant stacked kinetic typography slamming into frame with subtle camera shake.",
   },
   {
-    id: "ideas-in-motion",
-    feature: "right",
-    hyperframes: true,
-    title: "Ideas in motion",
+    id: "neon-host-neuron",
+    title: "Neon callout to neuron",
     prompt:
-      "Gooey metaball blobs in lime, coral and sky pop in, fuse and orbit, then part to reveal 'ideas in motion' with bouncing letters before a lime flood swallows the frame.",
-  },
-  {
-    id: "flash-cut-broadcast",
-    title: "Broadcast lower third",
-    prompt:
-      "Skewed broadcast news lower-third title bar over studio lighting followed by rapid full-screen editorial flash cuts.",
-  },
-  {
-    id: "faceless-story-reel",
-    title: "Faceless story with captions",
-    prompt:
-      "Generate a complete faceless storytelling video with automated visual B-roll scenes, chapter progression, and synchronized word-by-word kinetic captions.",
+      "3D perspective neon callout card beside the speaker that transitions into a glowing synaptic neuron firing across the axon.",
   },
   {
     id: "host-dark-text",
     title: "Dark headline reveal",
     prompt:
       "Dramatic low-light keynote teaser where bold word-by-word typography ('WE NEED TO TALK.') emerges over a spotlighted stage.",
-  },
-  {
-    id: "neon-host-neuron",
-    title: "Neon callout to neuron",
-    prompt:
-      "3D perspective neon callout card beside the speaker that transitions into a glowing synaptic neuron firing across the axon.",
   },
 ];

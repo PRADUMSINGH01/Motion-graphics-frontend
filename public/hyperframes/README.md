@@ -11,6 +11,12 @@ driven by one paused, seekable GSAP timeline registered on `window.__timelines`.
 | `every-frame.html` | 8s | 12×7 tile mosaic flipping in diagonal, reverse and radial waves between two scenes |
 | `signal.html` | 8s | Data story: self-drawing glow chart, counter to 2.4M, milestone tags, camera push |
 | `ideas-in-motion.html` | 8s | Gooey metaball blobs fuse, orbit and part to reveal the title, then a lime flood |
+| `vertigo.html` | 9s | FPV push through a tunnel of film frames, rack focus, a true dolly zoom (lens animates while the subject holds), whip pan to the logo |
+| `orbit.html` | 9s | 360° orbit of a frosted-glass editor card with billboarded tags, rack focus, crash zoom into the preview and a match cut |
+| `speed-ramp.html` | 8s | Three scenes joined by speed-ramped whip pans with directional motion blur; light sweep, crash-zoom words, end line |
+
+The last three use cinematic camera-move language (dolly zoom, FPV, orbit, rack focus,
+crash zoom, whip pan, speed ramp) with an anamorphic letterbox, film grain and vignette.
 
 Every piece ends on the frame it starts on, so it loops cleanly.
 
