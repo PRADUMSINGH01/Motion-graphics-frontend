@@ -1,18 +1,17 @@
 /* ==========================================================================
-   Home page (app/page.tsx)
+   Home page (app/page.tsx) — a showreel wall of live motion graphics.
    Stationery palette from landing.css tokens: paper, navy pen ink, graphite
    for secondary text, pale-blue rules, rose margin, and lime highlighter used
-   only to mark what is selected or annotated.
+   only for annotation and the active tile.
    ========================================================================== */
 
 .hm {
   width: 100%;
-  max-width: 1120px;
+  max-width: 1180px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 88px;
-  padding: 24px 0 24px;
+  padding: 20px 0 16px;
 }
 
 .hm-sr-only {
@@ -24,24 +23,19 @@
   white-space: nowrap;
 }
 
-/* ── Hero: copy + composer on the left, live render on the right ── */
+/* ── Intro: headline left, one line of context right ── */
 
-.hm-hero {
+.hm-intro {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.12fr);
-  align-items: center;
-  gap: 56px;
-}
-
-.hm-hero-copy {
-  min-width: 0;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  align-items: end;
+  gap: 24px 56px;
   container-type: inline-size;
 }
 
-/* Each sentence holds one line; size follows the column so neither wraps. */
 .hm-title {
   margin: 0;
-  font-size: clamp(34px, 9.4cqi, 60px);
+  font-size: clamp(34px, 5.2cqi, 60px);
   font-weight: 700;
   line-height: 1.02;
   letter-spacing: -0.045em;
@@ -54,105 +48,58 @@
 }
 
 .hm-lede {
-  margin: 20px 0 0;
-  max-width: 44ch;
+  margin: 0 0 6px;
+  max-width: 40ch;
   font-size: 17px;
   line-height: 1.6;
   color: var(--lp-graphite);
   text-wrap: pretty;
 }
 
-.hm-composer {
+/* ── Prompt bar ── */
+
+.hm-prompt {
   margin-top: 32px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 6px 6px 18px;
   background: var(--lp-surface);
   border: 1px solid var(--lp-line-strong);
-  border-radius: 16px;
-  box-shadow: var(--lp-shadow-lg);
+  border-radius: 14px;
+  box-shadow: var(--lp-shadow-md);
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.hm-composer:focus-within {
+.hm-prompt:focus-within {
   border-color: var(--lp-line-ink);
-  box-shadow: var(--lp-shadow-lg), var(--lp-ring);
+  box-shadow: var(--lp-shadow-md), var(--lp-ring);
 }
 
-/* The prompt is written on ruled lines, like the rest of the notebook. */
-.hm-composer-input {
-  display: block;
-  width: 100%;
-  min-height: 112px;
-  padding: 14px 18px 6px;
+.hm-prompt-input {
+  flex: 1;
+  min-width: 0;
+  height: 44px;
   border: 0;
-  resize: none;
   outline: none;
-  background-color: transparent;
-  background-image: repeating-linear-gradient(
-    to bottom,
-    transparent 0,
-    transparent 29px,
-    var(--lp-rule-blue) 29px,
-    var(--lp-rule-blue) 30px
-  );
-  background-position: 0 14px;
-  background-attachment: local;
+  background: transparent;
   font-family: inherit;
   font-size: 16px;
-  line-height: 30px;
   color: var(--lp-ink);
+  text-overflow: ellipsis;
 }
 
-.hm-composer-input:focus-visible {
+.hm-prompt-input:focus-visible {
   outline: none;
 }
 
-.hm-composer-input::placeholder {
+.hm-prompt-input::placeholder {
   color: var(--lp-graphite-light);
 }
 
-.hm-composer-bar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 10px 10px 10px 12px;
-  border-top: 1px solid var(--lp-line-soft);
-}
-
-.hm-seg {
-  display: inline-flex;
-  gap: 2px;
-  padding: 3px;
-  border-radius: 10px;
-  background: var(--lp-tray);
-}
-
-.hm-seg-btn {
-  height: 30px;
-  padding: 0 12px;
-  border: 0;
-  border-radius: 7px;
-  background: transparent;
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--lp-graphite);
-  cursor: pointer;
-  transition: background 0.16s ease, color 0.16s ease, box-shadow 0.16s ease;
-}
-
-.hm-seg-btn:hover {
-  color: var(--lp-ink);
-}
-
-.hm-seg-btn[aria-checked="true"] {
-  background: var(--lp-surface-hover);
-  color: var(--lp-ink);
-  box-shadow: 0 1px 2px rgba(7, 20, 46, 0.1), 0 0 0 1px var(--lp-line);
-}
-
 .hm-cta {
-  height: 40px;
+  flex-shrink: 0;
+  height: 44px;
   padding: 0 20px;
   border: 1px solid var(--lp-ink);
   border-radius: 10px;
@@ -164,7 +111,7 @@
   color: var(--lp-paper);
   cursor: pointer;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 6px 16px -8px rgba(7, 20, 46, 0.6);
-  transition: background 0.16s ease, transform 0.16s var(--lp-ease);
+  transition: background 0.16s ease, opacity 0.16s ease, transform 0.16s var(--lp-ease);
 }
 
 .hm-cta:hover:not(:disabled) {
@@ -176,18 +123,166 @@
 }
 
 .hm-cta:disabled {
-  opacity: 0.45;
+  opacity: 0.4;
   cursor: not-allowed;
 }
 
-.hm-composer-note {
-  margin: 14px 0 0 2px;
+/* ── Showreel wall ── */
+
+.hm-wall-wrap {
+  position: relative;
+  margin-top: 56px;
+}
+
+.hm-pen-note {
+  position: absolute;
+  right: 6%;
+  top: -42px;
+  margin: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 2px;
+  font-family: var(--font-pen), "Caveat", cursive;
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--lp-graphite);
+  transform: rotate(-2deg);
+}
+
+.hm-pen-arrow {
+  width: 44px;
+  height: 30px;
+  margin-top: 6px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.hm-wall {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-auto-flow: dense;
+  gap: 12px;
+}
+
+.hm-tile {
+  position: relative;
+  margin: 0;
+  aspect-ratio: 16 / 9;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #050914;
+  box-shadow: 0 0 0 1px rgba(7, 20, 46, 0.12), var(--lp-shadow-sm);
+  isolation: isolate;
+}
+
+/* Feature tiles span a 2×2 block and stretch to the rows beside them. The right-hand one
+   is pinned to the last two columns; dense flow fills the gap to its left. */
+.hm-tile.is-feature {
+  grid-column: span 2;
+  grid-row: span 2;
+  aspect-ratio: auto;
+}
+
+.hm-tile.is-feature-right {
+  grid-column: 3 / span 2;
+}
+
+.hm-tile-stage {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.hm-tile-poster {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hm-tile-frame {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1280px;
+  height: 720px;
+  border: 0;
+  transform-origin: top left;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+/* Caption: hidden until the tile is hovered or something inside it has focus. */
+.hm-tile-caption {
+  position: absolute;
+  inset: auto 0 0 0;
+  z-index: 2;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 40px 14px 12px;
+  background: linear-gradient(to top, rgba(5, 9, 20, 0.82), rgba(5, 9, 20, 0));
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.22s ease, transform 0.22s var(--lp-ease);
+}
+
+.hm-tile:hover .hm-tile-caption,
+.hm-tile:focus-within .hm-tile-caption {
+  opacity: 1;
+  transform: none;
+}
+
+.hm-tile-title {
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  color: #fff;
+}
+
+.hm-tile.is-feature .hm-tile-title {
+  font-size: 17px;
+}
+
+.hm-tile-use {
+  flex-shrink: 0;
+  height: 30px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--lp-lime);
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--lp-ink);
+  cursor: pointer;
+  transition: background 0.16s ease;
+}
+
+.hm-tile-use:hover {
+  background: #d4f74e;
+}
+
+.hm-tile-use:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.hm-wall-foot {
+  margin: 18px 0 0;
   font-size: 13.5px;
   color: var(--lp-graphite);
 }
 
 .hm-link {
-  margin-left: 4px;
   font-weight: 500;
   color: var(--lp-ink);
   text-decoration: underline;
@@ -200,257 +295,69 @@
   text-decoration-color: var(--lp-ink);
 }
 
-/* ── Live render monitor ── */
-
-.hm-monitor {
-  margin: 0;
-  min-width: 0;
-}
-
-.hm-monitor-screen {
-  border-radius: 14px;
-  overflow: hidden;
-  background: #050914;
-  box-shadow:
-    0 0 0 1px rgba(7, 20, 46, 0.9),
-    0 2px 4px rgba(7, 20, 46, 0.08),
-    0 32px 64px -24px rgba(7, 20, 46, 0.45);
-}
-
-.hm .lp-tpl-live-viewport {
-  border: 0;
-  cursor: inherit;
-}
-
-.hm-monitor-caption {
-  display: flex;
-  align-items: flex-end;
-  gap: 4px;
-  margin: 10px 0 0 18px;
-  color: var(--lp-graphite);
-}
-
-.hm-pen-arrow {
-  width: 46px;
-  height: 30px;
-  flex-shrink: 0;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.6;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.hm-pen-note {
-  font-family: var(--font-pen), "Caveat", cursive;
-  font-size: 23px;
-  font-weight: 500;
-  line-height: 1;
-  transform: rotate(-2deg) translateY(4px);
-  background-image: linear-gradient(
-    to top,
-    transparent 0.05em,
-    var(--lp-lime-soft) 0.05em,
-    var(--lp-lime-soft) 0.38em,
-    transparent 0.38em
-  );
-}
-
-/* ── Section headings ── */
-
-.hm-h2 {
-  margin: 0 0 20px;
-  font-size: 22px;
-  font-weight: 600;
-  letter-spacing: -0.025em;
-  color: var(--lp-ink);
-}
-
-/* ── Format picker: selecting one loads its prompt and render above ── */
-
-.hm-format-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 16px;
-}
-
-.hm-format {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 6px;
-  border: 1px solid var(--lp-line);
-  border-radius: 14px;
-  background: var(--lp-surface);
-  box-shadow: var(--lp-shadow-xs);
-  font-family: inherit;
-  text-align: left;
-  color: inherit;
-  cursor: pointer;
-  transition: border-color 0.16s ease, box-shadow 0.16s ease;
-}
-
-.hm-format:hover {
-  border-color: var(--lp-line-ink);
-}
-
-.hm-format[aria-pressed="true"] {
-  border-color: var(--lp-ink);
-  box-shadow: 0 0 0 1px var(--lp-ink), var(--lp-shadow-sm);
-}
-
-.hm-format-thumb {
-  display: block;
-  border-radius: 9px;
-  overflow: hidden;
-}
-
-.hm-format-body {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 10px 8px 8px;
-}
-
-.hm-format-name {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  font-size: 15px;
-  font-weight: 600;
-  letter-spacing: -0.015em;
-  color: var(--lp-ink);
-}
-
-.hm-format[aria-pressed="true"] .hm-format-label {
-  text-decoration: underline;
-  text-decoration-color: var(--lp-lime);
-  text-decoration-thickness: 3px;
-  text-underline-offset: 4px;
-}
-
-.hm-format-ratio {
-  flex-shrink: 0;
-  padding: 1px 7px;
-  border: 1px solid var(--lp-line);
-  border-radius: 999px;
-  font-size: 11.5px;
-  font-weight: 500;
-  font-variant-numeric: tabular-nums;
-  color: var(--lp-graphite);
-}
-
-.hm-format-desc {
-  font-size: 13.5px;
-  line-height: 1.5;
-  color: var(--lp-graphite);
-}
-
-/* ── How it works: a real sequence, so it is numbered ── */
-
-.hm-step-list {
-  list-style: none;
-  margin: 0;
-  padding: 24px 0 0;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 40px;
-  border-top: 1px solid var(--lp-line);
-}
-
-.hm-step {
-  display: grid;
-  grid-template-columns: 36px minmax(0, 1fr);
-  column-gap: 12px;
-  align-items: baseline;
-}
-
-.hm-step-num {
-  grid-row: span 2;
-  font-family: var(--font-pen), "Caveat", cursive;
-  font-size: 40px;
-  font-weight: 600;
-  line-height: 0.8;
-  color: var(--lp-lime-ink);
-}
-
-.hm-step-title {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 600;
-  letter-spacing: -0.015em;
-  color: var(--lp-ink);
-}
-
-.hm-step-body {
-  margin: 6px 0 0;
-  max-width: 36ch;
-  font-size: 14.5px;
-  line-height: 1.6;
-  color: var(--lp-graphite);
+/* Touch screens have no hover: keep captions visible. */
+@media (hover: none) {
+  .hm-tile-caption {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 /* ── Responsive ── */
 
 @media (max-width: 1040px) {
-  .hm-hero {
+  .hm-intro {
     grid-template-columns: minmax(0, 1fr);
-    gap: 40px;
   }
 
-  .hm-lede {
-    max-width: 56ch;
+  .hm-title {
+    font-size: clamp(34px, 8.6cqi, 60px);
   }
 
-  .hm-format-grid {
+  .hm-wall {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-}
 
-@media (max-width: 768px) {
-  .hm {
-    gap: 64px;
-    padding-top: 8px;
+  /* Spanning both columns, nothing beside a feature tile sizes its rows: give it a shape. */
+  .hm-tile.is-feature,
+  .hm-tile.is-feature-right {
+    grid-column: span 2;
+    grid-row: auto;
+    aspect-ratio: 16 / 9;
   }
 
-  .hm-step-list {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 24px;
+  .hm-pen-note {
+    display: none;
   }
 }
 
 @media (max-width: 560px) {
-  .hm-format-grid {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 10px;
-  }
-
-  .hm-format {
-    flex-direction: row;
-    align-items: center;
-    gap: 4px;
-  }
-
-  .hm-format-thumb {
-    width: 128px;
-    flex-shrink: 0;
-  }
-
-  .hm-format-body {
-    padding: 4px 8px;
-  }
-
-  .hm-composer-bar {
+  .hm-prompt {
     flex-direction: column;
     align-items: stretch;
+    padding: 6px;
   }
 
-  .hm-seg-btn {
-    flex: 1;
+  .hm-prompt-input {
+    padding: 0 10px;
   }
 
-  .hm-monitor-caption {
-    margin-left: 8px;
+  .hm-wall-wrap {
+    margin-top: 36px;
+  }
+
+  .hm-wall {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .hm-tile.is-feature,
+  .hm-tile.is-feature-right {
+    grid-column: auto;
+    grid-row: auto;
+    aspect-ratio: 16 / 9;
+  }
+
+  .hm-tile-caption {
+    padding: 32px 12px 10px;
   }
 }
