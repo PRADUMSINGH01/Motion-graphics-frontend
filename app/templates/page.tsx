@@ -240,10 +240,10 @@ const TEMPLATES: LiveStudioTemplate[] = [
 ];
 
 const QUICK_STAGE_IDS = [
+  "text-transition-cool",
   "saas-product-launch",
   "broll-data-cutaway",
-  "kinetic-typography-reel",
-  "vertical-creator-short",
+  "faceless-story-reel",
 ];
 
 const CATEGORY_TABS: TemplateCategory[] = [

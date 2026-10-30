@@ -489,7 +489,7 @@ export default function TemplatesSection({ onSelectTemplate }: TemplatesSectionP
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search reels, tags, prompts..."
-            className="w-full h-10 rounded-xl border border-[rgba(7,20,46,0.28)] bg-transparent pl-9.5 pr-8 text-[12.5px] text-[#07142e] placeholder-[rgba(7,20,46,0.45)] focus:border-[#07142e] focus:bg-[rgba(255,253,248,0.12)] focus:outline-none transition shadow-2xs"
+            className="w-full h-10 rounded-xl border border-[rgba(7,20,46,0.12)] bg-[#fffefb] pl-9.5 pr-8 text-[12.5px] text-[#07142e] placeholder-[rgba(7,20,46,0.45)] focus:border-[rgba(7,20,46,0.32)] focus:bg-white focus:outline-none transition shadow-2xs"
           />
           {searchQuery && (
             <button
@@ -545,7 +545,7 @@ export default function TemplatesSection({ onSelectTemplate }: TemplatesSectionP
                   className={`flex flex-col text-left p-2.5 rounded-xl border transition cursor-pointer ${
                     isCurrent
                       ? "border-[#07142e] bg-[#07142e] text-[#faf8f2] shadow-sm"
-                      : "border-[rgba(7,20,46,0.28)] bg-transparent text-[#07142e] hover:border-[#07142e] hover:bg-[rgba(255,253,248,0.14)]"
+                      : "border-[rgba(7,20,46,0.12)] bg-[#fffefb] text-[#07142e] hover:border-[rgba(7,20,46,0.28)] hover:bg-white"
                   }`}
                 >
                   <span
@@ -565,7 +565,7 @@ export default function TemplatesSection({ onSelectTemplate }: TemplatesSectionP
         </div>
 
         {/* Right: Transparent Notebook Director's Sheet (5 cols) */}
-        <div className="lg:col-span-5 rounded-2xl border-1.5 border-[rgba(7,20,46,0.34)] bg-transparent p-5 sm:p-6 shadow-xs backdrop-blur-xs flex flex-col justify-between space-y-4">
+        <div className="lg:col-span-5 rounded-2xl border border-[rgba(7,20,46,0.12)] bg-[#fffefb] p-5 sm:p-6 shadow-xs backdrop-blur-xs flex flex-col justify-between space-y-4">
           <div>
             <div className="flex items-center justify-between gap-2 border-b border-[rgba(7,20,46,0.18)] pb-3">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-[#c5ef26]/35 border border-[#07142e]/30 px-2.5 py-0.5 font-mono text-[10px] font-bold text-[#07142e]">
@@ -590,7 +590,7 @@ export default function TemplatesSection({ onSelectTemplate }: TemplatesSectionP
                 {stageTemplate.beats.map((beat) => (
                   <div
                     key={beat.time}
-                    className="flex items-start gap-2.5 rounded-lg border border-[rgba(7,20,46,0.22)] bg-transparent p-2 text-[12px]"
+                    className="flex items-start gap-2.5 rounded-lg border border-[rgba(7,20,46,0.12)] bg-[#fffefb] p-2 text-[12px]"
                   >
                     <span className="font-mono text-[10.5px] font-bold text-[#4d7c0f] shrink-0 pt-0.5">
                       {beat.time}
@@ -635,7 +635,7 @@ export default function TemplatesSection({ onSelectTemplate }: TemplatesSectionP
                 rows={3}
                 value={stagePrompt}
                 onChange={(e) => setStagePrompt(e.target.value)}
-                className="w-full rounded-xl border border-[rgba(7,20,46,0.32)] bg-transparent p-3 text-[12.5px] text-[#07142e] leading-relaxed focus:border-[#07142e] focus:bg-[rgba(255,253,248,0.12)] focus:outline-none transition"
+                className="w-full rounded-xl border border-[rgba(7,20,46,0.12)] bg-[#fffefb] p-3 text-[12.5px] text-[#07142e] leading-relaxed focus:border-[rgba(7,20,46,0.32)] focus:bg-white focus:outline-none transition"
               />
             </div>
           </div>
@@ -672,7 +672,7 @@ export default function TemplatesSection({ onSelectTemplate }: TemplatesSectionP
                 className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11.5px] font-semibold transition cursor-pointer ${
                   active
                     ? "bg-[#07142e] text-[#faf8f2] shadow-xs"
-                    : "border border-[rgba(7,20,46,0.24)] bg-transparent text-[rgba(7,20,46,0.85)] hover:border-[#07142e] hover:bg-[rgba(255,253,248,0.14)] hover:text-[#07142e]"
+                    : "border border-[rgba(7,20,46,0.12)] bg-[#fffefb] text-[rgba(7,20,46,0.85)] hover:border-[rgba(7,20,46,0.28)] hover:bg-white hover:text-[#07142e]"
                 }`}
               >
                 <IconComponent size={13} />
@@ -683,7 +683,7 @@ export default function TemplatesSection({ onSelectTemplate }: TemplatesSectionP
         </div>
 
         {/* Ratio Toggle */}
-        <div className="flex items-center gap-1 rounded-xl border border-[rgba(7,20,46,0.28)] bg-transparent p-0.5">
+        <div className="flex items-center gap-1 rounded-xl border border-[rgba(7,20,46,0.12)] bg-[#fffefb] p-0.5">
           {RATIO_FILTERS.map((r) => (
             <button
               key={r.id}
@@ -692,7 +692,7 @@ export default function TemplatesSection({ onSelectTemplate }: TemplatesSectionP
               className={`rounded-lg px-2.5 py-1 font-mono text-[10.5px] font-semibold transition cursor-pointer ${
                 selectedRatio === r.id
                   ? "bg-[#07142e] text-[#faf8f2] shadow-xs"
-                  : "text-[rgba(7,20,46,0.7)] hover:text-[#07142e] hover:bg-[rgba(255,253,248,0.14)]"
+                  : "text-[rgba(7,20,46,0.7)] hover:text-[#07142e] hover:bg-white"
               }`}
             >
               {r.label}
@@ -705,7 +705,7 @@ export default function TemplatesSection({ onSelectTemplate }: TemplatesSectionP
           12-REEL LIVE STORYBOARD GRID
          ========================================================================= */}
       {filteredTemplates.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-[rgba(7,20,46,0.38)] bg-transparent p-12 text-center space-y-3">
+        <div className="rounded-2xl border border-dashed border-[rgba(7,20,46,0.16)] bg-[#fffefb] p-12 text-center space-y-3">
           <p className="font-mono text-[14px] text-[rgba(7,20,46,0.8)]">
             No templates matching &ldquo;{searchQuery}&rdquo;
           </p>
@@ -728,10 +728,10 @@ export default function TemplatesSection({ onSelectTemplate }: TemplatesSectionP
             return (
               <div
                 key={tpl.id}
-                className={`group rounded-2xl border-1.5 p-3.5 shadow-xs transition-all duration-200 flex flex-col justify-between backdrop-blur-xs ${
+                className={`group rounded-2xl border p-3.5 shadow-xs transition-all duration-200 flex flex-col justify-between backdrop-blur-xs ${
                   isOnStage
                     ? "border-[#07142e] bg-[rgba(255,253,248,0.18)] ring-2 ring-[#c5ef26]"
-                    : "border-[rgba(7,20,46,0.32)] bg-transparent hover:-translate-y-1 hover:border-[#07142e] hover:bg-[rgba(255,253,248,0.14)] hover:shadow-md"
+                    : "border-[rgba(7,20,46,0.12)] bg-[#fffefb] hover:-translate-y-1 hover:border-[rgba(7,20,46,0.28)] hover:bg-white hover:shadow-md"
                 }`}
               >
                 <div>

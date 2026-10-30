@@ -9,35 +9,39 @@
   --db-paper: #faf8f2;
   --db-paper-2: #f5f2e8;
   --db-paper-trans: transparent;
-  --db-paper-trans-hover: rgba(255, 253, 248, 0.16);
-  --db-white: transparent;
-  --db-card-bg: transparent;
-  --db-card-bg-hover: rgba(255, 253, 248, 0.16);
+  --db-paper-trans-hover: #ffffff;
+  --db-white: #fffefb;
+  --db-card-bg: #fffefb;
+  --db-card-bg-hover: #ffffff;
   --db-ink: #07142e;
   --db-ink-2: #0e2044;
   --db-muted: rgba(7, 20, 46, 0.72);
   --db-faint: rgba(7, 20, 46, 0.48);
-  --db-rule: rgba(7, 20, 46, 0.2);
-  --db-rule-strong: rgba(7, 20, 46, 0.36);
+  --db-rule: rgba(7, 20, 46, 0.1);
+  --db-rule-strong: rgba(7, 20, 46, 0.16);
+  --db-ruled-line: rgba(7, 20, 46, 0.055);
+  --db-shadow-sm: 0 1px 2px rgba(7, 20, 46, 0.04), 0 2px 8px -2px rgba(7, 20, 46, 0.06);
+  --db-shadow-md: 0 1px 2px rgba(7, 20, 46, 0.04), 0 8px 24px -6px rgba(7, 20, 46, 0.1);
+  --db-shadow-lg: 0 2px 4px rgba(7, 20, 46, 0.04), 0 24px 48px -16px rgba(7, 20, 46, 0.18);
   --db-accent: #84cc16;
   --db-lime: #c5ef26;
   --db-lime-glow: rgba(197, 239, 38, 0.4);
 
   /* Remap legacy surf and ink variables across all dashboard sub-sections
      to authentic transparent cotton paper, midnight navy ink, and electric lime */
-  --surf-ffffff: transparent;
-  --surf-faf9f5: rgba(255, 253, 248, 0.08);
-  --surf-f7f6f0: rgba(255, 253, 248, 0.14);
-  --surf-f4f2ea: transparent;
-  --surf-f4f2ec: transparent;
-  --surf-f2efe6: rgba(7, 20, 46, 0.06);
-  --surf-eceae3: rgba(7, 20, 46, 0.2);
-  --surf-ece9e2: rgba(7, 20, 46, 0.2);
-  --surf-dedad0: rgba(7, 20, 46, 0.32);
-  --surf-dfdbcf: rgba(7, 20, 46, 0.32);
-  --surf-d8d5cb: rgba(7, 20, 46, 0.36);
-  --surf-ebe8df: rgba(7, 20, 46, 0.16);
-  --surf-e5e2d8: rgba(7, 20, 46, 0.24);
+  --surf-ffffff: #fffefb;
+  --surf-faf9f5: #fcfbf7;
+  --surf-f7f6f0: #f7f5ef;
+  --surf-f4f2ea: rgba(7, 20, 46, 0.03);
+  --surf-f4f2ec: rgba(7, 20, 46, 0.03);
+  --surf-f2efe6: rgba(7, 20, 46, 0.045);
+  --surf-eceae3: rgba(7, 20, 46, 0.08);
+  --surf-ece9e2: rgba(7, 20, 46, 0.08);
+  --surf-dedad0: rgba(7, 20, 46, 0.12);
+  --surf-dfdbcf: rgba(7, 20, 46, 0.12);
+  --surf-d8d5cb: rgba(7, 20, 46, 0.16);
+  --surf-ebe8df: rgba(7, 20, 46, 0.08);
+  --surf-e5e2d8: rgba(7, 20, 46, 0.1);
   --surf-111110: #07142e;
   --surf-0e1010: #07142e;
   --surf-14151a: #040c1c;
@@ -68,8 +72,8 @@
       to bottom,
       transparent 0px,
       transparent 31px,
-      rgba(7, 20, 46, 0.16) 31px,
-      rgba(7, 20, 46, 0.16) 32px
+      var(--db-ruled-line, rgba(7, 20, 46, 0.055)) 31px,
+      var(--db-ruled-line, rgba(7, 20, 46, 0.055)) 32px
     ),
     radial-gradient(
       ellipse 92% 78% at 52% 40%,
@@ -104,16 +108,16 @@ html:has(.db) body {
     to bottom,
     transparent 0px,
     transparent 31px,
-    rgba(7, 20, 46, 0.16) 31px,
-    rgba(7, 20, 46, 0.16) 32px
+    var(--db-ruled-line, rgba(7, 20, 46, 0.055)) 31px,
+    var(--db-ruled-line, rgba(7, 20, 46, 0.055)) 32px
   );
   background-attachment: local;
 }
 
 /* Left-Side Double Vertical Dark Navy Margin Lines */
 .db-double-margins {
-  border-right: 1.5px solid rgba(7, 20, 46, 0.72);
-  box-shadow: 3.5px 0 0 0 rgba(7, 20, 46, 0.72);
+  border-right: 1px solid rgba(7, 20, 46, 0.16);
+  box-shadow: 4px 0 0 0 rgba(7, 20, 46, 0.06);
 }
 
 .db-alpha-grid {
@@ -139,12 +143,25 @@ html:has(.db) body {
   font-family: var(--font-geist-mono), ui-monospace, "SFMono-Regular", Menlo, monospace;
 }
 .db-label {
-  font-family: var(--font-geist), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  font-size: 11.5px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--db-muted);
+}
+/* Highlighter-pen stroke behind the lower half of a headline phrase. */
+.db-highlight {
+  padding: 0 0.08em;
+  background-image: linear-gradient(
+    to top,
+    transparent 0.06em,
+    rgba(197, 239, 38, 0.45) 0.06em,
+    rgba(197, 239, 38, 0.45) 0.42em,
+    transparent 0.42em
+  );
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
 }
 .db-acc {
   color: var(--db-accent);
@@ -158,22 +175,21 @@ html:has(.db) body {
   gap: 8px;
   height: 38px;
   padding: 0 18px;
-  border-radius: 9px;
-  background: var(--db-ink);
+  border-radius: 10px;
+  background: linear-gradient(180deg, #13244a 0%, var(--db-ink) 100%);
   color: #ffffff;
   font-family: var(--font-geist), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 13.5px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.18s ease, background 0.18s ease;
   border: 1px solid var(--db-ink);
-  box-shadow: 0 2px 6px rgba(7, 20, 46, 0.12);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 6px 16px -6px rgba(7, 20, 46, 0.45);
 }
 .db-btn:hover {
-  background: #040c1c;
-  border-color: #040c1c;
+  background: linear-gradient(180deg, #1a2e5a 0%, #0d1f45 100%);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(7, 20, 46, 0.18);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 10px 22px -8px rgba(7, 20, 46, 0.5);
 }
 .db-btn:active {
   transform: translateY(0);
@@ -195,8 +211,8 @@ html:has(.db) body {
   font-weight: 700;
   cursor: pointer;
   transition: all 0.15s ease;
-  border: 1px solid rgba(7, 20, 46, 0.35);
-  box-shadow: 0 2px 10px rgba(197, 239, 38, 0.35);
+  border: 1px solid rgba(77, 124, 15, 0.35);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 6px 16px -8px rgba(101, 163, 13, 0.6);
 }
 .db-btn-lime:hover {
   background: #b5dc22;
@@ -213,18 +229,18 @@ html:has(.db) body {
   padding: 0 14px;
   border-radius: 9px;
   border: 1px solid var(--db-rule-strong);
-  background: rgba(255, 253, 248, 0.5);
+  background: var(--db-card-bg);
   color: var(--db-ink);
   font-family: var(--font-geist), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.15s ease;
+  box-shadow: 0 1px 2px rgba(7, 20, 46, 0.05);
+  transition: border-color 0.15s ease, background 0.15s ease;
 }
 .db-btn-ghost:hover {
-  border-color: var(--db-ink);
-  background: rgba(255, 253, 248, 0.8);
-  transform: translateY(-0.5px);
+  border-color: rgba(7, 20, 46, 0.28);
+  background: #ffffff;
 }
 
 .db-icon-btn {
@@ -274,7 +290,7 @@ html:has(.db) body {
   overflow: hidden;
   border-radius: 20px;
   background: #faf8f2;
-  border: 1.5px solid var(--db-ink);
+  border: 1px solid var(--db-rule-strong);
   box-shadow: 0 30px 70px -20px rgba(7, 20, 46, 0.3);
 }
 
@@ -320,8 +336,8 @@ html:has(.db) body {
   border: 1px solid transparent;
 }
 .db-nav:hover {
-  background: rgba(255, 253, 248, 0.55);
-  border-color: rgba(7, 20, 46, 0.22);
+  background: rgba(7, 20, 46, 0.04);
+  border-color: transparent;
   color: var(--db-ink);
 }
 .db-nav[aria-current="page"] {
@@ -329,7 +345,7 @@ html:has(.db) body {
   color: #ffffff;
   font-weight: 600;
   border-color: #07142e;
-  box-shadow: 0 2px 8px rgba(7, 20, 46, 0.14);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 4px 12px -4px rgba(7, 20, 46, 0.35);
 }
 .db-nav svg {
   color: var(--db-muted);
@@ -354,17 +370,15 @@ html:has(.db) body {
 
 /* Transparent Notebook Cards */
 .db-card {
-  border: 1.5px solid var(--db-rule-strong);
+  border: 1px solid var(--db-rule);
   border-radius: 16px;
-  background: transparent;
-  backdrop-filter: blur(2px);
-  box-shadow: 0 2px 10px rgba(7, 20, 46, 0.03);
-  transition: border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+  background: var(--db-card-bg);
+  box-shadow: var(--db-shadow-sm);
+  transition: border-color 0.2s ease, box-shadow 0.28s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .db-card:hover {
-  border-color: var(--db-ink);
-  background: rgba(255, 253, 248, 0.14);
-  box-shadow: 0 6px 20px rgba(7, 20, 46, 0.07);
+  border-color: var(--db-rule-strong);
+  box-shadow: var(--db-shadow-md);
 }
 .db-card-pad {
   padding: 22px;
@@ -374,10 +388,11 @@ html:has(.db) body {
 .db-input,
 .db-textarea {
   width: 100%;
-  border: 1.5px solid var(--db-rule-strong);
-  border-radius: 12px;
-  background: transparent;
+  border: 1px solid var(--db-rule-strong);
+  border-radius: 10px;
+  background: #ffffff;
   padding: 10px 14px;
+  box-shadow: 0 1px 2px rgba(7, 20, 46, 0.05);
   font-family: var(--font-geist), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 14px;
   color: var(--db-ink);
@@ -390,9 +405,9 @@ html:has(.db) body {
 .db-input:focus,
 .db-textarea:focus {
   outline: none;
-  border-color: var(--db-ink);
-  background: rgba(255, 253, 248, 0.14);
-  box-shadow: 0 0 0 3px rgba(152, 206, 0, 0.25);
+  border-color: rgba(7, 20, 46, 0.32);
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(7, 20, 46, 0.08);
 }
 .db-textarea {
   resize: vertical;
@@ -414,9 +429,9 @@ html:has(.db) body {
   gap: 6px;
   height: 24px;
   padding: 0 10px;
-  border-radius: 6px;
-  border: 1px solid var(--db-rule-strong);
-  background: transparent;
+  border-radius: 999px;
+  border: 1px solid var(--db-rule);
+  background: var(--db-card-bg);
   font-family: var(--font-geist), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 11.5px;
   font-weight: 600;
@@ -424,25 +439,21 @@ html:has(.db) body {
   white-space: nowrap;
 }
 
-/* Forced transparent cards across all dashboard modules */
-.db .bg-surf-ffffff,
-.db .bg-surf-faf9f5,
-.db .bg-surf-f7f6f0,
-.db .bg-surf-f4f2ea,
+/* Card surfaces across all dashboard modules: solid paper sheets above the ruled page */
 .db .bg-surf-fcfbf7 {
-  background-color: transparent !important;
+  background-color: var(--db-card-bg) !important;
 }
 
 .db .hover\:bg-surf-ffffff:hover,
 .db .hover\:bg-surf-faf9f5:hover,
 .db .hover\:bg-surf-f7f6f0:hover {
-  background-color: rgba(255, 253, 248, 0.14) !important;
+  background-color: #ffffff !important;
 }
 .db-tag-accent {
-  border-color: rgba(7, 20, 46, 0.38);
+  border-color: rgba(101, 163, 13, 0.28);
   background: rgba(197, 239, 38, 0.3);
-  color: #1f3300;
-  font-weight: 700;
+  color: #3f6212;
+  font-weight: 600;
 }
 .db-tag-ok {
   border-color: rgba(22, 101, 52, 0.35);
@@ -479,9 +490,9 @@ html:has(.db) body {
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--db-muted);
-  font-weight: 700;
+  font-weight: 600;
   padding: 0 18px 12px;
-  border-bottom: 1.5px solid var(--db-ink);
+  border-bottom: 1px solid var(--db-rule-strong);
 }
 .db-table td {
   padding: 14px 18px;
@@ -495,9 +506,9 @@ html:has(.db) body {
 
 /* Section header block */
 .db-eyebrow {
-  font-family: var(--font-geist), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  font-size: 11.5px;
-  font-weight: 700;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 10.5px;
+  font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--db-muted);

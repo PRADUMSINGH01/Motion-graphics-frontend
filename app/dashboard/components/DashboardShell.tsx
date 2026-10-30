@@ -31,7 +31,11 @@ export default function DashboardShell({ user }: { user: User & { id: string } }
   const { chats, activeChat, send, retry, newChat, selectChat, goHome, deleteChat, renameChat, updateChatSettings } = chatsApi;
 
   const [section, setSectionState] = useState<SectionId>("dashboard");
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  // Shell only mounts client-side (after auth resolves), so the viewport is known here:
+  // phones start with the drawer closed instead of covering the workspace.
+  const [sidebarOpen, setSidebarOpen] = useState(
+    () => typeof window === "undefined" || window.matchMedia("(min-width: 768px)").matches
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const [assetCount, setAssetCount] = useState(() => (typeof window !== "undefined" ? loadAssets(user.id).length : 0));
 
@@ -72,7 +76,10 @@ export default function DashboardShell({ user }: { user: User & { id: string } }
   const navigate = (next: SectionId) => {
     setAssetCount(loadAssets(user.id).length);
     setSectionState(next);
-    if (typeof window !== "undefined") window.location.hash = next;
+    if (typeof window !== "undefined") {
+      window.location.hash = next;
+      if (!window.matchMedia("(min-width: 768px)").matches) setSidebarOpen(false);
+    }
   };
 
   const newLaunch = (initialPrompt?: string, settings?: ChatSettings) => {

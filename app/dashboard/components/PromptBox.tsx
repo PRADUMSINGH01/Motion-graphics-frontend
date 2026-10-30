@@ -125,7 +125,7 @@ export default function PromptBox({
       />
 
       {/* Composer container */}
-      <div className="relative rounded-2xl border-1.5 border-[rgba(7,20,46,0.38)] bg-transparent p-3 shadow-xs backdrop-blur-2xs transition-all focus-within:border-[#07142e] focus-within:bg-[rgba(255,253,248,0.12)] focus-within:ring-2 focus-within:ring-[#07142e]/10">
+      <div className="relative rounded-2xl border border-[rgba(7,20,46,0.16)] bg-[#fffefb] p-3 shadow-xs backdrop-blur-2xs transition-all focus-within:border-[rgba(7,20,46,0.32)] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#07142e]/10">
         <textarea
           ref={textareaRef}
           value={value}
@@ -158,7 +158,7 @@ export default function PromptBox({
               className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[11px] font-medium border transition cursor-pointer ${
                 showModelModal
                   ? "bg-[#07142e] text-[#faf8f2] border-[#07142e] shadow-xs"
-                  : "bg-transparent border-[rgba(7,20,46,0.24)] text-[#07142e] hover:bg-[rgba(255,253,248,0.2)] hover:border-[#07142e]"
+                  : "bg-[#fffefb] border-[rgba(7,20,46,0.12)] text-[#07142e] hover:bg-white hover:border-[rgba(7,20,46,0.28)]"
               }`}
             >
               <FiZap size={11} className={showModelModal ? "text-[#c5ef26]" : "text-[#84cc16]"} />
@@ -175,7 +175,7 @@ export default function PromptBox({
 
             {/* Aspect Ratio Selector */}
             {settings && onSettingsChange ? (
-              <div className="flex items-center gap-0.5 rounded-lg bg-transparent p-0.5 border border-[rgba(7,20,46,0.24)]">
+              <div className="flex items-center gap-0.5 rounded-lg bg-[#fffefb] p-0.5 border border-[rgba(7,20,46,0.12)]">
                 {RATIOS.map((r) => {
                   const isActive = settings.ratio === r.id;
                   return (
@@ -187,7 +187,7 @@ export default function PromptBox({
                       className={`flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium transition cursor-pointer ${
                         isActive
                           ? "bg-[#07142e] text-[#faf8f2] shadow-xs font-semibold"
-                          : "text-[rgba(7,20,46,0.7)] hover:text-[#07142e] hover:bg-[rgba(255,253,248,0.14)]"
+                          : "text-[rgba(7,20,46,0.7)] hover:text-[#07142e] hover:bg-white"
                       }`}
                     >
                       <span
@@ -203,14 +203,14 @@ export default function PromptBox({
                 })}
               </div>
             ) : settings ? (
-              <span className="inline-flex items-center gap-1 rounded-lg border border-[rgba(7,20,46,0.24)] bg-transparent px-2.5 py-1 text-[11px] font-mono text-[#07142e]">
+              <span className="inline-flex items-center gap-1 rounded-lg border border-[rgba(7,20,46,0.12)] bg-[#fffefb] px-2.5 py-1 text-[11px] font-mono text-[#07142e]">
                 <FiMaximize2 size={11} /> {settings.ratio}
               </span>
             ) : null}
 
             {/* Duration Selector */}
             {settings && onSettingsChange ? (
-              <div className="flex items-center gap-0.5 rounded-lg bg-transparent p-0.5 border border-[rgba(7,20,46,0.24)]">
+              <div className="flex items-center gap-0.5 rounded-lg bg-[#fffefb] p-0.5 border border-[rgba(7,20,46,0.12)]">
                 {LENGTHS.map((l) => {
                   const isActive = settings.length === l.s;
                   return (
@@ -221,7 +221,7 @@ export default function PromptBox({
                       className={`rounded-md px-2 py-1 text-[11px] font-mono font-medium transition cursor-pointer ${
                         isActive
                           ? "bg-[#07142e] text-[#faf8f2] shadow-xs font-semibold"
-                          : "text-[rgba(7,20,46,0.7)] hover:text-[#07142e] hover:bg-[rgba(255,253,248,0.14)]"
+                          : "text-[rgba(7,20,46,0.7)] hover:text-[#07142e] hover:bg-white"
                       }`}
                     >
                       {l.label}
@@ -230,7 +230,7 @@ export default function PromptBox({
                 })}
               </div>
             ) : settings ? (
-              <span className="inline-flex items-center gap-1 rounded-lg border border-[rgba(7,20,46,0.24)] bg-transparent px-2.5 py-1 text-[11px] font-mono text-[#07142e]">
+              <span className="inline-flex items-center gap-1 rounded-lg border border-[rgba(7,20,46,0.12)] bg-[#fffefb] px-2.5 py-1 text-[11px] font-mono text-[#07142e]">
                 <FiClock size={11} /> {settings.length}s
               </span>
             ) : null}

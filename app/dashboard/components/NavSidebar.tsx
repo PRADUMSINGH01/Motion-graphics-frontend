@@ -156,7 +156,7 @@ export default function NavSidebar({
                   className={`group flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] font-medium transition-all duration-150 cursor-pointer ${
                     isActive
                       ? "bg-[#07142e] text-[#faf8f2] shadow-xs font-semibold"
-                      : "text-[#07142e] hover:bg-[rgba(255,253,248,0.18)] hover:border-[rgba(7,20,46,0.2)] border border-transparent"
+                      : "text-[#07142e] hover:bg-white hover:border-[rgba(7,20,46,0.2)] border border-transparent"
                   }`}
                 >
                   <span
@@ -209,7 +209,7 @@ export default function NavSidebar({
                   className={`group flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] font-medium transition-all duration-150 cursor-pointer ${
                     isActive
                       ? "bg-[#07142e] text-[#faf8f2] shadow-xs font-semibold"
-                      : "text-[#07142e] hover:bg-[rgba(255,253,248,0.18)] hover:border-[rgba(7,20,46,0.2)] border border-transparent"
+                      : "text-[#07142e] hover:bg-white hover:border-[rgba(7,20,46,0.2)] border border-transparent"
                   }`}
                 >
                   <span

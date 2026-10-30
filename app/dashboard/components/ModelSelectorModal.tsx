@@ -248,7 +248,7 @@ export default function ModelSelectorModal({
               }
             : undefined
         }
-        className={`fixed z-[1000000] flex flex-col bg-[#faf8f2] border border-[rgba(7,20,46,0.22)] shadow-2xl text-[#07142e] transition-all duration-200 select-none ${
+        className={`fixed z-[1000000] flex flex-col bg-[#faf8f2] border border-[rgba(7,20,46,0.12)] shadow-2xl text-[#07142e] transition-all duration-200 select-none ${
           isMobile
             ? "inset-x-0 bottom-0 max-h-[88vh] rounded-t-3xl p-4 pb-8 border-b-0 animate-in slide-in-from-bottom"
             : !coords
@@ -302,7 +302,7 @@ export default function ModelSelectorModal({
                     handleSelectModel(model);
                   }
                 }}
-                className={`w-full text-left p-3 rounded-xl border-1.5 transition-all cursor-pointer flex items-center justify-between gap-3 ${
+                className={`w-full text-left p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-3 ${
                   isSelected
                     ? "border-[#07142e] bg-[rgba(7,20,46,0.07)] shadow-xs"
                     : "border-[rgba(7,20,46,0.12)] hover:border-[#07142e]/40 hover:bg-[rgba(7,20,46,0.02)]"
@@ -340,7 +340,7 @@ export default function ModelSelectorModal({
                   className={`shrink-0 w-6 h-6 rounded-full flex items-center justify-center border transition-all ${
                     isSelected
                       ? "border-[#07142e] bg-[#07142e] text-[#c5ef26] shadow-2xs"
-                      : "border-[rgba(7,20,46,0.25)] bg-transparent text-transparent"
+                      : "border-[rgba(7,20,46,0.12)] bg-[#fffefb] text-transparent"
                   }`}
                 >
                   <FiCheck size={13} strokeWidth={3} />

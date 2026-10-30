@@ -9,7 +9,7 @@ import RenderLoader from "./RenderLoader";
 
 function AssistantAvatar() {
   return (
-    <div className="relative flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#07142e] border border-[rgba(7,20,46,0.4)] shadow-xs">
+    <div className="relative flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#07142e] border border-[rgba(7,20,46,0.16)] shadow-xs">
       <div className="relative h-4 w-4">
         <Image
           src="/byreel-mark.png"
@@ -51,7 +51,7 @@ function VideoPlayerCard({
     <div className="space-y-2.5">
       {/* Video Viewport with zero audio constraint */}
       <div
-        className={`relative overflow-hidden rounded-2xl bg-black border-1.5 border-[rgba(7,20,46,0.35)] shadow-lg ${
+        className={`relative overflow-hidden rounded-2xl bg-black border border-[rgba(7,20,46,0.16)] shadow-lg ${
           isVertical
             ? "max-w-[300px] aspect-[9/16]"
             : isSquare

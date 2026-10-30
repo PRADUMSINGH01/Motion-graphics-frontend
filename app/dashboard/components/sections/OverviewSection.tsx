@@ -262,7 +262,7 @@ export default function OverviewSection({
       {/* =========================================================================
           1. HERO MOTION COMPOSER: Clean Transparent Notebook Card
          ========================================================================= */}
-      <div className="relative overflow-hidden rounded-2xl border-1.5 border-[rgba(7,20,46,0.34)] bg-transparent backdrop-blur-xs p-6 sm:p-7 shadow-xs">
+      <div className="relative overflow-hidden rounded-2xl border border-[rgba(7,20,46,0.12)] bg-[#fffefb] backdrop-blur-xs p-6 sm:p-7 shadow-xs">
         {/* Model Selector Modal */}
         <ModelSelectorModal
           isOpen={showModelModal}
@@ -293,7 +293,7 @@ export default function OverviewSection({
               ref={modelTriggerRef}
               type="button"
               onClick={() => setShowModelModal(true)}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-md font-medium text-[11px] border border-[rgba(7,20,46,0.26)] bg-transparent text-[#07142e] hover:border-[#07142e] hover:bg-[rgba(255,253,248,0.2)] transition cursor-pointer shadow-2xs"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-md font-medium text-[11px] border border-[rgba(7,20,46,0.12)] bg-[#fffefb] text-[#07142e] hover:border-[rgba(7,20,46,0.28)] hover:bg-white transition cursor-pointer shadow-2xs"
             >
               <FiZap size={11} className="text-[#84cc16]" />
               <span className="font-bold">{currentModelObj.name}</span>
@@ -313,7 +313,7 @@ export default function OverviewSection({
                   className={`px-2.5 py-1 rounded-md font-mono text-[11px] font-bold transition cursor-pointer border ${
                     aspectRatio === ratio
                       ? "bg-[#07142e] text-[#faf8f2] border-[#07142e] shadow-2xs"
-                      : "bg-transparent text-[rgba(7,20,46,0.7)] border-[rgba(7,20,46,0.24)] hover:text-[#07142e] hover:bg-[rgba(255,253,248,0.14)]"
+                      : "bg-[#fffefb] text-[rgba(7,20,46,0.7)] border-[rgba(7,20,46,0.12)] hover:text-[#07142e] hover:bg-white"
                   }`}
                 >
                   {ratio === "RGBA" ? "RGBA Alpha" : ratio}
@@ -325,9 +325,9 @@ export default function OverviewSection({
 
         {/* Headline + Clean Prompt Form */}
         <div className="pt-5">
-          <h1 className="text-[28px] sm:text-[34px] font-extrabold tracking-[-0.03em] text-[#07142e] leading-tight m-0">
+          <h1 className="text-[30px] sm:text-[38px] font-bold tracking-[-0.04em] text-[#07142e] leading-[1.08] m-0 text-balance">
             Direct your next{" "}
-            <span className="inline-block px-2 py-0.5 rounded-md bg-[rgba(197,239,38,0.32)] border-b-2 border-[#84cc16]">
+            <span className="db-highlight">
               motion sequence.
             </span>
           </h1>
@@ -338,7 +338,7 @@ export default function OverviewSection({
 
           <form
             onSubmit={handleGenerate}
-            className="mt-5 flex flex-col gap-2 rounded-xl border-1.5 border-[rgba(7,20,46,0.4)] bg-transparent p-3 shadow-xs focus-within:border-[#07142e] focus-within:bg-[rgba(255,253,248,0.12)] transition-all"
+            className="mt-5 flex flex-col gap-2 rounded-xl border border-[rgba(7,20,46,0.16)] bg-[#fffefb] p-3 shadow-xs focus-within:border-[rgba(7,20,46,0.32)] focus-within:bg-white transition-all"
           >
             <div className="flex items-start gap-2.5">
               <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-[#07142e] text-[#c5ef26] font-mono text-xs font-bold mt-0.5">
@@ -361,7 +361,7 @@ export default function OverviewSection({
                 <button
                   type="button"
                   onClick={() => onNavigate("templates")}
-                  className="px-3 py-1.5 rounded-lg border border-[rgba(7,20,46,0.32)] text-[12px] font-semibold text-[#07142e] hover:bg-[rgba(255,253,248,0.14)] cursor-pointer transition"
+                  className="px-3 py-1.5 rounded-lg border border-[rgba(7,20,46,0.12)] text-[12px] font-semibold text-[#07142e] hover:bg-white cursor-pointer transition"
                 >
                   Templates
                 </button>
@@ -386,7 +386,7 @@ export default function OverviewSection({
                 key={pill.code}
                 type="button"
                 onClick={() => setPrompt(pill.query)}
-                className="inline-flex items-center gap-1.5 rounded-full border border-[rgba(7,20,46,0.26)] bg-transparent px-2.5 py-1 text-[11px] font-medium text-[#07142e] transition hover:border-[#07142e] hover:bg-[rgba(255,253,248,0.14)] cursor-pointer"
+                className="inline-flex items-center gap-1.5 rounded-full border border-[rgba(7,20,46,0.12)] bg-[#fffefb] px-2.5 py-1 text-[11px] font-medium text-[#07142e] transition hover:border-[rgba(7,20,46,0.28)] hover:bg-white cursor-pointer"
               >
                 <span className="font-mono text-[9.5px] text-[#4d7c0f] font-bold">
                   {pill.code}
@@ -424,7 +424,7 @@ export default function OverviewSection({
             <div
               key={template.id}
               onClick={() => handleSelectTemplate(template)}
-              className="group cursor-pointer rounded-2xl border-1.5 border-[rgba(7,20,46,0.32)] bg-transparent p-2.5 shadow-2xs transition-all duration-200 hover:-translate-y-1 hover:border-[#07142e] hover:bg-[rgba(255,253,248,0.14)] hover:shadow-md backdrop-blur-xs flex flex-col justify-between"
+              className="group cursor-pointer rounded-2xl border border-[rgba(7,20,46,0.12)] bg-[#fffefb] p-2.5 shadow-2xs transition-all duration-200 hover:-translate-y-1 hover:border-[rgba(7,20,46,0.28)] hover:bg-white hover:shadow-md backdrop-blur-xs flex flex-col justify-between"
             >
               <div className="relative aspect-[16/10] w-full overflow-hidden rounded-xl bg-[#07142e]">
                 <Image
@@ -475,7 +475,7 @@ export default function OverviewSection({
           <div className="flex items-center gap-3">
             <h2 className="text-[18px] font-bold text-[#07142e] m-0">Recent productions</h2>
             {/* Filter tabs */}
-            <div className="flex items-center gap-1 rounded-full border border-[rgba(7,20,46,0.28)] bg-transparent p-0.5">
+            <div className="flex items-center gap-1 rounded-full border border-[rgba(7,20,46,0.12)] bg-[#fffefb] p-0.5">
               {(["All", "Rendered", "Drafts"] as const).map((tab) => (
                 <button
                   key={tab}
@@ -484,7 +484,7 @@ export default function OverviewSection({
                   className={`rounded-full px-2.5 py-0.5 text-[11px] font-mono font-medium transition cursor-pointer ${
                     activeProjectTab === tab
                       ? "bg-[#07142e] text-[#faf8f2] shadow-2xs"
-                      : "text-[rgba(7,20,46,0.7)] hover:text-[#07142e] hover:bg-[rgba(255,253,248,0.14)]"
+                      : "text-[rgba(7,20,46,0.7)] hover:text-[#07142e] hover:bg-white"
                   }`}
                 >
                   {tab}
@@ -507,7 +507,7 @@ export default function OverviewSection({
           {filteredProjects.map((project) => (
             <div
               key={project.id}
-              className="group relative flex flex-col rounded-2xl border-1.5 border-[rgba(7,20,46,0.32)] bg-transparent p-2.5 shadow-2xs transition-all duration-200 hover:-translate-y-0.5 hover:border-[#07142e] hover:bg-[rgba(255,253,248,0.14)] hover:shadow-sm backdrop-blur-xs"
+              className="group relative flex flex-col rounded-2xl border border-[rgba(7,20,46,0.12)] bg-[#fffefb] p-2.5 shadow-2xs transition-all duration-200 hover:-translate-y-0.5 hover:border-[rgba(7,20,46,0.28)] hover:bg-white hover:shadow-sm backdrop-blur-xs"
             >
               {/* Thumbnail / Video container */}
               <div
@@ -588,7 +588,7 @@ export default function OverviewSection({
                   </button>
 
                   {activeMenuId === project.id && (
-                    <div className="absolute right-0 bottom-full mb-1 z-20 w-36 rounded-xl border-1.5 border-[#07142e] bg-[#faf8f2] p-1 shadow-lg">
+                    <div className="absolute right-0 bottom-full mb-1 z-20 w-36 rounded-xl border border-[#07142e] bg-[#faf8f2] p-1 shadow-lg">
                       <button
                         type="button"
                         onClick={() => {
@@ -673,7 +673,7 @@ export default function OverviewSection({
               <button
                 type="button"
                 onClick={() => setPreviewTemplate(null)}
-                className="rounded-xl border border-[rgba(7,20,46,0.25)] px-4 py-2 text-[13px] font-medium text-[#07142e] hover:bg-[rgba(7,20,46,0.06)] cursor-pointer"
+                className="rounded-xl border border-[rgba(7,20,46,0.12)] px-4 py-2 text-[13px] font-medium text-[#07142e] hover:bg-[rgba(7,20,46,0.06)] cursor-pointer"
               >
                 Close
               </button>
@@ -748,7 +748,7 @@ export default function OverviewSection({
                   <a
                     href={previewProject.videoUrl}
                     download
-                    className="flex h-9 w-9 items-center justify-center rounded-xl border border-[rgba(7,20,46,0.25)] text-[#07142e] hover:bg-[rgba(7,20,46,0.08)] cursor-pointer"
+                    className="flex h-9 w-9 items-center justify-center rounded-xl border border-[rgba(7,20,46,0.12)] text-[#07142e] hover:bg-[rgba(7,20,46,0.08)] cursor-pointer"
                     title="Download Master MP4"
                   >
                     <FiDownload size={15} />
@@ -761,7 +761,7 @@ export default function OverviewSection({
               <button
                 type="button"
                 onClick={() => setPreviewProject(null)}
-                className="rounded-xl border border-[rgba(7,20,46,0.25)] px-4 py-2 text-[13px] font-medium text-[#07142e] hover:bg-[rgba(7,20,46,0.06)] cursor-pointer"
+                className="rounded-xl border border-[rgba(7,20,46,0.12)] px-4 py-2 text-[13px] font-medium text-[#07142e] hover:bg-[rgba(7,20,46,0.06)] cursor-pointer"
               >
                 Close
               </button>

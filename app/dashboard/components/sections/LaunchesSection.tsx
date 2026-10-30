@@ -134,7 +134,7 @@ export default function LaunchesSection({
               type="button"
               onClick={onBack}
               title="Back to new composition"
-              className="flex items-center gap-1.5 rounded-lg border border-[rgba(7,20,46,0.28)] bg-transparent px-2.5 py-1 text-[12px] font-semibold text-[#07142e] transition hover:border-[#07142e] hover:bg-[rgba(255,253,248,0.3)] cursor-pointer"
+              className="flex items-center gap-1.5 rounded-lg border border-[rgba(7,20,46,0.12)] bg-[#fffefb] px-2.5 py-1 text-[12px] font-semibold text-[#07142e] transition hover:border-[rgba(7,20,46,0.28)] hover:bg-white cursor-pointer"
             >
               <FiArrowLeft size={13} />
               <span className="hidden sm:inline">New Sequence</span>
@@ -209,7 +209,7 @@ export default function LaunchesSection({
               <button
                 type="button"
                 onClick={() => setShowHistory((prev) => !prev)}
-                className="flex items-center gap-1.5 rounded-xl border border-[rgba(7,20,46,0.28)] bg-transparent px-3 py-1.5 text-[12px] font-mono font-bold text-[#07142e] transition hover:border-[#07142e] hover:bg-[rgba(255,253,248,0.25)] cursor-pointer"
+                className="flex items-center gap-1.5 rounded-xl border border-[rgba(7,20,46,0.12)] bg-[#fffefb] px-3 py-1.5 text-[12px] font-mono font-bold text-[#07142e] transition hover:border-[rgba(7,20,46,0.28)] hover:bg-white cursor-pointer"
               >
                 <FiClock size={12} />
                 <span>Sessions ({chats.length})</span>
@@ -217,7 +217,7 @@ export default function LaunchesSection({
 
               {/* History Dropdown Flyout */}
               {showHistory && (
-                <div className="absolute right-0 top-full z-50 mt-2 w-80 rounded-2xl border border-[rgba(7,20,46,0.28)] bg-[#faf8f2]/95 backdrop-blur-md p-2 shadow-2xl">
+                <div className="absolute right-0 top-full z-50 mt-2 w-80 rounded-2xl border border-[rgba(7,20,46,0.12)] bg-[#faf8f2]/95 backdrop-blur-md p-2 shadow-2xl">
                   <div className="flex items-center justify-between border-b border-[rgba(7,20,46,0.14)] px-3 py-2 text-[10.5px] font-mono font-bold text-[rgba(7,20,46,0.6)]">
                     <span>RECENT SEQUENCES</span>
                     <button
@@ -236,7 +236,7 @@ export default function LaunchesSection({
                           onSelect(c.id);
                           setShowHistory(false);
                         }}
-                        className={`flex cursor-pointer items-center justify-between rounded-xl px-3 py-2.5 text-[12.5px] transition hover:bg-[rgba(255,253,248,0.6)] ${
+                        className={`flex cursor-pointer items-center justify-between rounded-xl px-3 py-2.5 text-[12.5px] transition hover:bg-white ${
                           activeChat?.id === c.id
                             ? "bg-[#c5ef26]/20 font-bold text-[#07142e] border border-[rgba(7,20,46,0.18)]"
                             : "text-[#07142e]"
@@ -316,7 +316,7 @@ export default function LaunchesSection({
         <div className="flex min-h-0 flex-1 flex-col items-center justify-center p-4 sm:p-6 overflow-y-auto">
           <div className="w-full max-w-2xl space-y-6 text-center">
             {/* Byreel Center Studio Badge */}
-            <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-transparent border border-[rgba(7,20,46,0.32)] shadow-2xs">
+            <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-[#fffefb] border border-[rgba(7,20,46,0.12)] shadow-2xs">
               <div className="relative h-4 w-4">
                 <Image
                   src="/byreel-mark.png"
@@ -384,13 +384,13 @@ export default function LaunchesSection({
                   key={item.code}
                   type="button"
                   onClick={() => setDraftPrompt(item.prompt)}
-                  className="group rounded-2xl border-1.5 border-[rgba(7,20,46,0.32)] bg-transparent p-3.5 transition-all duration-200 hover:border-[#07142e] hover:bg-[rgba(255,253,248,0.22)] hover:shadow-xs cursor-pointer flex flex-col justify-between gap-2 backdrop-blur-2xs"
+                  className="group rounded-2xl border border-[rgba(7,20,46,0.12)] bg-[#fffefb] p-3.5 transition-all duration-200 hover:border-[rgba(7,20,46,0.28)] hover:bg-white hover:shadow-xs cursor-pointer flex flex-col justify-between gap-2 backdrop-blur-2xs"
                 >
                   <div className="flex items-center justify-between w-full gap-2">
                     <span className="text-[12px] font-bold text-[#07142e] tracking-tight">
                       {item.code} · {item.label}
                     </span>
-                    <span className="shrink-0 text-[10px] font-bold font-mono px-2 py-0.5 rounded-md bg-[rgba(197,239,38,0.28)] text-[#07142e] border border-[rgba(7,20,46,0.2)] group-hover:bg-[#07142e] group-hover:text-[#c5ef26] transition-colors">
+                    <span className="shrink-0 text-[10px] font-bold font-mono px-2 py-0.5 rounded-md bg-[rgba(197,239,38,0.28)] text-[#07142e] border border-[rgba(7,20,46,0.12)] group-hover:bg-[#07142e] group-hover:text-[#c5ef26] transition-colors">
                       {item.tag}
                     </span>
                   </div>
