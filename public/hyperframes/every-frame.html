@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <meta data-composition-id="every-frame" data-width="1920" data-height="1080" />
+    <title>Every frame</title>
+    <link rel="stylesheet" href="fonts/fonts.css" />
+    <script src="vendor/gsap.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1920px; height: 1080px; overflow: hidden; background: #07142e; }
+      #stage { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: #07142e; }
+
+      .scene { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; }
+      #sceneA { background: #c5ef26; }
+      #sceneB { background: #07142e; opacity: 0; }
+      .big {
+        position: absolute; left: 0; width: 1920px; text-align: center; white-space: nowrap;
+        font-family: "Anton", sans-serif; font-size: 300px; line-height: 1; letter-spacing: 6px;
+      }
+      .big .ltr { display: inline-block; }
+      #a1 { top: 280px; color: #07142e; }
+      #a-line {
+        position: absolute; left: 330px; top: 640px; width: 1260px; height: 26px; border-radius: 13px;
+        background: #07142e; transform-origin: left center;
+      }
+      #a-cap {
+        position: absolute; left: 0; width: 1920px; top: 720px; text-align: center;
+        font-family: "Bricolage Grotesque", sans-serif; font-weight: 600; font-size: 64px; color: #07142e;
+      }
+      #b1 { top: 250px; color: #f7f5ef; }
+      #b1 .ltr:nth-child(4n + 1) { color: #c5ef26; }
+      #b1 .ltr:nth-child(4n + 3) { color: #ff5b45; }
+      #b-cap {
+        position: absolute; left: 0; width: 1920px; top: 650px; text-align: center;
+        font-family: "Caveat", cursive; font-weight: 700; font-size: 120px; color: #7fb2ff;
+      }
+
+      #tiles {
+        position: absolute; left: 0; top: 0; width: 1920px; height: 1080px;
+      }
+      .tile {
+        position: absolute; width: 162px; height: 156px; background: #0b1d42;
+        border: 2px solid #07142e; border-radius: 10px; backface-visibility: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="stage">
+      <div class="scene" id="sceneA">
+        <div class="big" id="a1">ONE PROMPT.</div>
+        <div id="a-line"></div>
+        <div id="a-cap">a sentence, typed once</div>
+      </div>
+      <div class="scene" id="sceneB">
+        <div class="big" id="b1">EVERY FRAME.</div>
+        <div id="b-cap">animated for you</div>
+      </div>
+      <div id="tiles"></div>
+    </div>
+
+    <script src="player.js"></script>
+    <script>
+      var COLS = 12, ROWS = 7, TW = 160, TH = 154.3;
+      var tilesEl = document.getElementById("tiles");
+      var tiles = [];
+      for (var r = 0; r < ROWS; r++) {
+        for (var c = 0; c < COLS; c++) {
+          var t = document.createElement("div");
+          t.className = "tile";
+          t.style.left = c * TW - 1 + "px";
+          t.style.top = r * TH - 1 + "px";
+          tilesEl.appendChild(t);
+          tiles.push({ el: t, r: r, c: c });
+        }
+      }
+      function split(id) {
+        var el = document.getElementById(id);
+        el.innerHTML = el.textContent.split("").map(function (ch) {
+          return '<span class="ltr">' + (ch === " " ? "&nbsp;" : ch) + "</span>";
+        }).join("");
+        return gsap.utils.toArray("#" + id + " .ltr");
+      }
+      var aLetters = split("a1");
+      var bLetters = split("b1");
+      var els = tiles.map(function (t) { return t.el; });
+
+      /* Wave orders: a delay per tile, from 0 (first) to 1 (last). */
+      var maxDiag = COLS + ROWS - 2;
+      var cx = (COLS - 1) / 2, cy = (ROWS - 1) / 2, maxR = Math.hypot(cx, cy);
+      function wave(kind) {
+        return tiles.map(function (t) {
+          if (kind === "diag") return (t.c + t.r) / maxDiag;
+          if (kind === "diag-back") return 1 - (t.c + t.r) / maxDiag;
+          if (kind === "radial") return Math.hypot(t.c - cx, t.r - cy) / maxR;
+          return t.r / (ROWS - 1); /* "rows": top to bottom */
+        });
+      }
+      /* Flip every tile with its own delay. `open` turns the tile edge-on (invisible). */
+      function flip(tl, at, kind, open, spread, color) {
+        var delays = wave(kind);
+        tiles.forEach(function (t, i) {
+          var when = at + delays[i] * spread;
+          if (open) {
+            tl.to(t.el, { rotationY: 90, duration: 0.32, ease: "power2.in" }, when);
+          } else {
+            if (color) tl.set(t.el, { backgroundColor: color }, when);
+            tl.fromTo(t.el, { rotationY: -90 }, { rotationY: 0, duration: 0.36, ease: "back.out(1.6)", immediateRender: false }, when);
+          }
+        });
+      }
+
+      /* Per-tile perspective: each tile turns about its own centre, so at 90° it is truly edge-on. */
+      gsap.set(els, { rotationY: 0, transformPerspective: 900, backgroundColor: "#0b1d42" });
+      gsap.set(aLetters, { yPercent: 110, opacity: 0 });
+      gsap.set(bLetters, { scale: 0, opacity: 0 });
+      gsap.set("#a-line", { scaleX: 0 });
+      gsap.set(["#a-cap", "#b-cap"], { opacity: 0, y: 30 });
+
+      var tl = gsap.timeline({ paused: true });
+
+      /* 0.2–1.3s: the navy mosaic flips away in a diagonal wave, revealing scene A. */
+      flip(tl, 0.2, "diag", true, 0.8);
+      tl.to(aLetters, { yPercent: 0, opacity: 1, duration: 0.6, ease: "expo.out", stagger: 0.04 }, 0.7);
+      tl.to("#a-line", { scaleX: 1, duration: 0.6, ease: "power3.inOut" }, 1.3);
+      tl.to("#a-cap", { opacity: 1, y: 0, duration: 0.45, ease: "power2.out" }, 1.55);
+
+      /* 2.0–2.6s: a ripple runs through the letters. */
+      tl.to(aLetters, { y: -40, duration: 0.18, ease: "sine.out", stagger: { each: 0.04, yoyo: true, repeat: 1 } }, 2.0);
+
+      /* 2.9s: coral tiles flip back in from the far corner… */
+      flip(tl, 2.9, "diag-back", false, 0.7, "#ff5b45");
+      /* …scene B takes over underneath… */
+      tl.set("#sceneB", { opacity: 1 }, 4.0);
+
+      /* 4.1s: …and the tiles burst open from the centre. */
+      flip(tl, 4.1, "radial", true, 0.6);
+      tl.to(bLetters, { scale: 1, opacity: 1, duration: 0.55, ease: "back.out(2.2)", stagger: { each: 0.035, from: "center" } }, 4.35);
+      tl.to("#b-cap", { opacity: 1, y: 0, duration: 0.45, ease: "power2.out" }, 4.9);
+      tl.to(bLetters, { rotation: function (i) { return i % 2 ? 6 : -6; }, duration: 0.14, ease: "power2.out", yoyo: true, repeat: 3 }, 5.4);
+
+      /* 6.3s: navy tiles roll back in row by row; everything resets beneath them. */
+      flip(tl, 6.3, "rows", false, 0.6, "#0b1d42");
+      tl.set("#sceneB", { opacity: 0 }, 7.35);
+      tl.set(aLetters, { yPercent: 110, opacity: 0, y: 0 }, 7.35);
+      tl.set(bLetters, { scale: 0, opacity: 0, rotation: 0 }, 7.35);
+      tl.set("#a-line", { scaleX: 0 }, 7.35);
+      tl.set(["#a-cap", "#b-cap"], { opacity: 0, y: 30 }, 7.35);
+      tl.set({}, {}, 8);
+
+      window.__timelines = window.__timelines || {};
+      window.__timelines["every-frame"] = tl;
+    </script>
+  </body>
+</html>

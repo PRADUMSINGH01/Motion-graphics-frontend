@@ -1,18 +1,51 @@
-/* Reels shown on the home page wall. Each is a self-contained HTML composition in /public
-   authored on a 1280×720 stage, with a still poster in /public/showreel. `feature` entries
-   take a 2×2 tile: the first sits top-left, the second (tenth entry) bottom-right. */
+/* Reels shown on the home page wall.
+   - Originals are HyperFrames compositions in /public/hyperframes (1920×1080, seekable GSAP
+     timelines that also render to MP4); they loop on the page via `?autoplay`.
+   - The rest are earlier HTML reels in /public authored on a 1280×720 stage.
+   Every reel has a still poster in /public/showreel. `feature` entries take a 2×2 tile: the
+   first sits top-left, the second (tenth entry) bottom-right. */
 
 export interface ShowreelItem {
   id: string;
   title: string;
   prompt: string;
   feature?: "left" | "right";
+  /** HyperFrames composition in /public/hyperframes, authored at 1920×1080. */
+  hyperframes?: boolean;
 }
 
 export const SHOWREEL: ShowreelItem[] = [
   {
-    id: "text-transition-cool",
+    id: "ink-to-motion",
     feature: "left",
+    hyperframes: true,
+    title: "Ink to motion",
+    prompt:
+      "A handwritten line on ruled notebook paper, 'make the words jump off the page', gets a lime highlighter swipe, then the letters tear off the page into giant multicolour kinetic type that bounces on the beat and resolves into the logo.",
+  },
+  {
+    id: "make-it-move",
+    hyperframes: true,
+    title: "Make it move",
+    prompt:
+      "Swiss-style kinetic poster: 'MAKE IT MOVE.' in giant condensed type on navy, a lime circle in difference blend sweeping across the letters, glitch slices on the beat, and a six-colour shutter wipe.",
+  },
+  {
+    id: "every-frame",
+    hyperframes: true,
+    title: "Every frame",
+    prompt:
+      "Mosaic transition: a grid of navy tiles flips away in a diagonal wave to reveal 'ONE PROMPT.' on lime, flips back in coral, then bursts open from the centre onto 'EVERY FRAME.' on navy.",
+  },
+  {
+    id: "signal",
+    hyperframes: true,
+    title: "Signal, a data story",
+    prompt:
+      "Data story on dark navy: a glowing lime line chart draws itself while a counter rolls up to 2.4M views, milestone tags pop along the curve, volume bars rise and the camera pushes in on the peak.",
+  },
+  {
+    id: "text-transition-cool",
     title: "Kinetic text and colour wipes",
     prompt:
       "Create a vibrant, colorful 60 FPS kinetic text animation with spring word pops, diagonal multi-color shutter wipes, and an iris portal reveal.",
@@ -42,41 +75,18 @@ export const SHOWREEL: ShowreelItem[] = [
       "Low-key creator silhouette with lens-glint eyes and giant stacked kinetic typography slamming into frame with subtle camera shake.",
   },
   {
-    id: "saas-product-launch",
-    title: "Product launch trailer",
+    id: "ideas-in-motion",
+    feature: "right",
+    hyperframes: true,
+    title: "Ideas in motion",
     prompt:
-      "Keynote SaaS product launch trailer with 3D glass telemetry dashboard, rising +340% YoY benchmark bars, sub-8ms latency counter, and bold CTA.",
-  },
-  {
-    id: "split-screen-attention",
-    title: "Split-screen attention",
-    prompt:
-      "Split-screen documentary B-roll contrasting monochrome analog deep work on the left against a saturated high-velocity social feed on the right.",
-  },
-  {
-    id: "feed-scroll-macro",
-    title: "Thumb-scrolling feed",
-    prompt:
-      "Handheld macro POV shot of a smartphone feed scrolling rapidly with jump-cut flashes and kinetic retention hooks.",
+      "Gooey metaball blobs in lime, coral and sky pop in, fuse and orbit, then part to reveal 'ideas in motion' with bouncing letters before a lime flood swallows the frame.",
   },
   {
     id: "flash-cut-broadcast",
     title: "Broadcast lower third",
     prompt:
       "Skewed broadcast news lower-third title bar over studio lighting followed by rapid full-screen editorial flash cuts.",
-  },
-  {
-    id: "neon-host-neuron",
-    feature: "right",
-    title: "Neon callout to neuron",
-    prompt:
-      "3D perspective neon callout card beside the speaker that transitions into a glowing synaptic neuron firing across the axon.",
-  },
-  {
-    id: "broll-data-cutaway",
-    title: "Archival highlight cutaway",
-    prompt:
-      "Vox-style documentary B-roll panning across an archival print clipping with an animated electric lime marker sweep and source citation.",
   },
   {
     id: "faceless-story-reel",
@@ -91,9 +101,9 @@ export const SHOWREEL: ShowreelItem[] = [
       "Dramatic low-light keynote teaser where bold word-by-word typography ('WE NEED TO TALK.') emerges over a spotlighted stage.",
   },
   {
-    id: "vertical-creator-short",
-    title: "Vertical short hook",
+    id: "neon-host-neuron",
+    title: "Neon callout to neuron",
     prompt:
-      "Vertical 9:16 creator short: a phone mockup with rising retention bars and the hook 'Stop posting static videos on Reels & Shorts' popping in word by word.",
+      "3D perspective neon callout card beside the speaker that transitions into a glowing synaptic neuron firing across the axon.",
   },
 ];

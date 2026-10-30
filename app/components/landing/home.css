@@ -205,12 +205,11 @@
   object-fit: cover;
 }
 
+/* Width and height come inline from the reel's own stage size. */
 .hm-tile-frame {
   position: absolute;
   top: 0;
   left: 0;
-  width: 1280px;
-  height: 720px;
   border: 0;
   transform-origin: top left;
   pointer-events: none;
@@ -301,6 +300,50 @@
     opacity: 1;
     transform: none;
   }
+}
+
+/* ── Page-load entrance: one orchestrated moment. Headline, then prompt, then the wall
+   cascades in tile by tile. (landing.css collapses this under prefers-reduced-motion.) ── */
+
+@keyframes hm-rise {
+  from {
+    opacity: 0;
+    transform: translateY(0.45em);
+  }
+}
+
+@keyframes hm-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+
+@keyframes hm-tile-in {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.97);
+  }
+}
+
+.hm-title-line {
+  animation: hm-rise 0.9s var(--lp-ease) both;
+}
+
+.hm-title-line + .hm-title-line {
+  animation-delay: 0.08s;
+}
+
+.hm-lede {
+  animation: hm-fade-up 0.8s var(--lp-ease) 0.22s both;
+}
+
+.hm-prompt {
+  animation: hm-fade-up 0.8s var(--lp-ease) 0.32s both;
+}
+
+.hm-tile {
+  animation: hm-tile-in 0.8s var(--lp-ease) calc(0.42s + var(--i, 0) * 0.05s) both;
 }
 
 /* ── Responsive ── */

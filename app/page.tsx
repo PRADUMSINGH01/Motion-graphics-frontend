@@ -8,9 +8,14 @@ import { SHOWREEL, type ShowreelItem } from "./components/landing/showreel";
 import "./components/landing/landing.css";
 import "./components/landing/home.css";
 
-/* Reels are authored on a 1280×720 stage. */
-const STAGE_W = 1280;
-const STAGE_H = 720;
+/* HyperFrames originals are authored at 1920×1080; the earlier reels on a 1280×720 stage. */
+function stageOf(item: ShowreelItem) {
+  return item.hyperframes ? { w: 1920, h: 1080 } : { w: 1280, h: 720 };
+}
+
+function srcOf(item: ShowreelItem) {
+  return item.hyperframes ? `/hyperframes/${item.id}.html?autoplay` : `/${item.id}.html`;
+}
 
 /**
  * One live reel, scaled to cover its tile. The iframe only exists while the tile is on screen
@@ -19,13 +24,14 @@ const STAGE_H = 720;
  */
 function ReelTile({
   item,
-  feature,
+  index,
   onUse,
 }: {
   item: ShowreelItem;
-  feature?: "left" | "right";
+  index: number;
   onUse: (item: ShowreelItem) => void;
 }) {
+  const feature = item.feature;
   const boxRef = useRef<HTMLDivElement | null>(null);
   const [box, setBox] = useState({ w: 0, h: 0 });
   const [onScreen, setOnScreen] = useState(false);
@@ -60,13 +66,17 @@ function ReelTile({
     };
   }, []);
 
-  const scale = box.w ? Math.max(box.w / STAGE_W, box.h / STAGE_H) : 0;
-  const dx = (box.w - STAGE_W * scale) / 2;
-  const dy = (box.h - STAGE_H * scale) / 2;
+  const stage = stageOf(item);
+  const scale = box.w ? Math.max(box.w / stage.w, box.h / stage.h) : 0;
+  const dx = (box.w - stage.w * scale) / 2;
+  const dy = (box.h - stage.h * scale) / 2;
   const live = onScreen && !reduceMotion && scale > 0;
 
   return (
-    <figure className={`hm-tile${feature ? ` is-feature is-feature-${feature}` : ""}`}>
+    <figure
+      className={`hm-tile${feature ? ` is-feature is-feature-${feature}` : ""}`}
+      style={{ "--i": index } as React.CSSProperties}
+    >
       <div ref={boxRef} className="hm-tile-stage">
         {/* eslint-disable-next-line @next/next/no-img-element -- tiny static poster, sized by CSS */}
         <img
@@ -78,7 +88,7 @@ function ReelTile({
         />
         {live && (
           <iframe
-            src={`/${item.id}.html`}
+            src={srcOf(item)}
             title={item.title}
             sandbox="allow-scripts"
             tabIndex={-1}
@@ -86,6 +96,8 @@ function ReelTile({
             onLoad={() => setLoaded(true)}
             className="hm-tile-frame"
             style={{
+              width: stage.w,
+              height: stage.h,
               transform: `translate(${dx}px, ${dy}px) scale(${scale})`,
               opacity: loaded ? 1 : 0,
             }}
@@ -167,15 +179,15 @@ export default function Home() {
             </svg>
           </p>
           <div className="hm-wall">
-            {SHOWREEL.map((item) => (
-              <ReelTile key={item.id} item={item} feature={item.feature} onUse={applyReelPrompt} />
+            {SHOWREEL.map((item, i) => (
+              <ReelTile key={item.id} item={item} index={i} onUse={applyReelPrompt} />
             ))}
           </div>
           <p className="hm-wall-foot">
+            Want more starting points?{" "}
             <Link href="/templates" className="hm-link">
-              Open these in the templates library
-            </Link>{" "}
-            to see their scene timing and full prompts.
+              Browse the templates library
+            </Link>
           </p>
         </section>
       </div>

@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <meta data-composition-id="ink-to-motion" data-width="1920" data-height="1080" />
+    <title>Ink to motion</title>
+    <link rel="stylesheet" href="fonts/fonts.css" />
+    <script src="vendor/gsap.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1920px; height: 1080px; overflow: hidden; background: #f7f5ef; }
+      #stage { position: relative; width: 1920px; height: 1080px; overflow: hidden; }
+
+      /* ── Page ── */
+      #paper { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; background: #f7f5ef; }
+      .rule {
+        position: absolute; left: 0; width: 1920px; height: 2px;
+        background: rgba(74, 118, 196, 0.28); transform-origin: left center;
+      }
+      #margin {
+        position: absolute; left: 236px; top: 0; width: 10px; height: 1080px;
+        border-left: 2px solid rgba(214, 108, 124, 0.7);
+        border-right: 2px solid rgba(214, 108, 124, 0.7);
+        transform-origin: top center;
+      }
+      #highlight {
+        position: absolute; left: 292px; top: 566px; width: 1310px; height: 44px;
+        background: rgba(197, 239, 38, 0.8); border-radius: 8px; transform-origin: left center;
+      }
+      #ink {
+        position: absolute; left: 300px; top: 518px; white-space: nowrap;
+        font-family: "Caveat", cursive; font-weight: 700; font-size: 104px; line-height: 1;
+        color: #07142e;
+      }
+      #ink .ch { display: inline-block; opacity: 0; }
+
+      /* ── Navy sheet ── */
+      #sheet {
+        position: absolute; left: 0; top: 0; width: 1920px; height: 1080px;
+        background: #07142e; clip-path: inset(100% 0% 0% 0%);
+      }
+      #sheet::before {
+        content: ""; position: absolute; left: 0; top: 0; right: 0; bottom: 0;
+        background-image: radial-gradient(rgba(197, 239, 38, 0.09) 2px, transparent 2px);
+        background-size: 48px 48px;
+      }
+      #type { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; }
+      .mask { position: absolute; left: 0; width: 1920px; overflow: hidden; text-align: center; }
+      .mask > span { display: inline-block; }
+      #l1 { top: 84px; height: 150px; }
+      #burst { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: visible; }
+      #burst line { stroke-linecap: round; }
+      #l1 > span {
+        font-family: "Bricolage Grotesque", sans-serif; font-weight: 600; font-size: 120px;
+        letter-spacing: -4px; color: #f7f5ef; line-height: 150px;
+      }
+      #l2 { top: 250px; height: 600px; overflow: visible; }
+      #l2 .ltr {
+        display: inline-block; font-family: "Anton", sans-serif; font-size: 520px; line-height: 600px;
+        letter-spacing: 6px; transform-origin: 50% 100%;
+      }
+      #l3 { top: 846px; height: 150px; }
+      #l3 > span {
+        font-family: "Bricolage Grotesque", sans-serif; font-weight: 600; font-size: 120px;
+        letter-spacing: -4px; color: #c5ef26; line-height: 150px;
+      }
+
+      /* ── End mark ── */
+      #mark {
+        position: absolute; left: 0; top: 0; width: 1920px; height: 1080px;
+        display: flex; align-items: center; justify-content: center; gap: 44px;
+      }
+      #tri { width: 210px; height: 230px; transform: scale(0); }
+      #word {
+        display: flex; font-family: "Bricolage Grotesque", sans-serif; font-weight: 700;
+        font-size: 230px; letter-spacing: -10px; color: #f7f5ef; line-height: 1; overflow: hidden;
+        padding-bottom: 20px;
+      }
+      #word span { display: inline-block; transform: translateY(110%); }
+      #word .dot { color: #c5ef26; }
+      #tag {
+        position: absolute; left: 0; width: 1920px; top: 760px; text-align: center;
+        font-family: "Caveat", cursive; font-weight: 700; font-size: 84px; color: #c5ef26; opacity: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="stage">
+      <div id="paper">
+        <div id="rules"></div>
+        <div id="margin"></div>
+        <div id="highlight"></div>
+        <div id="ink">make the words jump off the page</div>
+      </div>
+
+      <div id="sheet">
+        <div id="type">
+          <svg id="burst" viewBox="0 0 1920 1080" aria-hidden="true"></svg>
+          <div class="mask" id="l1"><span>words that</span></div>
+          <div class="mask" id="l2"></div>
+          <div class="mask" id="l3"><span>off the page.</span></div>
+        </div>
+        <div id="mark">
+          <svg id="tri" viewBox="0 0 210 230" aria-hidden="true">
+            <path d="M18 14 L196 115 L18 216 Z" fill="#c5ef26" stroke="#c5ef26" stroke-width="20" stroke-linejoin="round" />
+          </svg>
+          <div id="word"><span>b</span><span>y</span><span>r</span><span>e</span><span>e</span><span>l</span></div>
+        </div>
+        <div id="tag">ideas in motion</div>
+      </div>
+    </div>
+
+    <script src="vendor/DrawSVGPlugin.min.js"></script>
+    <script src="player.js"></script>
+    <script>
+      /* Deterministic "randomness": the same frame renders identically every time. */
+      function seeded(seed) {
+        return function () {
+          seed |= 0; seed = (seed + 0x6d2b79f5) | 0;
+          var t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+          t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+          return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+        };
+      }
+      var rand = seeded(20261030);
+
+      /* Build the DOM the timeline animates. */
+      var rulesEl = document.getElementById("rules");
+      for (var r = 0; r < 15; r++) {
+        var rule = document.createElement("div");
+        rule.className = "rule";
+        rule.style.top = 92 + r * 64 + "px";
+        rulesEl.appendChild(rule);
+      }
+      var ink = document.getElementById("ink");
+      ink.innerHTML = ink.textContent
+        .split("")
+        .map(function (c) { return '<span class="ch">' + (c === " " ? "&nbsp;" : c) + "</span>"; })
+        .join("");
+      var palette = ["#c5ef26", "#ff5b45", "#7fb2ff", "#f7f5ef"];
+      document.getElementById("l2").innerHTML = "JUMP"
+        .split("")
+        .map(function (c, i) { return '<span class="ltr" style="color:' + palette[i] + '">' + c + "</span>"; })
+        .join("");
+
+      /* Impact rays around JUMP, fired when the letters land. */
+      var burst = document.getElementById("burst");
+      var rayColors = ["#c5ef26", "#ff5b45", "#7fb2ff", "#f7f5ef"];
+      for (var k = 0; k < 22; k++) {
+        var a = (k / 22) * Math.PI * 2 + 0.12;
+        var r1 = 330 + rand() * 60, r2 = r1 + 90 + rand() * 90;
+        var line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("x1", 960 + Math.cos(a) * r1 * 1.45);
+        line.setAttribute("y1", 560 + Math.sin(a) * r1 * 0.66);
+        line.setAttribute("x2", 960 + Math.cos(a) * r2 * 1.45);
+        line.setAttribute("y2", 560 + Math.sin(a) * r2 * 0.66);
+        line.setAttribute("stroke", rayColors[k % 4]);
+        line.setAttribute("stroke-width", 12);
+        burst.appendChild(line);
+      }
+      gsap.registerPlugin(DrawSVGPlugin);
+
+      var rules = gsap.utils.toArray(".rule");
+      var chars = gsap.utils.toArray("#ink .ch");
+      var letters = gsap.utils.toArray("#l2 .ltr");
+      var mid = (chars.length - 1) / 2;
+
+      var rays = gsap.utils.toArray("#burst line");
+      gsap.set("#highlight", { scaleX: 0, rotation: -0.6 });
+      gsap.set(rays, { drawSVG: "0% 0%", opacity: 0 });
+
+      var tl = gsap.timeline({ paused: true });
+
+      /* 0–0.9s: the page is ruled. */
+      tl.fromTo(rules, { scaleX: 0 }, { scaleX: 1, duration: 0.7, ease: "power3.out", stagger: 0.025 }, 0);
+      tl.fromTo("#margin", { scaleY: 0 }, { scaleY: 1, duration: 0.8, ease: "power3.out" }, 0.1);
+
+      /* 0.7–3.0s: the prompt is handwritten, a letter at a time. */
+      chars.forEach(function (ch, i) {
+        tl.fromTo(
+          ch,
+          { opacity: 0, y: 14, rotation: -8 },
+          { opacity: 1, y: 0, rotation: 0, duration: 0.16, ease: "back.out(3)" },
+          0.7 + i * 0.068
+        );
+      });
+
+      /* 3.1s: highlighter swipe. */
+      tl.to("#highlight", { scaleX: 1, duration: 0.45, ease: "power2.inOut" }, 3.1);
+
+      /* 3.8s: the words tear off the page and the rules fly away. */
+      chars.forEach(function (ch, i) {
+        var d = Math.abs(i - mid) / mid;
+        tl.to(
+          ch,
+          {
+            x: (rand() - 0.5) * 520,
+            y: -260 - rand() * 620,
+            rotation: (rand() - 0.5) * 220,
+            scale: 0.6 + rand() * 1.2,
+            opacity: 0,
+            duration: 0.62,
+            ease: "power3.in",
+          },
+          3.8 + (1 - d) * 0.12
+        );
+      });
+      tl.to("#highlight", { scaleY: 0, opacity: 0, duration: 0.3, ease: "power2.in" }, 3.85);
+      tl.to(rules, { y: -1200, duration: 0.6, ease: "power3.in", stagger: { each: 0.02, from: "end" } }, 3.9);
+      tl.to("#margin", { scaleY: 0, transformOrigin: "bottom center", duration: 0.45, ease: "power3.in" }, 3.95);
+
+      /* 4.2s: a navy sheet wipes up over the page. */
+      tl.to("#sheet", { clipPath: "inset(0% 0% 0% 0%)", duration: 0.6, ease: "expo.inOut" }, 4.15);
+
+      /* 4.7–5.9s: kinetic type. */
+      tl.fromTo("#l1 > span", { yPercent: 110 }, { yPercent: 0, duration: 0.55, ease: "power4.out" }, 4.65);
+      tl.fromTo(
+        letters,
+        { y: -980, rotation: function (i) { return [-24, 18, -14, 26][i]; } },
+        { y: 0, rotation: 0, duration: 0.85, ease: "back.out(1.5)", stagger: 0.09 },
+        4.85
+      );
+      /* The rays shoot outward (draw in from the inner end, then retract to the outer end). */
+      [5.35, 6.6].forEach(function (t) {
+        tl.fromTo(rays, { drawSVG: "0% 0%", opacity: 1 }, { drawSVG: "0% 100%", opacity: 1, duration: 0.18, ease: "power2.out", stagger: 0.006 }, t);
+        tl.to(rays, { drawSVG: "100% 100%", opacity: 0, duration: 0.3, ease: "power2.in", stagger: 0.006 }, t + 0.2);
+      });
+      tl.fromTo("#l3 > span", { yPercent: 110 }, { yPercent: 0, duration: 0.55, ease: "power4.out" }, 5.35);
+
+      /* 5.9–6.9s: the letters hop on the beat, twice. */
+      [5.95, 6.45].forEach(function (t) {
+        tl.to(letters, { y: -56, scaleY: 1.08, scaleX: 0.94, duration: 0.17, ease: "power2.out", stagger: 0.05 }, t);
+        tl.to(letters, { y: 0, scaleY: 1, scaleX: 1, duration: 0.3, ease: "bounce.out", stagger: 0.05 }, t + 0.17);
+      });
+
+      /* 7.0s: everything collapses into the byreel mark. */
+      tl.to("#type", { scale: 0.12, opacity: 0, duration: 0.45, ease: "power3.in" }, 7.0);
+      tl.fromTo("#tri", { scale: 0, rotation: -120 }, { scale: 1, rotation: 0, duration: 0.7, ease: "back.out(1.8)" }, 7.3);
+      tl.to("#word span", { y: 0, yPercent: 0, duration: 0.55, ease: "power4.out", stagger: 0.045 }, 7.5);
+      tl.fromTo("#tag", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, 8.0);
+
+      /* 9.0s: the sheet lifts away to the blank page we started on, so the loop is seamless. */
+      tl.to("#sheet", { clipPath: "inset(0% 0% 100% 0%)", duration: 0.6, ease: "expo.inOut" }, 9.0);
+      tl.set(rules, { y: 0, scaleX: 0 }, 9.6);
+      tl.set("#margin", { scaleY: 0, transformOrigin: "top center" }, 9.6);
+      tl.set({}, {}, 10);
+
+      window.__timelines = window.__timelines || {};
+      window.__timelines["ink-to-motion"] = tl;
+    </script>
+  </body>
+</html>

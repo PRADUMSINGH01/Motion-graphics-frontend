@@ -26,6 +26,12 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      {
+        /* Showreel compositions run in sandboxed (opaque-origin) iframes, and fonts are always
+           fetched with CORS, so their self-hosted fonts must allow any origin. */
+        source: "/hyperframes/fonts/:file*",
+        headers: [{ key: "Access-Control-Allow-Origin", value: "*" }],
+      },
     ];
   },
 
