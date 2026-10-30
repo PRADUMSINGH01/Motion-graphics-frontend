@@ -47,3 +47,6 @@ next-env.d.ts
 # scratch & tool files
 .claude/
 scratch_*.ps1
+
+# HyperFrames CLI local state (render locks/bookkeeping)
+.hyperframes/
