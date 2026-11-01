@@ -61,12 +61,7 @@
     return svg;
   }
 
-  /* Register the paused timeline under the composition id (HyperFrames contract). */
-  function register(id, tl, duration) {
-    if (duration) tl.set({}, {}, duration);
-    window.__timelines = window.__timelines || {};
-    window.__timelines[id] = tl;
-  }
-
-  window.HF = { seeded: seeded, split: split, grain: grain, register: register, NS: NS };
+  /* Timelines are registered inline in each composition (window.__timelines[id] = tl) so the
+     HyperFrames linter can see the registration. */
+  window.HF = { seeded: seeded, split: split, grain: grain, NS: NS };
 })();

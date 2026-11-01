@@ -124,7 +124,9 @@
       tl.set(guides.concat(dims), { drawSVG: "0%", opacity: 1 }, 9.6);
 
       HF.grain(tl, { opacity: 0.12, duration: 10 });
-      HF.register("brand-build", tl, 10);
+      tl.set({}, {}, 10);
+      window.__timelines = window.__timelines || {};
+      window.__timelines["brand-build"] = tl;
     </script>
   </body>
 </html>

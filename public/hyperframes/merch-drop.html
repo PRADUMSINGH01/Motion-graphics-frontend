@@ -164,7 +164,9 @@
       flipBoard(STATES[1], STATES[2], 8.2);
 
       HF.grain(tl, { opacity: 0.12, duration: 10 });
-      HF.register("merch-drop", tl, 10);
+      tl.set({}, {}, 10);
+      window.__timelines = window.__timelines || {};
+      window.__timelines["merch-drop"] = tl;
     </script>
   </body>
 </html>

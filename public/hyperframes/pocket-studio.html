@@ -221,7 +221,9 @@
       tl.set("#tag", { opacity: 0, x: 60 }, 9.95);
 
       HF.grain(tl, { opacity: 0.1, duration: 10 });
-      HF.register("pocket-studio", tl, 10);
+      tl.set({}, {}, 10);
+      window.__timelines = window.__timelines || {};
+      window.__timelines["pocket-studio"] = tl;
     </script>
   </body>
 </html>

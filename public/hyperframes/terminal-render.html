@@ -144,7 +144,9 @@
       tl.set("#cursor", { opacity: 1 }, 9.46);
 
       HF.grain(tl, { opacity: 0.12, duration: 10 });
-      HF.register("terminal-render", tl, 10);
+      tl.set({}, {}, 10);
+      window.__timelines = window.__timelines || {};
+      window.__timelines["terminal-render"] = tl;
     </script>
   </body>
 </html>

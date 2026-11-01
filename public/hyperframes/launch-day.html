@@ -150,7 +150,9 @@
       tl.set(avail, { yPercent: 120, opacity: 0 }, 9.45);
 
       HF.grain(tl, { opacity: 0.12, duration: 10 });
-      HF.register("launch-day", tl, 10);
+      tl.set({}, {}, 10);
+      window.__timelines = window.__timelines || {};
+      window.__timelines["launch-day"] = tl;
     </script>
   </body>
 </html>

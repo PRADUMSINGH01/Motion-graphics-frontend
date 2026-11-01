@@ -92,7 +92,9 @@
       tl.set(["#l1 span", "#l2 span"], { yPercent: 110 }, 8.3);
 
       HF.grain(tl, { opacity: 0.1, duration: DUR });
-      HF.register("halftone-field", tl, DUR);
+      tl.set({}, {}, DUR);
+      window.__timelines = window.__timelines || {};
+      window.__timelines["halftone-field"] = tl;
     </script>
   </body>
 </html>

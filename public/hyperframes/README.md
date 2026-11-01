@@ -51,8 +51,7 @@ npx hyperframes render -c ./ink-to-motion.html -o ink-to-motion.mp4
   so a given timestamp always renders the same frame.
 - Seek-safe: no `onUpdate` callbacks for visuals (seeks suppress them); counters use tween
   `modifiers` instead.
-- Shared kit in `fx/`: `kit.js` (seeded PRNG, letter splitter, timeline-driven film grain,
-  timeline registration) and `textures.css` (paper fibre, riso grain, halftone, CRT
+- Shared kit in `fx/`: `kit.js` (seeded PRNG, letter splitter, timeline-driven film grain) and `textures.css` (paper fibre, riso grain, halftone, CRT
   scanlines, blueprint grid, vignette). Textures are SVG noise baked into data URIs.
 - Self-contained: GSAP (+ DrawSVG, MotionPath plugins) in `vendor/`, OFL fonts from
   `@fontsource` in `fonts/`. No CDN requests.

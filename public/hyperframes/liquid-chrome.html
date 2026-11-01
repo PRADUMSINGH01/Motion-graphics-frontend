@@ -111,7 +111,9 @@
       tl.set("#ld", { attr: { scale: 220 } }, 9.85);
 
       HF.grain(tl, { opacity: 0.08, duration: 10 });
-      HF.register("liquid-chrome", tl, 10);
+      tl.set({}, {}, 10);
+      window.__timelines = window.__timelines || {};
+      window.__timelines["liquid-chrome"] = tl;
     </script>
   </body>
 </html>

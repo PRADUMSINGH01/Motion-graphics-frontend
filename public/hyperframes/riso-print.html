@@ -127,7 +127,9 @@
       tl.set("#s2b .ht", { backgroundPosition: "0px 0px" }, 9.5);
 
       HF.grain(tl, { opacity: 0.14, duration: 10, blend: "multiply", frequency: 0.75 });
-      HF.register("riso-print", tl, 10);
+      tl.set({}, {}, 10);
+      window.__timelines = window.__timelines || {};
+      window.__timelines["riso-print"] = tl;
     </script>
   </body>
 </html>

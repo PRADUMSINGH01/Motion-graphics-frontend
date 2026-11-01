@@ -181,7 +181,9 @@
       tl.set("#kitname", { textContent: names[0] }, 9.6);
 
       HF.grain(tl, { opacity: 0.1, duration: 10, blend: "multiply" });
-      HF.register("feature-bento", tl, 10);
+      tl.set({}, {}, 10);
+      window.__timelines = window.__timelines || {};
+      window.__timelines["feature-bento"] = tl;
     </script>
   </body>
 </html>
