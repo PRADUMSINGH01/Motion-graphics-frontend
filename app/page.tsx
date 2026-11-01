@@ -8,6 +8,46 @@ import { CATEGORIES, SHOWREEL, type Category, type ShowreelItem } from "./compon
 import "./components/landing/landing.css";
 import "./components/landing/home.css";
 
+const EXAMPLES = [
+  {
+    label: "Launch teaser for my app",
+    prompt:
+      "A 10-second launch teaser for my note-taking app: a 3, 2, 1 countdown on paper, the product card slams in, bold type, lime on navy.",
+  },
+  {
+    label: "Quote for Reels",
+    prompt:
+      "A vertical 9:16 kinetic quote for Reels: 'Make it simple, then make it move.' word by word on textured paper.",
+  },
+  {
+    label: "Chart for a YouTube video",
+    prompt:
+      "A 10-second B-roll chart for YouTube: a glowing line draws up to 2.4M views, milestone tags pop in, slow camera push.",
+  },
+];
+
+/* A real sequence, so the cards are numbered. */
+const STEPS = [
+  {
+    title: "Write what you want",
+    body: "One sentence is enough: what happens, the words on screen and the mood.",
+  },
+  {
+    title: "Check the storyboard",
+    body: "byreel splits it into timed scenes. Change any word, colour or cut; edits don't use credits.",
+  },
+  {
+    title: "Export and post",
+    body: "Drop it into Premiere, DaVinci or CapCut, or post it straight to YouTube and Reels.",
+  },
+];
+
+const STORYBOARD = [
+  { id: "launch-day", time: "0:00" },
+  { id: "pocket-studio", time: "0:03" },
+  { id: "feature-bento", time: "0:07" },
+];
+
 /* Every ninth reel of whatever is showing becomes a 2×2 tile, alternating sides, but only when
    at least four reels follow it to fill out the block beside it. */
 function featureOf(index: number, count: number): "left" | "right" | undefined {
@@ -148,14 +188,15 @@ export default function Home() {
   const countOf = (c: "All" | Category) =>
     c === "All" ? SHOWREEL.length : SHOWREEL.filter((r) => r.category === c).length;
 
-  const applyReelPrompt = (item: ShowreelItem) => {
-    setPrompt(item.prompt);
+  const fillPrompt = (text: string) => {
+    setPrompt(text);
     const el = inputRef.current;
     if (!el) return;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     el.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center" });
     el.focus({ preventScroll: true });
   };
+  const applyReelPrompt = (item: ShowreelItem) => fillPrompt(item.prompt);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -198,6 +239,15 @@ export default function Home() {
             Generate video
           </button>
         </form>
+
+        <div className="hm-try">
+          <span className="hm-try-label">Try</span>
+          {EXAMPLES.map((ex) => (
+            <button key={ex.label} type="button" className="hm-chip" onClick={() => fillPrompt(ex.prompt)}>
+              {ex.label}
+            </button>
+          ))}
+        </div>
 
         <section className="hm-wall-wrap" aria-label="Motion graphics made with byreel">
           <p className="hm-pen-note" aria-hidden="true">
@@ -261,6 +311,65 @@ export default function Home() {
               Browse the templates library
             </Link>
           </p>
+        </section>
+
+        <section className="hm-how" aria-labelledby="hm-how-title">
+          <h2 id="hm-how-title" className="hm-h2">
+            How a video gets made
+          </h2>
+          <ol className="hm-steps">
+            {STEPS.map((step, i) => (
+              <li key={step.title} className="hm-step lp-card-stock">
+                <span className="lp-tape hm-step-tape" aria-hidden="true">
+                  {i + 1}
+                </span>
+                <div className="hm-step-art" aria-hidden="true">
+                  {i === 0 && (
+                    <p className="hm-art-note">
+                      a launch teaser for my app, lime on navy, ten seconds, end on the logo
+                    </p>
+                  )}
+                  {i === 1 && (
+                    <div className="hm-art-board">
+                      {STORYBOARD.map((f) => (
+                        <figure key={f.id} className="hm-art-frame">
+                          {/* eslint-disable-next-line @next/next/no-img-element -- tiny static still */}
+                          <img src={`/showreel/${f.id}.jpg`} alt="" loading="lazy" />
+                          <figcaption>{f.time}</figcaption>
+                        </figure>
+                      ))}
+                    </div>
+                  )}
+                  {i === 2 && (
+                    <ul className="hm-art-specs">
+                      <li>MP4 up to 4K at 60 fps</li>
+                      <li>WebM with a transparent background</li>
+                      <li>16:9, 9:16, 1:1 and 4:5</li>
+                    </ul>
+                  )}
+                </div>
+                <h3 className="hm-step-title">{step.title}</h3>
+                <p className="hm-step-body">{step.body}</p>
+              </li>
+            ))}
+          </ol>
+        </section>
+
+        <section className="hm-close" aria-labelledby="hm-close-title">
+          <div>
+            <h2 id="hm-close-title" className="hm-close-title">
+              Start with 15 free credits a month.
+            </h2>
+            <p className="hm-close-body">No card needed. That&apos;s about three short videos.</p>
+          </div>
+          <div className="hm-close-actions">
+            <button type="button" className="hm-close-cta" onClick={() => fillPrompt(prompt)}>
+              Write your first prompt
+            </button>
+            <Link href="/pricing" className="hm-close-link">
+              See pricing
+            </Link>
+          </div>
         </section>
       </div>
     </NotebookShell>

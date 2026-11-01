@@ -988,382 +988,6 @@
    Professional SaaS Pricing Page (/pricing) — Transparent Ink-Ruled Ledger
    ========================================================================== */
 
-.lp-pricing-wrap {
-  width: 100%;
-  max-width: 1120px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 36px;
-  padding-bottom: 28px;
-}
-
-.lp-saas-header {
-  width: 100%;
-  max-width: 760px;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-}
-
-.lp-saas-eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  max-width: 100%;
-  padding: 5px 12px 5px 10px;
-  border-radius: 999px;
-  border: 1px solid var(--lp-line);
-  background: var(--lp-surface-hover);
-  box-shadow: var(--lp-shadow-xs);
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
-  font-size: 10.5px;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  line-height: 1.5;
-  text-transform: uppercase;
-  color: var(--lp-ink-soft);
-}
-
-.lp-saas-eyebrow-dot {
-  flex-shrink: 0;
-  width: 6px;
-  height: 6px;
-  border-radius: 999px;
-  background: #84cc16;
-  box-shadow: 0 0 0 3px rgba(132, 204, 22, 0.18);
-}
-
-.lp-pricing-sub {
-  margin: 0;
-  font-family: var(--font-geist), system-ui, sans-serif;
-  font-size: 16px;
-  font-weight: 400;
-  color: var(--lp-ink-soft);
-  max-width: 600px;
-  line-height: 1.6;
-  text-wrap: pretty;
-}
-
-/* Segmented Billing Control + Guarantee Bar */
-.lp-saas-controls-row {
-  margin-top: 8px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-}
-
-.lp-billing-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  padding: 3px;
-  background: rgba(7, 20, 46, 0.045);
-  border-radius: 11px;
-  border: 0;
-  box-shadow: inset 0 0 0 1px var(--lp-line-soft);
-}
-
-.lp-billing-btn {
-  border: 0;
-  background: transparent;
-  padding: 0 14px;
-  border-radius: 8px;
-  font-family: var(--font-geist), system-ui, sans-serif;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--lp-ink-soft);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  transition: all 0.16s ease;
-  height: 32px;
-}
-
-.lp-billing-btn.is-active {
-  background: var(--lp-surface-hover);
-  color: var(--lp-ink);
-  font-weight: 600;
-  box-shadow: 0 1px 2px rgba(7, 20, 46, 0.08), 0 0 0 1px var(--lp-line);
-}
-
-.lp-billing-save-pill {
-  padding: 2px 6px;
-  border-radius: 4px;
-  background: rgba(152, 206, 0, 0.28);
-  border: 1px solid rgba(101, 163, 13, 0.55);
-  color: var(--lp-ink);
-  font-family: var(--font-geist-mono), monospace;
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-}
-
-.lp-billing-btn.is-active .lp-billing-save-pill {
-  background: var(--lp-ink);
-  border-color: var(--lp-ink);
-  color: var(--lp-lime);
-}
-
-.lp-saas-trust-line {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  font-family: var(--font-geist-mono), monospace;
-  font-size: 10.5px;
-  font-weight: 500;
-  color: var(--lp-ink-muted);
-}
-
-.lp-saas-trust-line span {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-}
-
-/* Unified 4-Column Architectural SaaS Tier Matrix */
-.lp-pricing-grid {
-  width: 100%;
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  border: 1px solid var(--lp-line);
-  border-radius: var(--lp-radius-lg);
-  background: var(--lp-surface);
-  overflow: hidden;
-  box-shadow: var(--lp-shadow-md);
-}
-
-.lp-price-card {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  background: transparent;
-  border-right: 1px solid var(--lp-line-soft);
-  padding: 26px 22px 24px;
-  transition: background 0.18s ease;
-}
-
-.lp-price-card:last-child {
-  border-right: 0;
-}
-
-.lp-price-card:hover {
-  background: rgba(7, 20, 46, 0.012);
-}
-
-.lp-price-card.is-popular {
-  background: linear-gradient(180deg, rgba(197, 239, 38, 0.12) 0%, rgba(197, 239, 38, 0.02) 60%);
-  box-shadow: inset 0 2px 0 0 var(--lp-ink);
-}
-
-.lp-price-card-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  min-height: 22px;
-  margin-bottom: 8px;
-}
-
-.lp-price-tag {
-  font-family: var(--font-geist-mono), monospace;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--lp-ink);
-}
-
-.lp-popular-badge {
-  padding: 3px 8px;
-  border-radius: 999px;
-  background: var(--lp-ink);
-  color: var(--lp-lime);
-  font-family: var(--font-geist-mono), monospace;
-  font-size: 8.5px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.lp-price-name {
-  margin: 0;
-  font-family: var(--font-geist), system-ui, sans-serif;
-  font-size: 20px;
-  font-weight: 600;
-  letter-spacing: -0.025em;
-  color: var(--lp-ink);
-  line-height: 1.2;
-}
-
-.lp-price-desc {
-  margin: 4px 0 0;
-  font-family: var(--font-geist), system-ui, sans-serif;
-  font-size: 12.5px;
-  font-weight: 500;
-  color: var(--lp-ink-soft);
-  line-height: 1.45;
-  min-height: 36px;
-}
-
-.lp-price-amount-block {
-  margin: 16px 0 14px;
-  padding-bottom: 14px;
-  border-bottom: 1px solid var(--lp-line-soft);
-}
-
-.lp-price-amount-row {
-  display: flex;
-  align-items: baseline;
-  gap: 5px;
-}
-
-.lp-price-amount {
-  font-family: var(--font-geist), system-ui, sans-serif;
-  font-size: 40px;
-  font-weight: 600;
-  letter-spacing: -0.045em;
-  font-variant-numeric: tabular-nums;
-  color: var(--lp-ink);
-  line-height: 1;
-}
-
-.lp-price-period {
-  font-family: var(--font-geist-mono), monospace;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--lp-ink-muted);
-}
-
-.lp-price-billing-note {
-  margin-top: 4px;
-  font-family: var(--font-geist-mono), monospace;
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--lp-ink-soft);
-}
-
-/* Credit Quota Spec Box inside each SaaS Tier */
-.lp-quota-box {
-  margin-bottom: 14px;
-  padding: 9px 11px;
-  border-radius: 10px;
-  border: 1px solid var(--lp-line-soft);
-  background: rgba(7, 20, 46, 0.025);
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.lp-quota-main {
-  font-family: var(--font-geist-mono), monospace;
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--lp-ink);
-}
-
-.lp-quota-sub {
-  font-family: var(--font-geist), system-ui, sans-serif;
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--lp-ink-soft);
-}
-
-.lp-price-cta {
-  width: 100%;
-  padding: 0 14px;
-  margin-bottom: 18px;
-  border-radius: 10px;
-  border: 1px solid var(--lp-line-strong);
-  background: var(--lp-surface-hover);
-  color: var(--lp-ink);
-  font-family: var(--font-geist), system-ui, sans-serif;
-  font-size: 12.5px;
-  font-weight: 600;
-  text-align: center;
-  text-decoration: none;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  transition: all 0.16s ease;
-  height: 38px;
-  box-shadow: var(--lp-shadow-xs);
-}
-
-.lp-price-cta:hover {
-  background: var(--lp-surface-hover);
-  border-color: var(--lp-line-ink);
-  color: var(--lp-ink);
-}
-
-.lp-price-cta.is-primary {
-  background: linear-gradient(180deg, #13244a 0%, var(--lp-ink) 100%);
-  border-color: var(--lp-ink);
-  color: #faf8f2;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 6px 16px -6px rgba(7, 20, 46, 0.45);
-}
-
-.lp-price-cta.is-primary:hover {
-  background: linear-gradient(180deg, #1a2e5a 0%, var(--lp-ink-hover) 100%);
-  border-color: #040c1c;
-  color: #faf8f2;
-}
-
-.lp-tier-group-title {
-  margin: 0 0 10px;
-  font-family: var(--font-geist-mono), monospace;
-  font-size: 9.5px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--lp-ink-muted);
-}
-
-.lp-price-features {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 9px;
-  flex: 1;
-}
-
-.lp-price-feature-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  font-family: var(--font-geist), system-ui, sans-serif;
-  font-size: 12.5px;
-  font-weight: 500;
-  color: var(--lp-ink);
-  line-height: 1.4;
-}
-
-.lp-price-check {
-  width: 15px;
-  height: 15px;
-  border-radius: 999px;
-  border: 0;
-  background: rgba(197, 239, 38, 0.35);
-  color: #3f6212;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 9.5px;
-  font-weight: 700;
-  flex-shrink: 0;
-  margin-top: 1px;
-}
-
 /* Credit Consumption Reference Strip */
 .lp-credit-strip {
   width: 100%;
@@ -1441,123 +1065,6 @@
   font-size: 10px;
   font-weight: 500;
   color: var(--lp-ink-muted);
-}
-
-/* Architectural SaaS Feature Comparison Ledger */
-.lp-compare-section {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.lp-section-subhead {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.lp-section-title {
-  margin: 0;
-  font-family: var(--font-geist), system-ui, sans-serif;
-  font-size: 22px;
-  font-weight: 600;
-  letter-spacing: -0.025em;
-  color: var(--lp-ink);
-}
-
-.lp-section-kicker {
-  font-family: var(--font-geist-mono), monospace;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--lp-ink-soft);
-}
-
-.lp-compare-ledger {
-  width: 100%;
-  border: 1px solid var(--lp-line);
-  border-radius: var(--lp-radius-md);
-  background: var(--lp-surface);
-  overflow-x: auto;
-  box-shadow: var(--lp-shadow-sm);
-}
-
-.lp-compare-table {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 680px;
-  text-align: left;
-}
-
-.lp-compare-table th,
-.lp-compare-table td {
-  padding: 11px 16px;
-  border-bottom: 1px solid var(--lp-line-soft);
-  font-family: var(--font-geist), system-ui, sans-serif;
-  font-size: 12.5px;
-  color: var(--lp-ink);
-}
-
-.lp-compare-table thead th {
-  font-family: var(--font-geist-mono), monospace;
-  font-size: 10.5px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--lp-ink-soft);
-  background: rgba(7, 20, 46, 0.03);
-  border-bottom: 1px solid var(--lp-line);
-}
-
-.lp-compare-cat-row td {
-  padding: 9px 16px;
-  font-family: var(--font-geist-mono), monospace;
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--lp-ink-muted);
-  background: rgba(7, 20, 46, 0.018);
-}
-
-.lp-compare-table tbody tr:last-child td {
-  border-bottom: 0;
-}
-
-/* Transparent SaaS FAQ Grid */
-.lp-faq-grid {
-  width: 100%;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-}
-
-.lp-faq-card {
-  background: var(--lp-surface);
-  border: 1px solid var(--lp-line);
-  border-radius: var(--lp-radius-md);
-  padding: 18px 20px;
-  box-shadow: var(--lp-shadow-sm);
-}
-
-.lp-faq-q {
-  margin: 0 0 6px;
-  font-family: var(--font-geist), system-ui, sans-serif;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--lp-ink);
-}
-
-.lp-faq-a {
-  margin: 0;
-  font-family: var(--font-geist), system-ui, sans-serif;
-  font-size: 13px;
-  font-weight: 400;
-  color: var(--lp-ink-soft);
-  line-height: 1.6;
 }
 
 /* ==========================================================================
@@ -1864,28 +1371,13 @@
 }
 
 @media (max-width: 1120px) {
-  .lp-pricing-grid {
+.lp-credit-items-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .lp-price-card {
-    border-bottom: 1px solid var(--lp-line);
   }
-  .lp-credit-items-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .lp-faq-grid {
-    grid-template-columns: 1fr;
-  }
-}
 
 @media (max-width: 640px) {
-  .lp-pricing-grid {
-    grid-template-columns: 1fr;
-  }
-  .lp-price-card {
-    border-right: 0;
-  }
-  .lp-credit-items-grid {
+.lp-credit-items-grid {
     grid-template-columns: 1fr;
   }
   .lp-credit-unit-item {
@@ -2965,4 +2457,51 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* ==========================================================================
+   Notebook textures shared by every page
+   ========================================================================== */
+
+/* Index card: brighter stock than the page, with its own fibre and a pale top rule. */
+.lp-card-stock {
+  background-color: #fffdf8;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.014 0.11' numOctaves='3' seed='11'/%3E%3CfeColorMatrix values='0 0 0 0 0.5 0 0 0 0 0.43 0 0 0 0 0.3 0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23f)'/%3E%3C/svg%3E");
+}
+
+/*
+ * Masking tape: translucent, slightly creased, with torn ends. Position it with
+ * top/left and a rotation; put a short handwritten label inside if it marks something.
+ */
+.lp-tape {
+  position: absolute;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 112px;
+  height: 34px;
+  padding: 0 18px;
+  background-color: rgba(233, 222, 190, 0.82);
+  background-image:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.25), transparent 30%, rgba(255, 255, 255, 0.18) 60%, transparent),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='40'%3E%3Cfilter id='t'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.04 0.6' numOctaves='2' seed='5'/%3E%3CfeColorMatrix values='0 0 0 0 0.45 0 0 0 0 0.38 0 0 0 0 0.22 0 0 0 0.18 0'/%3E%3C/filter%3E%3Crect width='200' height='40' filter='url(%23t)'/%3E%3C/svg%3E");
+  box-shadow: 0 1px 2px rgba(60, 44, 10, 0.12);
+  clip-path: polygon(2% 8%, 6% 0, 12% 6%, 20% 1%, 30% 5%, 42% 0, 55% 4%, 68% 0, 80% 5%, 90% 1%, 97% 7%, 100% 30%, 98% 55%, 100% 82%, 95% 100%, 86% 94%, 74% 100%, 61% 95%, 48% 100%, 35% 95%, 22% 100%, 10% 94%, 3% 100%, 0 76%, 2% 50%, 0 24%);
+  font-family: var(--font-pen), "Caveat", cursive;
+  font-size: 21px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--lp-ink);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* Highlighter: a lime stroke behind the lower part of a line of text. */
+.lp-marker {
+  padding: 0 0.1em;
+  background-image: linear-gradient(to top, transparent 0.08em, var(--lp-lime-soft) 0.08em, var(--lp-lime-soft) 0.44em, transparent 0.44em);
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
 }
