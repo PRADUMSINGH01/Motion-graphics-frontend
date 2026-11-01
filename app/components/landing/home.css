@@ -23,22 +23,19 @@
   white-space: nowrap;
 }
 
-/* ── Intro: headline left, one line of context right ── */
+/* ── Hero: the brand story. Headline across the top; the story and the prompt on the
+   left; on the right the reel that tells the same story, taped into the notebook. ── */
 
-.hm-intro {
-  display: grid;
-  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
-  align-items: end;
-  gap: 24px 56px;
+.hm-hero {
   container-type: inline-size;
 }
 
 .hm-title {
   margin: 0;
-  font-size: clamp(34px, 5.2cqi, 60px);
+  font-size: clamp(38px, 6.3cqi, 78px);
   font-weight: 700;
-  line-height: 1.02;
-  letter-spacing: -0.045em;
+  line-height: 1.0;
+  letter-spacing: -0.048em;
   color: var(--lp-ink);
 }
 
@@ -47,19 +44,99 @@
   white-space: nowrap;
 }
 
-.hm-lede {
-  margin: 0 0 6px;
-  max-width: 40ch;
-  font-size: 17px;
-  line-height: 1.6;
+.hm-hero-body {
+  display: grid;
+  grid-template-columns: minmax(0, 0.86fr) minmax(0, 1.14fr);
+  gap: 40px 64px;
+  align-items: start;
+  margin-top: 36px;
+}
+
+.hm-hero-copy {
+  min-width: 0;
+}
+
+.hm-story {
+  margin: 0;
+  max-width: 46ch;
+  font-size: 18.5px;
+  line-height: 1.65;
   color: var(--lp-graphite);
   text-wrap: pretty;
+}
+
+.hm-hero-copy .hm-prompt {
+  margin-top: 30px;
+}
+
+/* The reel, mounted like a print taped into the notebook. */
+.hm-hero-reel {
+  position: relative;
+  margin: 0;
+  padding: 10px 10px 12px;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow:
+    0 0 0 1px rgba(7, 20, 46, 0.08),
+    0 2px 4px rgba(7, 20, 46, 0.06),
+    0 30px 60px -22px rgba(7, 20, 46, 0.4);
+  transform: rotate(1deg);
+}
+
+.hm-hero-screen {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #050914;
+}
+
+.hm-hero-tape {
+  top: -15px;
+  min-width: 96px;
+  height: 30px;
+}
+
+.hm-hero-tape.is-left {
+  left: 28px;
+  transform: rotate(-6deg);
+}
+
+.hm-hero-tape.is-right {
+  right: 28px;
+  transform: rotate(5deg);
+}
+
+.hm-hero-note {
+  position: absolute;
+  right: 6px;
+  bottom: -46px;
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  font-family: var(--font-pen), "Caveat", cursive;
+  font-size: 23px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--lp-graphite);
+  transform: rotate(-1.5deg);
+}
+
+.hm-hero-arrow {
+  width: 40px;
+  height: 26px;
+  margin-bottom: 6px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transform: scaleX(-1);
 }
 
 /* ── Prompt bar ── */
 
 .hm-prompt {
-  margin-top: 32px;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -131,35 +208,10 @@
 
 .hm-wall-wrap {
   position: relative;
-  margin-top: 40px;
+  margin-top: 104px;
 }
 
-.hm-pen-note {
-  position: absolute;
-  right: 6%;
-  top: -30px;
-  margin: 0;
-  display: flex;
-  align-items: flex-start;
-  gap: 2px;
-  font-family: var(--font-pen), "Caveat", cursive;
-  font-size: 24px;
-  font-weight: 500;
-  line-height: 1;
-  color: var(--lp-graphite);
-  transform: rotate(-2deg);
-}
 
-.hm-pen-arrow {
-  width: 44px;
-  height: 30px;
-  margin-top: 6px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.6;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
 
 /* Play/pause for the whole wall. */
 .hm-wall-bar {
@@ -428,8 +480,19 @@
   animation-delay: 0.08s;
 }
 
-.hm-lede {
+.hm-story {
   animation: hm-fade-up 0.8s var(--lp-ease) 0.22s both;
+}
+
+.hm-hero-reel {
+  animation: hm-print-in 1s var(--lp-ease) 0.3s both;
+}
+
+@keyframes hm-print-in {
+  from {
+    opacity: 0;
+    transform: rotate(4deg) translateY(28px) scale(0.97);
+  }
 }
 
 .hm-prompt {
@@ -705,12 +768,17 @@
 /* ── Responsive ── */
 
 @media (max-width: 1040px) {
-  .hm-intro {
+  .hm-hero-body {
     grid-template-columns: minmax(0, 1fr);
+    gap: 48px;
   }
 
-  .hm-title {
-    font-size: clamp(34px, 8.6cqi, 60px);
+  .hm-story {
+    max-width: 60ch;
+  }
+
+  .hm-hero-reel {
+    margin-bottom: 40px;
   }
 
   .hm-wall {
@@ -725,9 +793,6 @@
     aspect-ratio: 16 / 9;
   }
 
-  .hm-pen-note {
-    display: none;
-  }
 }
 
 @media (max-width: 900px) {
@@ -743,6 +808,16 @@
 
   .hm-close {
     padding: 36px 28px;
+  }
+}
+
+@media (max-width: 700px) {
+  .hm-title {
+    font-size: clamp(36px, 10.5cqi, 54px);
+  }
+
+  .hm-title-line {
+    white-space: normal;
   }
 }
 

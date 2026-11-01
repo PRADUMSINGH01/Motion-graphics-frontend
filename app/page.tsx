@@ -26,6 +26,11 @@ const EXAMPLES = [
   },
 ];
 
+/* The hero plays the brand story itself: a handwritten line becomes motion, ending on
+   "ideas in motion". The wall below shows every other reel. */
+const HERO_REEL = SHOWREEL.find((r) => r.id === "ink-to-motion") ?? SHOWREEL[0];
+const WALL = SHOWREEL.filter((r) => r !== HERO_REEL);
+
 /* A real sequence, so the cards are numbered. */
 const STEPS = [
   {
@@ -80,22 +85,20 @@ function useReducedMotion() {
 }
 
 /**
- * One live reel, scaled to cover its tile. The iframe only exists while the tile is on screen
+ * A live reel scaled to cover its box. The iframe only exists while the box is on screen
  * (so a wall of reels never runs all at once) and while reels are playing; otherwise the
  * still poster shows.
  */
-function ReelTile({
+function ReelStage({
   item,
-  index,
-  feature,
   playing,
-  onUse,
+  eager,
+  className,
 }: {
   item: ShowreelItem;
-  index: number;
-  feature?: "left" | "right";
   playing: boolean;
-  onUse: (item: ShowreelItem) => void;
+  eager?: boolean;
+  className: string;
 }) {
   const boxRef = useRef<HTMLDivElement | null>(null);
   const [box, setBox] = useState({ w: 0, h: 0 });
@@ -131,37 +134,55 @@ function ReelTile({
   const live = onScreen && playing && scale > 0;
 
   return (
+    <div ref={boxRef} className={className}>
+      {/* eslint-disable-next-line @next/next/no-img-element -- tiny static poster, sized by CSS */}
+      <img
+        src={`/showreel/${item.id}.jpg`}
+        alt=""
+        className="hm-tile-poster"
+        loading={eager ? "eager" : "lazy"}
+        decoding="async"
+      />
+      {live && (
+        <iframe
+          src={srcOf(item)}
+          title={item.title}
+          sandbox="allow-scripts"
+          tabIndex={-1}
+          aria-hidden="true"
+          onLoad={() => setLoaded(true)}
+          className="hm-tile-frame"
+          style={{
+            width: stage.w,
+            height: stage.h,
+            transform: `translate(${dx}px, ${dy}px) scale(${scale})`,
+            opacity: loaded ? 1 : 0,
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+function ReelTile({
+  item,
+  index,
+  feature,
+  playing,
+  onUse,
+}: {
+  item: ShowreelItem;
+  index: number;
+  feature?: "left" | "right";
+  playing: boolean;
+  onUse: (item: ShowreelItem) => void;
+}) {
+  return (
     <figure
       className={`hm-tile${feature ? ` is-feature is-feature-${feature}` : ""}`}
       style={{ "--i": Math.min(index, 8) } as React.CSSProperties}
     >
-      <div ref={boxRef} className="hm-tile-stage">
-        {/* eslint-disable-next-line @next/next/no-img-element -- tiny static poster, sized by CSS */}
-        <img
-          src={`/showreel/${item.id}.jpg`}
-          alt=""
-          className="hm-tile-poster"
-          loading={feature ? "eager" : "lazy"}
-          decoding="async"
-        />
-        {live && (
-          <iframe
-            src={srcOf(item)}
-            title={item.title}
-            sandbox="allow-scripts"
-            tabIndex={-1}
-            aria-hidden="true"
-            onLoad={() => setLoaded(true)}
-            className="hm-tile-frame"
-            style={{
-              width: stage.w,
-              height: stage.h,
-              transform: `translate(${dx}px, ${dy}px) scale(${scale})`,
-              opacity: loaded ? 1 : 0,
-            }}
-          />
-        )}
-      </div>
+      <ReelStage item={item} playing={playing} eager={!!feature} className="hm-tile-stage" />
       <figcaption className="hm-tile-caption">
         <span className="hm-tile-title">{item.title}</span>
         <button type="button" className="hm-tile-use" onClick={() => onUse(item)}>
@@ -184,9 +205,9 @@ export default function Home() {
   const playing = choice === "play" || (choice === "auto" && !reduceMotion);
 
   const [filter, setFilter] = useState<"All" | Category>("All");
-  const visible = filter === "All" ? SHOWREEL : SHOWREEL.filter((r) => r.category === filter);
+  const visible = filter === "All" ? WALL : WALL.filter((r) => r.category === filter);
   const countOf = (c: "All" | Category) =>
-    c === "All" ? SHOWREEL.length : SHOWREEL.filter((r) => r.category === c).length;
+    c === "All" ? WALL.length : WALL.filter((r) => r.category === c).length;
 
   const fillPrompt = (text: string) => {
     setPrompt(text);
@@ -210,53 +231,64 @@ export default function Home() {
   return (
     <NotebookShell ariaLabel="byreel — turn a written prompt into a motion graphics video">
       <div className="hm">
-        <header className="hm-intro">
-          <h1 className="hm-title">
-            <span className="hm-title-line">Describe the video.</span>{" "}
-            <span className="hm-title-line">byreel animates it.</span>
+        <section className="hm-hero" aria-labelledby="hm-title">
+          <h1 id="hm-title" className="hm-title">
+            <span className="hm-title-line">Ideas start as words.</span>{" "}
+            <span className="hm-title-line">byreel puts them in motion.</span>
           </h1>
-          <p className="hm-lede">
-            Every reel on this page started as one written sentence. Pick one to remix, or
-            write your own.
-          </p>
-        </header>
+          <div className="hm-hero-body">
+          <div className="hm-hero-copy">
+            <p className="hm-story">
+              byreel is a motion design studio you direct in plain language. Write what you can
+              see in your head; byreel storyboards it, animates it and renders the reel at up to
+              4K and 60 fps, ready for YouTube, Reels or launch day.
+            </p>
 
-        <form onSubmit={handleSubmit} className="hm-prompt">
-          <label htmlFor="hm-prompt" className="hm-sr-only">
-            Describe your video
-          </label>
-          <input
-            ref={inputRef}
-            id="hm-prompt"
-            type="text"
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            placeholder="A 15-second launch trailer for a note-taking app, bold type, lime on navy"
-            className="hm-prompt-input"
-            autoComplete="off"
-          />
-          <button type="submit" className="hm-cta">
-            Generate video
-          </button>
-        </form>
+            <form onSubmit={handleSubmit} className="hm-prompt">
+              <label htmlFor="hm-prompt" className="hm-sr-only">
+                Describe your video
+              </label>
+              <input
+                ref={inputRef}
+                id="hm-prompt"
+                type="text"
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                placeholder="A launch trailer for my app, lime on navy"
+                className="hm-prompt-input"
+                autoComplete="off"
+              />
+              <button type="submit" className="hm-cta">
+                Generate video
+              </button>
+            </form>
 
-        <div className="hm-try">
-          <span className="hm-try-label">Try</span>
-          {EXAMPLES.map((ex) => (
-            <button key={ex.label} type="button" className="hm-chip" onClick={() => fillPrompt(ex.prompt)}>
-              {ex.label}
-            </button>
-          ))}
-        </div>
+            <div className="hm-try">
+              <span className="hm-try-label">Try</span>
+              {EXAMPLES.map((ex) => (
+                <button key={ex.label} type="button" className="hm-chip" onClick={() => fillPrompt(ex.prompt)}>
+                  {ex.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <figure className="hm-hero-reel">
+            <span className="lp-tape hm-hero-tape is-left" aria-hidden="true" />
+            <span className="lp-tape hm-hero-tape is-right" aria-hidden="true" />
+            <ReelStage item={HERO_REEL} playing={playing} eager className="hm-hero-screen" />
+            <figcaption className="hm-hero-note">
+              <svg className="hm-hero-arrow" viewBox="0 0 64 40" aria-hidden="true">
+                <path d="M58 34 C 44 32, 26 24, 14 8" />
+                <path d="M24 9 L 13 7 L 14 18" />
+              </svg>
+              this reel started as one sentence
+            </figcaption>
+          </figure>
+          </div>
+        </section>
 
         <section className="hm-wall-wrap" aria-label="Motion graphics made with byreel">
-          <p className="hm-pen-note" aria-hidden="true">
-            all live renders
-            <svg className="hm-pen-arrow" viewBox="0 0 64 40">
-              <path d="M4 8 C 20 10, 38 18, 50 32" />
-              <path d="M40 33 L 51 33 L 50 22" />
-            </svg>
-          </p>
           <div className="hm-wall-bar">
             <div className="hm-filters" role="group" aria-label="Filter reels">
               {(["All", ...CATEGORIES] as const).map((c) => (
