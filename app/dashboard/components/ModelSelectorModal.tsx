@@ -248,7 +248,7 @@ export default function ModelSelectorModal({
               }
             : undefined
         }
-        className={`fixed z-[1000000] flex flex-col bg-[#faf8f2] border border-[rgba(7,20,46,0.12)] shadow-2xl text-[#07142e] transition-all duration-200 select-none ${
+        className={`fixed z-[1000000] flex flex-col bg-white border border-[rgba(7,20,46,0.12)] shadow-2xl text-[#07142e] transition-all duration-200 select-none ${
           isMobile
             ? "inset-x-0 bottom-0 max-h-[88vh] rounded-t-3xl p-4 pb-8 border-b-0 animate-in slide-in-from-bottom"
             : !coords
@@ -340,7 +340,7 @@ export default function ModelSelectorModal({
                   className={`shrink-0 w-6 h-6 rounded-full flex items-center justify-center border transition-all ${
                     isSelected
                       ? "border-[#07142e] bg-[#07142e] text-[#c5ef26] shadow-2xs"
-                      : "border-[rgba(7,20,46,0.12)] bg-[#fffefb] text-transparent"
+                      : "border-[rgba(7,20,46,0.12)] bg-white text-transparent"
                   }`}
                 >
                   <FiCheck size={13} strokeWidth={3} />

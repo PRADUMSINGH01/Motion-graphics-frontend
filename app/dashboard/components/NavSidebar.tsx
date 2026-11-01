@@ -87,7 +87,7 @@ export default function NavSidebar({
   return (
     <aside
       aria-label="Notebook studio navigation"
-      className={`fixed md:static inset-y-0 left-0 z-30 flex h-full shrink-0 flex-col bg-[#faf8f2]/95 backdrop-blur-sm db-double-margins transition-all duration-300 ${
+      className={`fixed md:static inset-y-0 left-0 z-30 flex h-full shrink-0 flex-col bg-white/95 backdrop-blur-sm db-double-margins transition-all duration-300 ${
         isOpen
           ? "w-[240px] translate-x-0 opacity-100"
           : "w-0 -translate-x-full md:w-0 md:translate-x-0 opacity-0 overflow-hidden border-none pointer-events-none"

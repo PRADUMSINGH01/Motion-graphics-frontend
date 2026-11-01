@@ -8,36 +8,36 @@
 .lp-crisp-paper {
   /* Design tokens — one ink, one paper, one lime. Every border, fill and text
      tint in this file resolves through these so the notebook stays calm. */
-  /* Stationery palette: navy pen ink, graphite pencil, pale-blue ruling,
-     rose margin line, lime highlighter. Text tints are solid colours so
-     contrast is predictable (graphite on paper ≈ 5:1). */
+  /* Stationery palette: bright white notebook paper, navy pen ink, crisp blue
+     ruling, red margin line, lime highlighter. Text tints are solid colours so
+     contrast is predictable: secondary text on white is about 9:1, ink 18:1. */
   --lp-ink: #07142e;
   --lp-ink-hover: #13244a;
-  --lp-ink-soft: #3d4a66;
-  --lp-ink-muted: #5f6a80;
-  --lp-graphite: #5f6a80;
-  --lp-graphite-light: #8a93a6;
-  --lp-paper: #f7f5ef;
-  --lp-surface: #fffefb;
+  --lp-ink-soft: #24314d;
+  --lp-ink-muted: #4a556d;
+  --lp-graphite: #3f4a61;
+  --lp-graphite-light: #6b7488;
+  --lp-paper: #ffffff;
+  --lp-surface: #ffffff;
   --lp-surface-hover: #ffffff;
-  --lp-line-soft: rgba(7, 20, 46, 0.07);
-  --lp-line: rgba(7, 20, 46, 0.1);
-  --lp-line-strong: rgba(7, 20, 46, 0.16);
-  --lp-line-ink: rgba(7, 20, 46, 0.24);
-  --lp-rule: rgba(74, 118, 196, 0.12);
-  --lp-rule-blue: rgba(74, 118, 196, 0.16);
-  --lp-margin-rose: rgba(214, 108, 124, 0.5);
-  --lp-tray: rgba(7, 20, 46, 0.05);
+  --lp-line-soft: rgba(7, 20, 46, 0.08);
+  --lp-line: rgba(7, 20, 46, 0.12);
+  --lp-line-strong: rgba(7, 20, 46, 0.2);
+  --lp-line-ink: rgba(7, 20, 46, 0.32);
+  --lp-rule: rgba(44, 110, 230, 0.15);
+  --lp-rule-blue: rgba(44, 110, 230, 0.22);
+  --lp-margin-rose: rgba(232, 64, 92, 0.6);
+  --lp-tray: rgba(7, 20, 46, 0.06);
   --lp-lime: #c5ef26;
-  --lp-lime-soft: rgba(197, 239, 38, 0.42);
-  --lp-lime-ink: #4d7c0f;
+  --lp-lime-soft: rgba(197, 239, 38, 0.6);
+  --lp-lime-ink: #3f6c06;
   --lp-radius-sm: 8px;
   --lp-radius-md: 12px;
   --lp-radius-lg: 18px;
-  --lp-shadow-xs: 0 1px 2px rgba(7, 20, 46, 0.05);
-  --lp-shadow-sm: 0 1px 2px rgba(7, 20, 46, 0.04), 0 2px 8px -2px rgba(7, 20, 46, 0.06);
-  --lp-shadow-md: 0 1px 2px rgba(7, 20, 46, 0.04), 0 8px 24px -6px rgba(7, 20, 46, 0.1);
-  --lp-shadow-lg: 0 2px 4px rgba(7, 20, 46, 0.04), 0 24px 48px -16px rgba(7, 20, 46, 0.18);
+  --lp-shadow-xs: 0 1px 2px rgba(7, 20, 46, 0.08);
+  --lp-shadow-sm: 0 1px 2px rgba(7, 20, 46, 0.06), 0 4px 12px -4px rgba(7, 20, 46, 0.1);
+  --lp-shadow-md: 0 1px 2px rgba(7, 20, 46, 0.06), 0 12px 28px -8px rgba(7, 20, 46, 0.16);
+  --lp-shadow-lg: 0 2px 4px rgba(7, 20, 46, 0.06), 0 28px 56px -18px rgba(7, 20, 46, 0.26);
   --lp-ring: 0 0 0 3px rgba(7, 20, 46, 0.08);
   --lp-ease: cubic-bezier(0.22, 1, 0.36, 1);
 
@@ -47,15 +47,8 @@
   overflow-x: hidden;
   color: var(--lp-ink);
   background-color: var(--lp-paper);
-  background-image: 
-    /* Paper fibre: long horizontal fibres plus a fine speckle, baked into SVG noise. */
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.012 0.09' numOctaves='3' seed='4'/%3E%3CfeColorMatrix values='0 0 0 0 0.45 0 0 0 0 0.38 0 0 0 0 0.26 0 0 0 0.09 0'/%3E%3C/filter%3E%3Crect width='600' height='600' filter='url(%23f)'/%3E%3C/svg%3E"),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='s'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='1' seed='9'/%3E%3CfeColorMatrix values='0 0 0 0 0.2 0 0 0 0 0.16 0 0 0 0 0.1 0 0 0 0.1 0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23s)'/%3E%3C/svg%3E"),
-    radial-gradient(
-    ellipse 80% 60% at 50% 0%,
-    rgba(255, 255, 255, 0.9) 0%,
-    rgba(255, 255, 255, 0) 70%
-  );
+  /* A barely-there cool speckle so the white reads as paper, not a screen. */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='s'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='1' seed='9'/%3E%3CfeColorMatrix values='0 0 0 0 0.1 0 0 0 0 0.14 0 0 0 0 0.24 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23s)'/%3E%3C/svg%3E");
   font-family: var(--font-geist), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -137,7 +130,7 @@
   inset: 0;
   pointer-events: none;
   z-index: 5;
-  box-shadow: inset 0 0 120px rgba(168, 156, 132, 0.08);
+  display: none;
 }
 
 /* ==========================================================================
@@ -230,13 +223,14 @@
 
 .lp-pen-link:hover {
   color: var(--lp-ink);
-  background: rgba(7, 20, 46, 0.04);
+  background: rgba(7, 20, 46, 0.05);
 }
 
+/* The current page is marked with the highlighter. */
 .lp-pen-link.is-active {
   color: var(--lp-ink);
-  background: var(--lp-surface);
-  box-shadow: var(--lp-shadow-sm), inset 0 0 0 1px var(--lp-line);
+  background: rgba(197, 239, 38, 0.32);
+  box-shadow: inset 0 0 0 1px rgba(101, 163, 13, 0.3);
 }
 
 .lp-pen-link.is-active .lp-pen-word {
@@ -1971,7 +1965,7 @@
 .lp-tpl-expand-pill {
   padding: 7px 14px;
   border-radius: 999px;
-  background: #faf8f2;
+  background: #ffffff;
   border: 0;
   color: var(--lp-ink);
   font-family: var(--font-geist), system-ui, sans-serif;
@@ -2118,7 +2112,7 @@
   position: relative;
   width: 100%;
   min-height: 100vh;
-  background-color: #faf8f2;
+  background-color: #ffffff;
   color: var(--lp-ink);
   overflow: hidden;
   display: flex;
@@ -2465,9 +2459,9 @@
 
 /* Index card: brighter stock than the page, with its own fibre and a pale top rule. */
 .lp-card-stock {
-  background-color: #fffdf8;
+  background-color: #ffffff;
   background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.014 0.11' numOctaves='3' seed='11'/%3E%3CfeColorMatrix values='0 0 0 0 0.5 0 0 0 0 0.43 0 0 0 0 0.3 0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23f)'/%3E%3C/svg%3E");
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.014 0.11' numOctaves='3' seed='11'/%3E%3CfeColorMatrix values='0 0 0 0 0.2 0 0 0 0 0.26 0 0 0 0 0.4 0 0 0 0.035 0'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23f)'/%3E%3C/svg%3E");
 }
 
 /*

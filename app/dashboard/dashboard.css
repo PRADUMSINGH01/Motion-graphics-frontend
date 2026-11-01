@@ -6,8 +6,8 @@
    ========================================================================== */
 
 .db {
-  --db-paper: #faf8f2;
-  --db-paper-2: #f5f2e8;
+  --db-paper: #ffffff;
+  --db-paper-2: #f6f7f9;
   --db-paper-trans: transparent;
   --db-paper-trans-hover: #ffffff;
   --db-white: #fffefb;
@@ -15,11 +15,11 @@
   --db-card-bg-hover: #ffffff;
   --db-ink: #07142e;
   --db-ink-2: #0e2044;
-  --db-muted: rgba(7, 20, 46, 0.72);
-  --db-faint: rgba(7, 20, 46, 0.48);
+  --db-muted: #3f4a61;
+  --db-faint: #6b7488;
   --db-rule: rgba(7, 20, 46, 0.1);
   --db-rule-strong: rgba(7, 20, 46, 0.16);
-  --db-ruled-line: rgba(7, 20, 46, 0.055);
+  --db-ruled-line: rgba(44, 110, 230, 0.12);
   --db-shadow-sm: 0 1px 2px rgba(7, 20, 46, 0.04), 0 2px 8px -2px rgba(7, 20, 46, 0.06);
   --db-shadow-md: 0 1px 2px rgba(7, 20, 46, 0.04), 0 8px 24px -6px rgba(7, 20, 46, 0.1);
   --db-shadow-lg: 0 2px 4px rgba(7, 20, 46, 0.04), 0 24px 48px -16px rgba(7, 20, 46, 0.18);
@@ -66,7 +66,7 @@
   --ink-658b02: #4d7c0f;
   --ink-556b02: #3f6212;
 
-  background-color: #faf8f2;
+  background-color: #ffffff;
   background-image:
     repeating-linear-gradient(
       to bottom,
@@ -77,9 +77,9 @@
     ),
     radial-gradient(
       ellipse 92% 78% at 52% 40%,
-      rgba(255, 254, 250, 0.98) 0%,
-      rgba(250, 248, 242, 0.88) 58%,
-      rgba(238, 233, 220, 0.95) 100%
+      #ffffff 0%,
+      #ffffff 58%,
+      #fbfcfe 100%
     );
   color: var(--db-ink);
   font-family: var(--font-geist), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -91,19 +91,19 @@
 
 html:has(.db) {
   color-scheme: light;
-  scrollbar-color: rgba(7, 20, 46, 0.28) #faf8f2;
+  scrollbar-color: rgba(7, 20, 46, 0.28) #ffffff;
 }
 html.dark:has(.db) {
   color-scheme: light;
-  scrollbar-color: rgba(7, 20, 46, 0.28) #faf8f2;
+  scrollbar-color: rgba(7, 20, 46, 0.28) #ffffff;
 }
 html:has(.db) body {
-  background: #faf8f2 !important;
+  background: #ffffff !important;
 }
 
 /* Crisp Notebook Horizontal Ruled Lines */
 .db-notebook-rules {
-  background-color: #faf8f2;
+  background-color: #ffffff;
   background-image: repeating-linear-gradient(
     to bottom,
     transparent 0px,
@@ -289,7 +289,7 @@ html:has(.db) body {
   width: min(560px, calc(100vw - 32px));
   overflow: hidden;
   border-radius: 20px;
-  background: #faf8f2;
+  background: #ffffff;
   border: 1px solid var(--db-rule-strong);
   box-shadow: 0 30px 70px -20px rgba(7, 20, 46, 0.3);
 }

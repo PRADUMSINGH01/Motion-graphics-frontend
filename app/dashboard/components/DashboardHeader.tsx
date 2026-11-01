@@ -42,7 +42,7 @@ export default function DashboardHeader({
   }, []);
 
   return (
-    <header className="flex h-16 shrink-0 items-center justify-between border-b border-[rgba(7,20,46,0.18)] bg-[#faf8f2]/90 backdrop-blur-md px-4 sm:px-6 z-20">
+    <header className="flex h-16 shrink-0 items-center justify-between border-b border-[rgba(7,20,46,0.18)] bg-white/90 backdrop-blur-md px-4 sm:px-6 z-20">
       {/* Left side: Universal sidebar toggle + Clean Global search bar */}
       <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
         <button
@@ -50,7 +50,7 @@ export default function DashboardHeader({
           onClick={onOpenMobileNav}
           aria-label="Toggle sidebar"
           title="Toggle sidebar"
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[rgba(7,20,46,0.12)] bg-[#fffefb] text-[#07142e] shadow-2xs transition hover:border-[rgba(7,20,46,0.28)] hover:bg-white cursor-pointer"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[rgba(7,20,46,0.12)] bg-white text-[#07142e] shadow-2xs transition hover:border-[rgba(7,20,46,0.28)] hover:bg-white cursor-pointer"
         >
           <FiSidebar size={16} />
         </button>
@@ -66,7 +66,7 @@ export default function DashboardHeader({
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Search templates, projects, prompts or assets..."
-            className="h-10 w-full rounded-lg border border-[rgba(7,20,46,0.12)] bg-[#fffefb] pl-10 pr-14 text-[13px] text-[#07142e] placeholder-[rgba(7,20,46,0.48)] shadow-2xs transition focus:border-[rgba(7,20,46,0.32)] focus:bg-white focus:outline-none"
+            className="h-10 w-full rounded-lg border border-[rgba(7,20,46,0.12)] bg-white pl-10 pr-14 text-[13px] text-[#07142e] placeholder-[rgba(7,20,46,0.48)] shadow-2xs transition focus:border-[rgba(7,20,46,0.32)] focus:bg-white focus:outline-none"
           />
           <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
             <kbd className="inline-flex h-5 items-center rounded-md border border-[rgba(7,20,46,0.1)] bg-[rgba(7,20,46,0.04)] px-1.5 font-mono text-[10px] font-medium text-[rgba(7,20,46,0.6)]">
