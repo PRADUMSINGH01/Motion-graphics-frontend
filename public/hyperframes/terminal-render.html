@@ -49,12 +49,12 @@
         background: linear-gradient(180deg, transparent, rgba(197, 239, 38, 0.06), transparent);
       }
       /* Glitch slices: copies of the tube offset sideways for a few frames. */
-      .slice { position: absolute; left: 0; width: 1800px; z-index: 22; background: rgba(255, 79, 168, 0.18); mix-blend-mode: screen; opacity: 0; }
+      .slice { position: absolute; left: 0; top: 0; width: 1800px; z-index: 22; background: rgba(255, 79, 168, 0.18); mix-blend-mode: screen; opacity: 0; }
       #flash { position: absolute; inset: 0; background: #f7f5ef; opacity: 0; z-index: 30; }
     </style>
   </head>
   <body>
-    <div id="stage">
+    <div id="stage" data-composition-id="terminal-render" data-width="1920" data-height="1080">
       <div id="tube">
         <div id="term">
           <div><span class="dim">$</span> <span id="cmd">byreel render "neon title, glitch cut, 10s"</span><span id="cursor"></span></div>
@@ -71,9 +71,9 @@
         </div>
         <div id="scan" class="fx-layer tx-scanlines" style="width: 1800px; height: 980px"></div>
         <div id="roll"></div>
-        <div class="slice" id="g1" style="top: 210px; height: 90px"></div>
-        <div class="slice" id="g2" style="top: 520px; height: 40px"></div>
-        <div class="slice" id="g3" style="top: 700px; height: 120px"></div>
+        <div class="slice" id="g1" style="height: 90px"></div>
+        <div class="slice" id="g2" style="height: 40px"></div>
+        <div class="slice" id="g3" style="height: 120px"></div>
       </div>
       <div id="flash"></div>
     </div>
@@ -114,7 +114,7 @@
       function glitch(at) {
         ["#g1", "#g2", "#g3"].forEach(function (g, i) {
           for (var k = 0; k < 4; k++) {
-            tl.set(g, { opacity: 1, x: (rand() - 0.5) * 300, top: 100 + rand() * 760 }, at + k * 0.05 + i * 0.012);
+            tl.set(g, { opacity: 1, x: (rand() - 0.5) * 300, y: 100 + rand() * 760 }, at + k * 0.05 + i * 0.012);
           }
           tl.set(g, { opacity: 0, x: 0 }, at + 0.24);
         });

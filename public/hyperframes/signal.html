@@ -28,7 +28,7 @@
         font-weight: 500; font-size: 40px; color: rgba(247, 245, 239, 0.72);
       }
       .pill {
-        position: absolute; padding: 12px 24px; border-radius: 999px; white-space: nowrap;
+        position: absolute; left: 0; top: 0; padding: 12px 24px; border-radius: 999px; white-space: nowrap;
         font-family: "Bricolage Grotesque", sans-serif; font-weight: 700; font-size: 34px;
         color: #07142e; background: #f7f5ef; transform-origin: 50% 100%;
         box-shadow: 0 16px 40px -12px rgba(0, 0, 0, 0.5);
@@ -42,7 +42,7 @@
     </style>
   </head>
   <body>
-    <div id="stage">
+    <div id="stage" data-composition-id="signal" data-width="1920" data-height="1080">
       <div id="cam">
         <svg id="chart" viewBox="0 0 1920 1080" aria-hidden="true">
           <defs>
@@ -134,7 +134,7 @@
         var L = lengthAtX(m[1]);
         var pt = curve.getPointAtLength(L);
         var el = document.querySelector(m[0]);
-        gsap.set(el, { left: pt.x, top: pt.y - 44, xPercent: -50, yPercent: -100, scale: 0 });
+        gsap.set(el, { x: pt.x, y: pt.y - 44, xPercent: -50, yPercent: -100, scale: 0 });
         return { el: el, at: DRAW_AT + DRAW_FOR * (L / total) };
       });
 

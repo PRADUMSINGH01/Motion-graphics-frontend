@@ -43,6 +43,7 @@
         position: absolute; left: 0; width: 1920px; top: 470px; text-align: center;
         font-family: "Anton", sans-serif; font-size: 230px; line-height: 1; letter-spacing: 4px; color: #f4efe3;
       }
+      #s2 .pink .knock .ch { display: inline-block; }
 
       .reg { position: absolute; width: 60px; height: 60px; border: 3px solid #07142e; border-radius: 50%; opacity: 0.55; }
       .reg::before, .reg::after { content: ""; position: absolute; background: #07142e; }
@@ -51,7 +52,7 @@
     </style>
   </head>
   <body>
-    <div id="stage" class="tx-paper">
+    <div id="stage" data-composition-id="riso-print" data-width="1920" data-height="1080" class="tx-paper">
       <div class="sheet tx-paper" id="s2">
         <div class="ink pink" id="s2p"><div class="shape blk"></div><div class="knock">TWO INKS.</div></div>
         <div class="ink blue" id="s2b">
@@ -114,7 +115,11 @@
       tl.to("#s1", { y: -1080, duration: 0.7, ease: "power2.inOut" }, 4.8);
       tl.to("#s2", { y: 0, duration: 0.7, ease: "power2.inOut" }, 4.8);
       jitter("#s2b", 5.6, 8.4, 30);
-      tl.to("#s2 .knock", { letterSpacing: "40px", duration: 0.5, ease: "steps(6)", yoyo: true, repeat: 3 }, 5.8);
+      /* Spread "TWO INKS." by moving each glyph outward (transforms stay smooth; letter-spacing
+         would reflow the line and snap to whole pixels in frame capture). */
+      var knock = HF.split("#s2 .knock");
+      var mid = (knock.length - 1) / 2;
+      tl.to(knock, { x: function (i) { return (i - mid) * 36; }, duration: 0.5, ease: "steps(6)", yoyo: true, repeat: 3 }, 5.8);
       tl.to("#s2b .ht", { backgroundPosition: "-96px 0px", duration: 2.8, ease: "steps(34)" }, 5.6);
 
       /* 8.7s: sheet 2 feeds out, revealing a blank sheet 1 (reset underneath) to loop from. */
