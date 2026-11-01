@@ -214,6 +214,27 @@
 
 
 /* Play/pause for the whole wall. */
+.hm-wall-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 40px;
+  margin-bottom: 22px;
+}
+
+.hm-wall-head .hm-h2 {
+  margin: 0;
+}
+
+.hm-wall-lede {
+  margin: 0;
+  max-width: 52ch;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--lp-graphite);
+}
+
 .hm-wall-bar {
   display: flex;
   flex-wrap: wrap;
@@ -337,33 +358,41 @@
   grid-column: 3 / span 2;
 }
 
-.hm-tile-stage {
+/* The whole tile is a button that opens the screening room. */
+.hm-tile-open {
   position: absolute;
   inset: 0;
-  overflow: hidden;
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: zoom-in;
 }
 
-.hm-tile-poster {
+.hm-tile-open:focus-visible {
+  outline: 3px solid var(--lp-lime);
+  outline-offset: -3px;
+}
+
+.hm-tile-video {
   position: absolute;
   inset: 0;
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.6s var(--lp-ease);
 }
 
-/* Width and height come inline from the reel's own stage size. */
-.hm-tile-frame {
-  position: absolute;
-  top: 0;
-  left: 0;
-  border: 0;
-  transform-origin: top left;
-  pointer-events: none;
-  transition: opacity 0.4s ease;
+.hm-tile:hover .hm-tile-video {
+  transform: scale(1.035);
 }
 
 /* Caption: hidden until the tile is hovered or something inside it has focus. */
 .hm-tile-caption {
+  pointer-events: none;
   position: absolute;
   inset: auto 0 0 0;
   z-index: 2;
@@ -398,6 +427,7 @@
 }
 
 .hm-tile-use {
+  pointer-events: auto;
   flex-shrink: 0;
   height: 30px;
   padding: 0 12px;
@@ -765,6 +795,183 @@
   border-color: rgba(247, 245, 239, 0.6);
 }
 
+/* ── Screening room: one reel large, with the sentence that made it ── */
+
+.hm-room {
+  width: min(1240px, calc(100vw - 48px));
+  max-width: none;
+  max-height: calc(100vh - 48px);
+  margin: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 22px;
+  background: #ffffff;
+  color: var(--lp-ink);
+  box-shadow: 0 40px 100px -30px rgba(7, 20, 46, 0.6);
+  overflow: auto;
+}
+
+.hm-room::backdrop {
+  background: rgba(7, 20, 46, 0.72);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+
+.hm-room[open] {
+  animation: hm-room-in 0.35s var(--lp-ease);
+}
+
+@keyframes hm-room-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.985);
+  }
+}
+
+.hm-room-inner {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.75fr) minmax(0, 1fr);
+  gap: 28px 32px;
+  padding: 22px;
+}
+
+.hm-room-screen {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #050914;
+}
+
+.hm-room-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hm-room-side {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 50px 6px 6px 0;
+}
+
+.hm-room-cat {
+  margin: 0;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--lp-lime-ink);
+}
+
+.hm-room-title {
+  margin: 4px 0 0;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.1;
+}
+
+.hm-room-label {
+  margin: 22px 0 8px;
+  font-family: var(--font-pen), "Caveat", cursive;
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--lp-graphite);
+}
+
+/* The prompt, written on a ruled index card. */
+.hm-room-prompt {
+  margin: 0;
+  padding: 10px 16px 14px 20px;
+  border-radius: 8px;
+  border: 1px solid var(--lp-line);
+  border-left: 3px solid var(--lp-margin-rose);
+  background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 29px, var(--lp-rule-blue) 29px, var(--lp-rule-blue) 30px);
+  font-size: 16px;
+  line-height: 30px;
+  color: var(--lp-ink);
+}
+
+.hm-room-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 24px;
+}
+
+.hm-room-use {
+  height: 46px;
+  padding: 0 22px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--lp-ink);
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 8px 20px -10px rgba(7, 20, 46, 0.7);
+  transition: background 0.16s ease;
+}
+
+.hm-room-use:hover {
+  background: var(--lp-ink-hover);
+}
+
+.hm-room-count {
+  font-size: 13.5px;
+  font-variant-numeric: tabular-nums;
+  color: var(--lp-graphite);
+}
+
+.hm-room-nav {
+  position: absolute;
+  top: 22px;
+  right: 22px;
+  display: flex;
+  gap: 6px;
+}
+
+.hm-room-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--lp-line-strong);
+  border-radius: 10px;
+  background: #ffffff;
+  color: var(--lp-ink);
+  cursor: pointer;
+  transition: border-color 0.16s ease, background 0.16s ease;
+}
+
+.hm-room-btn:hover {
+  border-color: var(--lp-line-ink);
+  background: var(--lp-tray);
+}
+
+.hm-room-btn svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.hm-room :focus-visible {
+  outline: 2px solid var(--lp-ink);
+  outline-offset: 2px;
+}
+
 /* ── Responsive ── */
 
 @media (max-width: 1040px) {
@@ -796,6 +1003,21 @@
 }
 
 @media (max-width: 900px) {
+  .hm-room-inner {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 14px;
+  }
+
+  .hm-room-side {
+    padding: 0 4px 6px;
+  }
+
+  .hm-room-nav {
+    position: static;
+    grid-row: 1;
+    justify-content: flex-end;
+  }
+
   .hm-steps {
     grid-template-columns: minmax(0, 1fr);
     gap: 40px;

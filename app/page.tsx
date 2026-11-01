@@ -60,13 +60,14 @@ function featureOf(index: number, count: number): "left" | "right" | undefined {
   return (index / 9) % 2 === 0 ? "left" : "right";
 }
 
-/* HyperFrames originals are authored at 1920×1080; the earlier reels on a 1280×720 stage. */
-function stageOf(item: ShowreelItem) {
-  return item.hyperframes ? { w: 1920, h: 1080 } : { w: 1280, h: 720 };
+/* Every reel ships as a short looping MP4 in two sizes (540p for tiles, 720p for the hero and
+   the screening room) plus a WebP poster, all in /public/showreel. */
+function videoOf(item: ShowreelItem, size: "sm" | "lg") {
+  return `/showreel/video/${item.id}${size === "lg" ? "-720" : ""}.mp4`;
 }
 
-function srcOf(item: ShowreelItem) {
-  return item.hyperframes ? `/hyperframes/${item.id}.html?autoplay` : `/${item.id}.html`;
+function posterOf(item: ShowreelItem) {
+  return `/showreel/${item.id}.webp`;
 }
 
 const REDUCED_MOTION = "(prefers-reduced-motion: reduce)";
@@ -85,82 +86,59 @@ function useReducedMotion() {
 }
 
 /**
- * A live reel scaled to cover its box. The iframe only exists while the box is on screen
- * (so a wall of reels never runs all at once) and while reels are playing; otherwise the
- * still poster shows.
+ * A reel as a muted, looping video. Nothing downloads until the reel is near the viewport and
+ * reels are playing (so a paused or reduced-motion visit costs only posters); after that it
+ * plays only while on screen, so the wall never decodes more than what you can see.
  */
-function ReelStage({
+function ReelVideo({
   item,
   playing,
-  eager,
+  size,
   className,
 }: {
   item: ShowreelItem;
   playing: boolean;
-  eager?: boolean;
+  size: "sm" | "lg";
   className: string;
 }) {
-  const boxRef = useRef<HTMLDivElement | null>(null);
-  const [box, setBox] = useState({ w: 0, h: 0 });
+  const ref = useRef<HTMLVideoElement | null>(null);
+  const [near, setNear] = useState(false);
   const [onScreen, setOnScreen] = useState(false);
-  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    const el = boxRef.current;
+    const el = ref.current;
     if (!el) return;
-    const ro = new ResizeObserver(([entry]) => {
-      const { width, height } = entry.contentRect;
-      setBox({ w: width, h: height });
-    });
-    ro.observe(el);
     const io = new IntersectionObserver(
       ([entry]) => {
+        if (entry.isIntersecting) setNear(true);
         setOnScreen(entry.isIntersecting);
-        if (!entry.isIntersecting) setLoaded(false);
       },
-      { rootMargin: "120px" }
+      { rootMargin: "240px 0px" }
     );
     io.observe(el);
-    return () => {
-      ro.disconnect();
-      io.disconnect();
-    };
+    return () => io.disconnect();
   }, []);
 
-  const stage = stageOf(item);
-  const scale = box.w ? Math.max(box.w / stage.w, box.h / stage.h) : 0;
-  const dx = (box.w - stage.w * scale) / 2;
-  const dy = (box.h - stage.h * scale) / 2;
-  const live = onScreen && playing && scale > 0;
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || !near) return;
+    if (onScreen && playing) el.play().catch(() => {});
+    else el.pause();
+  }, [near, onScreen, playing]);
 
   return (
-    <div ref={boxRef} className={className}>
-      {/* eslint-disable-next-line @next/next/no-img-element -- tiny static poster, sized by CSS */}
-      <img
-        src={`/showreel/${item.id}.jpg`}
-        alt=""
-        className="hm-tile-poster"
-        loading={eager ? "eager" : "lazy"}
-        decoding="async"
-      />
-      {live && (
-        <iframe
-          src={srcOf(item)}
-          title={item.title}
-          sandbox="allow-scripts"
-          tabIndex={-1}
-          aria-hidden="true"
-          onLoad={() => setLoaded(true)}
-          className="hm-tile-frame"
-          style={{
-            width: stage.w,
-            height: stage.h,
-            transform: `translate(${dx}px, ${dy}px) scale(${scale})`,
-            opacity: loaded ? 1 : 0,
-          }}
-        />
-      )}
-    </div>
+    <video
+      ref={ref}
+      className={className}
+      src={near && playing ? videoOf(item, size) : undefined}
+      poster={posterOf(item)}
+      muted
+      loop
+      playsInline
+      preload={near && playing ? "auto" : "none"}
+      disablePictureInPicture
+      aria-hidden="true"
+    />
   );
 }
 
@@ -169,12 +147,14 @@ function ReelTile({
   index,
   feature,
   playing,
+  onOpen,
   onUse,
 }: {
   item: ShowreelItem;
   index: number;
   feature?: "left" | "right";
   playing: boolean;
+  onOpen: (item: ShowreelItem) => void;
   onUse: (item: ShowreelItem) => void;
 }) {
   return (
@@ -182,7 +162,10 @@ function ReelTile({
       className={`hm-tile${feature ? ` is-feature is-feature-${feature}` : ""}`}
       style={{ "--i": Math.min(index, 8) } as React.CSSProperties}
     >
-      <ReelStage item={item} playing={playing} eager={!!feature} className="hm-tile-stage" />
+      <button type="button" className="hm-tile-open" onClick={() => onOpen(item)}>
+        <span className="hm-sr-only">Watch {item.title}</span>
+        <ReelVideo item={item} playing={playing} size="sm" className="hm-tile-video" />
+      </button>
       <figcaption className="hm-tile-caption">
         <span className="hm-tile-title">{item.title}</span>
         <button type="button" className="hm-tile-use" onClick={() => onUse(item)}>
@@ -190,6 +173,113 @@ function ReelTile({
         </button>
       </figcaption>
     </figure>
+  );
+}
+
+/**
+ * The screening room: one reel large, with the sentence that made it. Arrow keys step through
+ * whatever the wall is showing; Escape closes (native <dialog> behaviour).
+ */
+function ScreeningRoom({
+  reels,
+  index,
+  onIndex,
+  onClose,
+  onUse,
+}: {
+  reels: ShowreelItem[];
+  index: number | null;
+  onIndex: (i: number) => void;
+  onClose: () => void;
+  onUse: (item: ShowreelItem) => void;
+}) {
+  const ref = useRef<HTMLDialogElement | null>(null);
+  const item = index === null ? null : reels[index];
+
+  useEffect(() => {
+    const d = ref.current;
+    if (!d) return;
+    if (item && !d.open) d.showModal();
+    if (!item && d.open) d.close();
+  }, [item]);
+
+  const step = (delta: number) => {
+    if (index === null) return;
+    onIndex((index + delta + reels.length) % reels.length);
+  };
+
+  return (
+    <dialog
+      ref={ref}
+      className="hm-room"
+      aria-labelledby="hm-room-title"
+      onClose={onClose}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+      onKeyDown={(e) => {
+        if (e.key === "ArrowRight") step(1);
+        if (e.key === "ArrowLeft") step(-1);
+      }}
+    >
+      {item && (
+        <div className="hm-room-inner">
+          <div className="hm-room-screen">
+            <video
+              key={item.id}
+              className="hm-room-video"
+              src={videoOf(item, "lg")}
+              poster={posterOf(item)}
+              autoPlay
+              muted
+              loop
+              playsInline
+              disablePictureInPicture
+            />
+          </div>
+          <div className="hm-room-side">
+            <p className="hm-room-cat">{item.category}</p>
+            <h2 id="hm-room-title" className="hm-room-title">
+              {item.title}
+            </h2>
+            <p className="hm-room-label">The sentence behind it</p>
+            <blockquote className="hm-room-prompt lp-card-stock">{item.prompt}</blockquote>
+            <div className="hm-room-actions">
+              <button
+                type="button"
+                className="hm-room-use"
+                onClick={() => {
+                  onClose();
+                  onUse(item);
+                }}
+              >
+                Use this prompt
+              </button>
+              <span className="hm-room-count">
+                {(index ?? 0) + 1} of {reels.length}
+              </span>
+            </div>
+          </div>
+          <div className="hm-room-nav">
+            <button type="button" className="hm-room-btn" aria-label="Previous reel" onClick={() => step(-1)}>
+              <svg viewBox="0 0 16 16" aria-hidden="true">
+                <path d="M10 3L5 8l5 5" />
+              </svg>
+            </button>
+            <button type="button" className="hm-room-btn" aria-label="Next reel" onClick={() => step(1)}>
+              <svg viewBox="0 0 16 16" aria-hidden="true">
+                <path d="M6 3l5 5-5 5" />
+              </svg>
+            </button>
+            <button type="button" className="hm-room-btn" aria-label="Close" onClick={onClose}>
+              <svg viewBox="0 0 16 16" aria-hidden="true">
+                <path d="M4 4l8 8M12 4l-8 8" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
+    </dialog>
   );
 }
 
@@ -218,6 +308,7 @@ export default function Home() {
     el.focus({ preventScroll: true });
   };
   const applyReelPrompt = (item: ShowreelItem) => fillPrompt(item.prompt);
+  const [screening, setScreening] = useState<number | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -276,7 +367,9 @@ export default function Home() {
           <figure className="hm-hero-reel">
             <span className="lp-tape hm-hero-tape is-left" aria-hidden="true" />
             <span className="lp-tape hm-hero-tape is-right" aria-hidden="true" />
-            <ReelStage item={HERO_REEL} playing={playing} eager className="hm-hero-screen" />
+            <div className="hm-hero-screen">
+              <ReelVideo item={HERO_REEL} playing={playing} size="lg" className="hm-tile-video" />
+            </div>
             <figcaption className="hm-hero-note">
               <svg className="hm-hero-arrow" viewBox="0 0 64 40" aria-hidden="true">
                 <path d="M58 34 C 44 32, 26 24, 14 8" />
@@ -288,7 +381,16 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="hm-wall-wrap" aria-label="Motion graphics made with byreel">
+        <section className="hm-wall-wrap" aria-labelledby="hm-wall-title">
+          <div className="hm-wall-head">
+            <h2 id="hm-wall-title" className="hm-h2">
+              Made with byreel
+            </h2>
+            <p className="hm-wall-lede">
+              Every reel here started as one sentence. Open any of them to watch it large and
+              read the prompt behind it.
+            </p>
+          </div>
           <div className="hm-wall-bar">
             <div className="hm-filters" role="group" aria-label="Filter reels">
               {(["All", ...CATEGORIES] as const).map((c) => (
@@ -333,10 +435,18 @@ export default function Home() {
                 index={i}
                 feature={featureOf(i, visible.length)}
                 playing={playing}
+                onOpen={(it) => setScreening(visible.indexOf(it))}
                 onUse={applyReelPrompt}
               />
             ))}
           </div>
+          <ScreeningRoom
+            reels={visible}
+            index={screening}
+            onIndex={setScreening}
+            onClose={() => setScreening(null)}
+            onUse={applyReelPrompt}
+          />
           <p className="hm-wall-foot">
             Want more starting points?{" "}
             <Link href="/templates" className="hm-link">
@@ -366,7 +476,7 @@ export default function Home() {
                       {STORYBOARD.map((f) => (
                         <figure key={f.id} className="hm-art-frame">
                           {/* eslint-disable-next-line @next/next/no-img-element -- tiny static still */}
-                          <img src={`/showreel/${f.id}.jpg`} alt="" loading="lazy" />
+                          <img src={`/showreel/${f.id}.webp`} alt="" loading="lazy" />
                           <figcaption>{f.time}</figcaption>
                         </figure>
                       ))}
