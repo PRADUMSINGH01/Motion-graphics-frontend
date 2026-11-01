@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <meta data-composition-id="cut-paper" data-width="1920" data-height="1080" />
+    <title>Cut paper</title>
+    <link rel="stylesheet" href="fonts/fonts.css" />
+    <link rel="stylesheet" href="fx/textures.css" />
+    <script src="vendor/gsap.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1920px; height: 1080px; overflow: hidden; background: #f4efe3; }
+      #stage { position: relative; width: 1920px; height: 1080px; overflow: hidden; }
+      /* Every cut-out layer casts a short, soft shadow onto the one behind it. */
+      .layer { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; filter: drop-shadow(0 10px 8px rgba(40, 24, 8, 0.28)); }
+      .layer svg { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: visible; }
+      .layer .tex { position: absolute; inset: 0; mix-blend-mode: multiply; background-color: transparent; opacity: 0.85; pointer-events: none; }
+
+      #title { position: absolute; left: 0; width: 1920px; top: 150px; text-align: center; }
+      .cut {
+        display: inline-block; margin: 0 6px; padding: 6px 22px 2px; background: #fffdf6;
+        font-family: "Anton", sans-serif; font-size: 150px; line-height: 1; color: #07142e;
+        filter: url(#rough) drop-shadow(0 8px 6px rgba(40, 24, 8, 0.3));
+      }
+      .cut.lime { background: #c5ef26; }
+      .cut.coral { background: #ff5b45; color: #fffdf6; }
+      #strip {
+        position: absolute; left: 50%; top: 360px; padding: 14px 36px; background: #07142e; color: #fffdf6;
+        font-family: "Caveat", cursive; font-weight: 700; font-size: 68px; line-height: 1;
+        filter: url(#rough) drop-shadow(0 8px 6px rgba(40, 24, 8, 0.3));
+      }
+    </style>
+  </head>
+  <body>
+    <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+      <defs>
+        <!-- Torn-paper edges. The seed is swapped every other frame for stop-motion "boil". -->
+        <filter id="rough" x="-5%" y="-5%" width="110%" height="110%">
+          <feTurbulence id="rt" type="fractalNoise" baseFrequency="0.035" numOctaves="3" seed="2" result="n" />
+          <feDisplacementMap in="SourceGraphic" in2="n" scale="10" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+      </defs>
+    </svg>
+    <div id="stage" class="tx-paper">
+      <div class="layer" id="sky">
+        <svg viewBox="0 0 1920 1080"><rect x="-40" y="-40" width="2000" height="1160" fill="#f6d5ad" filter="url(#rough)" /></svg>
+        <div class="tex tx-paper"></div>
+      </div>
+      <div class="layer" id="sun"><svg viewBox="0 0 1920 1080"><circle cx="1420" cy="430" r="150" fill="#ff5b45" filter="url(#rough)" /></svg></div>
+      <div class="layer" id="cloud1"><svg viewBox="0 0 1920 1080"><path d="M300 330 q20 -70 90 -60 q30 -60 100 -30 q70 -20 80 50 q50 10 40 60 h-330 q-40 -10 20 -20z" fill="#fffdf6" filter="url(#rough)" /></svg></div>
+      <div class="layer" id="cloud2"><svg viewBox="0 0 1920 1080"><path d="M1050 220 q20 -50 70 -40 q30 -50 80 -20 q60 -10 60 40 q40 10 30 45 h-260 q-30 -10 20 -25z" fill="#fffdf6" filter="url(#rough)" /></svg></div>
+      <div class="layer" id="h3"><svg viewBox="0 0 1920 1080"><path d="M-40 760 C 200 600, 420 620, 640 700 S 1100 560, 1360 650 S 1760 600, 1980 680 V 1120 H -40 Z" fill="#7fb2ff" filter="url(#rough)" /></svg><div class="tex tx-paper"></div></div>
+      <div class="layer" id="h2"><svg viewBox="0 0 1920 1080"><path d="M-40 860 C 260 740, 520 780, 800 840 S 1280 720, 1560 800 S 1840 780, 1980 820 V 1120 H -40 Z" fill="#2f5bff" filter="url(#rough)" /></svg></div>
+      <div class="layer" id="h1"><svg viewBox="0 0 1920 1080"><path d="M-40 960 C 300 880, 640 920, 960 950 S 1500 870, 1980 930 V 1120 H -40 Z" fill="#07142e" filter="url(#rough)" /><path d="M140 930 l14 -40 l14 40 M420 925 l12 -34 l12 34 M1500 905 l14 -42 l14 42 M1700 912 l12 -34 l12 34" stroke="#c5ef26" stroke-width="10" fill="none" stroke-linejoin="round" /></svg></div>
+      <div class="layer" id="plane">
+        <svg viewBox="0 0 1920 1080">
+          <path id="trail" d="M-80 640 C 300 520, 520 700, 760 560 S 1080 380, 1260 520 S 1600 640, 2040 420" fill="none" stroke="#07142e" stroke-width="6" stroke-dasharray="18 16" stroke-linecap="round" />
+          <g id="craft"><path d="M0 0 L -90 -34 L -70 0 L -90 34 Z" fill="#fffdf6" stroke="#07142e" stroke-width="4" stroke-linejoin="round" /><path d="M -70 0 L 0 0" stroke="#07142e" stroke-width="3" /></g>
+        </svg>
+      </div>
+      <div id="title"><span class="cut">MADE</span><span class="cut lime">BY</span><span class="cut coral">HAND.</span></div>
+      <div id="strip">animated from one sentence</div>
+    </div>
+
+    <script src="fx/kit.js"></script>
+    <script src="vendor/MotionPathPlugin.min.js"></script>
+    <script src="player.js"></script>
+    <script>
+      gsap.registerPlugin(MotionPathPlugin);
+      var rand = HF.seeded(808);
+      var FPS = 12, STEP = 1 / FPS;
+      var layers = ["#sky", "#cloud1", "#cloud2", "#h3", "#h2", "#h1"];
+      var cuts = gsap.utils.toArray(".cut");
+      var trail = document.getElementById("trail");
+      var trailLen = trail.getTotalLength();
+
+      /* Stop motion: every move snaps to 12 fps ("on twos"). */
+      function stepped(dur) { return "steps(" + Math.max(1, Math.round(dur * FPS)) + ")"; }
+
+      gsap.set(layers, { y: -1150 });
+      gsap.set("#sun", { y: 820 }); /* starts below the horizon, behind the hills */
+      gsap.set(trail, { strokeDashoffset: trailLen, strokeDasharray: trailLen + " " + trailLen });
+      gsap.set("#craft", { opacity: 0 });
+      gsap.set(cuts, { scale: 1.6, opacity: 0, rotation: function () { return (rand() - 0.5) * 30; } });
+      gsap.set("#strip", { xPercent: -50, x: 0, y: 0, rotation: -2, opacity: 0, scaleX: 0, transformOrigin: "0% 50%" });
+
+      var tl = gsap.timeline({ paused: true });
+
+      /* Boil: the torn-edge noise re-seeds every other frame for the whole film. */
+      for (var t = 0, k = 0; t < 10; t += STEP, k++) tl.set("#rt", { attr: { seed: 2 + (k % 3) } }, t);
+
+      /* 0–1.3s: the paper layers drop in, back to front. */
+      layers.forEach(function (l, i) {
+        tl.to(l, { y: 0, duration: 0.5, ease: stepped(0.5) }, 0.1 + i * 0.12);
+      });
+      tl.to("#sun", { y: 0, duration: 2.2, ease: stepped(2.2) }, 1.0);
+
+      /* 1.4–4.4s: clouds drift; the plane loops across on its dashed trail. */
+      tl.to("#cloud1", { x: 160, duration: 7, ease: stepped(7) }, 1.3);
+      tl.to("#cloud2", { x: -120, duration: 7, ease: stepped(7) }, 1.3);
+      tl.set("#craft", { opacity: 1 }, 1.5);
+      tl.to("#craft", { motionPath: { path: trail, align: trail, autoRotate: true, alignOrigin: [0.5, 0.5] }, duration: 3, ease: stepped(3) }, 1.5);
+      tl.to(trail, { strokeDashoffset: 0, duration: 3, ease: stepped(3) }, 1.5);
+      tl.set(trail, { strokeDasharray: "18 16" }, 4.55);
+
+      /* 3.2–4.6s: the cut-out letters stick on one at a time. */
+      cuts.forEach(function (c, i) {
+        tl.to(c, { scale: 1, opacity: 1, rotation: (rand() - 0.5) * 8, duration: 0.25, ease: stepped(0.25) }, 3.2 + i * 0.35);
+      });
+      tl.to("#strip", { opacity: 1, scaleX: 1, duration: 0.5, ease: stepped(0.5) }, 4.4);
+
+      /* 5–7.8s: hold — letters nudge on twos like a hand re-placing them. */
+      for (var h = 5.0; h < 7.8; h += 0.5) {
+        tl.to(cuts, { rotation: function () { return (rand() - 0.5) * 8; }, y: function () { return (rand() - 0.5) * 8; }, duration: STEP, ease: "steps(1)" }, h);
+      }
+
+      /* 7.9–9.4s: everything is lifted off the board, front to back. */
+      tl.to(["#strip", "#title"], { y: -1150, duration: 0.5, ease: stepped(0.5) }, 7.9);
+      tl.to(["#plane", "#sun"].concat(layers.slice().reverse()), { y: -1150, duration: 0.5, ease: stepped(0.5), stagger: 0.1 }, 8.1);
+
+      /* Reset off-screen for the loop. */
+      tl.set(["#title"], { y: 0 }, 9.5);
+      tl.set(cuts, { scale: 1.6, opacity: 0 }, 9.5);
+      tl.set("#strip", { y: 0, opacity: 0, scaleX: 0 }, 9.5);
+      tl.set("#plane", { y: 0 }, 9.5);
+      tl.set("#sun", { y: 820 }, 9.5);
+      tl.set("#craft", { opacity: 0 }, 9.5);
+      tl.set(trail, { strokeDashoffset: trailLen, strokeDasharray: trailLen + " " + trailLen }, 9.5);
+      tl.set(["#cloud1", "#cloud2"], { x: 0 }, 9.5);
+
+      HF.grain(tl, { opacity: 0.1, duration: 10, blend: "multiply" });
+      HF.register("cut-paper", tl, 10);
+    </script>
+  </body>
+</html>

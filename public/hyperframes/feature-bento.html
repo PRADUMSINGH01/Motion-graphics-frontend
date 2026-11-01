@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <meta data-composition-id="feature-bento" data-width="1920" data-height="1080" />
+    <title>Feature bento</title>
+    <link rel="stylesheet" href="fonts/fonts.css" />
+    <link rel="stylesheet" href="fx/textures.css" />
+    <script src="vendor/gsap.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1920px; height: 1080px; overflow: hidden; background: #f4efe3; }
+      #stage { position: relative; width: 1920px; height: 1080px; overflow: hidden; font-family: "Bricolage Grotesque", sans-serif; }
+      #dots { --ht-color: rgba(7, 20, 46, 0.16); --ht-size: 1.6px; background-size: 28px 28px; }
+
+      #grid { position: absolute; left: 120px; top: 100px; width: 1680px; height: 880px; }
+      .card {
+        position: absolute; border-radius: 34px; overflow: hidden; background: #fffdf8;
+        box-shadow: 0 1px 0 rgba(7, 20, 46, 0.06), 0 30px 60px -30px rgba(7, 20, 46, 0.35), inset 0 0 0 1.5px rgba(7, 20, 46, 0.08);
+        padding: 38px 40px;
+      }
+      .card h5 { font-size: 30px; font-weight: 700; letter-spacing: -1px; color: #07142e; }
+      .card p { margin-top: 6px; font-size: 22px; color: #5f6a80; }
+      #A { left: 0; top: 0; width: 830px; height: 430px; background: #07142e; }
+      #B { left: 850px; top: 0; width: 405px; height: 430px; }
+      #C { left: 1275px; top: 0; width: 405px; height: 880px; background: #0e1f45; }
+      #D { left: 0; top: 450px; width: 405px; height: 430px; }
+      #E { left: 425px; top: 450px; width: 405px; height: 430px; background: #c5ef26; }
+      #F { left: 850px; top: 450px; width: 405px; height: 430px; }
+
+      /* A: headline */
+      #A .kick { font-size: 26px; font-weight: 600; color: #c5ef26; }
+      #A .hl { margin-top: 26px; font-size: 92px; font-weight: 800; letter-spacing: -4.5px; line-height: 0.98; color: #f7f5ef; }
+      #A .hl .ch { display: inline-block; }
+      #A .tex { position: absolute; right: -60px; bottom: -80px; width: 420px; height: 420px; border-radius: 50%; --ht-color: rgba(197, 239, 38, 0.5); --ht-size: 3px; }
+
+      /* B: toggles */
+      .tog { display: flex; align-items: center; justify-content: space-between; margin-top: 34px; font-size: 28px; font-weight: 600; color: #07142e; }
+      .sw { position: relative; width: 104px; height: 60px; border-radius: 30px; background: rgba(7, 20, 46, 0.14); }
+      .sw i { position: absolute; left: 6px; top: 6px; width: 48px; height: 48px; border-radius: 50%; background: #fff; box-shadow: 0 4px 10px rgba(7, 20, 46, 0.25); }
+
+      /* C: timeline */
+      #C h5 { color: #f7f5ef; }
+      #C p { color: rgba(247, 245, 239, 0.6); }
+      .lane { position: absolute; left: 40px; right: 40px; height: 64px; border-radius: 14px; background: rgba(255, 255, 255, 0.06); overflow: hidden; }
+      .lane b { position: absolute; top: 8px; height: 48px; border-radius: 10px; }
+      #ph { position: absolute; top: 200px; bottom: 60px; left: 120px; width: 4px; border-radius: 2px; background: #f7f5ef; box-shadow: 0 0 16px rgba(255, 255, 255, 0.8); }
+
+      /* D: chart */
+      .bars { position: absolute; left: 40px; right: 40px; bottom: 40px; height: 230px; display: flex; align-items: flex-end; gap: 14px; }
+      .bars i { flex: 1; border-radius: 10px 10px 4px 4px; background: #07142e; transform-origin: 50% 100%; }
+      .bars i:last-child { background: #ff5b45; }
+
+      /* E: chat */
+      .bub { position: absolute; max-width: 300px; padding: 18px 22px; border-radius: 24px; font-size: 25px; font-weight: 600; line-height: 1.3; }
+      #q { left: 40px; top: 110px; background: #07142e; color: #f7f5ef; border-bottom-left-radius: 6px; }
+      #a { right: 40px; top: 230px; background: #fffdf8; color: #07142e; border-bottom-right-radius: 6px; }
+
+      /* F: palette */
+      .sws { display: flex; gap: 14px; margin-top: 40px; }
+      .sws i { width: 70px; height: 150px; border-radius: 20px; }
+      #F .name { position: absolute; left: 40px; bottom: 40px; font-size: 26px; font-weight: 700; color: #07142e; }
+    </style>
+  </head>
+  <body>
+    <div id="stage" class="tx-paper">
+      <div id="dots" class="fx-layer tx-halftone"></div>
+      <div id="grid">
+        <div class="card" id="A">
+          <div class="tex tx-halftone"></div>
+          <div class="kick">byreel 2.0</div>
+          <div class="hl" id="hl">Everything a launch video needs.</div>
+        </div>
+        <div class="card" id="B">
+          <h5>Finish</h5><p>Texture, one tap away</p>
+          <div class="tog">Film grain <span class="sw" id="sw1"><i></i></span></div>
+          <div class="tog">Letterbox <span class="sw" id="sw2"><i></i></span></div>
+          <div class="tog">Halftone <span class="sw" id="sw3"><i></i></span></div>
+        </div>
+        <div class="card" id="C">
+          <h5>Timeline</h5><p>Every scene, timed to the beat</p>
+          <div class="lane" style="top: 230px"><b style="left: 0; width: 140px; background: #c5ef26"></b><b style="left: 160px; width: 110px; background: #c5ef26"></b></div>
+          <div class="lane" style="top: 314px"><b style="left: 40px; width: 180px; background: #7fb2ff"></b></div>
+          <div class="lane" style="top: 398px"><b style="left: 0; width: 90px; background: #ff5b45"></b><b style="left: 110px; width: 150px; background: #ff5b45"></b></div>
+          <div class="lane" style="top: 482px"><b style="left: 70px; width: 200px; background: #8b6cff"></b></div>
+          <div class="lane" style="top: 566px"><b style="left: 0; width: 260px; background: rgba(247,245,239,0.5)"></b></div>
+          <div id="ph"></div>
+        </div>
+        <div class="card" id="D">
+          <h5>Watch time</h5><p>Clips that hold attention</p>
+          <div class="bars"><i style="height: 30%"></i><i style="height: 44%"></i><i style="height: 38%"></i><i style="height: 60%"></i><i style="height: 72%"></i><i style="height: 100%"></i></div>
+        </div>
+        <div class="card" id="E">
+          <h5>Direct in words</h5>
+          <div class="bub" id="q">Make the logo pop.</div>
+          <div class="bub" id="a">Done. Added a crash zoom on the beat.</div>
+        </div>
+        <div class="card" id="F">
+          <h5>Brand kit</h5><p>Your colours, everywhere</p>
+          <div class="sws"><i id="w1"></i><i id="w2"></i><i id="w3"></i><i id="w4"></i></div>
+          <div class="name" id="kitname">byreel</div>
+        </div>
+      </div>
+    </div>
+
+    <script src="fx/kit.js"></script>
+    <script src="player.js"></script>
+    <script>
+      var rand = HF.seeded(77);
+      var cards = gsap.utils.toArray(".card");
+      var hl = HF.split("#hl");
+      var bars = gsap.utils.toArray(".bars i");
+      var blocks = gsap.utils.toArray(".lane b");
+      var palettes = [
+        ["#c5ef26", "#07142e", "#ff5b45", "#7fb2ff"],
+        ["#ff8fd0", "#2b1055", "#ffd23f", "#00c2a8"],
+        ["#f4efe3", "#1d3557", "#e63946", "#a8dadc"],
+      ];
+      var names = ["byreel", "Nightjar", "Harbour"];
+
+      gsap.set(cards, { scale: 0.86, opacity: 0, transformOrigin: "50% 50%" });
+      /* Camera starts tight on the Finish card (B), then pulls back to the whole grid. */
+      gsap.set("#grid", { scale: 2.3, transformOrigin: "1052px 215px" });
+      gsap.set(hl, { yPercent: 100, opacity: 0 });
+      gsap.set(bars, { scaleY: 0 });
+      gsap.set(["#q", "#a"], { scale: 0, transformOrigin: "0% 100%" });
+      gsap.set("#a", { transformOrigin: "100% 100%" });
+      gsap.set("#ph", { x: 0 });
+      palettes[0].forEach(function (c, i) { gsap.set("#w" + (i + 1), { backgroundColor: c }); });
+
+      var tl = gsap.timeline({ paused: true });
+
+      /* 0.1–1.6s: cards appear; the toggles flip on one after another. */
+      tl.to(cards, { scale: 1, opacity: 1, duration: 0.5, ease: "back.out(1.6)", stagger: 0.05 }, 0.1);
+      ["#sw1", "#sw2", "#sw3"].forEach(function (sw, i) {
+        var t = 0.7 + i * 0.32;
+        tl.to(sw + " i", { x: 44, duration: 0.25, ease: "back.out(2.5)" }, t);
+        tl.to(sw, { backgroundColor: "#c5ef26", duration: 0.2 }, t);
+      });
+
+      /* 1.7–2.7s: pull back to reveal the whole bento. */
+      tl.to("#grid", { scale: 1, duration: 1.0, ease: "expo.inOut" }, 1.7);
+
+      /* 2.5s onward: each card plays its own feature. */
+      tl.to(hl, { yPercent: 0, opacity: 1, duration: 0.45, ease: "power4.out", stagger: 0.018 }, 2.5);
+      tl.to(bars, { scaleY: 1, duration: 0.6, ease: "back.out(1.4)", stagger: 0.08 }, 2.7);
+      tl.to("#q", { scale: 1, duration: 0.4, ease: "back.out(2.2)" }, 3.0);
+      tl.to("#a", { scale: 1, duration: 0.4, ease: "back.out(2.2)" }, 3.8);
+      tl.to("#ph", { x: 200, duration: 5.4, ease: "none" }, 2.6);
+      blocks.forEach(function (b, i) {
+        tl.to(b, { x: (rand() - 0.5) * 80, duration: 1.2, ease: "power2.inOut", yoyo: true, repeat: 1 }, 3.0 + i * 0.2);
+      });
+      [4.3, 5.6].forEach(function (t, k) {
+        var pal = palettes[k + 1];
+        pal.forEach(function (c, i) {
+          tl.to("#w" + (i + 1), { backgroundColor: c, y: -12, duration: 0.25, ease: "power2.out" }, t + i * 0.06);
+          tl.to("#w" + (i + 1), { y: 0, duration: 0.3, ease: "bounce.out" }, t + 0.25 + i * 0.06);
+        });
+        tl.set("#kitname", { textContent: names[k + 1] }, t + 0.1);
+      });
+      tl.to(bars, { scaleY: 0.82, duration: 0.3, ease: "sine.inOut", yoyo: true, repeat: 3, stagger: 0.05 }, 5.0);
+
+      /* 8.1s: cards scatter off the page… */
+      cards.forEach(function (c, i) {
+        tl.to(c, {
+          y: 1200 + rand() * 300, x: (rand() - 0.5) * 500, rotation: (rand() - 0.5) * 50,
+          duration: 0.8, ease: "power3.in",
+        }, 8.1 + i * 0.06);
+      });
+
+      /* …and everything resets off-screen for the loop. */
+      tl.set(cards, { x: 0, y: 0, rotation: 0, scale: 0.86, opacity: 0 }, 9.6);
+      tl.set("#grid", { scale: 2.3 }, 9.6);
+      tl.set(["#sw1 i", "#sw2 i", "#sw3 i"], { x: 0 }, 9.6);
+      tl.set(["#sw1", "#sw2", "#sw3"], { backgroundColor: "rgba(7,20,46,0.14)" }, 9.6);
+      tl.set(hl, { yPercent: 100, opacity: 0 }, 9.6);
+      tl.set(bars, { scaleY: 0 }, 9.6);
+      tl.set(["#q", "#a"], { scale: 0 }, 9.6);
+      palettes[0].forEach(function (c, i) { tl.set("#w" + (i + 1), { backgroundColor: c }, 9.6); });
+      tl.set("#kitname", { textContent: names[0] }, 9.6);
+
+      HF.grain(tl, { opacity: 0.1, duration: 10, blend: "multiply" });
+      HF.register("feature-bento", tl, 10);
+    </script>
+  </body>
+</html>

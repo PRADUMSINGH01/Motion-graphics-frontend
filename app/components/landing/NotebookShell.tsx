@@ -43,7 +43,7 @@ export default function NotebookShell({
           LEFT-MARGIN HANDWRITTEN PEN SIDEBAR (Behind the Double Blue Lines)
          ===================================================================== */}
       <aside className="lp-margin-sidebar" aria-label="Notebook margin navigation">
-        <div className="lp-margin-header">INDEX</div>
+        <div className="lp-margin-header">contents</div>
         <nav className="lp-margin-nav">
           {MARGIN_NOTES.map((item, idx) => {
             const isActive =
@@ -58,7 +58,6 @@ export default function NotebookShell({
                 className={`lp-pen-link ${isActive ? "is-active" : ""}`}
                 style={{ "--line-idx": idx } as React.CSSProperties}
               >
-                <span className="lp-pen-num">{item.num}.</span>
                 <span className="lp-pen-word">
                   {item.label}
                   <svg
@@ -145,10 +144,7 @@ export default function NotebookShell({
           <div className="lp-notebook-footer-inner">
             <div className="lp-footer-brand-group">
               <span className="lp-footer-brand">byreel.in</span>
-              <span className="lp-footer-sep" aria-hidden="true">·</span>
-              <span className="lp-footer-copy">
-                © {new Date().getFullYear()} byreel.in — Ideas in Motion
-              </span>
+              <span className="lp-footer-copy">© {new Date().getFullYear()}</span>
             </div>
 
             <nav className="lp-footer-links" aria-label="Footer navigation">

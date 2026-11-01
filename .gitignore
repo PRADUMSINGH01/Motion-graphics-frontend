@@ -48,5 +48,7 @@ next-env.d.ts
 .claude/
 scratch_*.ps1
 
-# HyperFrames CLI local state (render locks/bookkeeping)
+# HyperFrames CLI local state and in-progress render folders
 .hyperframes/
+.*.hf-transaction-*/
+work-*-*/

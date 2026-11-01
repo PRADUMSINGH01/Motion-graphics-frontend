@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <meta data-composition-id="brand-build" data-width="1920" data-height="1080" />
+    <title>Brand build</title>
+    <link rel="stylesheet" href="fonts/fonts.css" />
+    <link rel="stylesheet" href="fx/textures.css" />
+    <script src="vendor/gsap.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1920px; height: 1080px; overflow: hidden; background: #0b2a6b; }
+      #stage { position: relative; width: 1920px; height: 1080px; overflow: hidden; }
+      #cam { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 900px 540px; }
+      #draw { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: visible; }
+      .guide { fill: none; stroke: rgba(255, 255, 255, 0.75); stroke-width: 2.5; }
+      .guide.dash { stroke-dasharray: 12 10; stroke: rgba(255, 255, 255, 0.5); }
+      .dim { fill: none; stroke: #c5ef26; stroke-width: 2.5; }
+      .note { font-family: "Caveat", cursive; font-weight: 700; font-size: 44px; fill: #ffffff; }
+      #mark { fill: #c5ef26; stroke: #c5ef26; stroke-width: 34; stroke-linejoin: round; }
+
+      #word {
+        position: absolute; left: 1060px; top: 330px; display: flex; overflow: hidden; padding-bottom: 14px;
+        font-family: "Bricolage Grotesque", sans-serif; font-weight: 700; font-size: 220px; letter-spacing: -10px;
+        line-height: 1; color: #ffffff;
+      }
+      #word span { display: inline-block; }
+      #spec { position: absolute; left: 1072px; top: 590px; font-family: "JetBrains Mono", monospace; font-weight: 500; font-size: 28px; color: rgba(255, 255, 255, 0.7); }
+      #pal { position: absolute; left: 1072px; top: 660px; display: flex; gap: 18px; }
+      .sw { width: 170px; }
+      .sw i { display: block; height: 120px; border-radius: 16px; box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.25); }
+      .sw b { display: block; margin-top: 12px; font-family: "JetBrains Mono", monospace; font-weight: 700; font-size: 22px; color: #ffffff; }
+      .sw small { display: block; font-family: "JetBrains Mono", monospace; font-size: 20px; color: rgba(255, 255, 255, 0.6); }
+      #title {
+        position: absolute; left: 120px; top: 90px; font-family: "JetBrains Mono", monospace; font-weight: 700;
+        font-size: 26px; letter-spacing: 3px; color: rgba(255, 255, 255, 0.75);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="stage" class="tx-blueprint">
+      <div id="cam">
+        <svg id="draw" viewBox="0 0 1920 1080" aria-hidden="true">
+          <!-- construction -->
+          <line class="guide dash" x1="120" y1="540" x2="1000" y2="540" />
+          <line class="guide dash" x1="640" y1="160" x2="640" y2="920" />
+          <circle class="guide" cx="640" cy="540" r="300" />
+          <circle class="guide dash" cx="640" cy="540" r="190" />
+          <line class="guide" x1="520" y1="290" x2="520" y2="790" />
+          <line class="guide" x1="520" y1="290" x2="900" y2="540" />
+          <line class="guide" x1="520" y1="790" x2="900" y2="540" />
+          <!-- dimensions -->
+          <path class="dim" d="M340 860 H 940 M340 845 V 875 M940 845 V 875" />
+          <text class="note" x="560" y="920">ø 600</text>
+          <path class="dim" d="M600 343 A 110 110 0 0 1 625 395" />
+          <text class="note" x="660" y="360">33.7°</text>
+          <path class="dim" d="M440 290 V 790 M425 290 H 455 M425 790 H 455" />
+          <text class="note" x="300" y="560">500</text>
+          <!-- the mark -->
+          <path id="mark" d="M537 318 L 883 540 L 537 762 Z" />
+        </svg>
+        <div id="title">BYREEL · BRAND SHEET · REV 2</div>
+        <div id="word"><span>b</span><span>y</span><span>r</span><span>e</span><span>e</span><span>l</span></div>
+        <div id="spec">Bricolage Grotesque 700 / tracking −4%</div>
+        <div id="pal">
+          <div class="sw"><i style="background: #c5ef26"></i><b>Lime</b><small>#C5EF26</small></div>
+          <div class="sw"><i style="background: #07142e"></i><b>Navy</b><small>#07142E</small></div>
+          <div class="sw"><i style="background: #f7f5ef"></i><b>Paper</b><small>#F7F5EF</small></div>
+          <div class="sw"><i style="background: #ff5b45"></i><b>Coral</b><small>#FF5B45</small></div>
+        </div>
+      </div>
+    </div>
+
+    <script src="fx/kit.js"></script>
+    <script src="vendor/DrawSVGPlugin.min.js"></script>
+    <script src="player.js"></script>
+    <script>
+      gsap.registerPlugin(DrawSVGPlugin);
+      var guides = gsap.utils.toArray(".guide");
+      var dims = gsap.utils.toArray(".dim");
+      var notes = gsap.utils.toArray(".note");
+      var letters = gsap.utils.toArray("#word span");
+      var sws = gsap.utils.toArray(".sw");
+
+      gsap.set(guides.concat(dims), { drawSVG: "0%" });
+      gsap.set(notes, { opacity: 0, y: 12 });
+      gsap.set("#mark", { opacity: 0, scale: 0.6, transformOrigin: "50% 50%" });
+      gsap.set(letters, { yPercent: 110 });
+      gsap.set(["#spec", "#title"], { opacity: 0 });
+      gsap.set(sws, { opacity: 0, y: 40 });
+
+      var tl = gsap.timeline({ paused: true });
+
+      /* A slow push-in over the whole sheet. */
+      tl.fromTo("#cam", { scale: 1.04 }, { scale: 1.12, duration: 10, ease: "none" }, 0);
+
+      /* 0.2–2.2s: construction geometry draws itself. */
+      tl.to("#title", { opacity: 1, duration: 0.5 }, 0.2);
+      tl.to(guides, { drawSVG: "100%", duration: 0.9, ease: "power2.inOut", stagger: 0.14 }, 0.3);
+      tl.to(dims, { drawSVG: "100%", duration: 0.5, ease: "power2.out", stagger: 0.2 }, 1.5);
+      tl.to(notes, { opacity: 1, y: 0, duration: 0.4, ease: "back.out(2)", stagger: 0.2 }, 1.7);
+
+      /* 2.7s: the mark fills in. */
+      tl.to("#mark", { opacity: 1, scale: 1, duration: 0.7, ease: "back.out(2.2)" }, 2.7);
+      tl.to(guides, { opacity: 0.35, duration: 0.6 }, 3.0);
+
+      /* 3.4–5.6s: wordmark, type spec and palette assemble the sheet. */
+      tl.to(letters, { yPercent: 0, duration: 0.6, ease: "power4.out", stagger: 0.05 }, 3.4);
+      tl.to("#spec", { opacity: 1, duration: 0.5 }, 4.1);
+      tl.to(sws, { opacity: 1, y: 0, duration: 0.5, ease: "back.out(1.8)", stagger: 0.12 }, 4.4);
+
+      /* 6.0–7.8s: the mark breathes; the swatches lift in turn. */
+      tl.to("#mark", { scale: 1.06, duration: 0.45, ease: "sine.inOut", yoyo: true, repeat: 3 }, 6.0);
+      tl.to(sws, { y: -14, duration: 0.25, ease: "power2.out", yoyo: true, repeat: 1, stagger: 0.12 }, 6.4);
+
+      /* 8.1–9.5s: the sheet erases back to the bare blueprint. */
+      tl.to(sws, { opacity: 0, y: 30, duration: 0.35, ease: "power2.in", stagger: 0.05 }, 8.1);
+      tl.to(letters, { yPercent: 110, duration: 0.4, ease: "power3.in", stagger: 0.03 }, 8.2);
+      tl.to(["#spec", "#title"], { opacity: 0, duration: 0.3 }, 8.2);
+      tl.to("#mark", { opacity: 0, scale: 0.6, duration: 0.4, ease: "power3.in" }, 8.4);
+      tl.to(notes, { opacity: 0, duration: 0.25 }, 8.4);
+      tl.to(guides.concat(dims), { drawSVG: "100% 100%", duration: 0.6, ease: "power2.in", stagger: 0.04 }, 8.5);
+      tl.set(guides.concat(dims), { drawSVG: "0%", opacity: 1 }, 9.6);
+
+      HF.grain(tl, { opacity: 0.12, duration: 10 });
+      HF.register("brand-build", tl, 10);
+    </script>
+  </body>
+</html>

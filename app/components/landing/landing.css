@@ -47,7 +47,11 @@
   overflow-x: hidden;
   color: var(--lp-ink);
   background-color: var(--lp-paper);
-  background-image: radial-gradient(
+  background-image: 
+    /* Paper fibre: long horizontal fibres plus a fine speckle, baked into SVG noise. */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.012 0.09' numOctaves='3' seed='4'/%3E%3CfeColorMatrix values='0 0 0 0 0.45 0 0 0 0 0.38 0 0 0 0 0.26 0 0 0 0.09 0'/%3E%3C/filter%3E%3Crect width='600' height='600' filter='url(%23f)'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='s'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='1' seed='9'/%3E%3CfeColorMatrix values='0 0 0 0 0.2 0 0 0 0 0.16 0 0 0 0 0.1 0 0 0 0.1 0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23s)'/%3E%3C/svg%3E"),
+    radial-gradient(
     ellipse 80% 60% at 50% 0%,
     rgba(255, 255, 255, 0.9) 0%,
     rgba(255, 255, 255, 0) 70%
@@ -153,14 +157,16 @@
   user-select: none;
 }
 
+/* A pen note in the margin, the way a real notebook labels its contents. */
 .lp-margin-header {
-  padding: 0 0 12px 10px;
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
-  font-size: 10.5px;
+  padding: 0 0 8px 10px;
+  font-family: var(--font-pen), "Caveat", cursive;
+  font-size: 24px;
   font-weight: 600;
-  text-transform: uppercase;
-  color: var(--lp-ink-muted);
-  letter-spacing: 0.14em;
+  line-height: 1;
+  color: var(--lp-graphite);
+  transform: rotate(-2deg);
+  transform-origin: left center;
 }
 
 .lp-margin-nav {

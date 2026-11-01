@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <meta data-composition-id="pocket-studio" data-width="1920" data-height="1080" />
+    <title>Pocket studio</title>
+    <link rel="stylesheet" href="fonts/fonts.css" />
+    <link rel="stylesheet" href="fx/textures.css" />
+    <script src="vendor/gsap.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1920px; height: 1080px; overflow: hidden; background: #04060d; }
+      #stage { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: #04060d; font-family: "Bricolage Grotesque", sans-serif; }
+
+      /* Aurora: three big blurred blobs drifting on the timeline. */
+      .blob { position: absolute; border-radius: 50%; filter: blur(110px); opacity: 0.75; }
+      #b1 { left: 120px; top: 80px; width: 820px; height: 640px; background: #8b6cff; }
+      #b2 { left: 1040px; top: 360px; width: 760px; height: 620px; background: #1f8bff; }
+      #b3 { left: 640px; top: 560px; width: 680px; height: 520px; background: #c5ef26; opacity: 0.45; }
+
+      #cam { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; perspective: 2200px; }
+      #phone {
+        position: absolute; left: 750px; top: 100px; width: 420px; height: 880px; border-radius: 68px;
+        background: linear-gradient(145deg, #2a2d38, #0b0c11 40%, #1c1e27);
+        box-shadow: 0 80px 140px -40px rgba(0, 0, 0, 0.85), inset 0 0 0 2px rgba(255, 255, 255, 0.12);
+        transform-style: preserve-3d;
+      }
+      #screen {
+        position: absolute; left: 16px; top: 16px; width: 388px; height: 848px; border-radius: 54px; overflow: hidden;
+        background: #f7f5ef;
+      }
+      #island { position: absolute; left: 50%; top: 18px; width: 120px; height: 34px; margin-left: -60px; border-radius: 20px; background: #000; z-index: 5; }
+      #glare {
+        position: absolute; inset: 0; border-radius: 54px; pointer-events: none; z-index: 6;
+        background: linear-gradient(115deg, rgba(255, 255, 255, 0.22) 0%, transparent 32%, transparent 70%, rgba(255, 255, 255, 0.08) 100%);
+      }
+      #track { position: absolute; left: 0; top: 0; width: 1164px; height: 848px; display: flex; }
+      .scr { position: relative; width: 388px; height: 848px; padding: 84px 26px 30px; }
+      .scr h4 { font-size: 30px; font-weight: 700; letter-spacing: -1px; color: #07142e; }
+      .scr .hint { margin-top: 6px; font-size: 18px; color: #5f6a80; }
+
+      /* Screen 1: prompt */
+      #prompt {
+        margin-top: 26px; min-height: 230px; padding: 22px; border-radius: 26px; background: #fff;
+        box-shadow: 0 1px 0 rgba(7, 20, 46, 0.06), 0 10px 30px -14px rgba(7, 20, 46, 0.3);
+        font-size: 27px; line-height: 1.38; color: #07142e;
+      }
+      #prompt .ch { opacity: 0; }
+      #caret { display: inline-block; width: 3px; height: 30px; background: #07142e; vertical-align: -5px; margin-left: 2px; }
+      .chips { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+      .chips span { padding: 9px 16px; border-radius: 999px; background: rgba(7, 20, 46, 0.06); font-size: 18px; font-weight: 600; color: #07142e; }
+      .chips span.on { background: #07142e; color: #c5ef26; }
+      #go {
+        position: absolute; left: 26px; right: 26px; bottom: 40px; height: 86px; border-radius: 26px;
+        background: #07142e; color: #f7f5ef; font-size: 28px; font-weight: 700;
+        display: flex; align-items: center; justify-content: center; gap: 12px;
+      }
+      #go i { width: 0; height: 0; border-left: 18px solid #c5ef26; border-top: 11px solid transparent; border-bottom: 11px solid transparent; }
+
+      /* Screen 2: render */
+      #ring { position: absolute; left: 64px; top: 230px; width: 260px; height: 260px; }
+      #pct { position: absolute; left: 0; width: 388px; top: 318px; text-align: center; font-size: 66px; font-weight: 800; letter-spacing: -3px; color: #07142e; font-variant-numeric: tabular-nums; }
+      .frames { position: absolute; left: 26px; right: 26px; top: 560px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+      .frames div { height: 72px; border-radius: 12px; background: #07142e; opacity: 0.12; }
+      .frames div:nth-child(4n + 1) { background: #ff5b45; }
+      .frames div:nth-child(4n + 2) { background: #c5ef26; }
+      .frames div:nth-child(4n + 3) { background: #7fb2ff; }
+
+      /* Screen 3: result */
+      #clip { position: relative; margin-top: 26px; height: 520px; border-radius: 28px; overflow: hidden; background: #07142e; }
+      #clip .w { position: absolute; left: 0; width: 336px; text-align: center; font-family: "Anton", sans-serif; line-height: 1; }
+      #clip .l1 { top: 120px; font-size: 64px; color: #f7f5ef; }
+      #clip .l2 { top: 196px; font-size: 168px; }
+      #clip .l2 span { display: inline-block; }
+      #clip .bar { position: absolute; left: 22px; right: 22px; bottom: 24px; height: 6px; border-radius: 3px; background: rgba(255, 255, 255, 0.2); }
+      #clip .bar i { position: absolute; left: 0; top: 0; bottom: 0; width: 100%; border-radius: 3px; background: #c5ef26; transform-origin: left center; }
+      .acts { display: flex; gap: 12px; margin-top: 22px; }
+      .acts span { flex: 1; height: 70px; border-radius: 22px; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700; }
+      .acts .a1 { background: rgba(7, 20, 46, 0.07); color: #07142e; }
+      .acts .a2 { background: #c5ef26; color: #07142e; }
+
+      /* Callouts */
+      .call { position: absolute; display: flex; align-items: center; gap: 0; color: #f7f5ef; font-size: 40px; font-weight: 600; letter-spacing: -1px; white-space: nowrap; }
+      .call .ln { height: 3px; width: 220px; background: rgba(247, 245, 239, 0.7); }
+      .call .dot { width: 18px; height: 18px; border-radius: 50%; background: #c5ef26; box-shadow: 0 0 0 8px rgba(197, 239, 38, 0.2); }
+      .call.left { flex-direction: row; }
+      .call.right { flex-direction: row-reverse; }
+      .call .tx { padding: 0 22px; }
+      #c1 { right: 1150px; top: 300px; }
+      #c2 { left: 1150px; top: 520px; }
+      #c3 { right: 1150px; top: 700px; }
+
+      #tag { position: absolute; left: 1010px; top: 380px; width: 820px; font-size: 118px; font-weight: 800; letter-spacing: -6px; line-height: 0.98; color: #f7f5ef; }
+      #tag b { color: #c5ef26; font-weight: 800; }
+      #black { position: absolute; inset: 0; background: #04060d; z-index: 50; }
+    </style>
+  </head>
+  <body>
+    <div id="stage">
+      <div class="blob" id="b1"></div>
+      <div class="blob" id="b2"></div>
+      <div class="blob" id="b3"></div>
+
+      <div class="call left" id="c1"><span class="tx">Type one sentence</span><span class="ln"></span><span class="dot"></span></div>
+      <div class="call right" id="c2"><span class="tx">Pick a look and a camera</span><span class="ln"></span><span class="dot"></span></div>
+      <div class="call left" id="c3"><span class="tx">Export 4K at 60 fps</span><span class="ln"></span><span class="dot"></span></div>
+      <div id="tag">Your studio,<br /><b>in your pocket.</b></div>
+
+      <div id="cam">
+        <div id="phone">
+          <div id="screen">
+            <div id="island"></div>
+            <div id="track">
+              <div class="scr">
+                <h4>New video</h4>
+                <div class="hint">Describe what should happen</div>
+                <div id="prompt"><span id="ptext">A 10-second launch teaser, bold type, lime on navy.</span><span id="caret"></span></div>
+                <div class="chips"><span class="on">16:9</span><span>9:16</span><span class="on">Crash zoom</span><span>Grain</span></div>
+                <div id="go"><i></i>Generate</div>
+              </div>
+              <div class="scr">
+                <h4>Rendering</h4>
+                <div class="hint">Scene 3 of 4 · 60 fps</div>
+                <svg id="ring" viewBox="0 0 260 260" aria-hidden="true">
+                  <circle cx="130" cy="130" r="110" fill="none" stroke="rgba(7,20,46,0.08)" stroke-width="22" />
+                  <circle id="arc" cx="130" cy="130" r="110" fill="none" stroke="#c5ef26" stroke-width="22" stroke-linecap="round"
+                    stroke-dasharray="691.15" stroke-dashoffset="691.15" transform="rotate(-90 130 130)" />
+                </svg>
+                <div id="pct">0%</div>
+                <div class="frames"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+              </div>
+              <div class="scr">
+                <h4>Ready</h4>
+                <div class="hint">launch-teaser.mp4 · 0:10</div>
+                <div id="clip">
+                  <div class="w l1">MEET</div>
+                  <div class="w l2" id="big"><span style="color:#c5ef26">2</span><span style="color:#ff5b45">.</span><span style="color:#7fb2ff">0</span></div>
+                  <div class="bar"><i></i></div>
+                </div>
+                <div class="acts"><span class="a1">Share</span><span class="a2">Export 4K</span></div>
+              </div>
+            </div>
+            <div id="glare"></div>
+          </div>
+        </div>
+      </div>
+      <div id="black"></div>
+    </div>
+
+    <script src="fx/kit.js"></script>
+    <script src="player.js"></script>
+    <script>
+      var chars = HF.split("#ptext");
+      var frames = gsap.utils.toArray(".frames div");
+      var big = gsap.utils.toArray("#big span");
+      var calls = ["#c1", "#c2", "#c3"];
+      var pctEl = document.getElementById("pct");
+
+      gsap.set("#phone", { y: 980, rotationX: 28, rotationY: -40 });
+      gsap.set(calls.map(function (c) { return c + " .ln"; }), { scaleX: 0 });
+      gsap.set("#c1 .ln, #c3 .ln", { transformOrigin: "100% 50%" });
+      gsap.set("#c2 .ln", { transformOrigin: "0% 50%" });
+      gsap.set(calls.map(function (c) { return c + " .tx"; }), { opacity: 0, y: 14 });
+      gsap.set(calls.map(function (c) { return c + " .dot"; }), { scale: 0 });
+      gsap.set(big, { y: -420 });
+      gsap.set("#clip .bar i", { scaleX: 0 });
+      gsap.set("#tag", { opacity: 0, x: 60 });
+
+      function callout(tl, id, t) {
+        tl.to(id + " .dot", { scale: 1, duration: 0.3, ease: "back.out(3)" }, t);
+        tl.to(id + " .ln", { scaleX: 1, duration: 0.45, ease: "power3.out" }, t + 0.1);
+        tl.to(id + " .tx", { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, t + 0.35);
+      }
+
+      var tl = gsap.timeline({ paused: true });
+
+      /* Aurora drift across the whole piece. */
+      tl.to("#b1", { x: 260, y: 120, duration: 10, ease: "sine.inOut" }, 0);
+      tl.to("#b2", { x: -300, y: -160, duration: 10, ease: "sine.inOut" }, 0);
+      tl.to("#b3", { x: 180, y: -220, scale: 1.2, duration: 10, ease: "sine.inOut" }, 0);
+
+      /* 0–1.5s: fade up, phone rises into a three-quarter view. */
+      tl.to("#black", { opacity: 0, duration: 0.6, ease: "power2.out" }, 0);
+      tl.to("#phone", { y: 0, rotationX: 6, rotationY: -16, duration: 1.4, ease: "power3.out" }, 0.15);
+
+      /* 1.2–3.0s: the prompt types itself. */
+      chars.forEach(function (c, i) { tl.set(c, { opacity: 1 }, 1.2 + i * 0.032); });
+      tl.to("#caret", { opacity: 0, duration: 0.01, yoyo: true, repeat: 7, repeatDelay: 0.2 }, 1.0);
+      callout(tl, "#c1", 1.5);
+
+      /* 3.0s: tap Generate, slide to the render screen. */
+      tl.to("#go", { scale: 0.94, duration: 0.1, ease: "power2.out", yoyo: true, repeat: 1 }, 3.0);
+      tl.to("#track", { x: -388, duration: 0.5, ease: "power3.inOut" }, 3.25);
+      tl.to("#phone", { rotationY: 14, rotationX: 4, duration: 2.2, ease: "power2.inOut" }, 3.3);
+
+      /* 3.6–5.4s: progress ring + percentage (tweened text via modifiers, seek-safe). */
+      tl.to("#arc", { attr: { "stroke-dashoffset": 0 }, duration: 1.8, ease: "power1.inOut" }, 3.6);
+      tl.fromTo(pctEl, { innerText: 0 }, { innerText: 100, duration: 1.8, ease: "power1.inOut", modifiers: { innerText: function (v) { return Math.round(v) + "%"; } } }, 3.6);
+      tl.to(frames, { opacity: 1, duration: 0.18, stagger: 0.2 }, 3.7);
+      callout(tl, "#c2", 3.9);
+
+      /* 5.5s: slide to the finished clip, which plays inside the phone. */
+      tl.to("#track", { x: -776, duration: 0.5, ease: "power3.inOut" }, 5.5);
+      tl.to(big, { y: 0, duration: 0.6, ease: "bounce.out", stagger: 0.1 }, 5.85);
+      tl.to("#clip .bar i", { scaleX: 1, duration: 2.6, ease: "none" }, 5.8);
+      tl.to(big, { y: -26, duration: 0.18, ease: "power2.out", yoyo: true, repeat: 1, stagger: 0.08 }, 6.9);
+      tl.to(big, { y: -26, duration: 0.18, ease: "power2.out", yoyo: true, repeat: 1, stagger: 0.08 }, 7.6);
+      callout(tl, "#c3", 6.0);
+
+      /* 8.0s: callouts retract, phone swings left square-on, tagline lands. */
+      tl.to(calls, { opacity: 0, duration: 0.35, ease: "power2.in" }, 7.9);
+      tl.to("#phone", { x: -420, rotationY: 0, rotationX: 0, duration: 0.8, ease: "power3.inOut" }, 8.0);
+      tl.to("#tag", { opacity: 1, x: 0, duration: 0.6, ease: "power3.out" }, 8.4);
+
+      /* 9.4s: fade to black and reset for the loop. */
+      tl.to("#black", { opacity: 1, duration: 0.5, ease: "power2.in" }, 9.4);
+      tl.set("#phone", { x: 0, y: 980, rotationX: 28, rotationY: -40 }, 9.95);
+      tl.set("#track", { x: 0 }, 9.95);
+      tl.set(calls, { opacity: 1 }, 9.95);
+      tl.set("#tag", { opacity: 0, x: 60 }, 9.95);
+
+      HF.grain(tl, { opacity: 0.1, duration: 10 });
+      HF.register("pocket-studio", tl, 10);
+    </script>
+  </body>
+</html>

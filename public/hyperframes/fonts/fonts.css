@@ -17,3 +17,15 @@
   font-weight: 700;
   font-display: block;
 }
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("jetbrains-mono-500.woff2") format("woff2");
+  font-weight: 500;
+  font-display: block;
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("jetbrains-mono-700.woff2") format("woff2");
+  font-weight: 700;
+  font-display: block;
+}

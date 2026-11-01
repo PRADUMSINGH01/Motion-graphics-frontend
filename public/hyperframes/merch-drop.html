@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <meta data-composition-id="merch-drop" data-width="1920" data-height="1080" />
+    <title>Merch drop</title>
+    <link rel="stylesheet" href="fonts/fonts.css" />
+    <link rel="stylesheet" href="fx/textures.css" />
+    <script src="vendor/gsap.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1920px; height: 1080px; overflow: hidden; background: #110f0d; }
+      #stage {
+        position: relative; width: 1920px; height: 1080px; overflow: hidden;
+        background: radial-gradient(ellipse 45% 60% at 30% 40%, #3a3127 0%, #17130f 60%, #0c0a08 100%);
+      }
+      #spot { background: radial-gradient(ellipse 22% 55% at 30% 0%, rgba(255, 236, 200, 0.22), transparent 70%); mix-blend-mode: screen; }
+
+      /* 3D box */
+      #scene { position: absolute; left: 380px; top: 330px; width: 380px; height: 380px; perspective: 1500px; }
+      #box { position: absolute; inset: 0; transform-style: preserve-3d; }
+      .face {
+        position: absolute; width: 380px; height: 380px; display: flex; align-items: center; justify-content: center;
+        border: 3px solid rgba(7, 20, 46, 0.25); backface-visibility: hidden;
+      }
+      .face.f { background: #c5ef26; transform: translateZ(190px); }
+      .face.b { background: #b2dc16; transform: rotateY(180deg) translateZ(190px); }
+      .face.r { background: #07142e; transform: rotateY(90deg) translateZ(190px); }
+      .face.l { background: #0d1e40; transform: rotateY(-90deg) translateZ(190px); }
+      .face.d { background: #000; transform: rotateX(-90deg) translateZ(190px); }
+      .face .logo { display: flex; align-items: center; gap: 14px; font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; font-size: 74px; letter-spacing: -3px; }
+      .face.f .logo, .face.b .logo { color: #07142e; }
+      .face.r .logo, .face.l .logo { color: #c5ef26; }
+      .face svg { width: 52px; height: 58px; }
+      .tape { position: absolute; left: 0; right: 0; top: 168px; height: 44px; background: rgba(247, 245, 239, 0.25); }
+      /* Lid hinges on the back edge of the top. */
+      #lid { position: absolute; width: 380px; height: 380px; transform-style: preserve-3d; }
+      #lid .face { background: #d6f74a; transform: none; }
+      #glow {
+        position: absolute; left: 40px; top: -360px; width: 300px; height: 520px; border-radius: 50%;
+        background: radial-gradient(ellipse at 50% 100%, rgba(255, 246, 200, 0.9), rgba(197, 239, 38, 0.35) 40%, transparent 70%);
+        filter: blur(12px); mix-blend-mode: screen;
+      }
+      .stk {
+        position: absolute; left: 110px; top: 90px; width: 160px; height: 160px; border-radius: 28px;
+        display: flex; align-items: center; justify-content: center; font-family: "Anton", sans-serif; font-size: 54px; line-height: 1;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.35);
+      }
+      #floor { position: absolute; left: 300px; top: 760px; width: 540px; height: 90px; border-radius: 50%; background: rgba(0, 0, 0, 0.55); filter: blur(18px); }
+
+      /* Split-flap board */
+      #board { position: absolute; left: 960px; top: 300px; display: grid; grid-template-columns: repeat(8, 96px); gap: 10px; }
+      .cell { position: relative; width: 96px; height: 140px; perspective: 600px; }
+      .half, .flap { position: absolute; left: 0; width: 96px; height: 70px; overflow: hidden; background: #1f1c19; }
+      .half.top, .flap.ftop { top: 0; border-radius: 10px 10px 0 0; transform-origin: 50% 100%; }
+      .half.bot, .flap.fbot { top: 70px; border-radius: 0 0 10px 10px; transform-origin: 50% 0%; }
+      .flap { backface-visibility: hidden; }
+      .flap.ftop { background: #262220; }
+      .cell span {
+        position: absolute; left: 0; width: 96px; height: 140px; line-height: 140px; text-align: center;
+        font-family: "JetBrains Mono", monospace; font-weight: 700; font-size: 92px; color: #f3ead8;
+      }
+      .bot span, .fbot span { top: -70px; }
+      .cell::after { content: ""; position: absolute; left: 0; right: 0; top: 69px; height: 2px; background: #0b0a09; z-index: 5; }
+      #caption { position: absolute; left: 964px; top: 640px; font-family: "Bricolage Grotesque", sans-serif; font-weight: 600; font-size: 46px; color: rgba(243, 234, 216, 0.75); }
+      #caption b { color: #c5ef26; font-weight: 700; }
+    </style>
+  </head>
+  <body>
+    <div id="stage">
+      <div id="spot" class="fx-layer"></div>
+      <div id="floor"></div>
+      <div id="scene">
+        <div id="glow"></div>
+        <div id="box">
+          <div class="face f"><div class="tape"></div><div class="logo"><svg viewBox="0 0 210 230"><path d="M18 14 L196 115 L18 216 Z" fill="currentColor" stroke="currentColor" stroke-width="20" stroke-linejoin="round" /></svg>byreel</div></div>
+          <div class="face b"><div class="logo">drop 04</div></div>
+          <div class="face r"><div class="logo">byreel</div></div>
+          <div class="face l"><div class="logo">merch</div></div>
+          <div class="face d"></div>
+          <div id="lid"><div class="face"><div class="tape" style="top: 0; height: 100%; width: 44px; left: 168px"></div></div></div>
+        </div>
+        <div class="stk" id="k1" style="background: #ff5b45; color: #fff">HI!</div>
+        <div class="stk" id="k2" style="background: #7fb2ff; color: #07142e">60</div>
+        <div class="stk" id="k3" style="background: #f7f5ef; color: #07142e">▶</div>
+      </div>
+      <div id="board"></div>
+      <div id="caption">Sticker pack + tee. <b>While stock lasts.</b></div>
+    </div>
+
+    <script src="fx/kit.js"></script>
+    <script src="player.js"></script>
+    <script>
+      var rand = HF.seeded(404);
+      var ALPHA = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+      var STATES = ["DROP 04 FRI 6PM ", "LIVE NOW48 HOURS", "DROP 04 FRI 6PM "];
+      var board = document.getElementById("board");
+      var cells = [];
+      for (var i = 0; i < 16; i++) {
+        var c = document.createElement("div");
+        c.className = "cell";
+        c.innerHTML = '<div class="half top"><span></span></div><div class="half bot"><span></span></div>' +
+          '<div class="flap ftop"><span></span></div><div class="flap fbot"><span></span></div>';
+        board.appendChild(c);
+        var q = function (sel) { return c.querySelector(sel); };
+        cells.push({ top: q(".top span"), bot: q(".bot span"), ftop: q(".ftop"), fbot: q(".fbot"), ftopS: q(".ftop span"), fbotS: q(".fbot span") });
+        var ch = STATES[0][i];
+        [cells[i].top, cells[i].bot, cells[i].ftopS, cells[i].fbotS].forEach(function (s) { s.textContent = ch; });
+      }
+
+      var tl = gsap.timeline({ paused: true });
+
+      /* One flap step: old character's top half falls away, new character's bottom half lands. */
+      function flapStep(cell, from, to, t) {
+        tl.set(cell.top, { textContent: to }, t);
+        tl.set(cell.bot, { textContent: from }, t);
+        tl.set(cell.ftopS, { textContent: from }, t);
+        tl.set(cell.fbotS, { textContent: to }, t);
+        tl.fromTo(cell.ftop, { rotationX: 0 }, { rotationX: -90, duration: 0.05, ease: "power1.in", immediateRender: false }, t);
+        tl.fromTo(cell.fbot, { rotationX: 90 }, { rotationX: 0, duration: 0.05, ease: "power1.out", immediateRender: false }, t + 0.05);
+      }
+      /* Each cell rattles through a few random characters before landing on its target. */
+      function flipBoard(from, to, at) {
+        cells.forEach(function (cell, i) {
+          var a = from[i], b = to[i];
+          if (a === b) return;
+          var seq = [a];
+          var hops = 2 + Math.floor(rand() * 3);
+          for (var h = 0; h < hops; h++) seq.push(ALPHA[Math.floor(rand() * ALPHA.length)]);
+          seq.push(b);
+          var t0 = at + i * 0.03;
+          for (var s = 1; s < seq.length; s++) flapStep(cell, seq[s - 1], seq[s], t0 + (s - 1) * 0.11);
+        });
+      }
+      gsap.set(".fbot", { rotationX: 0 });
+      /* Lid: hinged on the back-top edge (z = -190). 90° lies flat (closed); 158° is propped open. */
+      gsap.set("#lid", { z: -190, rotationX: 90, transformOrigin: "50% 0% 0" });
+      gsap.set(["#k1", "#k2", "#k3"], { y: 120, scale: 0.6, opacity: 0 });
+      gsap.set("#glow", { opacity: 0, scaleY: 0.4, transformOrigin: "50% 100%" });
+      gsap.set("#caption", { opacity: 0, y: 20 });
+
+      /* The box turns a full circle across the film: seamless loop. */
+      tl.fromTo("#box", { rotationY: -30, rotationX: -14 }, { rotationY: 330, rotationX: -14, duration: 10, ease: "none" }, 0);
+      tl.to("#floor", { scaleX: 0.85, duration: 2.5, ease: "sine.inOut", yoyo: true, repeat: 3 }, 0);
+
+      /* 1.2s: the board flips to LIVE NOW. */
+      flipBoard(STATES[0], STATES[1], 1.2);
+      tl.to("#caption", { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, 2.4);
+
+      /* 2.6s: the lid swings open, light spills, the stickers pop out. */
+      tl.to("#lid", { rotationX: 158, duration: 0.6, ease: "back.out(1.6)" }, 2.6);
+      tl.to("#glow", { opacity: 1, scaleY: 1, duration: 0.7, ease: "power2.out" }, 2.8);
+      [["#k1", -240, -150, -16], ["#k2", -320, 0, 8], ["#k3", -240, 150, 18]].forEach(function (k, i) {
+        tl.to(k[0], { y: k[1], x: k[2], rotation: k[3], scale: 1, opacity: 1, duration: 0.7, ease: "back.out(2)" }, 3.0 + i * 0.12);
+        tl.to(k[0], { y: k[1] - 20, duration: 1.1, ease: "sine.inOut", yoyo: true, repeat: 1 }, 3.8 + i * 0.12);
+      });
+
+      /* 6.6s: everything goes back in the box; the board flips back to the teaser. */
+      tl.to(["#k1", "#k2", "#k3"], { y: 120, x: 0, rotation: 0, scale: 0.6, opacity: 0, duration: 0.5, ease: "power3.in", stagger: 0.08 }, 6.6);
+      tl.to("#glow", { opacity: 0, scaleY: 0.4, duration: 0.5, ease: "power2.in" }, 7.0);
+      tl.to("#lid", { rotationX: 90, duration: 0.5, ease: "power3.in" }, 7.2);
+      tl.to("#caption", { opacity: 0, y: 20, duration: 0.4 }, 8.0);
+      flipBoard(STATES[1], STATES[2], 8.2);
+
+      HF.grain(tl, { opacity: 0.12, duration: 10 });
+      HF.register("merch-drop", tl, 10);
+    </script>
+  </body>
+</html>

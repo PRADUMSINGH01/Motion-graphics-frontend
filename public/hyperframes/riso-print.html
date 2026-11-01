@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <meta data-composition-id="riso-print" data-width="1920" data-height="1080" />
+    <title>Riso print</title>
+    <link rel="stylesheet" href="fonts/fonts.css" />
+    <link rel="stylesheet" href="fx/textures.css" />
+    <script src="vendor/gsap.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1920px; height: 1080px; overflow: hidden; background: #f4efe3; }
+      #stage { position: relative; width: 1920px; height: 1080px; overflow: hidden; }
+
+      .sheet { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: hidden; }
+      /* Two ink drums. Multiply makes overlaps print as a third colour, like real overprint. */
+      .ink { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; mix-blend-mode: multiply; }
+      .pink { color: #ff4fa8; }
+      .blue { color: #2f5bff; }
+      .shape { position: absolute; background: currentColor; }
+      .type {
+        position: absolute; font-family: "Anton", sans-serif; line-height: 0.86; letter-spacing: 2px; color: currentColor;
+      }
+      .ht { position: absolute; --ht-color: currentColor; --ht-size: 4px; background-size: 16px 16px; }
+      .dropout { position: absolute; inset: 0; opacity: 0.9; pointer-events: none; }
+
+      /* Sheet 1 */
+      #s1 .blue .disc { left: 760px; top: 110px; width: 780px; height: 780px; border-radius: 50%; }
+      #s1 .blue .stripe { left: 0; width: 1920px; height: 34px; }
+      #s1 .blue .ht { left: 1060px; top: 40px; width: 900px; height: 900px; border-radius: 50%; -webkit-mask-image: radial-gradient(circle, #000 35%, transparent 70%); mask-image: radial-gradient(circle, #000 35%, transparent 70%); }
+      #s1 .pink .type { left: 120px; top: 150px; font-size: 300px; }
+      #s1 .pink .small {
+        position: absolute; right: 120px; top: 868px; font-family: "Bricolage Grotesque", sans-serif; font-weight: 700;
+        font-size: 42px; letter-spacing: 1px; color: currentColor;
+      }
+
+      /* Sheet 2 */
+      #s2 .pink .blk { left: 0; top: 0; width: 1920px; height: 1080px; }
+      #s2 .blue .type { left: 0; width: 1920px; top: 190px; text-align: center; font-size: 340px; }
+      #s2 .blue .ht { left: 0; top: 700px; width: 1920px; height: 380px; --ht-size: 5px; }
+      #s2 .pink .knock {
+        position: absolute; left: 0; width: 1920px; top: 470px; text-align: center;
+        font-family: "Anton", sans-serif; font-size: 230px; line-height: 1; letter-spacing: 4px; color: #f4efe3;
+      }
+
+      .reg { position: absolute; width: 60px; height: 60px; border: 3px solid #07142e; border-radius: 50%; opacity: 0.55; }
+      .reg::before, .reg::after { content: ""; position: absolute; background: #07142e; }
+      .reg::before { left: 50%; top: -14px; bottom: -14px; width: 3px; margin-left: -1.5px; }
+      .reg::after { top: 50%; left: -14px; right: -14px; height: 3px; margin-top: -1.5px; }
+    </style>
+  </head>
+  <body>
+    <div id="stage" class="tx-paper">
+      <div class="sheet tx-paper" id="s2">
+        <div class="ink pink" id="s2p"><div class="shape blk"></div><div class="knock">TWO INKS.</div></div>
+        <div class="ink blue" id="s2b">
+          <div class="type">ONE PROMPT</div>
+          <div class="ht tx-halftone"></div>
+        </div>
+        <div class="dropout tx-riso"></div>
+      </div>
+
+      <div class="sheet tx-paper" id="s1">
+        <div class="ink blue" id="s1b">
+          <div class="shape disc"></div>
+          <div class="ht tx-halftone"></div>
+          <div class="shape stripe" style="top: 940px"></div>
+          <div class="shape stripe" style="top: 1000px"></div>
+        </div>
+        <div class="ink pink" id="s1p">
+          <div class="type">PRINT<br />IN<br />MOTION.</div>
+          <div class="small">Two inks. Twelve frames a second.</div>
+        </div>
+        <div class="dropout tx-riso"></div>
+        <div class="reg" style="left: 40px; top: 40px"></div>
+        <div class="reg" style="right: 40px; top: 40px"></div>
+      </div>
+    </div>
+
+    <script src="fx/kit.js"></script>
+    <script src="player.js"></script>
+    <script>
+      var rand = HF.seeded(1212);
+      var STEP = 1 / 12; /* print passes run at 12 fps for a hand-cranked feel */
+
+      gsap.set(["#s1b", "#s1p"], { clipPath: "inset(0% 100% 0% 0%)" });
+      gsap.set(["#s2b", "#s2p"], { clipPath: "inset(0% 0% 0% 0%)" });
+      gsap.set("#s2", { y: 1080, zIndex: 1 });
+      gsap.set("#s1", { zIndex: 2 });
+
+      var tl = gsap.timeline({ paused: true });
+
+      /* A print pass: the ink layer wipes on in visible 12 fps steps. */
+      function pass(target, at, dur) {
+        tl.to(target, { clipPath: "inset(0% 0% 0% 0%)", duration: dur, ease: "steps(" + Math.round(dur / STEP) + ")" }, at);
+      }
+      /* Misregistration: the layer hops a few pixels every frame-step, stepped not smooth. */
+      function jitter(target, from, to, amp) {
+        for (var t = from; t < to; t += STEP * 2) {
+          tl.set(target, { x: (rand() - 0.5) * amp, y: (rand() - 0.5) * amp, rotation: (rand() - 0.5) * 0.4 }, t);
+        }
+        tl.set(target, { x: 0, y: 0, rotation: 0 }, to);
+      }
+
+      /* Sheet 1: blue drum, then pink drum, then the press shakes the registration. */
+      pass("#s1b", 0.2, 0.9);
+      pass("#s1p", 1.2, 0.9);
+      jitter("#s1p", 2.2, 4.6, 26);
+      jitter("#s1b", 2.4, 4.4, 10);
+      tl.to("#s1b .ht", { backgroundPosition: "64px 32px", duration: 2.4, ease: "steps(29)" }, 2.2);
+
+      /* 4.8s: paper feed — sheet 1 rides up and out as sheet 2 feeds in from below. */
+      tl.to("#s1", { y: -1080, duration: 0.7, ease: "power2.inOut" }, 4.8);
+      tl.to("#s2", { y: 0, duration: 0.7, ease: "power2.inOut" }, 4.8);
+      jitter("#s2b", 5.6, 8.4, 30);
+      tl.to("#s2 .knock", { letterSpacing: "40px", duration: 0.5, ease: "steps(6)", yoyo: true, repeat: 3 }, 5.8);
+      tl.to("#s2b .ht", { backgroundPosition: "-96px 0px", duration: 2.8, ease: "steps(34)" }, 5.6);
+
+      /* 8.7s: sheet 2 feeds out, revealing a blank sheet 1 (reset underneath) to loop from. */
+      tl.set("#s1", { y: 0, zIndex: 0 }, 8.6);
+      tl.set(["#s1b", "#s1p"], { clipPath: "inset(0% 100% 0% 0%)" }, 8.6);
+      tl.set("#s1b .ht", { backgroundPosition: "0px 0px" }, 8.6);
+      tl.to("#s2", { y: -1080, duration: 0.7, ease: "power2.inOut" }, 8.7);
+      tl.set("#s2", { y: 1080 }, 9.5);
+      tl.set("#s1", { zIndex: 2 }, 9.5);
+      tl.set("#s2b .ht", { backgroundPosition: "0px 0px" }, 9.5);
+
+      HF.grain(tl, { opacity: 0.14, duration: 10, blend: "multiply", frequency: 0.75 });
+      HF.register("riso-print", tl, 10);
+    </script>
+  </body>
+</html>

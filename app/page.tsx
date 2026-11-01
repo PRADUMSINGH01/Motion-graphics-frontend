@@ -4,9 +4,16 @@ import React, { useState, useEffect, useRef, useSyncExternalStore } from "react"
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import NotebookShell from "./components/landing/NotebookShell";
-import { SHOWREEL, type ShowreelItem } from "./components/landing/showreel";
+import { CATEGORIES, SHOWREEL, type Category, type ShowreelItem } from "./components/landing/showreel";
 import "./components/landing/landing.css";
 import "./components/landing/home.css";
+
+/* Every ninth reel of whatever is showing becomes a 2×2 tile, alternating sides, but only when
+   at least four reels follow it to fill out the block beside it. */
+function featureOf(index: number, count: number): "left" | "right" | undefined {
+  if (index % 9 !== 0 || count - index < 5) return undefined;
+  return (index / 9) % 2 === 0 ? "left" : "right";
+}
 
 /* HyperFrames originals are authored at 1920×1080; the earlier reels on a 1280×720 stage. */
 function stageOf(item: ShowreelItem) {
@@ -40,15 +47,16 @@ function useReducedMotion() {
 function ReelTile({
   item,
   index,
+  feature,
   playing,
   onUse,
 }: {
   item: ShowreelItem;
   index: number;
+  feature?: "left" | "right";
   playing: boolean;
   onUse: (item: ShowreelItem) => void;
 }) {
-  const feature = item.feature;
   const boxRef = useRef<HTMLDivElement | null>(null);
   const [box, setBox] = useState({ w: 0, h: 0 });
   const [onScreen, setOnScreen] = useState(false);
@@ -85,7 +93,7 @@ function ReelTile({
   return (
     <figure
       className={`hm-tile${feature ? ` is-feature is-feature-${feature}` : ""}`}
-      style={{ "--i": index } as React.CSSProperties}
+      style={{ "--i": Math.min(index, 8) } as React.CSSProperties}
     >
       <div ref={boxRef} className="hm-tile-stage">
         {/* eslint-disable-next-line @next/next/no-img-element -- tiny static poster, sized by CSS */}
@@ -134,6 +142,11 @@ export default function Home() {
   const reduceMotion = useReducedMotion();
   const [choice, setChoice] = useState<"auto" | "play" | "pause">("auto");
   const playing = choice === "play" || (choice === "auto" && !reduceMotion);
+
+  const [filter, setFilter] = useState<"All" | Category>("All");
+  const visible = filter === "All" ? SHOWREEL : SHOWREEL.filter((r) => r.category === filter);
+  const countOf = (c: "All" | Category) =>
+    c === "All" ? SHOWREEL.length : SHOWREEL.filter((r) => r.category === c).length;
 
   const applyReelPrompt = (item: ShowreelItem) => {
     setPrompt(item.prompt);
@@ -195,6 +208,20 @@ export default function Home() {
             </svg>
           </p>
           <div className="hm-wall-bar">
+            <div className="hm-filters" role="group" aria-label="Filter reels">
+              {(["All", ...CATEGORIES] as const).map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  aria-pressed={filter === c}
+                  onClick={() => setFilter(c)}
+                  className="hm-filter"
+                >
+                  {c}
+                  <span className="hm-filter-count">{countOf(c)}</span>
+                </button>
+              ))}
+            </div>
             <button
               type="button"
               className="hm-play-toggle"
@@ -217,8 +244,15 @@ export default function Home() {
             )}
           </div>
           <div className="hm-wall">
-            {SHOWREEL.map((item, i) => (
-              <ReelTile key={item.id} item={item} index={i} playing={playing} onUse={applyReelPrompt} />
+            {visible.map((item, i) => (
+              <ReelTile
+                key={item.id}
+                item={item}
+                index={i}
+                feature={featureOf(i, visible.length)}
+                playing={playing}
+                onUse={applyReelPrompt}
+              />
             ))}
           </div>
           <p className="hm-wall-foot">

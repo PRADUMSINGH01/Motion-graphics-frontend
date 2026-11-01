@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <meta data-composition-id="liquid-chrome" data-width="1920" data-height="1080" />
+    <title>Liquid chrome</title>
+    <link rel="stylesheet" href="fonts/fonts.css" />
+    <link rel="stylesheet" href="fx/textures.css" />
+    <script src="vendor/gsap.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1920px; height: 1080px; overflow: hidden; background: #05060a; }
+      #stage {
+        position: relative; width: 1920px; height: 1080px; overflow: hidden;
+        background: radial-gradient(ellipse 70% 55% at 50% 42%, #1a1f33 0%, #07080d 70%);
+      }
+
+      /* Chrome: a hard-banded metal gradient plus an iridescent sheen, both clipped to text. */
+      .chrome {
+        position: absolute; left: 0; width: 1920px; text-align: center;
+        font-family: "Anton", sans-serif; font-size: 400px; line-height: 1; letter-spacing: 10px;
+        color: transparent; -webkit-background-clip: text; background-clip: text;
+        background-image:
+          linear-gradient(100deg, transparent 30%, rgba(255, 120, 210, 0.55) 44%, rgba(120, 210, 255, 0.55) 56%, transparent 70%),
+          linear-gradient(180deg, #ffffff 0%, #c9ced8 20%, #2a2e39 44%, #f4f6ff 50%, #6b7385 60%, #15171e 78%, #dfe6ff 100%);
+        background-size: 300% 100%, 100% 100%;
+        background-position: 100% 0, 0 0;
+        filter: url(#liquid);
+      }
+      .word { top: 250px; }
+      .mirror { top: 250px; transform: translateY(800px) scaleY(-1); transform-origin: 50% 0; opacity: 0.28;
+        -webkit-mask-image: linear-gradient(180deg, transparent 40%, #000 100%); mask-image: linear-gradient(180deg, transparent 40%, #000 100%); }
+      #floor {
+        position: absolute; left: 0; top: 690px; width: 1920px; height: 2px;
+        background: linear-gradient(90deg, transparent, rgba(220, 230, 255, 0.35), transparent);
+      }
+      #caustic { mix-blend-mode: screen; opacity: 0.35; }
+      #tag {
+        position: absolute; left: 0; width: 1920px; top: 860px; text-align: center;
+        font-family: "Bricolage Grotesque", sans-serif; font-weight: 600; font-size: 46px; letter-spacing: 1px;
+        color: rgba(230, 236, 255, 0.85);
+      }
+      #tag b { color: #c5ef26; font-weight: 700; }
+      #black { position: absolute; inset: 0; background: #000; z-index: 50; }
+    </style>
+  </head>
+  <body>
+    <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+      <defs>
+        <!-- The liquid: fractal noise displaces the type; scale = how molten it is. -->
+        <filter id="liquid" x="-20%" y="-60%" width="140%" height="220%">
+          <feTurbulence id="lt" type="fractalNoise" baseFrequency="0.006 0.02" numOctaves="2" seed="7" result="n" />
+          <feDisplacementMap id="ld" in="SourceGraphic" in2="n" scale="220" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+        <filter id="caustics">
+          <feTurbulence id="ct" type="turbulence" baseFrequency="0.004 0.012" numOctaves="2" seed="3" />
+          <feColorMatrix values="0 0 0 0 0.6  0 0 0 0 0.7  0 0 0 0 1  0 0 0 1.6 -0.9" />
+        </filter>
+      </defs>
+    </svg>
+    <div id="stage">
+      <svg id="caustic" class="fx-layer" viewBox="0 0 1920 1080" aria-hidden="true"><rect width="1920" height="1080" filter="url(#caustics)" /></svg>
+      <div class="chrome mirror" id="m1">LIQUID</div>
+      <div class="chrome mirror" id="m2">CHROME</div>
+      <div id="floor"></div>
+      <div class="chrome word" id="w1">LIQUID</div>
+      <div class="chrome word" id="w2">CHROME</div>
+      <div id="tag">Textures that <b>move</b>, from one sentence.</div>
+      <div id="black"></div>
+    </div>
+
+    <script src="fx/kit.js"></script>
+    <script src="player.js"></script>
+    <script>
+      gsap.set(["#w2", "#m2"], { opacity: 0 });
+      gsap.set(["#w1", "#m1"], { opacity: 0 });
+      gsap.set("#tag", { opacity: 0, y: 20 });
+
+      var tl = gsap.timeline({ paused: true });
+
+      /* The noise field drifts the whole time: the metal never sits still. */
+      tl.to("#lt", { attr: { baseFrequency: "0.009 0.028" }, duration: 5, ease: "sine.inOut", yoyo: true, repeat: 1 }, 0);
+      tl.to("#ct", { attr: { baseFrequency: "0.006 0.016" }, duration: 10, ease: "sine.inOut" }, 0);
+      tl.to(".chrome", { backgroundPosition: "-50% 0, 0 0", duration: 10, ease: "none" }, 0);
+
+      /* 0–1.2s: LIQUID pours out of the noise. */
+      tl.to("#black", { opacity: 0, duration: 0.5, ease: "power2.out" }, 0);
+      tl.to(["#w1", "#m1"], { opacity: 1, duration: 0.6, ease: "power2.out" }, 0.1);
+      tl.to("#ld", { attr: { scale: 14 }, duration: 1.3, ease: "expo.out" }, 0.1);
+
+      /* 1.4–3.4s: it settles into a slow wobble. */
+      tl.to("#ld", { attr: { scale: 30 }, duration: 1, ease: "sine.inOut", yoyo: true, repeat: 1 }, 1.4);
+
+      /* 3.5s: it melts — the field cranks up and the letters drip down into the floor. */
+      tl.to("#ld", { attr: { scale: 300 }, duration: 0.8, ease: "power2.in" }, 3.5);
+      tl.to("#w1", { scaleY: 1.5, y: 120, transformOrigin: "50% 0%", opacity: 0, duration: 0.8, ease: "power2.in" }, 3.5);
+      tl.to("#m1", { opacity: 0, duration: 0.6 }, 3.6);
+
+      /* 4.3s: CHROME re-forms from the same molten field. */
+      tl.to(["#w2", "#m2"], { opacity: 1, duration: 0.4, ease: "power2.out" }, 4.3);
+      tl.to("#ld", { attr: { scale: 14 }, duration: 1.2, ease: "expo.out" }, 4.3);
+      tl.to("#tag", { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 5.2);
+      tl.to("#ld", { attr: { scale: 40 }, duration: 0.9, ease: "sine.inOut", yoyo: true, repeat: 1 }, 5.8);
+
+      /* 7.8s: a final surge, then fade to black for the loop. */
+      tl.to("#ld", { attr: { scale: 240 }, duration: 1.2, ease: "power2.in" }, 7.8);
+      tl.to(["#w2", "#m2", "#tag"], { opacity: 0, duration: 0.9, ease: "power2.in" }, 8.2);
+      tl.to("#black", { opacity: 1, duration: 0.5, ease: "power2.in" }, 9.3);
+      tl.set("#w1", { scaleY: 1, y: 0 }, 9.85);
+      tl.set("#ld", { attr: { scale: 220 } }, 9.85);
+
+      HF.grain(tl, { opacity: 0.08, duration: 10 });
+      HF.register("liquid-chrome", tl, 10);
+    </script>
+  </body>
+</html>

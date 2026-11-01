@@ -1,0 +1,52 @@
+/*
+ * Texture kit for byreel HyperFrames compositions. Static textures are SVG noise or
+ * gradients baked into data URIs, so they cost one paint and need no network.
+ * Animate them by moving the layer (background-position / transform), never by re-seeding
+ * CSS — live grain comes from HF.grain() on the timeline.
+ */
+
+/* Paper fibre: warm stock with long fibres and a fine speckle. Use with mix-blend multiply. */
+.tx-paper {
+  background-color: #f4efe3;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.012 0.09' numOctaves='3' seed='4'/%3E%3CfeColorMatrix values='0 0 0 0 0.45 0 0 0 0 0.38 0 0 0 0 0.26 0 0 0 0.16 0'/%3E%3C/filter%3E%3Crect width='600' height='600' filter='url(%23f)'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='s'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='1' seed='9'/%3E%3CfeColorMatrix values='0 0 0 0 0.2 0 0 0 0 0.16 0 0 0 0 0.1 0 0 0 0.22 0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23s)'/%3E%3C/svg%3E");
+}
+
+/* Risograph grain: coarse, slightly clumped ink noise. Lay over flat ink with multiply. */
+.tx-riso {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='r'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='2' seed='3'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='discrete' tableValues='0 0 0.35 0.7'/%3E%3C/feComponentTransfer%3E%3CfeColorMatrix values='0 0 0 0 0.98 0 0 0 0 0.97 0 0 0 0 0.94 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23r)'/%3E%3C/svg%3E");
+}
+
+/* Halftone dots on a 12px grid. Set --ht-color and --ht-size. */
+.tx-halftone {
+  background-image: radial-gradient(circle at center, var(--ht-color, rgba(7, 20, 46, 0.5)) var(--ht-size, 2.4px), transparent calc(var(--ht-size, 2.4px) + 0.6px));
+  background-size: 12px 12px;
+}
+
+/* CRT: scanlines plus a faint RGB triad mask. */
+.tx-scanlines {
+  background-image:
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.32) 0 2px, transparent 2px 4px),
+    repeating-linear-gradient(90deg, rgba(255, 0, 0, 0.05) 0 1px, rgba(0, 255, 0, 0.05) 1px 2px, rgba(0, 0, 255, 0.05) 2px 3px);
+}
+
+/* Blueprint construction grid: fine 24px lines with a stronger 120px major grid. */
+.tx-blueprint {
+  background-color: #0b2a6b;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.16) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.16) 1px, transparent 1px),
+    linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+  background-size: 120px 120px, 120px 120px, 24px 24px, 24px 24px;
+}
+
+/* Soft lens vignette. */
+.tx-vignette {
+  background: radial-gradient(ellipse 75% 70% at 50% 50%, transparent 55%, rgba(0, 0, 0, 0.5) 100%);
+}
+
+/* Shared layout helpers. */
+.fx-layer { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; pointer-events: none; }
+.fx-bar { position: absolute; left: 0; width: 1920px; height: 128px; background: #000; z-index: 45; }
