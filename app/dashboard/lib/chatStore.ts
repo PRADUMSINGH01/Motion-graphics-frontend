@@ -72,6 +72,8 @@ export interface ChatSettings {
   provider?: string;
   model?: string;
   effort?: string;
+  /** Sound effects on cuts and hits (off: a silent video). */
+  sound?: boolean;
 }
 
 /**
@@ -99,6 +101,7 @@ export const DEFAULT_SETTINGS: ChatSettings = {
   provider: "glm",
   model: "glm-5.3-flash",
   effort: "high",
+  sound: true,
 };
 
 export const MAX_PROMPT_LENGTH = 4000;

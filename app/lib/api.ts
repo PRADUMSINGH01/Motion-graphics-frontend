@@ -547,6 +547,8 @@ export const api = {
       provider?: string;
       model?: string;
       effort?: string;
+      /** false: a silent video. */
+      sound?: boolean;
     }) =>
       request<{ success: boolean; job: PromptJob }>("/api/prompt", {
         method: "POST",

@@ -188,6 +188,25 @@ export default function StudioSettings({
         )}
       </div>
 
+      <div className="flex items-center justify-between gap-3">
+        <span id={`studio-sound-${variant}`} className="text-[12px] font-medium text-[var(--db-muted)]">
+          Sound effects
+        </span>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={settings.sound !== false}
+          aria-labelledby={`studio-sound-${variant}`}
+          onClick={() => onChange({ ...settings, sound: settings.sound === false })}
+          className={`relative h-7 w-12 shrink-0 rounded-full transition cursor-pointer ${settings.sound !== false ? "bg-[var(--db-ink)]" : "bg-[rgba(7,20,46,0.2)]"}`}
+        >
+          <span
+            aria-hidden="true"
+            className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow transition-all ${settings.sound !== false ? "left-6" : "left-1"}`}
+          />
+        </button>
+      </div>
+
       <div className="border-t border-[var(--db-rule)] pt-4">
         <div className="flex items-baseline justify-between gap-3">
           <span className="text-[12.5px] text-[var(--db-muted)]">This video uses</span>
@@ -224,7 +243,7 @@ export default function StudioSettings({
         <FiSliders size={14} aria-hidden="true" className="shrink-0 text-[var(--db-muted)]" />
         <span className="min-w-0 truncate font-semibold text-[var(--db-ink)]">{model.name}</span>
         <span className="shrink-0 tabular-nums text-[var(--db-muted)]">
-          {settings.ratio}, {settings.length} s
+          {settings.ratio}, {settings.length} s{settings.sound === false ? ", silent" : ""}
         </span>
       </button>
       {sheetOpen && typeof document !== "undefined"

@@ -210,7 +210,7 @@ export function useChats(userId: string) {
         ...(chat.settings ?? {}),
         ...(settings ?? {}),
       };
-      const { ratio, length, provider, model, effort } = effectiveSettings;
+      const { ratio, length, provider, model, effort, sound } = effectiveSettings;
 
       const assistant: ChatMessage = {
         id: createId("m"),
@@ -242,6 +242,7 @@ export function useChats(userId: string) {
           provider,
           model,
           effort,
+          sound,
           ...(chat.theme ? { themeFrom: chat.theme.jobId } : {})
         });
         track(chat.id, assistant.id, promptId, title);
@@ -280,7 +281,7 @@ export function useChats(userId: string) {
           if (!(err instanceof ApiError && err.statusCode === 404)) throw err;
         }
         if (!status) {
-          const { ratio, length, provider, model, effort } = chat.settings ?? DEFAULT_SETTINGS;
+          const { ratio, length, provider, model, effort, sound } = chat.settings ?? DEFAULT_SETTINGS;
           await api.prompt.queue({
             prompt,
             promptId,
@@ -289,6 +290,7 @@ export function useChats(userId: string) {
             provider: message.provider ?? provider,
             model: message.model ?? model,
             effort: message.effort ?? effort,
+            sound,
             ...(chat.theme ? { themeFrom: chat.theme.jobId } : {})
           });
         } else if (status.status === "failed") {
