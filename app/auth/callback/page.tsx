@@ -18,9 +18,13 @@ function GoogleCallbackContent() {
 
   useEffect(() => {
     const processCallback = async () => {
-      const token = searchParams.get("token");
+      // The server puts the session in the fragment, which never reaches a server log or a Referer; drop it
+      // from the address bar as soon as it is read.
+      const fragment = new URLSearchParams(window.location.hash.slice(1));
+      if (fragment.has("token")) window.history.replaceState(null, "", window.location.pathname + window.location.search);
+      const token = fragment.get("token") || searchParams.get("token");
       const errorParam = searchParams.get("error");
-      const name = searchParams.get("name") || "Creator";
+      const name = fragment.get("name") || searchParams.get("name") || "Creator";
 
       if (errorParam) {
         setStatus("error");

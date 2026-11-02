@@ -151,6 +151,10 @@ export interface BackendUser {
   auth: {
     provider: "email" | "google" | "email+google" | "github" | "apple";
     emailVerified: boolean;
+    /** False for an account that signs in only with Google. */
+    hasPassword?: boolean;
+    /** The email must be confirmed before free films (when the server sends confirmation emails). */
+    mustVerify?: boolean;
     role: "user" | "creator" | "admin" | "moderator" | "superadmin";
     status: "active" | "pending" | "suspended" | "deactivated";
     permissions: string[];
@@ -312,6 +316,8 @@ export interface ModelCatalogEntry {
   description: string;
   defaultEffort: string;
   efforts: string[];
+  /** Only on a paid plan (the server answers PLAN_LIMIT on Free). */
+  paid?: boolean;
 }
 
 export interface ModelCatalogGroup {
@@ -328,6 +334,10 @@ export interface ModelCatalogGroup {
 
 export const api = {
   auth: {
+    /** Sends a new confirmation link to the signed-in user's email. */
+    resendVerification: () =>
+      request<{ success: boolean; message: string }>("/api/verify-email/resend", { method: "POST" }),
+
     login: (credentials: { email: string; password: string }) =>
       request<{ success: boolean; message: string; user: BackendUser; token: string }>("/api/login", {
         method: "POST",

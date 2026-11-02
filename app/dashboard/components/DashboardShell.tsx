@@ -24,6 +24,7 @@ import IntegrationsSection from "./sections/IntegrationsSection";
 import MembershipSection from "./sections/MembershipSection";
 import BillingSection from "./sections/BillingSection";
 import AccountSection from "./sections/AccountSection";
+import VerifyEmailBanner from "./VerifyEmailBanner";
 
 export default function DashboardShell({ user }: { user: User & { id: string } }) {
   const { logout, refreshUser } = useAuth();
@@ -146,6 +147,7 @@ export default function DashboardShell({ user }: { user: User & { id: string } }
           onNavigate={navigate}
           title={section === "dashboard" || section === "overview" ? "Home" : SECTION_LABELS[section]}
         />
+        <VerifyEmailBanner />
 
         {/* Scrollable Main Area (Full-height flex for chat interface) with local notebook rules */}
         <div className={`min-h-0 flex-1 ${section === "create" || section === "launches" ? "flex flex-col overflow-hidden" : "overflow-y-auto"}`}>

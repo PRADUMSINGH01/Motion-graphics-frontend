@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
 import { useAlert } from "../context/AlertContext";
-import { openGoogleAuthPopup, BackendUser } from "../lib/api";
+import { openGoogleAuthPopup, getApiBaseUrl, BackendUser } from "../lib/api";
 import { safeRedirect } from "../lib/safeRedirect";
 import NotebookShell from "../components/landing/NotebookShell";
 
@@ -31,6 +31,8 @@ export default function LoginPage() {
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
+      // Only the backend's sign-in page may hand over a session.
+      if (event.origin !== new URL(getApiBaseUrl()).origin) return;
       const data = event.data;
       if (!data || typeof data !== "object") return;
       if (data.type === "GOOGLE_AUTH_SUCCESS" && data.token && data.user) {

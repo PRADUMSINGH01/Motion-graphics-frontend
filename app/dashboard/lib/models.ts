@@ -96,6 +96,7 @@ export function modelsFromCatalog(catalog: ModelCatalogGroup[]): ModelOption[] {
           name: m.name,
           providerLabel: g.name,
           tag: m.tag,
+          ...(m.paid ? { badge: "Paid plans" } : {}),
           description: m.description,
           efforts: usable,
           defaultEffort: preferred && usable.includes(preferred) ? preferred : usable[0],

@@ -47,6 +47,10 @@ export default function AccountSection({
     user.raw?.preferences?.hardwareAcceleration ?? true
   );
 
+  // A new email needs the current password; an account that signs in only with Google keeps Google's email.
+  const hasPassword = user.raw?.auth?.hasPassword !== false;
+  const emailChanged = email.trim().toLowerCase() !== (user.email || "").toLowerCase();
+
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -89,10 +93,11 @@ export default function AccountSection({
         payload.currentPassword = currentPassword;
         payload.newPassword = newPassword;
       }
+      if (emailChanged) payload.currentPassword = currentPassword;
 
       const res = await api.user.updateProfile(payload);
       if (res.success) {
-        setSaveSuccess("Profile updated successfully!");
+        setSaveSuccess(emailChanged ? `Profile saved. Check ${email.trim()} for a confirmation link.` : "Profile updated successfully!");
         setCurrentPassword("");
         setNewPassword("");
         setShowPasswordSection(false);
@@ -228,10 +233,26 @@ export default function AccountSection({
               type="email"
               required
               value={email}
+              readOnly={!hasPassword}
               onChange={(e) => setEmail(e.target.value)}
-              className="mt-1.5 w-full h-10 rounded-xl border border-surf-dedad0 px-3.5 text-[13.5px] text-ink-111110 focus:border-surf-111110 focus:outline-none"
+              className="mt-1.5 w-full h-10 rounded-xl border border-surf-dedad0 px-3.5 text-[13.5px] text-ink-111110 focus:border-surf-111110 focus:outline-none read-only:bg-slate-50 read-only:text-ink-55544e"
             />
+            {!hasPassword && <p className="mt-1 text-[11.5px] text-ink-55544e">Your email comes from your Google account.</p>}
           </div>
+
+          {emailChanged && !showPasswordSection && (
+            <div>
+              <label className="block text-[12.5px] font-medium text-ink-55544e">Current password (to change your email)</label>
+              <input
+                type="password"
+                required
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                autoComplete="current-password"
+                className="mt-1.5 w-full h-10 rounded-xl border border-surf-dedad0 px-3.5 text-[13.5px] text-ink-111110 focus:border-surf-111110 focus:outline-none"
+              />
+            </div>
+          )}
 
           <div>
             <label className="block text-[12.5px] font-medium text-ink-55544e">Company / Studio</label>
