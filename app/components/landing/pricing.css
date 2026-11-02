@@ -261,6 +261,19 @@
   border-color: var(--lp-line-ink);
 }
 
+/* Signed-in plan buttons start checkout, so they are buttons, not links. */
+button.pr-cta {
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.pr-cta:disabled,
+.pr-cta[aria-disabled="true"] {
+  cursor: default;
+  opacity: 0.55;
+  transform: none;
+}
+
 .pr-cta:active {
   transform: translateY(1px);
 }

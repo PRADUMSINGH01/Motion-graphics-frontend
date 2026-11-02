@@ -36,6 +36,8 @@ export interface ChatMessage {
   isStreaming?: boolean;
   /** Assistant only: the render failed; `content` says why. */
   isError?: boolean;
+  /** Assistant only: the paywall refused the film (the plan's longest film, or credits used up). */
+  paywall?: "PLAN_LIMIT" | "CREDITS_EXHAUSTED";
   /** Assistant only: model tokens the video has used so far, every attempt included. */
   tokens?: number;
   tokenDetails?: {
@@ -90,7 +92,7 @@ export interface Chat {
 
 export const DEFAULT_SETTINGS: ChatSettings = {
   ratio: "9:16",
-  length: 30,
+  length: 15,
   provider: "glm",
   model: "glm-5.3-flash",
   effort: "high",

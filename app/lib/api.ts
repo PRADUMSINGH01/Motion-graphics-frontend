@@ -27,14 +27,24 @@ export interface ApiErrorResponse {
 export class ApiError extends Error {
   public statusCode: number;
   public details?: Record<string, string[]>;
+  /** The backend's machine-readable reason, e.g. "CREDITS_EXHAUSTED" or "PLAN_LIMIT" on a 402. */
+  public code?: string;
+  /** The whole error body, for the fields a code carries (required credits, the plan's longest film...). */
+  public data?: Record<string, unknown>;
 
-  constructor(message: string, statusCode: number, details?: Record<string, string[]>) {
+  constructor(message: string, statusCode: number, details?: Record<string, string[]>, code?: string, data?: Record<string, unknown>) {
     super(message);
     this.name = "ApiError";
     this.statusCode = statusCode;
     this.details = details;
+    this.code = code;
+    this.data = data;
   }
 }
+
+/** A 402 from the paywall: the plan's longest film, or the credits left this period. */
+export const isPaywallError = (err: unknown): err is ApiError =>
+  err instanceof ApiError && err.statusCode === 402 && (err.code === "PLAN_LIMIT" || err.code === "CREDITS_EXHAUSTED");
 
 /**
  * Generic fetch wrapper for backend API calls with automatic fallback.
@@ -89,7 +99,7 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
   // If response returned 404 and in browser, attempt Next.js route fallback. Not for routes the backend
   // owns (auth, account, billing, video prompts): its answer is final, and a local stand-in route would
   // fake success without the user's session.
-  const backendOwned = /^api\/(login|register|logout|user|google|billing|prompt|videos)(\/|$|\?)/.test(cleanEndpoint);
+  const backendOwned = /^api\/(login|register|logout|user|google|billing|prompt|videos|usage|models)(\/|$|\?)/.test(cleanEndpoint);
   if (!res.ok && res.status === 404 && typeof window !== "undefined" && !backendOwned) {
     const nextUrl = `${window.location.origin}/${cleanEndpoint}`;
     if (primaryUrl !== nextUrl) {
@@ -114,7 +124,7 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
       data?.message ||
       data?.error ||
       (data?.errors ? Object.values(data.errors).flat().join(", ") : `Request failed with status ${res.status}`);
-    throw new ApiError(errorMsg, res.status, data?.errors);
+    throw new ApiError(errorMsg, res.status, data?.errors, typeof data?.error === "string" ? data.error : undefined, data);
   }
 
   return data as T;
@@ -161,6 +171,8 @@ export interface BackendUser {
     storage: { usedBytes: number; limitBytes: number };
     lastResetAt: string;
     nextResetAt: string;
+    /** This billing period's credits, as the paywall counts them. */
+    credits?: CreditsSummary;
   };
   preferences?: {
     renderCompletionAlerts: boolean;
@@ -220,6 +232,94 @@ export interface PromptTokens {
   /** Input tokens the model provider served from its cache (cheaper). */
   cachedInput: number;
   output: number;
+}
+
+// ---- Billing, usage and models (server/billing.mjs and the /api/usage, /api/models routes) ----
+
+export type PlanTier = "free" | "creator" | "pro" | "enterprise";
+export type BillingCycle = "monthly" | "annual";
+
+export interface CreditsSummary {
+  used: number;
+  limit: number;
+  remaining: number;
+  periodStart: string;
+  periodEnd: string;
+}
+
+export interface PlanPrice {
+  amount: number;
+  currency: string;
+}
+
+/** A plan as checkout sells it: prices come from the Dodo products, so null means it can't be bought yet. */
+export interface BillingPlan {
+  tier: PlanTier;
+  credits: number;
+  maxSeconds: number;
+  prices: Record<BillingCycle, PlanPrice | null>;
+  purchasable: boolean;
+}
+
+export interface InvoiceItem {
+  id: string;
+  date: string;
+  description: string;
+  amount: string;
+  status: string;
+}
+
+export interface UsageFilm {
+  promptId: string;
+  title?: string;
+  status: PromptStatus;
+  createdAt: string;
+  durationS: number | null;
+  ratio: string | null;
+  credits: number;
+  refunded: boolean;
+  thumbnail: string | null;
+  videoUrl: string | null;
+}
+
+export interface UsageSummary {
+  plan: {
+    tier: PlanTier;
+    status: string;
+    interval: BillingCycle | null;
+    renewsAt: string | null;
+    cancelAtPeriodEnd: boolean;
+    /** A Dodo customer exists, so the billing portal can open. */
+    manageable: boolean;
+  };
+  credits: CreditsSummary;
+  limits: { maxSeconds: number; creditsPerFilm: Record<string, number> };
+  totals: {
+    films: number;
+    completed: number;
+    failed: number;
+    seconds: number;
+    creditsCharged: number;
+    creditsRefunded: number;
+  };
+  films: UsageFilm[];
+}
+
+export interface ModelCatalogEntry {
+  id: string;
+  name: string;
+  tag: string;
+  description: string;
+  defaultEffort: string;
+  efforts: string[];
+}
+
+export interface ModelCatalogGroup {
+  provider: string;
+  name: string;
+  /** The server has a key for this provider. */
+  ready: boolean;
+  models: ModelCatalogEntry[];
 }
 
 // ============================================================================
@@ -336,11 +436,43 @@ export const api = {
         body: JSON.stringify(preferences),
       }),
 
-    updatePlan: (tier: "free" | "creator" | "pro" | "enterprise", interval: "monthly" | "annual" = "monthly") =>
-      request<{ success: boolean; message: string; user: BackendUser; checkoutUrl?: string; portalUrl?: string }>("/api/user/plan", {
+  },
+
+  // ==========================================================================
+  // Billing (Dodo Payments): plans and prices, checkout, the customer portal, invoices
+  // ==========================================================================
+  billing: {
+    /** Public: every plan's credits, longest film and real price. */
+    plans: () =>
+      request<{ success: boolean; configured: boolean; plans: BillingPlan[]; creditsPerFilm: Record<string, number> }>(
+        "/api/billing/plans",
+        { method: "GET" }
+      ),
+
+    /** A new subscriber gets a checkout link; a subscriber changing plan may get a payment link, or none. */
+    checkout: (tier: PlanTier, interval: BillingCycle = "monthly") =>
+      request<{ success: boolean; kind: "checkout" | "change"; url: string | null }>("/api/billing/checkout", {
         method: "POST",
         body: JSON.stringify({ tier, interval }),
       }),
+
+    /** Dodo's customer portal: payment method, receipts, cancel. */
+    portal: () => request<{ success: boolean; url: string }>("/api/billing/portal", { method: "POST" }),
+
+    /** Pull the subscription from Dodo (on return from checkout): right even when a webhook is late. */
+    sync: () => request<{ success: boolean; user: BackendUser; applied: string[] }>("/api/billing/sync", { method: "POST" }),
+
+    invoices: () => request<{ success: boolean; invoices: InvoiceItem[] }>("/api/billing/invoices", { method: "GET" }),
+  },
+
+  usage: {
+    /** The plan, this period's credits, and the films that used them. */
+    get: () => request<{ success: boolean } & UsageSummary>("/api/usage", { method: "GET" }),
+  },
+
+  models: {
+    /** The models the server can run, grouped by provider. */
+    list: () => request<{ success: boolean; catalog: ModelCatalogGroup[] }>("/api/models", { method: "GET" }),
   },
 
   keys: {

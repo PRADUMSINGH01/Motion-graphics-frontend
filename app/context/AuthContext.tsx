@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { useAlert } from "./AlertContext";
 import { useRouter } from "next/navigation";
-import { api, BackendUser, ApiError } from "../lib/api";
+import { api, BackendUser, ApiError, type CreditsSummary } from "../lib/api";
 
 export interface User {
   id?: string;
@@ -22,6 +22,8 @@ export interface User {
     renders: { daily: number; monthly: number; lifetime: number; limit: number };
     apiCalls: { daily: number; monthly: number; lifetime: number; limit: number };
     storage: { usedBytes: number; limitBytes: number };
+    /** This billing period's credits, as the paywall counts them. */
+    credits?: CreditsSummary;
   };
   token?: string;
   raw?: BackendUser;

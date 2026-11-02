@@ -13,7 +13,7 @@ import {
   FiX,
   FiZap,
 } from "react-icons/fi";
-import { API_BASE_URL as API_URL } from "../../../lib/api";
+import { API_BASE_URL as API_URL, api } from "../../../lib/api";
 import type { User } from "../../../context/AuthContext";
 import {
   type Chat,
@@ -24,8 +24,9 @@ import {
   collectVideos,
 } from "../../lib/chatStore";
 import type { SectionId } from "../../lib/sections";
+import { formatDate } from "../../../lib/plans";
 import { SHOWREEL, type ShowreelItem } from "../../../components/landing/showreel";
-import ModelSelectorModal, { AVAILABLE_MODELS, type EffortLevel } from "../ModelSelectorModal";
+import ModelSelectorModal, { findModel, useModels, type EffortLevel } from "../ModelSelectorModal";
 import "./overview.css";
 
 interface OverviewProps {
@@ -167,10 +168,24 @@ export default function OverviewSection({
 
   useEffect(() => {
     let cancelled = false;
-    fetch(`${API_URL}/api/videos`)
-      .then((r) => (r.ok ? r.json() : null))
+    // Through the API client, which sends the session: the list is the signed-in user's films only.
+    api.prompt
+      .list()
       .then((data) => {
-        if (!cancelled && data && Array.isArray(data.videos)) setBackendVideos(data.videos);
+        if (cancelled || !Array.isArray(data.videos)) return;
+        setBackendVideos(
+          data.videos.map((j) => ({
+            id: j.id,
+            jobId: j.harnessJobId ?? j.promptId,
+            title: j.title ?? "",
+            prompt: j.prompt ?? "",
+            status: j.status,
+            videoUrl: j.play?.[0] ?? null,
+            previewUrl: null,
+            createdAt: j.createdAt ?? "",
+            durationSec: j.durationS ?? undefined,
+          }))
+        );
       })
       .catch(() => {});
     return () => {
@@ -191,9 +206,8 @@ export default function OverviewSection({
   }, [previewTemplate, previewProject]);
 
   /* ── Numbers for the stat tiles ── */
-  const gens = user.usage?.generations;
-  const creditsUsed = gens?.monthly ?? 0;
-  const creditsLimit = gens?.limit ?? 0;
+  const creditsUsed = user.usage?.credits?.used ?? 0;
+  const creditsLimit = user.usage?.credits?.limit ?? 0;
   const creditsLeft = Math.max(0, creditsLimit - creditsUsed);
   const creditPct = creditsLimit > 0 ? Math.min(100, Math.round((creditsUsed / creditsLimit) * 100)) : 0;
   const library = useMemo(() => collectVideos(chats), [chats]);
@@ -271,7 +285,8 @@ export default function OverviewSection({
     [chats]
   );
 
-  const currentModel = AVAILABLE_MODELS.find((m) => m.id === selectedModel) || AVAILABLE_MODELS[0];
+  const models = useModels();
+  const currentModel = findModel(models, selectedModel);
 
   const handleGenerate = (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -521,16 +536,14 @@ export default function OverviewSection({
             </div>
             <dl className="ov-dl">
               <div>
-                <dt>Generations</dt>
+                <dt>Credits used</dt>
                 <dd>
                   {creditsUsed} / {creditsLimit || "—"}
                 </dd>
               </div>
               <div>
-                <dt>Renders</dt>
-                <dd>
-                  {user.usage?.renders?.monthly ?? 0} / {user.usage?.renders?.limit || "—"}
-                </dd>
+                <dt>Renews</dt>
+                <dd>{formatDate(user.usage?.credits?.periodEnd)}</dd>
               </div>
             </dl>
             <button type="button" className="ov-btn-primary ov-full" onClick={() => onNavigate("billing")}>

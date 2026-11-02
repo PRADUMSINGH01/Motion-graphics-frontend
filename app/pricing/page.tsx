@@ -1,20 +1,23 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
+import { useAlert } from "../context/AlertContext";
 import NotebookShell from "../components/landing/NotebookShell";
+import type { BillingCycle, BillingPlan, PlanPrice } from "../lib/api";
+import { creditCost, hasAnnualPrices, startCheckout, usePlans } from "../lib/plans";
 import "../components/landing/pricing.css";
 
 type PlanId = "free" | "creator" | "pro" | "enterprise";
 
+/* Prices, credits and the longest film come from the backend (the Dodo products checkout sells); this
+   holds only the words around them. */
 interface Plan {
   id: PlanId;
   name: string;
   forWho: string;
-  monthlyPrice: number;
-  annualPrice: number;
-  annualTotal: number;
   credits: number;
   creditsNote: string;
   cta: string;
@@ -29,9 +32,6 @@ const PLANS: Plan[] = [
     id: "free",
     name: "Free",
     forWho: "Try the studio and make your first few clips.",
-    monthlyPrice: 0,
-    annualPrice: 0,
-    annualTotal: 0,
     credits: 15,
     creditsNote: "About 5 B-roll clips or 3 short videos",
     cta: "Start free",
@@ -40,7 +40,7 @@ const PLANS: Plan[] = [
     features: [
       "720p exports at 30 fps",
       "16:9 and 9:16 formats",
-      "B-roll clips up to 10 seconds",
+      "Films up to 15 seconds",
       "Starter templates",
       "Shared render queue",
       "byreel watermark on exports",
@@ -50,9 +50,6 @@ const PLANS: Plan[] = [
     id: "creator",
     name: "Creator",
     forWho: "For people posting Shorts, Reels and B-roll every day.",
-    monthlyPrice: 19,
-    annualPrice: 15,
-    annualTotal: 180,
     credits: 200,
     creditsNote: "About 40 short videos or 65 B-roll clips",
     cta: "Choose Creator",
@@ -62,20 +59,17 @@ const PLANS: Plan[] = [
       "1080p at 60 fps, MP4 and WebM",
       "No watermark, full commercial rights",
       "16:9, 9:16 and 1:1 formats",
+      "Films up to 60 seconds",
       "Documentary-style B-roll",
       "Transparent overlays for your editor",
-      "Unused credits roll over for 30 days",
     ],
   },
   {
     id: "pro",
     name: "Pro Studio",
     forWho: "For teams shipping product launches and 4K video.",
-    monthlyPrice: 39,
-    annualPrice: 31,
-    annualTotal: 372,
     credits: 600,
-    creditsNote: "About 50 launch trailers or 200 B-roll clips",
+    creditsNote: "About 30 one-minute launch films or 200 B-roll clips",
     cta: "Choose Pro Studio",
     href: "/register?plan=pro",
     includesLabel: "Everything in Creator, plus",
@@ -93,9 +87,6 @@ const PLANS: Plan[] = [
     id: "enterprise",
     name: "Agency",
     forWho: "For agencies and content teams working at volume.",
-    monthlyPrice: 99,
-    annualPrice: 79,
-    annualTotal: 948,
     credits: 2500,
     creditsNote: "Shared across up to 10 seats",
     cta: "Choose Agency",
@@ -107,17 +98,17 @@ const PLANS: Plan[] = [
       "Batch export in every format",
       "Render API and webhooks",
       "Dedicated render capacity",
-      "90-day rollover and priority support",
+      "Priority support",
     ],
   },
 ];
 
-/* What one render costs. The calculator and the cost list both read from here. */
+/* What one render costs: a credit per 3 seconds of film, at least 2 (creditCost, as the backend charges). */
 const RENDERS = [
-  { id: "shorts", label: "Short videos", detail: "15 to 30 s, vertical for Reels, Shorts and TikTok", credits: 5, max: 100, start: 12 },
-  { id: "broll", label: "B-roll clips", detail: "5 to 10 s cutaways for YouTube", credits: 3, max: 100, start: 10 },
-  { id: "motion", label: "Motion graphics scenes", detail: "30 to 45 s, kinetic type, charts, explainers", credits: 8, max: 50, start: 2 },
-  { id: "launch", label: "Product launch videos", detail: "45 to 60 s, multi-scene trailers", credits: 12, max: 30, start: 1 },
+  { id: "shorts", label: "Short videos", detail: "15 s, vertical for Reels, Shorts and TikTok", credits: creditCost(15), max: 100, start: 12 },
+  { id: "broll", label: "B-roll clips", detail: "9 s cutaways for YouTube", credits: creditCost(9), max: 100, start: 10 },
+  { id: "motion", label: "Motion graphics scenes", detail: "30 s of kinetic type, charts or explainers", credits: creditCost(30), max: 50, start: 2 },
+  { id: "launch", label: "Product launch videos", detail: "60 s multi-scene trailers", credits: creditCost(60), max: 30, start: 1 },
 ] as const;
 
 type RenderId = (typeof RENDERS)[number]["id"];
@@ -127,7 +118,7 @@ const COMPARE: { group: string; rows: [string, string, string, string, string][]
     group: "Videos",
     rows: [
       ["Credits each month", "15", "200", "600", "2,500 shared"],
-      ["B-roll clip length", "Up to 10 s", "Any length", "Any length, 4K", "Any length, batch"],
+      ["Longest film", "15 s", "60 s", "60 s", "60 s"],
       ["Short videos for Reels and Shorts", "720p draft", "1080p, 60 fps", "4K, 60 fps, auto-reframe", "4K, 60 fps, batch"],
       ["Product launch videos", "Preview only", "1080p", "4K, multi-scene", "4K, per-client kits"],
     ],
@@ -153,7 +144,6 @@ const COMPARE: { group: string; rows: [string, string, string, string, string][]
     group: "Speed and team",
     rows: [
       ["Renders at once", "1", "2", "4, priority", "10, dedicated"],
-      ["Unused credits roll over", "", "30 days", "60 days", "90 days"],
       ["Seats", "1", "1", "Up to 3", "10, plus API"],
     ],
   },
@@ -162,7 +152,7 @@ const COMPARE: { group: string; rows: [string, string, string, string, string][]
 const FAQS = [
   {
     q: "What does a credit pay for?",
-    a: "Rendering. A B-roll clip is 3 credits, a short video 5, a motion graphics scene 8 and a product launch video 12. Changing words, colours, screenshots or timing in the editor is free; credits are only used when you render.",
+    a: `Rendering: a credit for every 3 seconds of film, at least 2. A 9-second B-roll clip is ${creditCost(9)} credits, a 15-second short ${creditCost(15)}, a 30-second scene ${creditCost(30)} and a one-minute launch video ${creditCost(60)}. Changing words, colours, screenshots or timing in the editor is free, and a film that fails gives its credits back.`,
   },
   {
     q: "Can I use the videos in Premiere, Final Cut, DaVinci or CapCut?",
@@ -174,16 +164,27 @@ const FAQS = [
   },
   {
     q: "What happens to credits I don't use?",
-    a: "On paid plans they roll over: 30 days on Creator, 60 on Pro Studio and 90 on Agency.",
+    a: "Your credits renew at the start of each billing month. Unused credits don't carry over, so pick the plan that fits a typical month.",
   },
   {
     q: "Can I change or cancel my plan?",
-    a: "Any time, from your account. Upgrades apply straight away.",
+    a: "Any time, from Billing in your studio. Upgrades apply straight away; cancelling keeps your plan until the end of the period you paid for. Payments are handled by Dodo Payments.",
   },
 ];
 
-function cost(plan: Plan, annual: boolean) {
-  return annual ? plan.annualPrice : plan.monthlyPrice;
+/* The price as the page draws it: symbol and number apart. Yearly prices are shown per month. */
+function priceParts(price: PlanPrice, cycle: BillingCycle) {
+  const amount = cycle === "annual" ? price.amount / 12 : price.amount;
+  const parts = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: price.currency || "USD",
+    maximumFractionDigits: Number.isInteger(amount) ? 0 : 2,
+  }).formatToParts(amount);
+  return {
+    symbol: parts.filter((p) => p.type === "currency").map((p) => p.value).join(""),
+    number: parts.filter((p) => p.type !== "currency" && p.type !== "literal").map((p) => p.value).join(""),
+    total: new Intl.NumberFormat("en-US", { style: "currency", currency: price.currency || "USD" }).format(price.amount),
+  };
 }
 
 function Check() {
@@ -194,17 +195,128 @@ function Check() {
   );
 }
 
+/**
+ * A plan's button. Signed out: sign up with the plan in mind. Signed in: checkout (or the studio for the
+ * plan you have, Billing for anything else that isn't for sale here).
+ */
+function PlanCta({
+  plan,
+  live,
+  loaded,
+  cycle,
+  primary,
+  className = "",
+}: {
+  plan: Plan;
+  live: BillingPlan | undefined;
+  /** The backend's plans have loaded, so a missing price means "not on sale", not "still loading". */
+  loaded: boolean;
+  cycle: BillingCycle;
+  primary?: boolean;
+  className?: string;
+}) {
+  const { user } = useAuth();
+  const { failure } = useAlert();
+  const router = useRouter();
+  const [busy, setBusy] = useState(false);
+  const cls = `pr-cta${primary ? " is-primary" : ""}${className ? ` ${className}` : ""}`;
+  const currentTier = user?.plan?.tier;
+
+  if (currentTier === plan.id) {
+    return (
+      <Link href="/dashboard" className={cls}>
+        Open your studio
+      </Link>
+    );
+  }
+  if (plan.id !== "free" && loaded && !live?.prices[cycle]) {
+    return (
+      <button type="button" className={cls} disabled>
+        Coming soon
+      </button>
+    );
+  }
+  if (!user) {
+    // A paid plan comes back here after sign-up and opens checkout (see ?buy= in PricingPage).
+    const href =
+      plan.id === "free" ? plan.href : `${plan.href}&redirect=${encodeURIComponent(`/pricing?buy=${plan.id}&interval=${cycle}`)}`;
+    return (
+      <Link href={href} className={cls}>
+        {plan.cta}
+      </Link>
+    );
+  }
+  // Moving to Free is cancelling, and a plan with no product isn't sold yet: both live in Billing.
+  if (plan.id === "free") {
+    return (
+      <Link href="/dashboard?section=billing" className={cls}>
+        Manage your plan
+      </Link>
+    );
+  }
+  if (!live?.prices[cycle]) {
+    // Prices still loading (a missing price after loading is "Coming soon", above).
+    return (
+      <button type="button" className={cls} disabled>
+        {plan.cta}
+      </button>
+    );
+  }
+  return (
+    <button
+      type="button"
+      className={cls}
+      disabled={busy}
+      onClick={async () => {
+        setBusy(true);
+        try {
+          if ((await startCheckout(plan.id, cycle)) === "changed") router.push("/billing");
+        } catch (err) {
+          failure("Couldn't start checkout", err instanceof Error ? err.message : "Please try again.");
+          setBusy(false);
+        }
+      }}
+    >
+      {busy ? "Opening checkout…" : plan.cta}
+    </button>
+  );
+}
+
 export default function PricingPage() {
-  const [annual, setAnnual] = useState(true);
+  const [annual, setAnnual] = useState(false);
   const { user } = useAuth();
   const currentTier = user?.plan?.tier;
+  const { plans: live } = usePlans();
+  const liveOf = (id: PlanId) => live?.find((p) => p.tier === id);
+  // The yearly switch shows only when a plan is sold yearly.
+  const yearly = hasAnnualPrices(live);
+  const cycle: BillingCycle = yearly && annual ? "annual" : "monthly";
+  const creditsOf = (plan: Plan) => liveOf(plan.id)?.credits ?? plan.credits;
+
+  // Back from sign-up with a paid plan in mind (?buy=pro&interval=monthly): open its checkout, once.
+  const { failure } = useAlert();
+  const bought = useRef(false);
+  useEffect(() => {
+    if (bought.current || !user || !live) return;
+    const params = new URLSearchParams(window.location.search);
+    const buy = params.get("buy");
+    if (!buy) return;
+    bought.current = true;
+    window.history.replaceState({}, "", "/pricing");
+    const plan = live.find((p) => p.tier === buy);
+    const interval: BillingCycle = params.get("interval") === "annual" && plan?.prices.annual ? "annual" : "monthly";
+    if (!plan?.prices[interval] || user.plan?.tier === plan.tier) return;
+    startCheckout(plan.tier, interval).catch((err) =>
+      failure("Couldn't start checkout", err instanceof Error ? err.message : "Please try again.")
+    );
+  }, [user, live, failure]);
 
   const [counts, setCounts] = useState<Record<RenderId, number>>(
     () => Object.fromEntries(RENDERS.map((r) => [r.id, r.start])) as Record<RenderId, number>
   );
   const needed = RENDERS.reduce((sum, r) => sum + r.credits * counts[r.id], 0);
-  const fit = PLANS.find((p) => p.credits >= needed) ?? PLANS[PLANS.length - 1];
-  const spare = fit.credits - needed;
+  const fit = PLANS.find((p) => creditsOf(p) >= needed) ?? PLANS[PLANS.length - 1];
+  const spare = creditsOf(fit) - needed;
 
   return (
     <NotebookShell ariaLabel="byreel pricing">
@@ -221,31 +333,35 @@ export default function PricingPage() {
               rewriting a headline or changing a colour costs nothing.
             </p>
           </div>
-          <div className="pr-billing" role="radiogroup" aria-label="Billing period">
-            <button
-              type="button"
-              role="radio"
-              aria-checked={!annual}
-              onClick={() => setAnnual(false)}
-              className="pr-billing-btn"
-            >
-              Monthly
-            </button>
-            <button
-              type="button"
-              role="radio"
-              aria-checked={annual}
-              onClick={() => setAnnual(true)}
-              className="pr-billing-btn"
-            >
-              Yearly <span className="pr-save">save 20%</span>
-            </button>
-          </div>
+          {yearly && (
+            <div className="pr-billing" role="radiogroup" aria-label="Billing period">
+              <button
+                type="button"
+                role="radio"
+                aria-checked={!annual}
+                onClick={() => setAnnual(false)}
+                className="pr-billing-btn"
+              >
+                Monthly
+              </button>
+              <button
+                type="button"
+                role="radio"
+                aria-checked={annual}
+                onClick={() => setAnnual(true)}
+                className="pr-billing-btn"
+              >
+                Yearly
+              </button>
+            </div>
+          )}
         </header>
 
         <section className="pr-plans" aria-label="Plans">
           {PLANS.map((plan) => {
-            const price = cost(plan, annual);
+            const livePlan = liveOf(plan.id);
+            const price = livePlan?.prices[cycle];
+            const parts = price ? priceParts(price, cycle) : null;
             const isCurrent = currentTier === plan.id;
             const isFit = plan.id === fit.id;
             return (
@@ -258,29 +374,40 @@ export default function PricingPage() {
                 <p className="pr-plan-for">{plan.forWho}</p>
 
                 <p className="pr-price">
-                  <span className="pr-currency">$</span>
-                  <span className="pr-amount">{price}</span>
-                  <span className="pr-per">{price === 0 ? "forever" : "a month"}</span>
+                  {plan.id === "free" ? (
+                    <>
+                      <span className="pr-currency">$</span>
+                      <span className="pr-amount">0</span>
+                      <span className="pr-per">forever</span>
+                    </>
+                  ) : parts ? (
+                    <>
+                      <span className="pr-currency">{parts.symbol}</span>
+                      <span className="pr-amount">{parts.number}</span>
+                      <span className="pr-per">a month</span>
+                    </>
+                  ) : (
+                    <span className="pr-amount">{live ? "Soon" : "…"}</span>
+                  )}
                 </p>
                 <p className="pr-price-note">
-                  {price === 0
+                  {plan.id === "free"
                     ? "No card needed"
-                    : annual
-                      ? `Billed yearly, $${plan.annualTotal.toLocaleString("en-US")}`
-                      : "Billed monthly"}
+                    : parts
+                      ? cycle === "annual"
+                        ? `Billed yearly, ${parts.total}`
+                        : "Billed monthly"
+                      : live
+                        ? "Not on sale yet"
+                        : "Loading price"}
                 </p>
 
                 <div className="pr-credits">
-                  <strong>{plan.credits.toLocaleString("en-US")} credits a month</strong>
+                  <strong>{creditsOf(plan).toLocaleString("en-US")} credits a month</strong>
                   <span>{plan.creditsNote}</span>
                 </div>
 
-                <Link
-                  href={isCurrent ? "/dashboard" : `${plan.href}&interval=${annual ? "annual" : "monthly"}`}
-                  className={`pr-cta${plan.popular ? " is-primary" : ""}`}
-                >
-                  {isCurrent ? "Open your studio" : plan.cta}
-                </Link>
+                <PlanCta plan={plan} live={livePlan} loaded={Boolean(live)} cycle={cycle} primary={plan.popular} />
                 {isCurrent && <p className="pr-current">Your current plan</p>}
 
                 <p className="pr-includes">{plan.includesLabel}</p>
@@ -335,12 +462,7 @@ export default function PricingPage() {
               <span className="lp-marker">{fit.name}</span> covers it
               {spare > 0 ? `, with ${spare.toLocaleString("en-US")} to spare.` : "."}
             </p>
-            <Link
-              href={`${fit.href}&interval=${annual ? "annual" : "monthly"}`}
-              className="pr-cta is-primary pr-result-cta"
-            >
-              {fit.cta}
-            </Link>
+            <PlanCta plan={fit} live={liveOf(fit.id)} loaded={Boolean(live)} cycle={cycle} primary className="pr-result-cta" />
           </div>
         </section>
 

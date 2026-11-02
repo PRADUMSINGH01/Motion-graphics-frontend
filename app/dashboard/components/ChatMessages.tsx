@@ -176,17 +176,46 @@ function AssistantMessage({
             <FiAlertTriangle className="mt-0.5 shrink-0 text-[#dc2626]" size={16} />
             <div className="min-w-0 space-y-1.5">
               <p className="text-[13px] text-[#7f1d1d] leading-relaxed break-words">{message.content}</p>
+              {message.paywall && (
+                <p className="text-[12px] text-[#7f1d1d]/80 leading-relaxed">
+                  {message.paywall === "PLAN_LIMIT"
+                    ? "Choose a shorter length below, or upgrade for longer films."
+                    : "Your credits renew with your plan, or upgrade for more."}
+                </p>
+              )}
               {message.tokens != null && (
                 <p className="font-mono text-[10.5px] text-[#991b1b]/70">Used {formatTokens(message.tokens)} so far</p>
               )}
-              <button
-                type="button"
-                onClick={onRetry}
-                title="Continue from the step that failed, keeping what was already made"
-                className="inline-flex items-center gap-1.5 rounded-md bg-[#dc2626] px-2.5 py-1 text-[11.5px] font-semibold text-white shadow-xs transition hover:bg-[#b91c1c]"
-              >
-                <FiRotateCw size={11} /> Retry
-              </button>
+              <div className="flex flex-wrap items-center gap-2">
+                {message.paywall && (
+                  <a
+                    href="#membership"
+                    className="inline-flex items-center gap-1.5 rounded-md bg-[#07142e] px-2.5 py-1 text-[11.5px] font-semibold text-[#faf8f2] shadow-xs transition hover:bg-[#040c1c]"
+                  >
+                    See plans
+                  </a>
+                )}
+                {message.paywall === "CREDITS_EXHAUSTED" && (
+                  <a
+                    href="#billing"
+                    className="inline-flex items-center gap-1.5 rounded-md border border-[#fecaca] bg-white px-2.5 py-1 text-[11.5px] font-semibold text-[#7f1d1d] transition hover:bg-[#fff5f5]"
+                  >
+                    Credits & usage
+                  </a>
+                )}
+                <button
+                  type="button"
+                  onClick={onRetry}
+                  title={
+                    message.paywall
+                      ? "Try again, after upgrading or choosing a shorter length"
+                      : "Continue from the step that failed, keeping what was already made"
+                  }
+                  className="inline-flex items-center gap-1.5 rounded-md bg-[#dc2626] px-2.5 py-1 text-[11.5px] font-semibold text-white shadow-xs transition hover:bg-[#b91c1c]"
+                >
+                  <FiRotateCw size={11} /> Retry
+                </button>
+              </div>
             </div>
           </div>
         )}

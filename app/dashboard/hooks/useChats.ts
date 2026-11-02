@@ -14,7 +14,13 @@ import {
   saveChats,
   themePending,
 } from "../lib/chatStore";
-import { api, ApiError, type PromptJob } from "../../lib/api";
+import { api, ApiError, isPaywallError, type PromptJob } from "../../lib/api";
+
+// A refused film says why and, for the paywall, which limit (the chat offers the way past it).
+const failureOf = (err: unknown, fallback: string) => ({
+  content: err instanceof Error ? err.message : fallback,
+  paywall: isPaywallError(err) ? (err.code as "PLAN_LIMIT" | "CREDITS_EXHAUSTED") : undefined,
+});
 
 const POLL_INTERVAL_MS = 3000;
 // A render takes minutes; a backend that is briefly unreachable should not end the wait.
@@ -241,7 +247,7 @@ export function useChats(userId: string) {
         patchMessage(chat.id, assistant.id, {
           isStreaming: false,
           isError: true,
-          content: err instanceof Error ? err.message : "Could not submit your prompt.",
+          ...failureOf(err, "Could not submit your prompt."),
         });
       }
     },
@@ -263,7 +269,7 @@ export function useChats(userId: string) {
       if (!chat || !message?.promptId || message.isStreaming) return;
       const { promptId } = message;
       const title = deriveTitle(prompt);
-      patchMessage(chatId, messageId, { isStreaming: true, isError: false, content: "", stages: stagesFor("queued"), activity: undefined });
+      patchMessage(chatId, messageId, { isStreaming: true, isError: false, paywall: undefined, content: "", stages: stagesFor("queued"), activity: undefined });
       try {
         let status: PromptJob | null = null;
         try {
@@ -291,7 +297,7 @@ export function useChats(userId: string) {
         patchMessage(chatId, messageId, {
           isStreaming: false,
           isError: true,
-          content: err instanceof Error ? err.message : "Could not retry this video.",
+          ...failureOf(err, "Could not retry this video."),
         });
       }
     },

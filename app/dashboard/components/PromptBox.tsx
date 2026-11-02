@@ -16,9 +16,13 @@ import {
 } from "../lib/chatStore";
 import ModelSelectorModal, {
   AVAILABLE_MODELS,
+  findModel,
+  useModels,
   type ModelOption,
   type EffortLevel,
 } from "./ModelSelectorModal";
+import { useAuth } from "../../context/AuthContext";
+import { creditCost, usePlans } from "../../lib/plans";
 
 export { AVAILABLE_MODELS, type ModelOption, type EffortLevel };
 
@@ -75,9 +79,19 @@ export default function PromptBox({
     if (settings?.effort) setLocalEffort(settings.effort as EffortLevel);
   }, [settings?.model, settings?.effort]);
 
-  const currentModel =
-    AVAILABLE_MODELS.find((m) => m.id === localModelId) || AVAILABLE_MODELS[0];
+  const models = useModels();
+  const currentModel = findModel(models, localModelId);
   const currentEffort = (localEffort || currentModel.defaultEffort) as EffortLevel;
+
+  // The plan's longest film: longer lengths are shown but locked, and a saved longer length comes down to it.
+  const { user } = useAuth();
+  const { plans } = usePlans();
+  const maxSeconds = plans?.find((p) => p.tier === (user?.plan?.tier ?? "free"))?.maxSeconds ?? null;
+  useEffect(() => {
+    if (maxSeconds && settings && onSettingsChange && settings.length > maxSeconds) {
+      onSettingsChange({ ...settings, length: maxSeconds });
+    }
+  }, [maxSeconds, settings, onSettingsChange]);
 
   useEffect(() => {
     if (autoFocus || initialValue) {
@@ -213,21 +227,33 @@ export default function PromptBox({
               <div className="flex items-center gap-0.5 rounded-lg bg-white p-0.5 border border-[rgba(7,20,46,0.12)]">
                 {LENGTHS.map((l) => {
                   const isActive = settings.length === l.s;
+                  const locked = maxSeconds !== null && l.s > maxSeconds;
                   return (
                     <button
                       key={l.s}
                       type="button"
+                      disabled={locked}
                       onClick={() => onSettingsChange({ ...settings, length: l.s })}
-                      className={`rounded-md px-2 py-1 text-[11px] font-mono font-medium transition cursor-pointer ${
+                      title={
+                        locked
+                          ? `Your plan makes films up to ${maxSeconds} s. Upgrade in Billing for longer films.`
+                          : `${creditCost(l.s)} credits`
+                      }
+                      className={`rounded-md px-2 py-1 text-[11px] font-mono font-medium transition ${
                         isActive
-                          ? "bg-[#07142e] text-[#faf8f2] shadow-xs font-semibold"
-                          : "text-[rgba(7,20,46,0.7)] hover:text-[#07142e] hover:bg-white"
+                          ? "bg-[#07142e] text-[#faf8f2] shadow-xs font-semibold cursor-pointer"
+                          : locked
+                          ? "text-[rgba(7,20,46,0.3)] cursor-not-allowed"
+                          : "text-[rgba(7,20,46,0.7)] hover:text-[#07142e] hover:bg-white cursor-pointer"
                       }`}
                     >
                       {l.label}
                     </button>
                   );
                 })}
+                <span className="px-1.5 text-[10.5px] font-mono text-[rgba(7,20,46,0.55)]" title="Credits this film uses">
+                  {creditCost(settings.length)} cr
+                </span>
               </div>
             ) : settings ? (
               <span className="inline-flex items-center gap-1 rounded-lg border border-[rgba(7,20,46,0.12)] bg-white px-2.5 py-1 text-[11px] font-mono text-[#07142e]">

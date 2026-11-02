@@ -12,83 +12,10 @@ import {
   FiActivity,
 } from "react-icons/fi";
 
-export type EffortLevel = "low" | "medium" | "high" | "xhigh";
+import { FALLBACK_MODELS, findModel, useModels, type EffortLevel, type ModelOption } from "../lib/models";
 
-export interface ModelOption {
-  provider: "azure" | "glm" | "claude" | "openai" | "gemini";
-  id: string;
-  name: string;
-  providerLabel: string;
-  tag: string;
-  badge?: string;
-  description: string;
-  efforts: EffortLevel[];
-  defaultEffort: EffortLevel;
-  isReady?: boolean;
-}
-
-export const AVAILABLE_MODELS: ModelOption[] = [
-  {
-    provider: "glm",
-    id: "glm-5.3-flash",
-    name: "GLM 5.3 Flash",
-    providerLabel: "Zhipu AI",
-    tag: "Ultra Fast",
-    badge: "Recommended",
-    description: "Sub-second thinking, script synthesis & kinetic pacing (200k context)",
-    efforts: ["low", "medium", "high", "xhigh"],
-    defaultEffort: "high",
-    isReady: true,
-  },
-  {
-    provider: "azure",
-    id: "gpt-5-mini",
-    name: "GPT-5 Mini",
-    providerLabel: "Azure AI (MaaS)",
-    tag: "Serverless",
-    badge: "Deep Reasoning",
-    description: "Concise reasoning, deterministic Remotion TS code & camera math",
-    efforts: ["low", "medium", "high", "xhigh"],
-    defaultEffort: "high",
-    isReady: true,
-  },
-  {
-    provider: "azure",
-    id: "qwen--qwen38-27b",
-    name: "Qwen 3.8 27B",
-    providerLabel: "Azure AI (A100)",
-    tag: "2x A100 GPU",
-    badge: "Dedicated Cluster",
-    description: "Max reasoning with deep visual & motion planning on 2x A100 80GB",
-    efforts: ["low", "medium", "high", "xhigh"],
-    defaultEffort: "xhigh",
-    isReady: true,
-  },
-  {
-    provider: "azure",
-    id: "DeepSeek-V4-Pro",
-    name: "DeepSeek V4 Pro",
-    providerLabel: "Azure AI (MaaS)",
-    tag: "Serverless",
-    badge: "Code Leader",
-    description: "High-speed coding benchmark leader (>70% Pass@1 on Python/TS)",
-    efforts: ["low", "medium", "high", "xhigh"],
-    defaultEffort: "high",
-    isReady: true,
-  },
-  {
-    provider: "claude",
-    id: "claude-sonnet-5-5",
-    name: "Claude 3.5 Sonnet",
-    providerLabel: "Anthropic",
-    tag: "Visual Design",
-    badge: "Design Master",
-    description: "World-class layout, typography hierarchy & scene choreography",
-    efforts: ["low", "medium", "high"],
-    defaultEffort: "low",
-    isReady: true,
-  },
-];
+// The picker's list is the server's (useModels); these names stay importable from here.
+export { FALLBACK_MODELS as AVAILABLE_MODELS, findModel, useModels, type EffortLevel, type ModelOption };
 
 export const EFFORT_OPTIONS: {
   id: EffortLevel;
@@ -126,6 +53,7 @@ export default function ModelSelectorModal({
   const [coords, setCoords] = useState<{ top: number; left: number } | null>(null);
   const [isMobile, setIsMobile] = useState<boolean>(false);
   const modalRef = useRef<HTMLDivElement>(null);
+  const models = useModels();
 
   // Sync props when modal opens
   useEffect(() => {
@@ -206,8 +134,7 @@ export default function ModelSelectorModal({
     return null;
   }
 
-  const currentModel =
-    AVAILABLE_MODELS.find((m) => m.id === activeModelId) || AVAILABLE_MODELS[0];
+  const currentModel = findModel(models, activeModelId);
 
   const handleSelectModel = (model: ModelOption) => {
     setActiveModelId(model.id);
@@ -288,7 +215,7 @@ export default function ModelSelectorModal({
 
         {/* Scrollable Model Options */}
         <div className="flex-1 overflow-y-auto py-2.5 space-y-2 pr-1 min-h-0">
-          {AVAILABLE_MODELS.map((model) => {
+          {models.map((model) => {
             const isSelected = activeModelId === model.id;
             return (
               <div

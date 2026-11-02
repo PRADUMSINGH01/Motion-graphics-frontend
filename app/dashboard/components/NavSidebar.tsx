@@ -53,11 +53,10 @@ const NAV_GROUPS: { label: string; items: NavItemConfig[] }[] = [
   },
 ];
 
-/** Monthly generation quota: one credit per queued prompt (billing.creditsPerGeneration). */
+/** This billing period's credits (a film costs a credit per 3 seconds, at least 2). */
 function computeCompute(usage: User["usage"]): { used: number; limit: number; pct: number } {
-  const gens = usage?.generations;
-  const used = gens?.monthly ?? 0;
-  const limit = gens?.limit ?? 0;
+  const used = usage?.credits?.used ?? 0;
+  const limit = usage?.credits?.limit ?? 0;
   const pct = limit > 0 ? Math.min(100, Math.round((used / limit) * 100)) : 0;
   return { used, limit, pct };
 }
