@@ -51,6 +51,7 @@ export interface ChatMessage {
   provider?: string;
   model?: string;
   effort?: string;
+  route?: string;
   /** Assistant only: the film's frame and length as it was ordered. */
   ratio?: Ratio;
   length?: number;
@@ -72,6 +73,8 @@ export interface ChatSettings {
   provider?: string;
   model?: string;
   effort?: string;
+  /** OpenRouter models: which provider serves them ("auto" or unset: OpenRouter balances). */
+  route?: string;
   /** Sound effects on cuts and hits (off: a silent video). */
   sound?: boolean;
 }

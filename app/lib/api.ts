@@ -320,6 +320,18 @@ export interface ModelCatalogEntry {
   paid?: boolean;
 }
 
+/** One provider serving an OpenRouter model. Prices are USD per million tokens. */
+export interface OpenRouterProvider {
+  tag: string;
+  name: string;
+  quantization: string | null;
+  inputPerM: number;
+  outputPerM: number;
+  contextLength: number | null;
+  /** Percent over the last day. */
+  uptime: number | null;
+}
+
 export interface ModelCatalogGroup {
   provider: string;
   name: string;
@@ -483,6 +495,12 @@ export const api = {
   models: {
     /** The models the server can run, grouped by provider. */
     list: () => request<{ success: boolean; catalog: ModelCatalogGroup[] }>("/api/models", { method: "GET" }),
+    /** The providers serving an OpenRouter model (tool calls included), cheapest first. */
+    routes: (model: string) =>
+      request<{ success: boolean; model: string; sorts: string[]; providers: OpenRouterProvider[] }>(
+        `/api/models/routes?model=${encodeURIComponent(model)}`,
+        { method: "GET" }
+      ),
   },
 
   keys: {
@@ -557,6 +575,8 @@ export const api = {
       provider?: string;
       model?: string;
       effort?: string;
+      /** OpenRouter only: "auto", "price", "throughput", or a provider tag such as "baidu/fp8". */
+      route?: string;
       /** false: a silent video. */
       sound?: boolean;
     }) =>

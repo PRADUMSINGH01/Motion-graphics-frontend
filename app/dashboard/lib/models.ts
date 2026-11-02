@@ -7,7 +7,7 @@
  */
 
 import { useEffect, useState } from "react";
-import { api, type ModelCatalogGroup } from "../../lib/api";
+import { api, type ModelCatalogGroup, type OpenRouterProvider } from "../../lib/api";
 
 export type EffortLevel = "low" | "medium" | "high" | "xhigh";
 
@@ -136,3 +136,36 @@ export function useModels(): ModelOption[] {
 
 /** The option for a saved model id; the first one when that model is no longer offered. */
 export const findModel = (models: ModelOption[], id: string | undefined) => models.find((m) => m.id === id) ?? models[0];
+
+const providerRequests = new Map<string, Promise<OpenRouterProvider[]>>();
+
+/**
+ * The providers serving an OpenRouter model, cheapest first, fetched once per model while the page is open.
+ * null until they arrive; an empty list when OpenRouter couldn't be reached.
+ */
+export function useOpenRouterProviders(modelId: string | null): OpenRouterProvider[] | null {
+  const [loaded, setLoaded] = useState<{ model: string; providers: OpenRouterProvider[] } | null>(null);
+  useEffect(() => {
+    if (!modelId) return;
+    let live = true;
+    if (!providerRequests.has(modelId)) {
+      providerRequests.set(
+        modelId,
+        api.models
+          .routes(modelId)
+          .then((r) => r.providers)
+          .catch(() => {
+            providerRequests.delete(modelId);
+            return [];
+          })
+      );
+    }
+    providerRequests.get(modelId)!.then((providers) => {
+      if (live) setLoaded({ model: modelId, providers });
+    });
+    return () => {
+      live = false;
+    };
+  }, [modelId]);
+  return modelId && loaded?.model === modelId ? loaded.providers : null;
+}

@@ -12,6 +12,8 @@ import { useAuth } from "../../context/AuthContext";
 import { creditCost, usePlans } from "../../lib/plans";
 import type { ChatSettings, Ratio } from "../lib/chatStore";
 import ModelSelectorModal, { findModel, useModels, type EffortLevel, type ModelOption } from "./ModelSelectorModal";
+import { useOpenRouterProviders } from "../lib/models";
+import type { OpenRouterProvider } from "../../lib/api";
 
 const RATIOS: { id: Ratio; w: number; h: number }[] = [
   { id: "16:9", w: 16, h: 9 },
@@ -122,7 +124,20 @@ export default function StudioSettings({
   const remaining = user?.usage?.credits?.remaining;
   const short = remaining != null && remaining < cost;
   const lockedTitle = maxSeconds ? `Your plan makes films up to ${maxSeconds} s. Upgrade in Billing for longer films.` : undefined;
-  const pickModel = (m: ModelOption, e: EffortLevel) => onChange({ ...settings, provider: m.provider, model: m.id, effort: e });
+  // A provider choice belongs to its model: a new model starts on Auto.
+  const pickModel = (m: ModelOption, e: EffortLevel) =>
+    onChange({ ...settings, provider: m.provider, model: m.id, effort: e, route: m.id === settings.model ? settings.route : undefined });
+
+  // OpenRouter models: who serves the film. Auto lets OpenRouter balance; a sort or one named provider.
+  const routed = model.provider === "openrouter";
+  const providers = useOpenRouterProviders(routed ? model.id : null);
+  const route = (routed && settings.route) || "auto";
+  const pinned = providers?.find((p) => p.tag === route);
+  const money = (n: number) => (n === 0 ? "free" : `$${n < 0.1 ? n.toFixed(3).replace(/0$/, "") : n.toFixed(2)}`);
+  const providerLabel = (p: OpenRouterProvider) => {
+    const variant = p.tag.split("/").slice(1).join("/") || p.quantization;
+    return `${p.name}${variant ? ` · ${variant}` : ""} — ${money(p.inputPerM)} in / ${money(p.outputPerM)} out`;
+  };
 
   const panel = (
     <section aria-labelledby={`studio-settings-${variant}`} className="space-y-5">
@@ -147,6 +162,46 @@ export default function StudioSettings({
           <FiChevronDown size={14} aria-hidden="true" className="shrink-0 text-[var(--db-muted)]" />
         </button>
       </div>
+
+      {routed && (
+        <div className="space-y-2">
+          <label htmlFor={`studio-route-${variant}`} className="block text-[12px] font-medium text-[var(--db-muted)]">
+            Provider
+          </label>
+          <div className="relative">
+            <select
+              id={`studio-route-${variant}`}
+              value={route}
+              onChange={(e) => onChange({ ...settings, route: e.target.value === "auto" ? undefined : e.target.value })}
+              className="h-11 w-full cursor-pointer appearance-none truncate rounded-lg border border-[var(--db-rule-strong)] bg-white pl-3 pr-8 text-[13px] text-[var(--db-ink)] transition hover:border-[rgba(7,20,46,0.32)]"
+            >
+              <option value="auto">Auto (OpenRouter balances)</option>
+              <option value="price">Cheapest available</option>
+              <option value="throughput">Fastest available</option>
+              {route !== "auto" && !["price", "throughput"].includes(route) && !pinned && <option value={route}>{route}</option>}
+              {providers && providers.length > 0 && (
+                <optgroup label="Only this provider">
+                  {providers.map((p) => (
+                    <option key={p.tag} value={p.tag}>
+                      {providerLabel(p)}
+                    </option>
+                  ))}
+                </optgroup>
+              )}
+            </select>
+            <FiChevronDown size={14} aria-hidden="true" className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[var(--db-muted)]" />
+          </div>
+          <p className="text-[12px] leading-snug text-[var(--db-muted)]">
+            {pinned
+              ? `Only ${pinned.name} runs this film, with no fallback${pinned.uptime != null ? ` (${pinned.uptime}% up today)` : ""}. Prices per million tokens.`
+              : providers === null
+              ? "Loading providers…"
+              : providers.length === 0
+              ? "Couldn't load the provider list. Auto still works."
+              : `${providers.length} provider${providers.length === 1 ? "" : "s"} serve this model. Prices per million tokens.`}
+          </p>
+        </div>
+      )}
 
       <div className="space-y-2">
         <p className="text-[12px] font-medium text-[var(--db-muted)]">Frame</p>

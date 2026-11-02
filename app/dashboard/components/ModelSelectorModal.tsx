@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState, useLayoutEffect } from "react";
+import React, { Fragment, useEffect, useRef, useState, useLayoutEffect } from "react";
 import { createPortal } from "react-dom";
 import {
   FiCpu,
@@ -215,11 +215,18 @@ export default function ModelSelectorModal({
 
         {/* Scrollable Model Options */}
         <div className="flex-1 overflow-y-auto py-2.5 space-y-2 pr-1 min-h-0">
-          {models.map((model) => {
+          {models.map((model, i) => {
             const isSelected = activeModelId === model.id;
+            // A heading where a new provider group starts (OpenRouter's Free, Value and Top among them).
+            const startsGroup = i === 0 || models[i - 1].providerLabel !== model.providerLabel;
             return (
+              <Fragment key={`${model.provider}:${model.id}`}>
+              {startsGroup && (
+                <p className={`m-0 px-1 text-[10.5px] font-bold uppercase tracking-wider text-[rgba(7,20,46,0.55)] ${i === 0 ? "" : "pt-2"}`}>
+                  {model.providerLabel}
+                </p>
+              )}
               <div
-                key={model.id}
                 role="button"
                 tabIndex={0}
                 onClick={() => handleSelectModel(model)}
@@ -257,9 +264,7 @@ export default function ModelSelectorModal({
                       </span>
                     )}
                   </div>
-                  <p className="text-[11.5px] text-[rgba(7,20,46,0.68)] leading-snug mt-1 m-0">
-                    <span className="font-semibold text-[#07142e]/80">{model.providerLabel}</span> · {model.description}
-                  </p>
+                  <p className="text-[11.5px] text-[rgba(7,20,46,0.68)] leading-snug mt-1 m-0">{model.description}</p>
                 </div>
 
                 {/* Selection Radio / Check Pill */}
@@ -273,6 +278,7 @@ export default function ModelSelectorModal({
                   <FiCheck size={13} strokeWidth={3} />
                 </div>
               </div>
+              </Fragment>
             );
           })}
         </div>
