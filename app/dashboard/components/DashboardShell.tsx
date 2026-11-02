@@ -133,7 +133,7 @@ export default function DashboardShell({ user }: { user: User & { id: string } }
       />
 
       {/* Main Workspace Column with notebook ruled lines */}
-      <main className="flex h-full min-w-0 flex-1 flex-col overflow-hidden db-notebook-rules relative">
+      <main className="flex h-full min-w-0 flex-1 flex-col overflow-hidden relative bg-[#fcfcfd]">
         {/* Global Header Bar */}
         <DashboardHeader
           user={user}
@@ -144,10 +144,11 @@ export default function DashboardShell({ user }: { user: User & { id: string } }
           onSearchChange={setSearchQuery}
           onNewLaunch={() => newLaunch()}
           onNavigate={navigate}
+          title={section === "dashboard" || section === "overview" ? "Home" : SECTION_LABELS[section]}
         />
 
         {/* Scrollable Main Area (Full-height flex for chat interface) with local notebook rules */}
-        <div className={`min-h-0 flex-1 db-notebook-rules ${section === "create" || section === "launches" ? "flex flex-col overflow-hidden" : "overflow-y-auto"}`}>
+        <div className={`min-h-0 flex-1 ${section === "create" || section === "launches" ? "flex flex-col overflow-hidden" : "overflow-y-auto"}`}>
           {(section === "dashboard" || section === "overview") && (
             <OverviewSection
               user={user}
