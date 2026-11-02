@@ -223,6 +223,8 @@ export function useChats(userId: string) {
         provider,
         model,
         effort,
+        ratio,
+        length,
       };
       updateChat(chat.id, (c) => ({
         ...c,

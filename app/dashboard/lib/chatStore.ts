@@ -51,6 +51,9 @@ export interface ChatMessage {
   provider?: string;
   model?: string;
   effort?: string;
+  /** Assistant only: the film's frame and length as it was ordered. */
+  ratio?: Ratio;
+  length?: number;
 }
 
 /** "850 tokens", "12.4k tokens", "1.25M tokens". */

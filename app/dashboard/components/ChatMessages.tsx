@@ -1,249 +1,168 @@
 "use client";
 
 import { useState, type RefObject } from "react";
-import Image from "next/image";
 import { FiRotateCw, FiAlertTriangle } from "react-icons/fi";
 import { type ChatMessage, type Ratio, formatTokens } from "../lib/chatStore";
+import { creditCost } from "../../lib/plans";
+import { useModels, type ModelOption } from "./ModelSelectorModal";
 import VideoActions from "./VideoActions";
 import RenderLoader from "./RenderLoader";
+import { frameClass } from "./filmFrame";
 
-function AssistantAvatar() {
-  return (
-    <div className="relative flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#07142e] border border-[rgba(7,20,46,0.16)] shadow-xs">
-      <div className="relative h-4 w-4">
-        <Image
-          src="/byreel-mark.png"
-          alt="byreel"
-          fill
-          className="object-contain"
-          sizes="16px"
-        />
-      </div>
-    </div>
-  );
-}
+/** A model id as people know it: its name when the server lists it. */
+const modelName = (models: ModelOption[], id?: string) => (id ? models.find((m) => m.id === id)?.name ?? id : undefined);
 
-function VideoPlayerCard({
-  title,
-  url,
-  ratio,
-  tokens,
-  tokenDetails,
-  logs,
-  model,
-  effort,
-}: {
-  title: string;
-  url: string;
-  ratio: Ratio;
-  tokens?: number;
-  tokenDetails?: { total: number; input: number; output: number };
-  logs?: Array<{ ts: string; line: string }>;
-  model?: string;
-  effort?: string;
-}) {
-  const [showLogs, setShowLogs] = useState(false);
-  const isVertical = ratio === "9:16";
-  const isSquare = ratio === "1:1";
-  const totalTokens = tokenDetails?.total ?? tokens;
+function FilmCard({ message, ratio, model }: { message: ChatMessage; ratio: Ratio; model?: string }) {
+  const [showLog, setShowLog] = useState(false);
+  const preview = message.preview!;
+  const total = message.tokenDetails?.total ?? message.tokens;
+  const length = message.length;
 
   return (
-    <div className="space-y-2.5">
-      {/* Video Viewport with zero audio constraint */}
-      <div
-        className={`relative overflow-hidden rounded-2xl bg-black border border-[rgba(7,20,46,0.16)] shadow-lg ${
-          isVertical
-            ? "max-w-[300px] aspect-[9/16]"
-            : isSquare
-            ? "max-w-[380px] aspect-square"
-            : "max-w-2xl aspect-[16/9]"
-        }`}
-      >
-        <video
-          src={url}
-          controls
-          loop
-          playsInline
-          muted
-          preload="metadata"
-          aria-label={title}
-          className="h-full w-full object-contain"
-        />
+    <figure className="m-0 space-y-3">
+      <div className={`overflow-hidden rounded-xl bg-black shadow-[var(--db-shadow-md)] ${frameClass(ratio)}`}>
+        <video src={preview.url} controls loop playsInline muted preload="metadata" aria-label={preview.title} className="h-full w-full object-contain" />
       </div>
 
-      {/* Title & Actions Bar */}
-      <div className="max-w-2xl flex flex-wrap items-center justify-between gap-2 pt-0.5">
-        <div className="flex flex-wrap items-center gap-2">
-          <h3 className="text-[14.5px] sm:text-[15.5px] font-semibold text-[#07142e] tracking-tight">{title}</h3>
-          <span className="font-mono text-[10px] font-bold text-[rgba(7,20,46,0.7)] bg-[rgba(7,20,46,0.06)] border border-[rgba(7,20,46,0.14)] px-1.5 py-0.5 rounded-md">
-            {ratio}
-          </span>
-          {model && (
-            <span className="font-mono text-[10px] font-medium text-[#07142e] bg-[rgba(7,20,46,0.06)] border border-[rgba(7,20,46,0.14)] px-1.5 py-0.5 rounded-md">
-              🤖 {model} {effort ? `· ${effort}` : ""}
-            </span>
-          )}
-          {totalTokens != null && (
-            <span
-              className="inline-flex items-center gap-1 font-mono text-[10px] font-semibold text-[#07142e] bg-[rgba(7,20,46,0.06)] border border-[rgba(7,20,46,0.14)] px-2 py-0.5 rounded-md"
-              title={
-                tokenDetails
-                  ? `Total: ${formatTokens(tokenDetails.total)} (${formatTokens(tokenDetails.input)} in, ${formatTokens(tokenDetails.output)} out)`
-                  : "Model tokens used"
-              }
-            >
-              <span>⚡ {formatTokens(totalTokens)}</span>
-              {tokenDetails && (
-                <span className="text-[9px] text-[rgba(7,20,46,0.55)] font-normal">
-                  ({formatTokens(tokenDetails.input)} in · {formatTokens(tokenDetails.output)} out)
-                </span>
-              )}
-            </span>
-          )}
-          {logs && logs.length > 0 && (
-            <button
-              type="button"
-              onClick={() => setShowLogs((prev) => !prev)}
-              className="font-mono text-[10px] font-medium text-[rgba(7,20,46,0.6)] hover:text-[#07142e] underline transition-colors cursor-pointer"
-            >
-              {showLogs ? "Hide Reasoning" : "View Agent Thinking"}
-            </button>
-          )}
-        </div>
-
-        <VideoActions url={url} title={title} />
-      </div>
-
-      {/* Expandable Agent Reasoning Tray */}
-      {showLogs && logs && logs.length > 0 && (
-        <div className="max-w-2xl rounded-xl bg-[#07142e] border border-white/10 p-3 text-white font-mono text-[10px] space-y-1.5 max-h-48 overflow-y-auto no-scrollbar shadow-md">
-          <div className="flex items-center justify-between border-b border-white/10 pb-1 mb-1 text-[9.5px] text-[#c5ef26]">
-            <span>Model Reasoning & Event Log</span>
-            <span>{logs.length} trace events</span>
-          </div>
-          {logs.map((l, i) => (
-            <div key={i} className="flex items-start gap-2 text-white/80">
-              <span className="text-white/30 shrink-0">{l.ts ? l.ts.slice(11, 19) : ""}</span>
-              <span className="break-all">{l.line}</span>
+      <figcaption className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
+        <div className="min-w-0 space-y-1">
+          <h3 className="text-[15.5px] font-semibold leading-snug text-[var(--db-ink)]">{preview.title}</h3>
+          <dl className="flex flex-wrap gap-x-4 gap-y-1 text-[12.5px] text-[var(--db-faint)]">
+            <div className="flex gap-1">
+              <dt className="sr-only">Frame</dt>
+              <dd className="m-0">{ratio}</dd>
             </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function AssistantMessage({
-  message,
-  ratio,
-  onRetry,
-}: {
-  message: ChatMessage;
-  ratio: Ratio;
-  onRetry: () => void;
-}) {
-  return (
-    <div className="flex items-start gap-3 sm:gap-3.5 db-rise">
-      <AssistantAvatar />
-      <div className="min-w-0 flex-1 space-y-3 pt-0.5">
-        {/* Live Loading Rendering Viewfinder with Agent Thinking Stream */}
-        {message.isStreaming && message.stages && (
-          <RenderLoader
-            stages={message.stages}
-            activity={message.activity}
-            thought={message.thought}
-            ratio={ratio}
-            startedAt={message.createdAt}
-            tokens={message.tokens}
-            tokenDetails={message.tokenDetails}
-            logs={message.logs}
-            provider={message.provider}
-            model={message.model}
-            effort={message.effort}
-          />
-        )}
-
-        {/* Text message content */}
-        {message.content && !message.isError && (
-          <div className="max-w-2xl text-[14px] sm:text-[14.5px] leading-relaxed text-[#07142e] font-normal">
-            {message.content}
-          </div>
-        )}
-
-        {/* Error panel */}
-        {message.isError && (
-          <div className="flex max-w-xl items-start gap-2.5 rounded-xl border border-[#fecaca] bg-[rgba(254,242,242,0.85)] p-3 text-[#991b1b]">
-            <FiAlertTriangle className="mt-0.5 shrink-0 text-[#dc2626]" size={16} />
-            <div className="min-w-0 space-y-1.5">
-              <p className="text-[13px] text-[#7f1d1d] leading-relaxed break-words">{message.content}</p>
-              {message.paywall && (
-                <p className="text-[12px] text-[#7f1d1d]/80 leading-relaxed">
-                  {message.paywall === "PLAN_LIMIT"
-                    ? "Choose a shorter length below, or upgrade for longer films."
-                    : "Your credits renew with your plan, or upgrade for more."}
-                </p>
-              )}
-              {message.tokens != null && (
-                <p className="font-mono text-[10.5px] text-[#991b1b]/70">Used {formatTokens(message.tokens)} so far</p>
-              )}
-              <div className="flex flex-wrap items-center gap-2">
-                {message.paywall && (
-                  <a
-                    href="#membership"
-                    className="inline-flex items-center gap-1.5 rounded-md bg-[#07142e] px-2.5 py-1 text-[11.5px] font-semibold text-[#faf8f2] shadow-xs transition hover:bg-[#040c1c]"
-                  >
-                    See plans
-                  </a>
-                )}
-                {message.paywall === "CREDITS_EXHAUSTED" && (
-                  <a
-                    href="#billing"
-                    className="inline-flex items-center gap-1.5 rounded-md border border-[#fecaca] bg-white px-2.5 py-1 text-[11.5px] font-semibold text-[#7f1d1d] transition hover:bg-[#fff5f5]"
-                  >
-                    Credits & usage
-                  </a>
-                )}
-                <button
-                  type="button"
-                  onClick={onRetry}
-                  title={
-                    message.paywall
-                      ? "Try again, after upgrading or choosing a shorter length"
-                      : "Continue from the step that failed, keeping what was already made"
-                  }
-                  className="inline-flex items-center gap-1.5 rounded-md bg-[#dc2626] px-2.5 py-1 text-[11.5px] font-semibold text-white shadow-xs transition hover:bg-[#b91c1c]"
-                >
-                  <FiRotateCw size={11} /> Retry
-                </button>
+            {length ? (
+              <>
+                <div className="flex gap-1">
+                  <dt className="sr-only">Length</dt>
+                  <dd className="m-0 tabular-nums">{length} s</dd>
+                </div>
+                <div className="flex gap-1">
+                  <dt className="sr-only">Cost</dt>
+                  <dd className="m-0 tabular-nums">{creditCost(length)} credits</dd>
+                </div>
+              </>
+            ) : null}
+            {model ? (
+              <div className="flex gap-1">
+                <dt className="sr-only">Model</dt>
+                <dd className="m-0">
+                  {model}
+                  {message.effort ? `, ${message.effort} effort` : ""}
+                </dd>
               </div>
-            </div>
-          </div>
-        )}
+            ) : null}
+          </dl>
+        </div>
+        <VideoActions url={preview.url} title={preview.title} />
+      </figcaption>
 
-        {/* Finished Video Card with Reasoning Explorer */}
-        {message.preview && (
-          <VideoPlayerCard
-            title={message.preview.title}
-            url={message.preview.url}
-            ratio={ratio}
-            tokens={message.tokens}
-            tokenDetails={message.tokenDetails}
-            logs={message.logs}
-            model={message.model}
-            effort={message.effort}
-          />
-        )}
+      {message.logs && message.logs.length > 0 ? (
+        <div>
+          <button
+            type="button"
+            onClick={() => setShowLog((v) => !v)}
+            aria-expanded={showLog}
+            className="text-[12.5px] font-medium text-[var(--db-muted)] underline underline-offset-2 hover:text-[var(--db-ink)] cursor-pointer"
+          >
+            {showLog ? "Hide build log" : "Show build log"}
+          </button>
+          {showLog ? (
+            <div className="mt-2 max-h-64 overflow-y-auto rounded-lg border border-[var(--db-rule)] bg-[var(--db-paper-2)] p-3 font-mono text-[11.5px] leading-relaxed text-[var(--db-muted)]">
+              {total != null ? <p className="mb-2 text-[var(--db-ink)]">{formatTokens(total)} model tokens</p> : null}
+              {message.logs.map((l, i) => (
+                <div key={i} className="flex gap-2">
+                  <span className="shrink-0 text-[var(--db-faint)]">{l.ts ? l.ts.slice(11, 19) : ""}</span>
+                  <span className="break-words">{l.line}</span>
+                </div>
+              ))}
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+    </figure>
+  );
+}
+
+function FailedFilm({ message, onRetry }: { message: ChatMessage; onRetry: () => void }) {
+  return (
+    <div className="flex max-w-[640px] items-start gap-3 rounded-xl border border-[#f1c9c4] bg-[#fff7f6] p-4">
+      <FiAlertTriangle className="mt-0.5 shrink-0 text-[#b42318]" size={17} aria-hidden="true" />
+      <div className="min-w-0 space-y-2">
+        <p className="break-words text-[14px] font-medium leading-relaxed text-[#7a1a12]">{message.content}</p>
+        {message.paywall ? (
+          <p className="text-[13px] leading-relaxed text-[#7a1a12]">
+            {message.paywall === "PLAN_LIMIT"
+              ? "Choose a shorter length, or upgrade for longer films."
+              : "Your credits renew with your plan, or upgrade for more."}
+          </p>
+        ) : message.tokens != null ? (
+          <p className="text-[12.5px] text-[#7a1a12]">Used {formatTokens(message.tokens)} model tokens before it stopped.</p>
+        ) : null}
+        <div className="flex flex-wrap items-center gap-2 pt-1">
+          {message.paywall ? (
+            <a href="#membership" className="inline-flex h-9 items-center rounded-lg bg-[var(--db-ink)] px-3.5 text-[13px] font-semibold text-white hover:bg-[#040c1c]">
+              See plans
+            </a>
+          ) : null}
+          {message.paywall === "CREDITS_EXHAUSTED" ? (
+            <a href="#billing" className="inline-flex h-9 items-center rounded-lg border border-[#e3b4ae] bg-white px-3.5 text-[13px] font-medium text-[#7a1a12] hover:bg-[#fff1ef]">
+              Credits and usage
+            </a>
+          ) : null}
+          <button
+            type="button"
+            onClick={onRetry}
+            title={message.paywall ? "Try again after upgrading or choosing a shorter length" : "Continue from the step that failed, keeping what was made"}
+            className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[#e3b4ae] bg-white px-3.5 text-[13px] font-medium text-[#7a1a12] hover:bg-[#fff1ef] cursor-pointer"
+          >
+            <FiRotateCw size={13} aria-hidden="true" /> {message.paywall ? "Try again" : "Retry"}
+          </button>
+        </div>
       </div>
+    </div>
+  );
+}
+
+function AssistantMessage({ message, ratio, onRetry, models }: { message: ChatMessage; ratio: Ratio; onRetry: () => void; models: ModelOption[] }) {
+  const frame = message.ratio ?? ratio;
+  const model = modelName(models, message.model);
+  return (
+    <div className="space-y-3">
+      {message.isStreaming && message.stages ? (
+        <RenderLoader
+          stages={message.stages}
+          activity={message.activity}
+          thought={message.thought}
+          ratio={frame}
+          startedAt={message.createdAt}
+          tokens={message.tokens}
+          tokenDetails={message.tokenDetails}
+          logs={message.logs}
+          provider={message.provider}
+          model={model}
+          effort={message.effort}
+        />
+      ) : null}
+
+      {message.content && !message.isError ? (
+        <p className="max-w-[640px] text-[14.5px] leading-relaxed text-[var(--db-ink)]">{message.content}</p>
+      ) : null}
+
+      {message.isError ? <FailedFilm message={message} onRetry={onRetry} /> : null}
+
+      {message.preview ? <FilmCard message={message} ratio={frame} model={model} /> : null}
     </div>
   );
 }
 
 function UserMessage({ message }: { message: ChatMessage }) {
   return (
-    <div className="flex justify-end db-rise">
-      <div className="max-w-[85%] sm:max-w-xl rounded-2xl rounded-br-xs bg-[#07142e] px-4 py-2.5 text-[14px] leading-relaxed text-[#faf8f2] shadow-2xs break-words whitespace-pre-wrap">
+    <div className="flex justify-end">
+      <p className="m-0 max-w-[85%] whitespace-pre-wrap break-words rounded-2xl rounded-br-md border border-[var(--db-rule)] bg-[var(--db-paper-2)] px-4 py-2.5 text-[14.5px] leading-relaxed text-[var(--db-ink)] sm:max-w-[560px]">
         {message.content}
-      </div>
+      </p>
     </div>
   );
 }
@@ -260,19 +179,15 @@ export default function ChatMessages({
   /** Retry a failed reply in place (by message id). */
   onRetry: (messageId: string) => void;
 }) {
+  const models = useModels();
   return (
-    <div className="min-h-0 flex-1 overflow-y-auto" role="log" aria-live="polite" aria-label="Conversation History">
-      <div className="mx-auto max-w-3xl space-y-6 px-4 py-6 sm:px-6">
+    <div className="min-h-0 flex-1 overflow-y-auto" role="log" aria-live="polite" aria-label="This video and its takes">
+      <div className="mx-auto max-w-[820px] space-y-8 px-4 py-6 sm:px-8 sm:py-8">
         {messages.map((message) =>
           message.role === "user" ? (
             <UserMessage key={message.id} message={message} />
           ) : (
-            <AssistantMessage
-              key={message.id}
-              message={message}
-              ratio={ratio}
-              onRetry={() => onRetry(message.id)}
-            />
+            <AssistantMessage key={message.id} message={message} ratio={ratio} models={models} onRetry={() => onRetry(message.id)} />
           )
         )}
         <div ref={bottomRef} />

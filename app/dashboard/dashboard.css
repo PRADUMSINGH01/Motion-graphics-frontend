@@ -753,3 +753,38 @@ html:has(.db) body {
   background: #c5ef26;
   border-color: #9fcf0d;
 }
+
+/* ── Studio ───────────────────────────────────────────────────────────── */
+
+/* The composer draws its own focus ring around the whole box. */
+.st-composer textarea:focus-visible {
+  outline: none;
+}
+
+/* The pipeline step in progress: one bar moving inside its segment. */
+.st-step-running {
+  position: relative;
+}
+.st-step-running::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 40%;
+  border-radius: inherit;
+  background: var(--db-lime);
+  animation: st-step 1.6s ease-in-out infinite;
+}
+@keyframes st-step {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(250%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .st-step-running::after {
+    animation: none;
+    width: 50%;
+  }
+}
