@@ -185,7 +185,7 @@ export default function NavSidebar({
             />
           </div>
           <p className="sb-usage-note">
-            {compute.limit > 0 ? `${Math.max(0, compute.limit - compute.used)} credits left this month` : "Pick a plan to start rendering"}
+            {compute.limit > 0 ? `${Math.max(0, compute.limit - compute.used)} ${compute.limit - compute.used === 1 ? "credit" : "credits"} left this month` : "Pick a plan to start rendering"}
           </p>
           <button type="button" className="sb-usage-cta" onClick={() => onNavigate("billing")}>
             Upgrade plan

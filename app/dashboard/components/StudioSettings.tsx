@@ -320,7 +320,7 @@ export default function StudioSettings({
       <div className="border-t border-[var(--db-rule)] pt-4">
         <div className="flex items-baseline justify-between gap-3">
           <span className="text-[12.5px] text-[var(--db-muted)]">This video uses</span>
-          <span className={`text-[15px] font-semibold tabular-nums ${short ? "text-[#b42318]" : "text-[var(--db-ink)]"}`}>{cost} credits</span>
+          <span className={`text-[15px] font-semibold tabular-nums ${short ? "text-[#b42318]" : "text-[var(--db-ink)]"}`}>{cost} {cost === 1 ? "credit" : "credits"}</span>
         </div>
         {remaining != null && (
           <p className={`mt-1 text-right text-[12px] tabular-nums ${short ? "text-[#b42318]" : "text-[var(--db-muted)]"}`}>

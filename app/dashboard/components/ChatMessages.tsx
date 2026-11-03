@@ -41,7 +41,7 @@ function FilmCard({ message, ratio, model }: { message: ChatMessage; ratio: Rati
                 <div className="flex gap-1">
                   <dt className="sr-only">Cost</dt>
                   <dd className="m-0 tabular-nums" title={message.credits != null ? "Charged for what it used: model tokens and render time" : undefined}>
-                    {message.credits != null ? `${message.credits} ${message.credits === 1 ? "credit" : "credits"}` : `about ${creditCost(length)} credits`}
+                    {message.credits != null ? `${message.credits} ${message.credits === 1 ? "credit" : "credits"}` : `about ${creditCost(length)} ${creditCost(length) === 1 ? "credit" : "credits"}`}
                   </dd>
                 </div>
               </>
