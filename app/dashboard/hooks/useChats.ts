@@ -55,12 +55,17 @@ const byRecent = (a: Chat, b: Chat) => b.updatedAt.localeCompare(a.updatedAt);
  * The signed-in user's Studio chats. This browser keeps a copy for an instant start; the server keeps the
  * history, so a chat made here shows in any other browser, and a rename or delete there shows here.
  */
-export function useChats(userId: string) {
+/** onCredits runs when the account's credits change: a video's estimate is held, settled or refunded. */
+export function useChats(userId: string, onCredits?: () => void) {
   // Only rendered client-side, after sign-in, so reading storage during the first render is safe.
   const [chats, setChats] = useState<Chat[]>(() => loadChats(userId).sort(byRecent));
   // null means a new video; a chat opens when the user picks one or sends a prompt.
   const [activeId, setActiveId] = useState<string | null>(null);
   const pollers = useRef(new Map<string, ReturnType<typeof setTimeout>>());
+  const creditsChanged = useRef(onCredits);
+  useEffect(() => {
+    creditsChanged.current = onCredits;
+  });
 
   // Sync state. `saved` holds each chat's sync key as the server last stored it; a chat whose key differs
   // is saved. Nothing is saved before the server's copy is read, so an old copy here can't race a newer one.
@@ -120,6 +125,7 @@ export function useChats(userId: string) {
           if (job.theme && job.harnessJobId) {
             updateChat(chatId, (c) => (c.theme ? c : { ...c, theme: { jobId: job.harnessJobId!, name: job.theme! } }), false);
           }
+          if (job.status === "done" || job.status === "failed") creditsChanged.current?.();
           if (job.status === "done") {
             const url = job.play[0];
             if (url) {
@@ -397,6 +403,7 @@ export function useChats(userId: string) {
           sound,
           ...(editOf ? { editOf } : chat.theme ? { themeFrom: chat.theme.jobId } : {}),
         });
+        creditsChanged.current?.();
         track(chat.id, assistant.id, promptId, title);
       } catch (err) {
         patchMessage(

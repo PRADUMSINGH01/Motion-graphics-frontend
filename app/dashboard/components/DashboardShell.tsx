@@ -28,7 +28,7 @@ import VerifyEmailBanner from "./VerifyEmailBanner";
 
 export default function DashboardShell({ user }: { user: User & { id: string } }) {
   const { logout, refreshUser } = useAuth();
-  const chatsApi = useChats(user.id);
+  const chatsApi = useChats(user.id, refreshUser);
   const { chats, activeChat, send, retry, newChat, selectChat, goHome, deleteChat, renameChat, updateChatSettings } = chatsApi;
 
   const [section, setSectionState] = useState<SectionId>("dashboard");
