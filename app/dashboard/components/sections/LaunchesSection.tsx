@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { FiCheck, FiEdit2, FiFilm, FiPlus, FiTrash2, FiX } from "react-icons/fi";
-import { type Chat, type ChatSettings, DEFAULT_SETTINGS, themePending } from "../../lib/chatStore";
+import { type Chat, type ChatSettings, DEFAULT_SETTINGS, lastFinishedTake, themePending } from "../../lib/chatStore";
 import { SHOWREEL } from "../../../components/landing/showreel";
 import ChatMessages from "../ChatMessages";
 import PromptBox from "../PromptBox";
@@ -110,7 +110,7 @@ function FilmsList({
 interface LaunchesSectionProps {
   chats: Chat[];
   activeChat: Chat | null;
-  onSend: (text: string, settings?: ChatSettings) => void;
+  onSend: (text: string, settings?: ChatSettings, options?: { editOf?: string }) => void;
   onRetry: (chatId: string, messageId: string) => void;
   onNewChat: (settings?: ChatSettings) => void;
   onSelect: (id: string) => void;
@@ -136,6 +136,8 @@ export default function LaunchesSection({
   const [renaming, setRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState("");
   const [filmsOpen, setFilmsOpen] = useState(false);
+  // A follow-up changes the latest finished video unless "New take" is chosen.
+  const [newTake, setNewTake] = useState(false);
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const filmsRef = useRef<HTMLDivElement | null>(null);
 
@@ -170,6 +172,8 @@ export default function LaunchesSection({
   );
 
   const hasMessages = !!activeChat && activeChat.messages.length > 0;
+  const editable = lastFinishedTake(activeChat);
+  const sendFollowUp = (text: string) => onSend(text, settings, editable && !newTake ? { editOf: editable.promptId } : undefined);
   const tone = activeChat ? filmTone(activeChat) : null;
   const waitingForTheme = activeChat ? themePending(activeChat) : false;
 
@@ -282,11 +286,31 @@ export default function LaunchesSection({
             />
             <div className="shrink-0 border-t border-[var(--db-rule)] bg-white px-4 py-3 sm:px-8 sm:py-4">
               <div className="mx-auto max-w-[820px]">
+                {editable ? (
+                  <div role="radiogroup" aria-label="What the next message does" className="mb-2 flex items-center gap-1 text-[12.5px]">
+                    {[
+                      { id: false, label: "Change this video", hint: "Keeps what you don't mention" },
+                      { id: true, label: "New take", hint: "Starts again in the same look" },
+                    ].map((o) => (
+                      <button
+                        key={String(o.id)}
+                        type="button"
+                        role="radio"
+                        aria-checked={newTake === o.id}
+                        title={o.hint}
+                        onClick={() => setNewTake(o.id)}
+                        className={`h-11 rounded-lg px-3 font-medium transition cursor-pointer lg:h-8 ${newTake === o.id ? "bg-[var(--db-ink)] text-white" : "text-[var(--db-muted)] hover:bg-[var(--db-paper-2)] hover:text-[var(--db-ink)]"}`}
+                      >
+                        {o.label}
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
                 <PromptBox
-                  onSend={(text) => onSend(text, settings)}
+                  onSend={sendFollowUp}
                   settings={settings}
                   onSettingsChange={changeSettings}
-                  placeholder="Ask for a change, or describe the next take…"
+                  placeholder={editable && !newTake ? "What should change? e.g. make the title bigger, use our brand colours…" : "Describe the next take…"}
                   disabledReason={waitingForTheme ? "The first take is still choosing the look. You can send the next prompt once it's set." : undefined}
                 />
               </div>

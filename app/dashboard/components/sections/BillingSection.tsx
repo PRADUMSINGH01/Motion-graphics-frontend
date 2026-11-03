@@ -5,7 +5,7 @@ import { FiCreditCard, FiExternalLink, FiRefreshCw, FiFilm, FiLoader } from "rea
 import { useAuth, type User } from "../../../context/AuthContext";
 import { useAlert } from "../../../context/AlertContext";
 import { api, ApiError, type InvoiceItem, type UsageSummary } from "../../../lib/api";
-import { PLAN_NAMES, creditCost, formatDate } from "../../../lib/plans";
+import { PLAN_NAMES, formatDate, usePlans } from "../../../lib/plans";
 
 const STATUS_STYLE: Record<string, string> = {
   active: "bg-surf-f2fac2 text-ink-658b02",
@@ -20,6 +20,7 @@ const FILM_STATUS: Record<string, string> = { done: "Ready", failed: "Failed", r
 const fetchBilling = () => Promise.all([api.usage.get(), api.billing.invoices()]);
 
 export default function BillingSection({ user }: { user: User }) {
+  const { typical } = usePlans();
   const { refreshUser } = useAuth();
   const { success, failure } = useAlert();
   const [usage, setUsage] = useState<UsageSummary | null>(null);
@@ -190,8 +191,9 @@ export default function BillingSection({ user }: { user: User }) {
                 <span>Renews {formatDate(credits.periodEnd)}</span>
               </div>
               <p className="border-t border-surf-f2efe6 pt-3 text-[12px] text-ink-8c8980">
-                A 15-second film uses {creditCost(15)} credits, 30 seconds {creditCost(30)}, a minute {creditCost(60)}. A
-                film that fails gives its credits back.
+                Each video is charged by what it actually uses: model tokens and render time. On the default model a
+                15-second video is about {typical(15)} credits; bigger models cost more, and the Studio shows the estimate
+                before you start. A video that fails gives its credits back.
               </p>
             </>
           ) : (

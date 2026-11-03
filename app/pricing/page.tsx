@@ -7,7 +7,7 @@ import { useAuth } from "../context/AuthContext";
 import { useAlert } from "../context/AlertContext";
 import NotebookShell from "../components/landing/NotebookShell";
 import type { BillingCycle, BillingPlan, PlanPrice } from "../lib/api";
-import { creditCost, hasAnnualPrices, startCheckout, usePlans } from "../lib/plans";
+import { hasAnnualPrices, startCheckout, usePlans } from "../lib/plans";
 import "../components/landing/pricing.css";
 
 type PlanId = "free" | "creator" | "pro" | "enterprise";
@@ -103,12 +103,13 @@ const PLANS: Plan[] = [
   },
 ];
 
-/* What one render costs: a credit per 3 seconds of film, at least 2 (creditCost, as the backend charges). */
+/* Typical renders. Each is charged what it measures (model tokens and render time); the credits shown are the
+   typical numbers on the default model, from the backend. */
 const RENDERS = [
-  { id: "shorts", label: "Short videos", detail: "15 s, vertical for Reels, Shorts and TikTok", credits: creditCost(15), max: 100, start: 12 },
-  { id: "broll", label: "B-roll clips", detail: "9 s cutaways for YouTube", credits: creditCost(9), max: 100, start: 10 },
-  { id: "motion", label: "Motion graphics scenes", detail: "30 s of kinetic type, charts or explainers", credits: creditCost(30), max: 50, start: 2 },
-  { id: "launch", label: "Product launch videos", detail: "60 s multi-scene trailers", credits: creditCost(60), max: 30, start: 1 },
+  { id: "shorts", label: "Short videos", detail: "15 s, vertical for Reels, Shorts and TikTok", seconds: 15, max: 100, start: 12 },
+  { id: "broll", label: "B-roll clips", detail: "9 s cutaways for YouTube", seconds: 9, max: 100, start: 10 },
+  { id: "motion", label: "Motion graphics scenes", detail: "30 s of kinetic type, charts or explainers", seconds: 30, max: 50, start: 2 },
+  { id: "launch", label: "Product launch videos", detail: "60 s multi-scene trailers", seconds: 60, max: 30, start: 1 },
 ] as const;
 
 type RenderId = (typeof RENDERS)[number]["id"];
@@ -152,7 +153,7 @@ const COMPARE: { group: string; rows: [string, string, string, string, string][]
 const FAQS = [
   {
     q: "What does a credit pay for?",
-    a: `Rendering: a credit for every 3 seconds of film, at least 2. A 9-second B-roll clip is ${creditCost(9)} credits, a 15-second short ${creditCost(15)}, a 30-second scene ${creditCost(30)} and a one-minute launch video ${creditCost(60)}. Changing words, colours, screenshots or timing in the editor is free, and a film that fails gives its credits back.`,
+    a: "Each video is charged by what it actually uses: the model's tokens and the render time, so a short title on a fast model costs a credit or two and a long film on a top model costs more. The Studio shows the estimate before you start, each finished video shows what it was charged, and a video that fails gives its credits back.",
   },
   {
     q: "Can I use the videos in Premiere, Final Cut, DaVinci or CapCut?",
@@ -286,7 +287,7 @@ export default function PricingPage() {
   const [annual, setAnnual] = useState(false);
   const { user } = useAuth();
   const currentTier = user?.plan?.tier;
-  const { plans: live } = usePlans();
+  const { plans: live, typical } = usePlans();
   const liveOf = (id: PlanId) => live?.find((p) => p.tier === id);
   // The yearly switch shows only when a plan is sold yearly.
   const yearly = hasAnnualPrices(live);
@@ -314,7 +315,7 @@ export default function PricingPage() {
   const [counts, setCounts] = useState<Record<RenderId, number>>(
     () => Object.fromEntries(RENDERS.map((r) => [r.id, r.start])) as Record<RenderId, number>
   );
-  const needed = RENDERS.reduce((sum, r) => sum + r.credits * counts[r.id], 0);
+  const needed = RENDERS.reduce((sum, r) => sum + typical(r.seconds) * counts[r.id], 0);
   const fit = PLANS.find((p) => creditsOf(p) >= needed) ?? PLANS[PLANS.length - 1];
   const spare = creditsOf(fit) - needed;
 
@@ -437,7 +438,7 @@ export default function PricingPage() {
                 <span className="pr-row-text">
                   <span className="pr-row-label">{r.label}</span>
                   <span className="pr-row-detail">
-                    {r.detail}. {r.credits} credits each.
+                    {r.detail}. About {typical(r.seconds)} credits each.
                   </span>
                 </span>
                 <input

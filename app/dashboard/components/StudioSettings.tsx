@@ -13,6 +13,30 @@ import { creditCost, usePlans } from "../../lib/plans";
 import type { ChatSettings, Ratio } from "../lib/chatStore";
 import ModelSelectorModal, { findModel, useModels, type EffortLevel, type ModelOption } from "./ModelSelectorModal";
 import { useOpenRouterProviders } from "../lib/models";
+import { api } from "../../lib/api";
+
+/**
+ * The credits a film with these settings holds when it starts (the server's estimate for this model and
+ * length; it is then charged what it measures). Fetched a moment after the settings stop changing.
+ */
+function useEstimate(provider: string | undefined, model: string | undefined, length: number): number | null {
+  const [result, setResult] = useState<{ key: string; credits: number } | null>(null);
+  const key = `${provider}|${model}|${length}`;
+  useEffect(() => {
+    let live = true;
+    const timer = setTimeout(() => {
+      api.billing
+        .estimate({ provider, model, length })
+        .then((r) => live && setResult({ key, credits: r.credits }))
+        .catch(() => {});
+    }, 250);
+    return () => {
+      live = false;
+      clearTimeout(timer);
+    };
+  }, [provider, model, length, key]);
+  return result?.key === key ? result.credits : null;
+}
 import type { OpenRouterProvider } from "../../lib/api";
 
 const RATIOS: { id: Ratio; w: number; h: number }[] = [
@@ -20,7 +44,9 @@ const RATIOS: { id: Ratio; w: number; h: number }[] = [
   { id: "9:16", w: 9, h: 16 },
   { id: "1:1", w: 12, h: 12 },
 ];
-const LENGTHS = [15, 30, 45, 60];
+// Any whole second from 1 to 60; the plan may allow less.
+const MIN_SECONDS = 1;
+const MAX_SECONDS = 60;
 const EFFORT_NAMES: Record<string, string> = { low: "Low", medium: "Medium", high: "High", xhigh: "Max" };
 
 function FrameIcon({ w, h }: { w: number; h: number }) {
@@ -120,10 +146,16 @@ export default function StudioSettings({
     };
   }, [sheetOpen, picking]);
 
-  const cost = creditCost(settings.length);
+  const cost = useEstimate(settings.provider, settings.model, settings.length) ?? creditCost(settings.length);
   const remaining = user?.usage?.credits?.remaining;
   const short = remaining != null && remaining < cost;
   const lockedTitle = maxSeconds ? `Your plan makes films up to ${maxSeconds} s. Upgrade in Billing for longer films.` : undefined;
+  // The longest film this plan makes; a typed length outside 1..that comes back inside.
+  const allowedSeconds = Math.min(MAX_SECONDS, maxSeconds ?? MAX_SECONDS);
+  const setLength = (s: number) => {
+    if (!Number.isFinite(s)) return;
+    onChange({ ...settings, length: Math.max(MIN_SECONDS, Math.min(allowedSeconds, Math.round(s))) });
+  };
   // A provider choice belongs to its model: a new model starts on Auto.
   const pickModel = (m: ModelOption, e: EffortLevel) =>
     onChange({ ...settings, provider: m.provider, model: m.id, effort: e, route: m.id === settings.model ? settings.route : undefined });
@@ -175,10 +207,9 @@ export default function StudioSettings({
               onChange={(e) => onChange({ ...settings, route: e.target.value === "auto" ? undefined : e.target.value })}
               className="h-11 w-full cursor-pointer appearance-none truncate rounded-lg border border-[var(--db-rule-strong)] bg-white pl-3 pr-8 text-[13px] text-[var(--db-ink)] transition hover:border-[rgba(7,20,46,0.32)]"
             >
-              <option value="auto">Auto (OpenRouter balances)</option>
-              <option value="price">Cheapest available</option>
+              <option value="auto">Auto: cheapest reliable hosts</option>
               <option value="throughput">Fastest available</option>
-              {route !== "auto" && !["price", "throughput"].includes(route) && !pinned && <option value={route}>{route}</option>}
+              {route !== "auto" && route !== "throughput" && !pinned && <option value={route}>{route}</option>}
               {providers && providers.length > 0 && (
                 <optgroup label="Only this provider">
                   {providers.map((p) => (
@@ -198,7 +229,7 @@ export default function StudioSettings({
               ? "Loading providers…"
               : providers.length === 0
               ? "Couldn't load the provider list. Auto still works."
-              : `${providers.length} provider${providers.length === 1 ? "" : "s"} serve this model. Prices per million tokens.`}
+              : `${providers.length} provider${providers.length === 1 ? "" : "s"} serve this model; Auto uses the cheapest reliable ones. Prices per million tokens.`}
           </p>
         </div>
       )}
@@ -223,17 +254,41 @@ export default function StudioSettings({
       </div>
 
       <div className="space-y-2">
-        <p className="text-[12px] font-medium text-[var(--db-muted)]">Length</p>
-        <Segmented
-          label="Length in seconds"
-          options={LENGTHS}
-          value={settings.length}
-          onChange={(s) => onChange({ ...settings, length: s })}
-          isLocked={(s) => maxSeconds !== null && s > maxSeconds}
-          lockedTitle={lockedTitle}
-          render={(s) => <span className="tabular-nums">{s}s</span>}
+        <div className="flex items-center justify-between gap-3">
+          <label htmlFor={`studio-length-${variant}`} className="text-[12px] font-medium text-[var(--db-muted)]">
+            Length
+          </label>
+          <span className="flex items-center gap-1.5">
+            <input
+              type="number"
+              inputMode="numeric"
+              aria-label="Length in seconds"
+              min={MIN_SECONDS}
+              max={allowedSeconds}
+              value={settings.length}
+              onChange={(e) => setLength(Number(e.target.value))}
+              className="h-9 w-16 rounded-lg border border-[var(--db-rule-strong)] bg-white px-2 text-right text-[13px] font-semibold tabular-nums text-[var(--db-ink)] focus:border-[var(--db-ink)] focus:outline-none"
+            />
+            <span className="text-[12.5px] text-[var(--db-muted)]">s</span>
+          </span>
+        </div>
+        <input
+          id={`studio-length-${variant}`}
+          type="range"
+          min={MIN_SECONDS}
+          max={allowedSeconds}
+          step={1}
+          value={Math.min(settings.length, allowedSeconds)}
+          onChange={(e) => setLength(Number(e.target.value))}
+          aria-valuetext={`${settings.length} seconds`}
+          title={lockedTitle}
+          className="h-11 w-full cursor-pointer accent-[var(--db-ink)] lg:h-8"
         />
-        {maxSeconds !== null && maxSeconds < LENGTHS[LENGTHS.length - 1] && (
+        <div className="flex justify-between text-[11.5px] tabular-nums text-[var(--db-faint)]" aria-hidden="true">
+          <span>{MIN_SECONDS} s</span>
+          <span>{allowedSeconds} s</span>
+        </div>
+        {maxSeconds !== null && maxSeconds < MAX_SECONDS && (
           <p className="text-[12px] leading-snug text-[var(--db-muted)]">
             Your plan makes films up to {maxSeconds} s.{" "}
             <a href="#membership" className="font-medium text-[var(--db-ink)] underline underline-offset-2">

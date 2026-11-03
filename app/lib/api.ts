@@ -4,6 +4,7 @@
  */
 
 import type { MotionBillingQuote } from "./motionBilling";
+import type { Chat } from "../dashboard/lib/chatStore";
 
 export const LOCAL_API_URL = "http://localhost:8080";
 
@@ -228,6 +229,16 @@ export interface PromptJob {
   ratio?: string;
   createdAt?: string;
   updatedAt?: string;
+  /** What the person should know about the finished film (a scene that fell back to a simple version). */
+  notes?: string[];
+  /** Credits the film holds while it runs, then what it was charged once it measured what it used. */
+  credits?: number;
+  creditsSettled?: boolean;
+  /** What the film ran on. */
+  provider?: string;
+  model?: string;
+  effort?: string;
+  route?: string;
 }
 
 export interface PromptTokens {
@@ -465,6 +476,12 @@ export const api = {
   // ==========================================================================
   billing: {
     /** Public: every plan's credits, longest film and real price. */
+    /** The credits a film holds before it starts (it is charged what it measures when it finishes). */
+    estimate: (params: { provider?: string; model?: string; length: number }) =>
+      request<{ success: boolean; seconds: number; credits: number; measured: boolean }>(
+        `/api/billing/estimate?${new URLSearchParams({ length: String(params.length), ...(params.provider ? { provider: params.provider } : {}), ...(params.model ? { model: params.model } : {}) })}`,
+        { method: "GET" }
+      ),
     plans: () =>
       request<{ success: boolean; configured: boolean; plans: BillingPlan[]; creditsPerFilm: Record<string, number> }>(
         "/api/billing/plans",
@@ -490,6 +507,19 @@ export const api = {
   usage: {
     /** The plan, this period's credits, and the films that used them. */
     get: () => request<{ success: boolean } & UsageSummary>("/api/usage", { method: "GET" }),
+  },
+
+  /** The Studio's chats, kept on the server per account so they follow the user to any browser. */
+  chats: {
+    /** Every chat, newest first, and the ids deleted in another browser. */
+    list: () => request<{ success: boolean; chats: Chat[]; deleted: string[] }>("/api/chats", { method: "GET" }),
+    /** Saves a chat. 409 (code CHAT_NEWER) carries the server's newer copy in `data.chat`; 410 means it was deleted. */
+    save: (chat: Chat, options?: { restore?: boolean }) =>
+      request<{ success: boolean; chat: Chat }>(`/api/chats/${encodeURIComponent(chat.id)}${options?.restore ? "?restore=1" : ""}`, {
+        method: "PUT",
+        body: JSON.stringify(chat),
+      }),
+    remove: (id: string) => request<{ success: boolean }>(`/api/chats/${encodeURIComponent(id)}`, { method: "DELETE" }),
   },
 
   models: {
@@ -568,7 +598,7 @@ export const api = {
       promptId: string;
       template?: string;
       ratio?: "9:16" | "16:9" | "1:1";
-      /** Seconds, 15-90. */
+      /** Seconds, 1-60 (the plan may allow less). */
       length?: number;
       /** A previous video's job id: reuse its exact look (the chat's theme). */
       themeFrom?: string;
@@ -577,6 +607,8 @@ export const api = {
       effort?: string;
       /** OpenRouter only: "auto", "price", "throughput", or a provider tag such as "baidu/fp8". */
       route?: string;
+      /** Edit this finished video (its promptId) instead of making a new one: unchanged scenes are kept. */
+      editOf?: string;
       /** false: a silent video. */
       sound?: boolean;
     }) =>

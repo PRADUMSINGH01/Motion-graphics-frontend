@@ -5,7 +5,7 @@ import { FiCheck, FiArrowRight, FiLoader } from "react-icons/fi";
 import { useAuth, type User } from "../../../context/AuthContext";
 import { useAlert } from "../../../context/AlertContext";
 import { api, type BillingCycle, type BillingPlan, type PlanTier } from "../../../lib/api";
-import { PLAN_NAMES, creditCost, formatPrice, hasAnnualPrices, startCheckout, usePlans } from "../../../lib/plans";
+import { PLAN_NAMES, formatPrice, hasAnnualPrices, startCheckout, usePlans } from "../../../lib/plans";
 
 const BLURBS: Record<PlanTier, string> = {
   free: "Try the studio and make your first few films.",
@@ -15,8 +15,8 @@ const BLURBS: Record<PlanTier, string> = {
 };
 
 /** What a plan really gives, in the backend's terms. */
-function featuresOf(plan: BillingPlan): string[] {
-  const shortFilms = Math.floor(plan.credits / creditCost(15));
+function featuresOf(plan: BillingPlan, typical15: number): string[] {
+  const shortFilms = Math.floor(plan.credits / typical15);
   return [
     `${plan.credits.toLocaleString()} credits every month`,
     `Films up to ${plan.maxSeconds} seconds`,
@@ -29,7 +29,7 @@ function featuresOf(plan: BillingPlan): string[] {
 export default function MembershipSection({ user }: { user: User }) {
   const { refreshUser } = useAuth();
   const { success, failure } = useAlert();
-  const { plans, error } = usePlans();
+  const { plans, error, typical } = usePlans();
   const [interval, setInterval] = useState<BillingCycle>("monthly");
   const [busy, setBusy] = useState<PlanTier | "portal" | null>(null);
   const currentTier = (user.plan?.tier ?? "free") as PlanTier;
@@ -155,7 +155,7 @@ export default function MembershipSection({ user }: { user: User }) {
                 </div>
 
                 <div className="mt-6 border-t border-surf-f2efe6 pt-5 space-y-2.5">
-                  {featuresOf(plan).map((feat) => (
+                  {featuresOf(plan, typical(15)).map((feat) => (
                     <div key={feat} className="flex items-start gap-2.5 text-[12.5px] text-ink-2d2c28">
                       <FiCheck size={14} className="text-ink-658b02 shrink-0 mt-0.5" />
                       <span>{feat}</span>
@@ -188,8 +188,8 @@ export default function MembershipSection({ user }: { user: User }) {
       </div>
 
       <p className="text-center text-[12px] text-ink-8c8980">
-        Payments are processed by Dodo Payments. A 15-second film uses {creditCost(15)} credits, a minute uses{" "}
-        {creditCost(60)}.
+        Payments are processed by Dodo Payments. Each video is charged by what it actually uses (model tokens and render
+        time): on the default model a 15-second video is about {typical(15)} credits, a minute about {typical(60)}.
       </p>
     </div>
   );

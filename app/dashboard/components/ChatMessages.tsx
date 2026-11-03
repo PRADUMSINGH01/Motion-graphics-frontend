@@ -40,9 +40,26 @@ function FilmCard({ message, ratio, model }: { message: ChatMessage; ratio: Rati
                 </div>
                 <div className="flex gap-1">
                   <dt className="sr-only">Cost</dt>
-                  <dd className="m-0 tabular-nums">{creditCost(length)} credits</dd>
+                  <dd className="m-0 tabular-nums" title={message.credits != null ? "Charged for what it used: model tokens and render time" : undefined}>
+                    {message.credits != null ? `${message.credits} ${message.credits === 1 ? "credit" : "credits"}` : `about ${creditCost(length)} credits`}
+                  </dd>
                 </div>
               </>
+            ) : null}
+            {total != null ? (
+              <div className="flex gap-1">
+                <dt className="sr-only">Model tokens</dt>
+                <dd
+                  className="m-0 tabular-nums"
+                  title={
+                    message.tokenDetails
+                      ? `${message.tokenDetails.input.toLocaleString()} in (${(message.tokenDetails.cachedInput ?? 0).toLocaleString()} cached), ${message.tokenDetails.output.toLocaleString()} out`
+                      : undefined
+                  }
+                >
+                  {formatTokens(total)}
+                </dd>
+              </div>
             ) : null}
             {model ? (
               <div className="flex gap-1">
@@ -57,6 +74,14 @@ function FilmCard({ message, ratio, model }: { message: ChatMessage; ratio: Rati
         </div>
         <VideoActions url={preview.url} title={preview.title} />
       </figcaption>
+
+      {message.notes?.length ? (
+        <ul className="m-0 list-none space-y-1 rounded-lg border border-[#f0e2b6] bg-[#fdf8e8] px-3 py-2 text-[12.5px] leading-relaxed text-[#5c4a12]">
+          {message.notes.map((n, i) => (
+            <li key={i}>{n}</li>
+          ))}
+        </ul>
+      ) : null}
 
       {message.logs && message.logs.length > 0 ? (
         <div>
@@ -130,6 +155,7 @@ function AssistantMessage({ message, ratio, onRetry, models }: { message: ChatMe
   const model = modelName(models, message.model);
   return (
     <div className="space-y-3">
+      {message.editOf ? <p className="m-0 text-[12px] font-medium text-[var(--db-faint)]">Edit of the video above</p> : null}
       {message.isStreaming && message.stages ? (
         <RenderLoader
           stages={message.stages}

@@ -52,6 +52,12 @@ export interface ChatMessage {
   model?: string;
   effort?: string;
   route?: string;
+  /** Assistant only: the take this one edits (its promptId), when it is an edit rather than a new take. */
+  editOf?: string;
+  /** Assistant only: credits the finished film was charged (what it measured). */
+  credits?: number;
+  /** Assistant only: what to know about the finished film (a scene that fell back to a simple version). */
+  notes?: string[];
   /** Assistant only: the film's frame and length as it was ordered. */
   ratio?: Ratio;
   length?: number;
@@ -117,7 +123,63 @@ export function createId(prefix = "c"): string {
 
 export function createChat(settings: ChatSettings = DEFAULT_SETTINGS): Chat {
   const now = new Date().toISOString();
-  return { id: createId(), title: "New Short", createdAt: now, updatedAt: now, messages: [], settings };
+  return { id: createId(), title: "New video", createdAt: now, updatedAt: now, messages: [], settings };
+}
+
+/**
+ * A chat as it is kept (in this browser and on the server): build logs, the model's thinking and live
+ * activity are dropped (token counts are kept). They are large, a running take re-reads them from its job, and a finished take's
+ * log is fetched when someone opens it.
+ */
+export function slimChat(chat: Chat): Chat {
+  return {
+    ...chat,
+    messages: chat.messages.map((message) => {
+      const kept = { ...message };
+      delete kept.logs;
+      delete kept.thought;
+      delete kept.activity;
+      return kept;
+    }),
+  };
+}
+
+/**
+ * What a chat's saved copy depends on. A running take's progress (stages, tokens) changes every few seconds
+ * and is not worth a save; its start, its result, a rename or a new setting are.
+ */
+export function chatSyncKey(chat: Chat): string {
+  return JSON.stringify({
+    t: chat.title,
+    s: chat.settings,
+    th: chat.theme,
+    m: chat.messages.map((m) => [m.id, m.content, m.isStreaming, m.isError, m.paywall, m.preview?.url, m.harnessJobId]),
+  });
+}
+
+/**
+ * This browser's chats merged with the server's: a chat deleted elsewhere goes, each other chat keeps its
+ * newer copy, and `upload` lists the ones the server should get (new here, or newer here).
+ */
+export function mergeChats(local: Chat[], remote: Chat[], deleted: string[]): { chats: Chat[]; upload: string[] } {
+  const gone = new Set(deleted);
+  const byId = new Map<string, Chat>();
+  for (const c of remote) if (!gone.has(c.id)) byId.set(c.id, c);
+  const upload: string[] = [];
+  for (const c of local) {
+    if (gone.has(c.id)) continue;
+    const theirs = byId.get(c.id);
+    if (!theirs || c.updatedAt > theirs.updatedAt) {
+      byId.set(c.id, c);
+      if (c.messages.length) upload.push(c.id);
+    }
+  }
+  return { chats: [...byId.values()].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)), upload };
+}
+
+/** The chat's latest finished video: what a follow-up request edits. */
+export function lastFinishedTake(chat: Chat | null | undefined): ChatMessage | null {
+  return [...(chat?.messages ?? [])].reverse().find((m) => m.role === "assistant" && m.preview && m.promptId) ?? null;
 }
 
 /** The chat's first video is still choosing its look: later prompts wait for it to share the theme. */
@@ -135,13 +197,17 @@ export function loadChats(userId: string): Chat[] {
   }
 }
 
+/** This browser's copy: the most recently used chats, slimmed (the server keeps the full history). */
 export function saveChats(userId: string, chats: Chat[]): void {
   try {
-    window.localStorage.setItem(storageKey(userId), JSON.stringify(chats.slice(0, MAX_STORED_CHATS)));
+    const recent = [...chats].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)).slice(0, MAX_STORED_CHATS);
+    window.localStorage.setItem(storageKey(userId), JSON.stringify(recent.map(slimChat)));
   } catch {
-    // Storage full or blocked: the session still works, it just won't survive a reload.
+    // Storage full or blocked: the chats are still on the server.
   }
 }
+
+export const chatStorageKey = storageKey;
 
 /** Group chats into date buckets for the sidebar, newest first. */
 export function groupChatsByDate(chats: Chat[]): { label: string; chats: Chat[] }[] {
@@ -169,7 +235,7 @@ export function groupChatsByDate(chats: Chat[]): { label: string; chats: Chat[] 
 
 export function deriveTitle(prompt: string): string {
   const clean = prompt.replace(/\s+/g, " ").trim();
-  if (!clean) return "New Short";
+  if (!clean) return "New video";
   return clean.length > 42 ? `${clean.slice(0, 42).trimEnd()}…` : clean;
 }
 

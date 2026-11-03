@@ -15,7 +15,10 @@ export const PLAN_NAMES: Record<PlanTier, string> = {
   enterprise: "Agency",
 };
 
-/** What a film costs: a credit per 3 seconds, at least 2. Mirrors creditCost in server/billing.mjs. */
+/**
+ * The flat rate (a credit per 3 seconds, at least 2): only a fallback while the measured numbers load. Films are
+ * charged what they use: model tokens and render time (server/billing.mjs).
+ */
 export const creditCost = (seconds: number) => Math.max(2, Math.ceil(seconds / 3));
 
 export function formatPrice(price: PlanPrice | null | undefined): string {
@@ -35,10 +38,10 @@ export function formatDate(iso: string | null | undefined): string {
 }
 
 // One request per page load, shared by every component that asks.
-let plansRequest: Promise<BillingPlan[]> | null = null;
-function loadPlans(): Promise<BillingPlan[]> {
+let plansRequest: Promise<{ plans: BillingPlan[]; typical: Record<string, number> }> | null = null;
+function loadPlans(): Promise<{ plans: BillingPlan[]; typical: Record<string, number> }> {
   if (!plansRequest) {
-    plansRequest = api.billing.plans().then((r) => r.plans).catch((err) => {
+    plansRequest = api.billing.plans().then((r) => ({ plans: r.plans, typical: r.creditsPerFilm ?? {} })).catch((err) => {
       plansRequest = null; // a failed load is retried next time
       throw err;
     });
@@ -46,19 +49,25 @@ function loadPlans(): Promise<BillingPlan[]> {
   return plansRequest;
 }
 
-export function usePlans(): { plans: BillingPlan[] | null; error: string | null } {
+/** Plans, and what a film of a given length typically costs in credits (measured films vary by model). */
+export function usePlans(): { plans: BillingPlan[] | null; error: string | null; typical: (seconds: number) => number } {
   const [plans, setPlans] = useState<BillingPlan[] | null>(null);
+  const [typicalMap, setTypicalMap] = useState<Record<string, number>>({});
   const [error, setError] = useState<string | null>(null);
   useEffect(() => {
     let live = true;
     loadPlans()
-      .then((p) => live && setPlans(p))
+      .then((p) => {
+        if (!live) return;
+        setPlans(p.plans);
+        setTypicalMap(p.typical);
+      })
       .catch((err) => live && setError(err instanceof Error ? err.message : "Could not load plans."));
     return () => {
       live = false;
     };
   }, []);
-  return { plans, error };
+  return { plans, error, typical: (seconds: number) => typicalMap[String(seconds)] ?? creditCost(seconds) };
 }
 
 /** Any plan sells yearly: only then is a monthly/yearly switch worth showing. */
