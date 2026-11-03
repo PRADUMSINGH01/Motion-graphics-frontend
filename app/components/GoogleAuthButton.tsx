@@ -92,6 +92,7 @@ export default function GoogleAuthButton({
             );
 
             setTimeout(() => {
+              router.refresh();
               router.push("/dashboard");
             }, 600);
           } else {

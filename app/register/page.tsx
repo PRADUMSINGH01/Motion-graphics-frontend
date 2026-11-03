@@ -57,7 +57,7 @@ function getPasswordStrength(pw: string): {
 
 function RegisterFormContent() {
   const router = useRouter();
-  const { register, applyOAuthSession, loginAsDemo } = useAuth();
+  const { register, applyOAuthSession } = useAuth();
   const { showAlert, success } = useAlert();
   const searchParams = useSearchParams();
 
@@ -88,6 +88,7 @@ function RegisterFormContent() {
         setGoogleLoading(false);
         applyOAuthSession(data.token as string, data.user as BackendUser);
         success("Google Sign-Up Successful", "Welcome to your studio notebook!");
+        router.refresh();
         router.push(redirectTarget);
       } else if (data.type === "GOOGLE_AUTH_ERROR") {
         setGoogleLoading(false);
@@ -152,14 +153,6 @@ function RegisterFormContent() {
       });
     }
   }, [selectedPlan.tier, showAlert]);
-
-  const handleAppleNotice = useCallback(() => {
-    showAlert({
-      type: "failure",
-      title: "Coming Soon",
-      message: "Apple Sign-Up is coming soon. Please use email or Google.",
-    });
-  }, [showAlert]);
 
   return (
     <NotebookShell ariaLabel="byreel.in studio register notebook">
@@ -413,18 +406,9 @@ function RegisterFormContent() {
                 </p>
               </div>
 
-              {/* 1-Click Instant Studio Demo Button */}
-              <button
-                type="button"
-                onClick={() => loginAsDemo("pro")}
-                className="lp-demo-pass-btn"
-              >
-                <span>✦ Skip Signup — Try Pro Studio Demo</span>
-                <span className="lp-demo-pass-badge">INSTANT →</span>
-              </button>
 
-              {/* Google & Apple OAuth */}
-              <div className="lp-oauth-grid">
+              {/* Google sign-in */}
+              <div className="lp-oauth-grid" style={{ gridTemplateColumns: "1fr" }}>
                 <button
                   type="button"
                   onClick={handleGoogleSignup}
@@ -450,23 +434,6 @@ function RegisterFormContent() {
                     />
                   </svg>
                   <span>{googleLoading ? "Connecting…" : "Google"}</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={handleAppleNotice}
-                  disabled={loading || googleLoading}
-                  className="lp-oauth-btn"
-                >
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                    aria-hidden="true"
-                  >
-                    <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
-                  </svg>
-                  <span>Apple</span>
                 </button>
               </div>
 
@@ -546,7 +513,7 @@ function RegisterFormContent() {
                       required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      placeholder="At least 6 characters"
+                      placeholder="At least 8 characters"
                       className="lp-field-input"
                       style={{ paddingRight: 38 }}
                     />

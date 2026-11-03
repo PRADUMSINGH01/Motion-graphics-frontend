@@ -75,6 +75,7 @@ function GoogleCallbackContent() {
         );
 
         setTimeout(() => {
+          router.refresh();
           router.replace("/dashboard");
         }, 800);
       } catch (err: any) {
@@ -82,6 +83,7 @@ function GoogleCallbackContent() {
         // Even if getMe temporarily fails, token is stored; proceed to workspace
         setStatus("success");
         setTimeout(() => {
+          router.refresh();
           router.replace("/dashboard");
         }, 1000);
       }

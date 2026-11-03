@@ -47,7 +47,6 @@ interface AuthContextType {
   logout: () => void;
   refreshUser: () => Promise<void>;
   triggerDemoAlert: (type: "success" | "failure" | "error") => void;
-  loginAsDemo: (tier?: "free" | "creator" | "pro") => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -71,6 +70,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const { success, failure, error } = useAlert();
   const router = useRouter();
+
+  // Into the app after a sign-in or sign-up. The router may hold a "/dashboard -> /login" redirect it prefetched
+  // before the session existed (real sign-ups and sign-ins landed back on /login), so its cache is dropped first.
+  const enterApp = (path: string) => {
+    router.refresh();
+    router.push(path);
+  };
 
   const purgeSession = useCallback(() => {
     setUser(null);
@@ -226,7 +232,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       );
 
       setTimeout(() => {
-        router.push(redirectTo);
+        enterApp(redirectTo);
       }, 700);
 
       return true;
@@ -308,7 +314,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       );
 
       setTimeout(() => {
-        router.push(redirectTo);
+        enterApp(redirectTo);
       }, 700);
 
       return true;
@@ -338,7 +344,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         }
         success("Google Sign-In Successful", `Welcome back, ${loggedUser.name}!`);
-        setTimeout(() => router.push("/dashboard"), 700);
+        setTimeout(() => enterApp("/dashboard"), 700);
         return true;
       }
       return false;
@@ -363,7 +369,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         }
         success("Google Registration Successful", `Welcome to byreel AI, ${newUser.name}!`);
-        setTimeout(() => router.push("/dashboard"), 700);
+        setTimeout(() => enterApp("/dashboard"), 700);
         return true;
       }
       return false;
@@ -439,48 +445,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const loginAsDemo = (tier: "free" | "creator" | "pro" = "pro") => {
-    const demoUser: User = {
-      id: "demo-creator-01",
-      name: "Pradum Singh",
-      email: "pradum@byreel.ai",
-      username: "pradum",
-      role: "creator",
-      plan: {
-        tier,
-        status: "active",
-        billingInterval: "monthly",
-        features: [
-          "4K UHD Video Rendering",
-          "Octane 3D Motion Engine",
-          "All Motion Templates",
-          "Unlimited Drafts",
-        ],
-      },
-      usage: {
-        generations: { daily: 4, monthly: 48, lifetime: 120, limit: 300 },
-        renders: { daily: 2, monthly: 18, lifetime: 64, limit: 100 },
-        apiCalls: { daily: 15, monthly: 180, lifetime: 520, limit: 1000 },
-        storage: { usedBytes: 1024 * 1024 * 480, limitBytes: 1024 * 1024 * 1024 * 10 },
-      },
-      token: "demo-session-token",
-    };
-
-    setUser(demoUser);
-    try {
-      localStorage.setItem("animagent_user", JSON.stringify(demoUser));
-      localStorage.setItem("animagent_token", "demo-session-token");
-      if (typeof document !== "undefined") {
-        document.cookie = `token=demo-session-token; path=/; max-age=604800; SameSite=Lax`;
-        document.cookie = `animagent_token=demo-session-token; path=/; max-age=604800; SameSite=Lax`;
-      }
-    } catch {}
-
-    success("Demo Studio Activated", "Welcome to byreel AI Studio preview workspace!");
-    setTimeout(() => {
-      router.push("/dashboard");
-    }, 400);
-  };
 
   return (
     <AuthContext.Provider
@@ -495,7 +459,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         logout,
         refreshUser,
         triggerDemoAlert,
-        loginAsDemo,
       }}
     >
       {children}

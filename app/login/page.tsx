@@ -11,7 +11,7 @@ import NotebookShell from "../components/landing/NotebookShell";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login, applyOAuthSession, loginAsDemo } = useAuth();
+  const { login, applyOAuthSession } = useAuth();
   const { showAlert, success } = useAlert();
   // Read once on mount: where middleware (or a deep link) wants the user sent after sign-in.
   const [redirectTarget] = useState(() =>
@@ -39,6 +39,7 @@ export default function LoginPage() {
         setGoogleLoading(false);
         applyOAuthSession(data.token as string, data.user as BackendUser);
         success("Google Sign-In Successful", "Welcome back to your studio notebook!");
+        router.refresh();
         router.push(redirectTarget);
       } else if (data.type === "GOOGLE_AUTH_ERROR") {
         setGoogleLoading(false);
@@ -85,14 +86,6 @@ export default function LoginPage() {
         message: "Please allow popups for Google Sign-In.",
       });
     }
-  }, [showAlert]);
-
-  const handleAppleNotice = useCallback(() => {
-    showAlert({
-      type: "failure",
-      title: "Coming Soon",
-      message: "Apple Sign-In is coming soon. Please use email or Google.",
-    });
   }, [showAlert]);
 
   return (
@@ -322,18 +315,9 @@ export default function LoginPage() {
                 </p>
               </div>
 
-              {/* 1-Click Instant Studio Demo Button */}
-              <button
-                type="button"
-                onClick={() => loginAsDemo("pro")}
-                className="lp-demo-pass-btn"
-              >
-                <span>✦ Enter Instant Pro Studio Demo</span>
-                <span className="lp-demo-pass-badge">1-CLICK PASS →</span>
-              </button>
 
-              {/* Google & Apple OAuth */}
-              <div className="lp-oauth-grid">
+              {/* Google sign-in */}
+              <div className="lp-oauth-grid" style={{ gridTemplateColumns: "1fr" }}>
                 <button
                   type="button"
                   onClick={handleGoogleLogin}
@@ -359,23 +343,6 @@ export default function LoginPage() {
                     />
                   </svg>
                   <span>{googleLoading ? "Connecting…" : "Google"}</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={handleAppleNotice}
-                  disabled={loading || googleLoading}
-                  className="lp-oauth-btn"
-                >
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                    aria-hidden="true"
-                  >
-                    <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
-                  </svg>
-                  <span>Apple</span>
                 </button>
               </div>
 
