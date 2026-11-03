@@ -20,7 +20,7 @@ const LOADING_STEPS = [
     id: "motion",
     shortLabel: "01 · Text & Transitions",
     label: "Compiling colorful kinetic word pops & shutter wipes",
-    sub: "60 FPS spring physics, counter-sliding ribbons & iris portal reveals",
+    sub: "Spring physics, counter-sliding ribbons & iris portal reveals",
   },
   {
     id: "launch",
@@ -313,7 +313,7 @@ export default function StudioLoadingScreen({
             </div>
 
             <div className="lp-loading-meta-row">
-              <span>00:00:{secNum}:{frameNum} · 60 FPS</span>
+              <span>00:00:{secNum}:{frameNum}</span>
               <span>{progress}%</span>
             </div>
           </div>

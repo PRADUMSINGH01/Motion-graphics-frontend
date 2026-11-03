@@ -26,9 +26,7 @@ interface LiveStudioTemplate {
   title: string;
   shortLabel: string;
   ratio: "16:9" | "9:16";
-  duration: string;
-  nleReady: string;
-  prompt: string;
+  duration: string;  prompt: string;
   beats: SceneBeat[];
 }
 
@@ -40,10 +38,8 @@ const TEMPLATES: LiveStudioTemplate[] = [
     title: "Colorful Kinetic Text & Wipe Transitions",
     shortLabel: "01 · Text & Transitions",
     ratio: "16:9",
-    duration: "15s · 60fps",
-    nleReady: "16:9 & RGBA Alpha",
-    prompt:
-      "Create a vibrant, colorful 60 FPS kinetic text animation with spring word pops, diagonal multi-color shutter wipes, and an iris portal reveal.",
+    duration: "15s",    prompt:
+      "Create a vibrant, colorful kinetic text animation with spring word pops, diagonal multi-color shutter wipes, and an iris portal reveal.",
     beats: [
       { time: "00:00–00:03", text: "Colorful kinetic word chips pop with spring physics" },
       { time: "00:03–00:06", text: "Multi-color diagonal shutter wipe & iris portal reveal" },
@@ -57,9 +53,7 @@ const TEMPLATES: LiveStudioTemplate[] = [
     title: "SaaS 3.0 Flagship Launch Trailer",
     shortLabel: "02 · Product Launch",
     ratio: "16:9",
-    duration: "30s · 60fps",
-    nleReady: "4K MP4 & WebM",
-    prompt:
+    duration: "30s",    prompt:
       "Keynote SaaS product launch trailer with 3D glass telemetry dashboard, rising +340% YoY benchmark bars, sub-8ms latency counter, and bold CTA.",
     beats: [
       { time: "00:00–00:08", text: "Keynote headline reveal over perspective grid" },
@@ -74,9 +68,7 @@ const TEMPLATES: LiveStudioTemplate[] = [
     title: "Vox-Style Archival Highlight Cutaway",
     shortLabel: "03 · Animated B-Roll",
     ratio: "16:9",
-    duration: "12s · 60fps",
-    nleReady: "Premiere & DaVinci",
-    prompt:
+    duration: "12s",    prompt:
       "Vox-style documentary B-roll panning across an archival print clipping with an animated electric lime marker sweep and source citation.",
     beats: [
       { time: "00:00–00:03", text: "Smooth camera pan onto archival newspaper clipping" },
@@ -91,9 +83,7 @@ const TEMPLATES: LiveStudioTemplate[] = [
     title: "Faceless Channel Story & Caption Engine",
     shortLabel: "04 · Faceless Video",
     ratio: "9:16",
-    duration: "20s · 60fps",
-    nleReady: "YouTube & Reels",
-    prompt:
+    duration: "20s",    prompt:
       "Generate a complete faceless storytelling video with automated visual B-roll scenes, chapter progression, and synchronized word-by-word kinetic captions.",
     beats: [
       { time: "00:00–00:05", text: "Chapter 01 visual hook & retention graph reveal" },
@@ -108,9 +98,7 @@ const TEMPLATES: LiveStudioTemplate[] = [
     title: "Attention Split Documentary B-Roll",
     shortLabel: "Attention Split",
     ratio: "16:9",
-    duration: "20s · 60fps",
-    nleReady: "YouTube Essays",
-    prompt:
+    duration: "20s",    prompt:
       "Split-screen documentary B-roll contrasting monochrome analog deep work on the left against a saturated high-velocity social feed on the right.",
     beats: [
       { time: "00:00–00:06", text: "Monochrome film-grain reader scene establishes" },
@@ -125,9 +113,7 @@ const TEMPLATES: LiveStudioTemplate[] = [
     title: "3D Neon Callout → Neural Synapse Cutaway",
     shortLabel: "Neon → Neuron",
     ratio: "16:9",
-    duration: "15s · 60fps",
-    nleReady: "MP4 & WebM",
-    prompt:
+    duration: "15s",    prompt:
       "3D perspective neon callout card beside the speaker that transitions into a glowing synaptic neuron firing across the axon.",
     beats: [
       { time: "00:00–00:05", text: "3D neon callout box pops in beside speaker" },
@@ -142,9 +128,7 @@ const TEMPLATES: LiveStudioTemplate[] = [
     title: "Flash-Cut Zoom & Beat Montage",
     shortLabel: "Flash-Cut Zoom",
     ratio: "9:16",
-    duration: "15s · 60fps",
-    nleReady: "Reels & Shorts",
-    prompt:
+    duration: "15s",    prompt:
       "Aggressive camera zoom punches with high-contrast flash cuts, scanline texture, and bold impact labels on every beat.",
     beats: [
       { time: "00:00–00:04", text: "Rapid camera push-in with keylight shift" },
@@ -159,9 +143,7 @@ const TEMPLATES: LiveStudioTemplate[] = [
     title: "Bold Kinetic Creator Intro",
     shortLabel: "Creator Intro",
     ratio: "16:9",
-    duration: "10s · 60fps",
-    nleReady: "16:9 & 9:16",
-    prompt:
+    duration: "10s",    prompt:
       "Low-key creator silhouette with lens-glint eyes and giant stacked kinetic typography slamming into frame with subtle camera shake.",
     beats: [
       { time: "00:00–00:03", text: "Low-key studio silhouette & eye lens glint" },
@@ -176,9 +158,7 @@ const TEMPLATES: LiveStudioTemplate[] = [
     title: "Macro POV — Thumb Scrolling Feed",
     shortLabel: "Macro Feed Scroll",
     ratio: "9:16",
-    duration: "15s · 60fps",
-    nleReady: "9:16 Vertical",
-    prompt:
+    duration: "15s",    prompt:
       "Handheld macro POV shot of a smartphone feed scrolling rapidly with jump-cut flashes and kinetic retention hooks.",
     beats: [
       { time: "00:00–00:04", text: "Jump-cut flash into macro phone viewport" },
@@ -193,9 +173,7 @@ const TEMPLATES: LiveStudioTemplate[] = [
     title: "Broadcast Lower-Third & Flash Cut",
     shortLabel: "Broadcast Cut",
     ratio: "16:9",
-    duration: "15s · 60fps",
-    nleReady: "Broadcast 60fps",
-    prompt:
+    duration: "15s",    prompt:
       "Skewed broadcast news lower-third title bar over studio lighting followed by rapid full-screen editorial flash cuts.",
     beats: [
       { time: "00:00–00:05", text: "Studio keylight & skewed lower-third bar slide" },
@@ -210,9 +188,7 @@ const TEMPLATES: LiveStudioTemplate[] = [
     title: "Phone Toss → Ticking Clock Hook",
     shortLabel: "Phone Toss Hook",
     ratio: "9:16",
-    duration: "12s · 60fps",
-    nleReady: "Reels, Shorts & X",
-    prompt:
+    duration: "12s",    prompt:
       "A smartphone gets tossed out of frame with motion blur, hard-cutting to a high-contrast ticking analog clock.",
     beats: [
       { time: "00:00–00:04", text: "Lockscreen time glow & hand grip" },
@@ -227,9 +203,7 @@ const TEMPLATES: LiveStudioTemplate[] = [
     title: "Keynote Dark Headline Reveal",
     shortLabel: "Keynote Teaser",
     ratio: "16:9",
-    duration: "12s · 60fps",
-    nleReady: "4K Keynote MP4",
-    prompt:
+    duration: "12s",    prompt:
       "Dramatic low-light keynote teaser where bold word-by-word typography ('WE NEED TO TALK.') emerges over a spotlighted stage.",
     beats: [
       { time: "00:00–00:04", text: "Spotlight silhouette fade-in from obsidian" },
@@ -263,7 +237,7 @@ const RATIO_FILTERS: { id: AspectFilter; label: string }[] = [
 const BASE_W = 1280;
 
 /**
- * Renders a real 1280x720 60fps composition scaled smoothly to fit its container.
+ * Renders a real 1280x720 composition scaled smoothly to fit its container.
  */
 function LiveScaledStage({
   src,
@@ -472,10 +446,9 @@ export default function TemplatesPage() {
               Director&rsquo;s screening room &amp; templates.
             </h1>
             <p className="lp-tpl-sub">
-              Every reel on this sheet is a live 60fps render compiled from a
-              single prompt. Load any template onto the screening monitor to
-              inspect its scene beats, edit the prompt, and open it in the
-              Studio.
+              Each template is a real composition made from a single prompt.
+              Preview one, read its scene beats, then open it in the Studio and
+              change what you like.
             </p>
           </div>
         </header>
@@ -485,7 +458,7 @@ export default function TemplatesPage() {
           className="lp-director-deck"
           aria-label="Active template screening stage"
         >
-          {/* Left: Live 60fps Screening Monitor + 4-Reel Quick Switcher */}
+          {/* Left: Live preview + 4-Reel Quick Switcher */}
           <div className="lp-director-monitor-col">
             <div className="lp-director-monitor-frame">
               <LiveScaledStage
@@ -533,7 +506,7 @@ export default function TemplatesPage() {
                   <span>Now screening</span>
                 </span>
                 <span className="lp-director-spec-tag">
-                  {stageTemplate.ratio} · {stageTemplate.nleReady}
+                  {stageTemplate.ratio} · {stageTemplate.duration}
                 </span>
               </div>
 

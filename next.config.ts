@@ -14,6 +14,11 @@ const nextConfig: NextConfig = {
     imageSizes: [16, 32, 48, 64, 96, 128, 256],
   },
 
+  /* Pages that were removed: old links land on the page that replaced them. */
+  async redirects() {
+    return [{ source: "/data-usage", destination: "/policy", permanent: true }];
+  },
+
   /* ── Headers for caching static assets ── */
   async headers() {
     return [

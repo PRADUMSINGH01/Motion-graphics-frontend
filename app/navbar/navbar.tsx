@@ -29,8 +29,8 @@ import { useAuth } from "../context/AuthContext";
 import { ByreelLogo } from "../components/landing/ByreelBrand";
 import ThemeToggle from "../components/ThemeToggle";
 
-// Excluded routes: workspace has its own studio chrome, dashboard has its own shell,
-// landing page ("/") renders LandingNav, and pricing/billing pages have navbar removed
+// Excluded routes: the studio has its own shell, and every page drawn in the notebook shell (home, pricing,
+// templates, sign-in, about and the legal pages) has the notebook's own header.
 const EXCLUDED_ROUTES = [
   "/",
   "/workspace",
@@ -40,7 +40,10 @@ const EXCLUDED_ROUTES = [
   "/billing",
   "/login",
   "/register",
-  "/loading",
+  "/about",
+  "/terms",
+  "/policy",
+  "/privacy",
 ];
 
 const NAV_LINKS = [

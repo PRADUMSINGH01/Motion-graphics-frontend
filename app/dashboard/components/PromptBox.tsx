@@ -18,6 +18,8 @@ interface PromptBoxProps {
   autoFocus?: boolean;
   /** "start": the tall box of a new film; "dock": the one under a conversation. */
   size?: "start" | "dock";
+  /** The button's words: "Make video", or "Make the change" for an edit. */
+  submitLabel?: string;
 }
 
 const MAX_HEIGHT_PX = 220;
@@ -35,6 +37,7 @@ export default function PromptBox({
   placeholder = "Describe the video: what's on screen, the words, the feel…",
   autoFocus,
   size = "dock",
+  submitLabel = "Make video",
 }: PromptBoxProps) {
   const [value, setValue] = useState(initialValue);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -96,11 +99,11 @@ export default function PromptBox({
             type="button"
             onClick={submit}
             disabled={!canSend}
-            aria-label="Make video"
+            aria-label={submitLabel}
             className="flex h-11 shrink-0 items-center gap-2 rounded-xl bg-[var(--db-ink)] px-3 text-[13.5px] font-semibold text-white transition hover:bg-[#040c1c] active:translate-y-px disabled:cursor-not-allowed disabled:bg-[rgba(7,20,46,0.35)] sm:px-4 cursor-pointer"
           >
             <FiArrowUp size={16} strokeWidth={2.5} aria-hidden="true" className="text-[var(--db-lime)]" />
-            <span className="hidden sm:inline">Make video</span>
+            <span className="hidden sm:inline">{submitLabel}</span>
           </button>
         </div>
       </div>

@@ -339,7 +339,7 @@ function RegisterFormContent() {
                 fontWeight="900"
                 fontFamily="monospace"
               >
-                60 FPS
+                1080p
               </text>
             </svg>
           </Link>

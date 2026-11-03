@@ -19,7 +19,6 @@ interface Plan {
   name: string;
   forWho: string;
   credits: number;
-  creditsNote: string;
   cta: string;
   href: string;
   includesLabel: string;
@@ -31,75 +30,50 @@ const PLANS: Plan[] = [
   {
     id: "free",
     name: "Free",
-    forWho: "Try the studio and make your first few clips.",
+    forWho: "Try the studio and make your first videos.",
     credits: 15,
-    creditsNote: "About 5 B-roll clips or 3 short videos",
     cta: "Start free",
     href: "/register?plan=free",
     includesLabel: "Includes",
     features: [
-      "720p exports at 30 fps",
-      "16:9 and 9:16 formats",
-      "Films up to 15 seconds",
-      "Starter templates",
-      "Shared render queue",
-      "byreel watermark on exports",
+      "Videos up to 15 seconds",
+      "1080p MP4 in 16:9, 9:16 or 1:1",
+      "Fast models (GLM, DeepSeek and more)",
+      "Change any video by asking",
+      "Brand kit, templates and product launch",
+      "No watermark",
     ],
   },
   {
     id: "creator",
     name: "Creator",
-    forWho: "For people posting Shorts, Reels and B-roll every day.",
+    forWho: "For people posting Shorts, Reels and B-roll every week.",
     credits: 200,
-    creditsNote: "About 40 short videos or 65 B-roll clips",
     cta: "Choose Creator",
     href: "/register?plan=creator",
     includesLabel: "Everything in Free, plus",
-    features: [
-      "1080p at 60 fps, MP4 and WebM",
-      "No watermark, full commercial rights",
-      "16:9, 9:16 and 1:1 formats",
-      "Films up to 60 seconds",
-      "Documentary-style B-roll",
-      "Transparent overlays for your editor",
-    ],
+    features: ["Videos up to 60 seconds", "Top models: Claude, GPT, Gemini and more", "200 credits every month"],
   },
   {
     id: "pro",
     name: "Pro Studio",
-    forWho: "For teams shipping product launches and 4K video.",
+    forWho: "For teams shipping launch videos and explainers every week.",
     credits: 600,
-    creditsNote: "About 30 one-minute launch films or 200 B-roll clips",
     cta: "Choose Pro Studio",
     href: "/register?plan=pro",
     includesLabel: "Everything in Creator, plus",
     popular: true,
-    features: [
-      "Multi-scene product launch videos",
-      "4K at 60 fps, with transparent WebM",
-      "Turn a URL or screenshot into a launch reel",
-      "Brand kit with your fonts, colours and logo",
-      "Priority renders, about 3× faster",
-      "Scene-by-scene timing editor",
-    ],
+    features: ["Three times the credits of Creator", "600 credits every month"],
   },
   {
     id: "enterprise",
     name: "Agency",
     forWho: "For agencies and content teams working at volume.",
     credits: 2500,
-    creditsNote: "Shared across up to 10 seats",
     cta: "Choose Agency",
     href: "/register?plan=enterprise",
     includesLabel: "Everything in Pro Studio, plus",
-    features: [
-      "Up to 10 seats",
-      "Separate brand kits per client",
-      "Batch export in every format",
-      "Render API and webhooks",
-      "Dedicated render capacity",
-      "Priority support",
-    ],
+    features: ["Over four times the credits of Pro Studio", "2,500 credits every month"],
   },
 ];
 
@@ -114,38 +88,24 @@ const RENDERS = [
 
 type RenderId = (typeof RENDERS)[number]["id"];
 
+/* Only what really differs, plus what every plan shares (so nobody wonders whether Free is a demo). */
 const COMPARE: { group: string; rows: [string, string, string, string, string][] }[] = [
   {
-    group: "Videos",
+    group: "What changes by plan",
     rows: [
-      ["Credits each month", "15", "200", "600", "2,500 shared"],
-      ["Longest film", "15 s", "60 s", "60 s", "60 s"],
-      ["Short videos for Reels and Shorts", "720p draft", "1080p, 60 fps", "4K, 60 fps, auto-reframe", "4K, 60 fps, batch"],
-      ["Product launch videos", "Preview only", "1080p", "4K, multi-scene", "4K, per-client kits"],
+      ["Credits each month", "15", "200", "600", "2,500"],
+      ["Longest video", "15 s", "60 s", "60 s", "60 s"],
+      ["Top models (Claude, GPT, Gemini…)", "", "yes", "yes", "yes"],
     ],
   },
   {
-    group: "Exports",
+    group: "Every plan",
     rows: [
-      ["Best quality", "720p, 30 fps", "1080p, 60 fps", "4K, 60 fps", "4K, 60 fps"],
-      ["Formats", "16:9, 9:16", "16:9, 9:16, 1:1, 4:5", "All, in one click", "All, in one click"],
-      ["Transparent overlays (WebM)", "", "1080p", "4K", "4K"],
-      ["Watermark-free, commercial use", "", "yes", "yes", "Client licence"],
-    ],
-  },
-  {
-    group: "Brand and editing",
-    rows: [
-      ["Uploaded assets", "3", "50", "Unlimited", "Shared library"],
-      ["Brand kits", "", "1", "Unlimited", "One per client"],
-      ["Editor", "Text only", "Full scene editor", "Scene editor and keyframes", "Editor with team review"],
-    ],
-  },
-  {
-    group: "Speed and team",
-    rows: [
-      ["Renders at once", "1", "2", "4, priority", "10, dedicated"],
-      ["Seats", "1", "1", "Up to 3", "10, plus API"],
+      ["1080p MP4, no watermark", "yes", "yes", "yes", "yes"],
+      ["16:9, 9:16 and 1:1", "yes", "yes", "yes", "yes"],
+      ["Change a video by asking", "yes", "yes", "yes", "yes"],
+      ["Brand kit, templates, product launch", "yes", "yes", "yes", "yes"],
+      ["Commercial use of your videos", "yes", "yes", "yes", "yes"],
     ],
   },
 ];
@@ -156,12 +116,16 @@ const FAQS = [
     a: "Each video is charged by what it actually uses: the model's tokens and the render time, so a short title on a fast model costs a credit or two and a long film on a top model costs more. The Studio shows the estimate before you start, each finished video shows what it was charged, and a video that fails gives its credits back.",
   },
   {
+    q: "Do changes to a video cost credits?",
+    a: "Yes, a change is made like a small new video, so it is charged what it uses. Changes keep the scenes you didn't ask about, so they usually cost less than the first take.",
+  },
+  {
     q: "Can I use the videos in Premiere, Final Cut, DaVinci or CapCut?",
-    a: "Yes. Export a 60 fps MP4, or a WebM with a transparent background to lay charts, captions and callouts over your own footage.",
+    a: "Yes. Every video downloads as a 1080p MP4 (H.264), which every editor and social network takes.",
   },
   {
     q: "Can one video go to YouTube and to Reels?",
-    a: "Yes. Paid plans export 16:9, 9:16, 1:1 and 4:5 from the same project, so you set it up once.",
+    a: "Pick 16:9 for YouTube, 9:16 for Reels, Shorts and TikTok, or 1:1 for feeds. For the same video in another frame, start a new take in that frame.",
   },
   {
     q: "What happens to credits I don't use?",
@@ -325,13 +289,14 @@ export default function PricingPage() {
         <header className="pr-head">
           <div>
             <h1 className="pr-title">
-              Pay for renders.
+              Pay for what
               <br />
-              Editing is free.
+              each video uses.
             </h1>
             <p className="pr-lede">
-              Every plan has the whole studio. Credits are only used when a video renders, so
-              rewriting a headline or changing a colour costs nothing.
+              Every plan has the whole studio. A video is charged by the model time and render time
+              it really used: you see the estimate before it starts, and a video that fails costs
+              nothing.
             </p>
           </div>
           {yearly && (
@@ -405,7 +370,7 @@ export default function PricingPage() {
 
                 <div className="pr-credits">
                   <strong>{creditsOf(plan).toLocaleString("en-US")} credits a month</strong>
-                  <span>{plan.creditsNote}</span>
+                  <span>About {Math.max(1, Math.floor(creditsOf(plan) / typical(15)))} videos of 15 seconds</span>
                 </div>
 
                 <PlanCta plan={plan} live={livePlan} loaded={Boolean(live)} cycle={cycle} primary={plan.popular} />
@@ -438,7 +403,7 @@ export default function PricingPage() {
                 <span className="pr-row-text">
                   <span className="pr-row-label">{r.label}</span>
                   <span className="pr-row-detail">
-                    {r.detail}. About {typical(r.seconds)} credits each.
+                    {r.detail}. About {typical(r.seconds)} {typical(r.seconds) === 1 ? "credit" : "credits"} each.
                   </span>
                 </span>
                 <input

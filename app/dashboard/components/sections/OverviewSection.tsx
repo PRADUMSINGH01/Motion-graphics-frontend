@@ -22,6 +22,8 @@ import {
   DEFAULT_SETTINGS,
   collectPending,
   collectVideos,
+  formatLength,
+  posterFor,
 } from "../../lib/chatStore";
 import type { SectionId } from "../../lib/sections";
 import { formatDate } from "../../../lib/plans";
@@ -32,7 +34,6 @@ import "./overview.css";
 interface OverviewProps {
   user: User;
   chats: Chat[];
-  assetCount: number;
   onNavigate: (s: SectionId) => void;
   onOpenLaunch: (chatId: string) => void;
   onNewLaunch: (initialPrompt?: string, settings?: ChatSettings) => void;
@@ -49,6 +50,7 @@ interface BackendVideoItem {
   previewUrl: string | null;
   createdAt: string;
   durationSec?: number;
+  poster: string | null;
 }
 
 interface Production {
@@ -56,7 +58,7 @@ interface Production {
   title: string;
   meta: string;
   duration: string;
-  poster: string;
+  poster?: string;
   videoUrl: string | null;
   status: "Rendered" | "Draft";
   chatId?: string;
@@ -88,9 +90,6 @@ const TEMPLATES = TEMPLATE_IDS.map((id) => SHOWREEL.find((r) => r.id === id)).fi
   (r): r is ShowreelItem => Boolean(r)
 );
 
-/** Fallback productions shown before the user has rendered anything. */
-const SAMPLE_IDS = ["pocket-studio", "make-it-move", "every-frame", "orbit"];
-
 const RATIOS = ["16:9", "9:16", "1:1"] as const;
 
 function greeting(date: Date) {
@@ -118,12 +117,12 @@ function reelPoster(id: string) {
 }
 
 /** Video that plays only while hovered: posters keep the grid light. */
-function HoverVideo({ src, poster, label }: { src: string | null; poster: string; label: string }) {
+function HoverVideo({ src, poster, label, fit = false }: { src: string | null; poster?: string; label: string; fit?: boolean }) {
   const ref = useRef<HTMLVideoElement>(null);
   const [armed, setArmed] = useState(false);
   return (
     <div
-      className="ov-media"
+      className={fit ? "ov-media is-fit" : "ov-media"}
       onMouseEnter={() => {
         if (!src) return;
         setArmed(true);
@@ -138,7 +137,7 @@ function HoverVideo({ src, poster, label }: { src: string | null; poster: string
       }}
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={poster} alt={label} loading="lazy" decoding="async" />
+      {poster ? <img src={poster} alt={label} loading="lazy" decoding="async" /> : <span className="ov-media-blank" aria-hidden="true" />}
       {src && armed && <video ref={ref} src={src} muted loop playsInline preload="auto" aria-hidden="true" />}
     </div>
   );
@@ -184,6 +183,7 @@ export default function OverviewSection({
             previewUrl: null,
             createdAt: j.createdAt ?? "",
             durationSec: j.durationS ?? undefined,
+            poster: j.poster ?? posterFor(j.play?.[0]) ?? null,
           }))
         );
       })
@@ -217,47 +217,32 @@ export default function OverviewSection({
   const tier = user.plan?.tier ?? "free";
   const firstName = user.name?.split(" ")[0] || "there";
 
-  /* ── Recent productions: backend renders, else local library, else samples ── */
+  /* ── Recent productions: the account's renders from the server, else this browser's chats ── */
   const productions: Production[] = useMemo(() => {
     if (backendVideos.length) {
-      return backendVideos.slice(0, 8).map((v, i) => {
+      return backendVideos.slice(0, 8).map((v) => {
         const url = v.videoUrl ? (v.videoUrl.startsWith("http") ? v.videoUrl : `${API_URL}${v.videoUrl}`) : null;
-        const sample = SAMPLE_IDS[i % SAMPLE_IDS.length];
         return {
           id: v.jobId || v.id,
-          title: v.title || "Untitled render",
+          title: v.title || "Untitled video",
           meta: timeAgo(v.createdAt),
-          duration: v.durationSec ? `0:${String(Math.round(v.durationSec)).padStart(2, "0")}` : "0:10",
-          poster: v.previewUrl ? (v.previewUrl.startsWith("http") ? v.previewUrl : `${API_URL}${v.previewUrl}`) : reelPoster(sample),
+          duration: formatLength(v.durationSec),
+          poster: v.poster ?? undefined,
           videoUrl: url,
           status: url ? "Rendered" : "Draft",
         };
       });
     }
-    if (library.length) {
-      return library.slice(0, 8).map((v, i) => ({
-        id: v.id,
-        title: v.title,
-        meta: timeAgo(v.createdAt),
-        duration: "0:15",
-        poster: reelPoster(SAMPLE_IDS[i % SAMPLE_IDS.length]),
-        videoUrl: null,
-        status: "Rendered" as const,
-        chatId: v.chatId,
-      }));
-    }
-    return SAMPLE_IDS.map((id) => {
-      const r = SHOWREEL.find((x) => x.id === id)!;
-      return {
-        id,
-        title: r.title,
-        meta: "Sample · 1080p",
-        duration: "0:10",
-        poster: reelPoster(id),
-        videoUrl: reelVideo(id),
-        status: "Rendered" as const,
-      };
-    });
+    return library.slice(0, 8).map((v) => ({
+      id: v.id,
+      title: v.title,
+      meta: timeAgo(v.createdAt),
+      duration: "",
+      poster: posterFor(v.url),
+      videoUrl: v.url,
+      status: "Rendered" as const,
+      chatId: v.chatId,
+    }));
   }, [backendVideos, library]);
 
   const q = searchFilter.trim().toLowerCase();
@@ -325,7 +310,7 @@ export default function OverviewSection({
       live: pending.length > 0,
     },
     {
-      label: "Projects",
+      label: "Chats",
       value: String(chats.length),
       foot: `${library.length} finished video${library.length === 1 ? "" : "s"}`,
       icon: FiLayers,
@@ -489,9 +474,9 @@ export default function OverviewSection({
                     onClick={() => (p.chatId && !p.videoUrl ? onOpenLaunch(p.chatId) : setPreviewProject(p))}
                     aria-label={`Open ${p.title}`}
                   >
-                    <HoverVideo src={p.videoUrl} poster={p.poster} label={p.title} />
+                    <HoverVideo src={p.videoUrl} poster={p.poster} label={p.title} fit />
                     <span className={`ov-badge ${p.status === "Rendered" ? "is-ok" : ""}`}>{p.status}</span>
-                    <span className="ov-dur">{p.duration}</span>
+                    {p.duration && <span className="ov-dur">{p.duration}</span>}
                     <span className="ov-play" aria-hidden="true">
                       <FiPlay size={14} />
                     </span>
@@ -649,14 +634,12 @@ export default function OverviewSection({
                 <video src={previewProject.videoUrl} poster={previewProject.poster} controls autoPlay loop playsInline />
               ) : (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={previewProject.poster} alt={previewProject.title} />
+                previewProject.poster && <img src={previewProject.poster} alt={previewProject.title} />
               )}
             </div>
             <div className="ov-modal-body">
               <h3>{previewProject.title}</h3>
-              <p>
-                {previewProject.duration} · {previewProject.meta}
-              </p>
+              <p>{[previewProject.duration, previewProject.meta].filter(Boolean).join(" · ")}</p>
             </div>
             <div className="ov-modal-foot">
               {previewProject.videoUrl && (

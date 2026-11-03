@@ -144,7 +144,7 @@ export const SHOWREEL: ShowreelItem[] = [
     category: "Motion graphics",
     title: "Kinetic text and colour wipes",
     prompt:
-      "Create a vibrant, colorful 60 FPS kinetic text animation with spring word pops, diagonal multi-color shutter wipes, and an iris portal reveal.",
+      "Create a vibrant, colorful kinetic text animation with spring word pops, diagonal multi-color shutter wipes, and an iris portal reveal.",
   },
   {
     id: "ideas-in-motion",

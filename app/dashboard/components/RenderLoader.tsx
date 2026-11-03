@@ -84,7 +84,7 @@ export default function RenderLoader({ stages, activity, thought, ratio, started
               </li>
             ))}
           </ol>
-          <p className="mt-3 hidden text-[12px] leading-snug text-[#a3adbf] sm:block">
+          <p className="mt-3 text-[12px] leading-snug text-[#a3adbf]">
             Videos usually take 5 to 20 minutes. You can leave this page; it keeps going.
           </p>
         </div>

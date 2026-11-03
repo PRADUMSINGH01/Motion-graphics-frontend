@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { FiCheck, FiEdit2, FiFilm, FiPlus, FiTrash2, FiX } from "react-icons/fi";
-import { type Chat, type ChatSettings, DEFAULT_SETTINGS, lastFinishedTake, themePending } from "../../lib/chatStore";
+import { type Chat, type ChatSettings, CHAT_TONE, DEFAULT_SETTINGS, chatTone, lastFinishedTake, themePending } from "../../lib/chatStore";
 import { SHOWREEL } from "../../../components/landing/showreel";
 import ChatMessages from "../ChatMessages";
 import PromptBox from "../PromptBox";
@@ -12,21 +12,9 @@ import StudioSettings from "../StudioSettings";
 const EXAMPLE_IDS = ["launch-day", "ink-to-motion", "vertigo", "halftone-field"];
 const EXAMPLES = EXAMPLE_IDS.map((id) => SHOWREEL.find((s) => s.id === id)).filter((s): s is (typeof SHOWREEL)[number] => Boolean(s));
 
-type Tone = "ready" | "working" | "failed" | "draft";
-const TONE: Record<Tone, { label: string; dot: string }> = {
-  ready: { label: "Ready", dot: "bg-[#4d7c0f]" },
-  working: { label: "Rendering", dot: "bg-[#b45309]" },
-  failed: { label: "Needs attention", dot: "bg-[#b42318]" },
-  draft: { label: "Draft", dot: "bg-[#9aa1b0]" },
-};
+const TONE = CHAT_TONE;
 
-function filmTone(chat: Chat): Tone {
-  const last = [...chat.messages].reverse().find((m) => m.role === "assistant");
-  if (last?.isStreaming) return "working";
-  if (last?.isError) return "failed";
-  if (chat.messages.some((m) => m.preview)) return "ready";
-  return "draft";
-}
+const filmTone = chatTone;
 
 function ago(iso: string): string {
   const min = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
@@ -308,6 +296,7 @@ export default function LaunchesSection({
                 ) : null}
                 <PromptBox
                   onSend={sendFollowUp}
+                  submitLabel={editable && !newTake ? "Make the change" : "Make video"}
                   settings={settings}
                   onSettingsChange={changeSettings}
                   placeholder={editable && !newTake ? "What should change? e.g. make the title bigger, use our brand colours…" : "Describe the next take…"}
@@ -373,10 +362,9 @@ export default function LaunchesSection({
         )}
       </div>
 
-      {/* Wide screens: the next film's settings and the films list, beside the work */}
-      <aside aria-label="Video settings and recent videos" className="hidden w-[300px] shrink-0 flex-col gap-8 overflow-y-auto border-l border-[var(--db-rule)] bg-[var(--db-paper-2)] p-5 lg:flex">
+      {/* Wide screens: the next film's settings beside the work (recent chats are in the left sidebar) */}
+      <aside aria-label="Video settings" className="hidden w-[300px] shrink-0 flex-col gap-8 overflow-y-auto border-l border-[var(--db-rule)] bg-[var(--db-paper-2)] p-5 lg:flex">
         <StudioSettings settings={settings} onChange={changeSettings} variant="panel" />
-        <div className="border-t border-[var(--db-rule)] pt-6">{filmsList}</div>
       </aside>
     </div>
   );

@@ -276,3 +276,33 @@ export function collectPending(chats: Chat[]): PendingVideo[] {
     )
   );
 }
+/** The still of a finished video: the server serves it next to the video, under the same key. */
+export function posterFor(videoUrl: string | null | undefined): string | undefined {
+  if (!videoUrl || !videoUrl.includes("/final.mp4")) return undefined;
+  return videoUrl.replace("/final.mp4", "/thumbnail.jpg");
+}
+
+/** "0:05", "1:00". */
+export function formatLength(seconds: number | null | undefined): string {
+  const s = Math.max(0, Math.round(seconds ?? 0));
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+}
+
+export type ChatTone = "ready" | "working" | "failed" | "draft";
+
+/** Where a chat stands, from its latest reply: being made, failed, has a finished video, or nothing yet. */
+export function chatTone(chat: Chat): ChatTone {
+  const last = [...chat.messages].reverse().find((m) => m.role === "assistant");
+  if (last?.isStreaming) return "working";
+  if (last?.isError) return "failed";
+  if (chat.messages.some((m) => m.preview)) return "ready";
+  return "draft";
+}
+
+/** How each state reads in a list: its words and its dot. */
+export const CHAT_TONE: Record<ChatTone, { label: string; dot: string }> = {
+  ready: { label: "Ready", dot: "bg-[#4d7c0f]" },
+  working: { label: "Rendering", dot: "bg-[#b45309]" },
+  failed: { label: "Needs attention", dot: "bg-[#b42318]" },
+  draft: { label: "Draft", dot: "bg-[#9aa1b0]" },
+};

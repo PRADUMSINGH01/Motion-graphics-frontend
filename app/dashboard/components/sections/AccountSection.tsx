@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import {
-  FiRefreshCw,
   FiLogOut,
   FiCheck,
   FiAlertCircle,
@@ -26,10 +25,10 @@ export default function AccountSection({
   onLogout: () => void;
   onRefresh: () => Promise<void>;
 }) {
-  const [name, setName] = useState(user.name || "Pradum Singh");
-  const [email, setEmail] = useState(user.email || "creator@byreel.io");
-  const [company, setCompany] = useState(user.raw?.profile?.company || "Byreel Motion Studio");
-  const [role, setRole] = useState(user.role || user.raw?.profile?.bio || "Lead Creative Director");
+  const [name, setName] = useState(user.name || "");
+  const [email, setEmail] = useState(user.email || "");
+  const [company, setCompany] = useState(user.raw?.profile?.company || "");
+  const [role, setRole] = useState(user.raw?.profile?.bio || "");
 
   // Passwords
   const [currentPassword, setCurrentPassword] = useState("");
@@ -54,15 +53,14 @@ export default function AccountSection({
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
-  const [refreshing, setRefreshing] = useState(false);
 
   // Sync state if user prop changes
   useEffect(() => {
     if (user) {
       setName(user.name || "");
       setEmail(user.email || "");
-      setCompany(user.raw?.profile?.company || "Byreel Motion Studio");
-      setRole(user.role || user.raw?.profile?.bio || "Lead Creative Director");
+      setCompany(user.raw?.profile?.company || "");
+      setRole(user.raw?.profile?.bio || "");
       if (user.raw?.preferences) {
         setRenderAlerts(user.raw.preferences.renderCompletionAlerts ?? true);
         setProductUpdates(user.raw.preferences.productUpdates ?? false);
@@ -135,19 +133,6 @@ export default function AccountSection({
     }
   };
 
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    try {
-      await onRefresh();
-      setSaveSuccess("Session and profile refreshed successfully.");
-      setTimeout(() => setSaveSuccess(null), 2500);
-    } catch (err: any) {
-      setSaveError("Failed to refresh session.");
-    } finally {
-      setRefreshing(false);
-    }
-  };
-
   const isGoogleUser =
     user.raw?.auth?.provider === "google" || user.raw?.auth?.provider === "email+google";
 
@@ -155,19 +140,9 @@ export default function AccountSection({
     <div className="mx-auto w-full max-w-4xl p-6 lg:p-8 space-y-8">
       {/* Header */}
       <div>
-        <div className="flex items-center gap-2">
-          <span className="rounded-full bg-surf-f2fac2 px-2.5 py-0.5 font-mono text-[11px] font-semibold text-ink-658b02">
-            PREFERENCES &amp; PROFILE
-          </span>
-          {isGoogleUser && (
-            <span className="rounded-full bg-blue-50 border border-blue-200 px-2.5 py-0.5 font-mono text-[11px] font-semibold text-blue-700">
-              GOOGLE VERIFIED
-            </span>
-          )}
-        </div>
-        <h1 className="mt-1 text-[28px] font-bold text-ink-111110">Account Settings</h1>
-        <p className="text-[13.5px] text-ink-717069">
-          Manage your account profile, personal studio preferences, and session security.
+        <h1 className="text-[26px] font-bold text-ink-111110">Settings</h1>
+        <p className="mt-1 text-[13.5px] text-ink-717069">
+          Your profile, sign-in and email choices.{isGoogleUser ? " You sign in with Google." : ""}
         </p>
       </div>
 
@@ -197,7 +172,7 @@ export default function AccountSection({
 
         <div className="flex items-center gap-5">
           <div className="relative h-16 w-16 overflow-hidden rounded-full border-2 border-surf-111110 bg-slate-100 flex items-center justify-center text-slate-400 font-bold text-xl">
-            {user.raw?.profile?.avatarUrl ? (
+            {user.raw?.profile?.avatarUrl && !user.raw.profile.avatarUrl.startsWith("/dashboard/") ? (
               <Image
                 src={user.raw.profile.avatarUrl}
                 alt={name}
@@ -329,56 +304,19 @@ export default function AccountSection({
 
       {/* Studio Notification Preferences */}
       <div className="rounded-2xl border border-surf-dedad0 bg-surf-ffffff p-6 shadow-2xs space-y-4">
-        <h3 className="text-[17px] font-bold text-ink-111110">Studio Preferences</h3>
+        <h3 className="text-[17px] font-bold text-ink-111110">Email</h3>
 
         <div className="divide-y divide-surf-f2efe6">
           <div className="flex items-center justify-between py-3">
             <div>
-              <p className="text-[13.5px] font-medium text-ink-111110">Render Completion Alerts</p>
-              <p className="text-[12px] text-ink-717069">Get notified when your 4K video exports finish.</p>
+              <p className="text-[13.5px] font-medium text-ink-111110">Product news</p>
+              <p className="text-[12px] text-ink-717069">Email me now and then about new features.</p>
             </div>
             <button
               type="button"
-              onClick={() => handleTogglePreference("renderCompletionAlerts", !renderAlerts)}
-              className={`relative h-6 w-11 rounded-full transition-colors cursor-pointer ${
-                renderAlerts ? "bg-surf-111110" : "bg-surf-dedad0"
-              }`}
-            >
-              <span
-                className={`absolute top-0.5 h-5 w-5 rounded-full bg-surf-c5ef26 transition-transform ${
-                  renderAlerts ? "left-5" : "left-0.5"
-                }`}
-              />
-            </button>
-          </div>
-
-          <div className="flex items-center justify-between py-3">
-            <div>
-              <p className="text-[13.5px] font-medium text-ink-111110">Hardware GPU Acceleration</p>
-              <p className="text-[12px] text-ink-717069">Use WebGL / WebGPU for client timeline rendering.</p>
-            </div>
-            <button
-              type="button"
-              onClick={() => handleTogglePreference("hardwareAcceleration", !hardwareAcceleration)}
-              className={`relative h-6 w-11 rounded-full transition-colors cursor-pointer ${
-                hardwareAcceleration ? "bg-surf-111110" : "bg-surf-dedad0"
-              }`}
-            >
-              <span
-                className={`absolute top-0.5 h-5 w-5 rounded-full bg-surf-c5ef26 transition-transform ${
-                  hardwareAcceleration ? "left-5" : "left-0.5"
-                }`}
-              />
-            </button>
-          </div>
-
-          <div className="flex items-center justify-between py-3">
-            <div>
-              <p className="text-[13.5px] font-medium text-ink-111110">Product Release Digests</p>
-              <p className="text-[12px] text-ink-717069">Weekly digest of new AI motion styles and presets.</p>
-            </div>
-            <button
-              type="button"
+              role="switch"
+              aria-checked={productUpdates}
+              aria-label="Email me about new features"
               onClick={() => handleTogglePreference("productUpdates", !productUpdates)}
               className={`relative h-6 w-11 rounded-full transition-colors cursor-pointer ${
                 productUpdates ? "bg-surf-111110" : "bg-surf-dedad0"
@@ -394,31 +332,109 @@ export default function AccountSection({
         </div>
       </div>
 
-      {/* Danger Zone */}
-      <div className="rounded-2xl border border-red-200 bg-red-50/50 p-6 space-y-4">
-        <h3 className="text-[16px] font-bold text-ink-dc2626">Session &amp; Security</h3>
-        <p className="text-[12.5px] text-ink-7f1d1d">
-          Sign out of all active devices or refresh your authenticated profile token.
-        </p>
-
-        <div className="flex items-center gap-3 pt-1">
-          <button
-            type="button"
-            onClick={handleRefresh}
-            disabled={refreshing}
-            className="flex items-center gap-1.5 rounded-xl border border-red-300 bg-surf-ffffff px-3.5 py-2 text-[12.5px] font-medium text-ink-7f1d1d hover:bg-red-50 cursor-pointer"
-          >
-            <FiRefreshCw size={13} className={refreshing ? "animate-spin" : ""} /> Sync Session
-          </button>
-          <button
-            type="button"
-            onClick={onLogout}
-            className="flex items-center gap-1.5 rounded-xl bg-surf-dc2626 px-4 py-2 text-[12.5px] font-semibold text-white hover:bg-red-700 shadow-xs cursor-pointer"
-          >
-            <FiLogOut size={13} /> Log Out
-          </button>
+      <div className="flex items-center justify-between gap-4 rounded-2xl border border-surf-dedad0 bg-surf-ffffff p-6">
+        <div>
+          <h3 className="text-[16px] font-bold text-ink-111110">Log out</h3>
+          <p className="text-[12.5px] text-ink-717069">End your session on this device.</p>
         </div>
+        <button
+          type="button"
+          onClick={onLogout}
+          className="flex shrink-0 items-center gap-1.5 rounded-xl border border-surf-dedad0 px-4 py-2 text-[12.5px] font-semibold text-ink-111110 hover:border-surf-111110 cursor-pointer"
+        >
+          <FiLogOut size={13} /> Log out
+        </button>
       </div>
+
+      <DeleteAccount user={user} hasPassword={hasPassword} />
+    </div>
+  );
+}
+
+/** Deleting the account: everything in it goes, so it asks for the password (or the email) first. */
+function DeleteAccount({ user, hasPassword }: { user: User; hasPassword: boolean }) {
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setBusy(true);
+    setError(null);
+    try {
+      await api.user.deleteAccount(hasPassword ? { password: value } : { confirm: value });
+      try {
+        localStorage.removeItem("animagent_token");
+        localStorage.removeItem("animagent_user");
+      } catch {
+        /* storage blocked */
+      }
+      document.cookie = "token=; path=/; max-age=0";
+      window.location.href = "/?deleted=1";
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not delete the account.");
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="space-y-3 rounded-2xl border border-red-200 bg-red-50/40 p-6">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h3 className="text-[16px] font-bold text-ink-dc2626">Delete account</h3>
+          <p className="text-[12.5px] text-ink-7f1d1d">
+            Deletes your profile, every video and chat, and your API keys. This can&apos;t be undone. Cancel a paid plan in
+            Billing first.
+          </p>
+        </div>
+        {!open && (
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            className="shrink-0 rounded-xl border border-red-300 bg-surf-ffffff px-4 py-2 text-[12.5px] font-semibold text-ink-dc2626 hover:bg-red-50 cursor-pointer"
+          >
+            Delete account
+          </button>
+        )}
+      </div>
+      {open && (
+        <form onSubmit={submit} className="space-y-3 border-t border-red-200 pt-3">
+          <label className="block">
+            <span className="text-[12.5px] font-medium text-ink-7f1d1d">
+              {hasPassword ? "Your password" : `Type ${user.email} to confirm`}
+            </span>
+            <input
+              type={hasPassword ? "password" : "email"}
+              autoComplete={hasPassword ? "current-password" : "off"}
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
+              className="mt-1.5 h-10 w-full max-w-sm rounded-xl border border-red-200 bg-surf-ffffff px-3.5 text-[13.5px] text-ink-111110 focus:border-red-400 focus:outline-none"
+            />
+          </label>
+          {error && <p className="text-[12.5px] font-medium text-ink-dc2626">{error}</p>}
+          <div className="flex gap-2">
+            <button
+              type="submit"
+              disabled={busy || !value.trim()}
+              className="rounded-xl bg-surf-dc2626 px-4 py-2 text-[12.5px] font-semibold text-white hover:bg-red-700 disabled:opacity-50 cursor-pointer"
+            >
+              {busy ? "Deleting…" : "Delete my account"}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setOpen(false);
+                setValue("");
+                setError(null);
+              }}
+              className="rounded-xl border border-surf-dedad0 bg-surf-ffffff px-4 py-2 text-[12.5px] font-medium text-ink-111110 cursor-pointer"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      )}
     </div>
   );
 }

@@ -1,115 +1,98 @@
 import React from "react";
 import Link from "next/link";
-import BackButton from "../components/BackButton";
-import ThemeToggle from "../components/ThemeToggle";
-import {
-  FiArrowLeft,
-  FiInfo,
-  FiShield,
-  FiUsers,
-  FiCpu,
-  FiCheckCircle,
-  FiArrowRight,
-  FiGlobe,
-} from "react-icons/fi";
+import NotebookShell from "../components/landing/NotebookShell";
 
 export const metadata = {
-  title: "About us",
-  description: "Learn about the team and technology powering the world's most advanced autonomous motion graphics agent.",
+  title: "About · byreel.in",
+  description: "byreel turns a written description into a finished motion graphics video: what it does, how it works and how to reach us.",
 };
+
+const STEPS = [
+  {
+    title: "It reads what you asked for",
+    body: "The words you want on screen, the frame, the length and the feel. Nothing you didn't write is put on screen as fact.",
+  },
+  {
+    title: "It plans timed scenes",
+    body: "A short storyboard: what each scene shows, how long it holds and how it moves to the next.",
+  },
+  {
+    title: "It animates and checks each scene",
+    body: "Every scene is written as an animated page with HyperFrames, checked for layout, contrast and timing, then rendered to a 1080p MP4.",
+  },
+];
 
 export default function AboutPage() {
   return (
-    <div className="relative min-h-screen bg-canvas text-fg-muted font-poppins pt-24 pb-20 px-4 sm:px-6 lg:px-8">
-      {/* Ambient gradient */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-96 bg-gradient-to-b from-blue-900/10 via-purple-900/5 to-transparent blur-3xl pointer-events-none" />
-
-      <div className="max-w-4xl mx-auto relative z-10">
-        {/* Back navigation */}
-        <div className="mb-6 flex items-center justify-between">
-          <BackButton fallbackUrl="/dashboard" label="Back to Studio" />
-          <ThemeToggle />
-        </div>
-
-        {/* Page Header */}
-        <div className="space-y-3 pb-8 border-b border-line">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-blue-500/10 text-accent border border-blue-500/20">
-            <FiInfo className="w-3.5 h-3.5" />
-            <span>Our Mission</span>
-          </div>
-
-          <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-fg font-comic">
-            Democratizing High-End Motion Design
-          </h1>
-
-          <p className="text-sm sm:text-base text-fg-muted leading-relaxed font-poppins pt-1">
-            byreel AI was created to replace hours of manual keyframe manipulation with intelligent, procedural physics and autonomous animation intelligence.
+    <NotebookShell ariaLabel="About byreel">
+      <article className="mx-auto w-full max-w-3xl space-y-10 px-4 py-6 text-[#07142e] sm:px-6 sm:py-10">
+        <header className="space-y-3 border-b border-[rgba(7,20,46,0.18)] pb-6">
+          <h1 className="m-0 text-3xl font-extrabold tracking-tight sm:text-4xl">About byreel</h1>
+          <p className="m-0 text-[15px] leading-relaxed text-[rgba(7,20,46,0.78)]">
+            byreel makes motion graphics from a description. Write what you want to see, like a launch teaser, a
+            kinetic quote or an animated chart, and byreel plans it, animates it and hands you a video you can post.
+            Then ask for changes in plain words.
           </p>
-        </div>
+        </header>
 
-        {/* Studio Stats */}
-        <div className="my-10 grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <div className="p-4 rounded-2xl bg-surface border border-line backdrop-blur-xl text-center space-y-1 shadow-sm dark:shadow-none">
-            <span className="text-2xl sm:text-3xl font-bold text-fg font-comic">60 FPS</span>
-            <span className="text-[11px] text-fg-muted block font-poppins">Fluid Canvas Playback</span>
-          </div>
-          <div className="p-4 rounded-2xl bg-surface border border-line backdrop-blur-xl text-center space-y-1 shadow-sm dark:shadow-none">
-            <span className="text-2xl sm:text-3xl font-bold text-accent font-comic">4.8M+</span>
-            <span className="text-[11px] text-fg-muted block font-poppins">Rendered Frames</span>
-          </div>
-          <div className="p-4 rounded-2xl bg-surface border border-line backdrop-blur-xl text-center space-y-1 shadow-sm dark:shadow-none">
-            <span className="text-2xl sm:text-3xl font-bold text-success font-comic">100%</span>
-            <span className="text-[11px] text-fg-muted block font-poppins">Commercial Ownership</span>
-          </div>
-          <div className="p-4 rounded-2xl bg-surface border border-line backdrop-blur-xl text-center space-y-1 shadow-sm dark:shadow-none">
-            <span className="text-2xl sm:text-3xl font-bold text-purple-700 dark:text-purple-400 font-comic">Zero</span>
-            <span className="text-[11px] text-fg-muted block font-poppins">Customer Data Training</span>
-          </div>
-        </div>
+        <section className="space-y-4" aria-labelledby="about-how">
+          <h2 id="about-how" className="m-0 text-xl font-bold">
+            How a video is made
+          </h2>
+          <ol className="m-0 grid list-none gap-3 p-0 sm:grid-cols-3">
+            {STEPS.map((s, i) => (
+              <li key={s.title} className="rounded-2xl border border-[rgba(7,20,46,0.14)] bg-white/70 p-4">
+                <span className="text-[12px] font-semibold text-[rgba(7,20,46,0.55)]">{i + 1}</span>
+                <h3 className="mt-1 text-[14.5px] font-semibold">{s.title}</h3>
+                <p className="mt-1 text-[13px] leading-relaxed text-[rgba(7,20,46,0.75)]">{s.body}</p>
+              </li>
+            ))}
+          </ol>
+          <p className="m-0 text-[13.5px] leading-relaxed text-[rgba(7,20,46,0.75)]">
+            The planning and animation are written by large language models you can choose in the Studio, from
+            providers such as Zhipu (GLM), DeepSeek, Anthropic, OpenAI and Google. Your request is sent to the model you
+            pick so it can make your video.
+          </p>
+        </section>
 
-        {/* Narrative Sections */}
-        <div className="space-y-8 text-sm leading-relaxed text-fg-muted">
-          <section className="space-y-3">
-            <h2 className="text-xl font-bold text-fg font-comic flex items-center gap-2">
-              <FiCpu className="w-5 h-5 text-accent" />
-              <span>Procedural Physics Meets Creative Direction</span>
-            </h2>
-            <p>
-              Traditional motion design requires navigating dense timeline graphs, bezier handles, and render queues. We believe animators, art directors, and frontend engineers should communicate visual concepts through language, while autonomous agents calculate spring dynamics, fluid inertia, and lighting interactions.
-            </p>
-          </section>
+        <section className="space-y-3" aria-labelledby="about-yours">
+          <h2 id="about-yours" className="m-0 text-xl font-bold">
+            Your videos are yours
+          </h2>
+          <p className="m-0 text-[13.5px] leading-relaxed text-[rgba(7,20,46,0.75)]">
+            You can use what you make commercially, as set out in the{" "}
+            <Link href="/terms" className="underline underline-offset-2">
+              Terms
+            </Link>
+            . byreel doesn&apos;t train AI models, and we don&apos;t sell your prompts or videos. The{" "}
+            <Link href="/policy" className="underline underline-offset-2">
+              Privacy Policy
+            </Link>{" "}
+            explains what we keep and why.
+          </p>
+        </section>
 
-          <section className="space-y-3">
-            <h2 className="text-xl font-bold text-fg font-comic flex items-center gap-2">
-              <FiShield className="w-5 h-5 text-success" />
-              <span>Built on Ethical AI &amp; Creator Sovereignty</span>
-            </h2>
-            <p>
-              We firmly reject the practice of training foundational models on non-consensual creator portfolios. Our algorithms are trained strictly on synthetic mathematical simulations, licensed open-source graphics routines, and in-house animation assets. When you build with byreel, your output is legally unassailable and exclusively yours.
-            </p>
-          </section>
-
-          {/* Connect Banner */}
-          <div className="pt-6 border-t border-line flex flex-col sm:flex-row items-center justify-between gap-4">
-            <span className="text-xs text-fg-muted">
-              Explore our legal transparency commitments:
-            </span>
-            <div className="flex items-center gap-4 text-xs">
-              <Link href="/terms" className="text-fg hover:text-accent underline">
-                Terms
-              </Link>
-              <span>•</span>
-              <Link href="/policy" className="text-fg hover:text-accent underline">
-                Privacy
-              </Link>
-              <span>•</span>
-              <Link href="/data-usage" className="text-fg hover:text-accent underline">
-                Data Usage
-              </Link>
-            </div>
+        <section className="space-y-3 border-t border-[rgba(7,20,46,0.18)] pt-6" aria-labelledby="about-contact">
+          <h2 id="about-contact" className="m-0 text-xl font-bold">
+            Get in touch
+          </h2>
+          <p className="m-0 text-[13.5px] leading-relaxed text-[rgba(7,20,46,0.75)]">
+            Questions, a bug, or a video that didn&apos;t come out right: write to{" "}
+            <a href="mailto:support@byreel.in" className="underline underline-offset-2">
+              support@byreel.in
+            </a>
+            .
+          </p>
+          <div className="flex flex-wrap gap-3 pt-1">
+            <Link href="/register" className="rounded-xl bg-[#07142e] px-4 py-2.5 text-[13px] font-semibold text-white">
+              Make your first video
+            </Link>
+            <Link href="/pricing" className="rounded-xl border border-[rgba(7,20,46,0.2)] px-4 py-2.5 text-[13px] font-semibold">
+              See pricing
+            </Link>
           </div>
-        </div>
-      </div>
-    </div>
+        </section>
+      </article>
+    </NotebookShell>
   );
 }

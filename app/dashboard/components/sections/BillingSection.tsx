@@ -87,10 +87,7 @@ export default function BillingSection({ user }: { user: User }) {
     <div className="mx-auto w-full max-w-5xl p-6 lg:p-8 space-y-8">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <span className="rounded-full bg-surf-f2fac2 px-2.5 py-0.5 font-mono text-[11px] font-semibold text-ink-658b02">
-            BILLING & USAGE
-          </span>
-          <h1 className="mt-1 text-[28px] font-bold text-ink-111110">Billing & usage</h1>
+          <h1 className="text-[26px] font-bold text-ink-111110">Billing & usage</h1>
           <p className="text-[13.5px] text-ink-717069">Your plan, the credits left this period, and what each film used.</p>
         </div>
         <button

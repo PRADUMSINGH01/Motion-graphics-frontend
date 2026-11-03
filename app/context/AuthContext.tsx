@@ -46,7 +46,6 @@ interface AuthContextType {
   applyOAuthSession: (token: string, backendUser: BackendUser) => void;
   logout: () => void;
   refreshUser: () => Promise<void>;
-  triggerDemoAlert: (type: "success" | "failure" | "error") => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -426,24 +425,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const triggerDemoAlert = (type: "success" | "failure" | "error") => {
-    if (type === "success") {
-      success(
-        "Motion Graphic Exported",
-        "High-definition 4K WebM render is ready for download."
-      );
-    } else if (type === "failure") {
-      failure(
-        "Action Blocked",
-        "GPU compute token quota reached for current tier. Upgrade plan to increase limits."
-      );
-    } else {
-      error(
-        "GPU Rendering Failure (503)",
-        "Cluster worker node timed out while compiling shaders."
-      );
-    }
-  };
 
 
   return (
@@ -458,7 +439,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         applyOAuthSession,
         logout,
         refreshUser,
-        triggerDemoAlert,
       }}
     >
       {children}

@@ -15,9 +15,11 @@ import {
   FiDroplet,
   FiChevronsLeft,
   FiPlus,
+  FiTrash2,
 } from "react-icons/fi";
 import type { IconType } from "react-icons";
 import type { SectionId } from "../lib/sections";
+import { type Chat, CHAT_TONE as TONE, chatTone } from "../lib/chatStore";
 import type { User } from "../../context/AuthContext";
 
 interface NavItemConfig {
@@ -63,6 +65,11 @@ function computeCompute(usage: User["usage"]): { used: number; limit: number; pc
 
 interface NavSidebarProps {
   section: SectionId;
+  /** Recent chats, newest first, with the open one. */
+  chats?: Chat[];
+  activeChatId?: string | null;
+  onOpenChat?: (chatId: string) => void;
+  onDeleteChat?: (chatId: string) => void;
   counts: Partial<Record<SectionId, number>>;
   isOpen: boolean;
   onClose: () => void;
@@ -83,7 +90,12 @@ export default function NavSidebar({
   onNewLaunch,
   planLabel,
   usage,
+  chats = [],
+  activeChatId,
+  onOpenChat,
+  onDeleteChat,
 }: NavSidebarProps) {
+  const recents = chats.slice(0, 20);
   const compute = computeCompute(usage);
   // Normalize section to active key
   const activeId: SectionId =
@@ -170,6 +182,43 @@ export default function NavSidebar({
             </ul>
           </div>
         ))}
+
+        {recents.length > 0 && (
+          <div className="sb-group">
+            <p className="sb-group-label">Recent</p>
+            <ul>
+              {recents.map((c) => {
+                const tone = TONE[chatTone(c)];
+                const open = activeId === "create" && c.id === activeChatId;
+                return (
+                  <li key={c.id} className="group relative">
+                    <button
+                      type="button"
+                      onClick={() => onOpenChat?.(c.id)}
+                      aria-current={open ? "page" : undefined}
+                      title={`${c.title || "Untitled video"} · ${tone.label}`}
+                      className="sb-item pr-8"
+                    >
+                      <span aria-hidden="true" className={`ml-1 mr-0.5 h-1.5 w-1.5 shrink-0 rounded-full ${tone.dot}`} />
+                      <span className="truncate">{c.title || "Untitled video"}</span>
+                    </button>
+                    {onDeleteChat && (
+                      <button
+                        type="button"
+                        onClick={() => onDeleteChat(c.id)}
+                        aria-label={`Remove ${c.title || "this chat"} from the list`}
+                        title="Remove from the list (its videos stay in Your videos)"
+                        className="absolute right-1 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-md text-[rgba(7,20,46,0.5)] opacity-0 transition hover:bg-[rgba(7,20,46,0.06)] hover:text-[#b42318] focus-visible:opacity-100 group-hover:opacity-100 cursor-pointer"
+                      >
+                        <FiTrash2 size={12} aria-hidden="true" />
+                      </button>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        )}
 
         <div className="sb-usage">
           <div className="sb-usage-top">

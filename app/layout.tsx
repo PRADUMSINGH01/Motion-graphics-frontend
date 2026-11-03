@@ -37,10 +37,10 @@ const caveat = Caveat({
 const themeInitScript = `(function(){try{var t=localStorage.getItem("byreel_theme")||"light";if(t==="system"){t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}var r=document.documentElement;r.classList.add(t);r.setAttribute("data-theme",t);r.style.colorScheme=t}catch(e){}})();`;
 
 const siteDescription =
-  "Describe a scene in plain language and byreel writes, animates and exports broadcast-ready 60 FPS motion graphics — no timeline required.";
+  "Describe a video in plain words and byreel plans it, animates it and renders a ready-to-post motion graphics MP4. No timeline required.";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://byreel.ai"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://www.byreel.in"),
   title: {
     default: "byreel — The AI agent for motion graphics",
     template: "%s · byreel",

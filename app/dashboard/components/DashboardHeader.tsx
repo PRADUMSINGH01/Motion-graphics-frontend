@@ -1,11 +1,25 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
-import { FiSearch, FiSidebar, FiPlus } from "react-icons/fi";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { FiArrowRight, FiMessageSquare, FiSearch, FiSidebar, FiPlus } from "react-icons/fi";
 import type { User } from "../../context/AuthContext";
 import AccountMenu from "./AccountMenu";
 import ThemeToggle from "../../components/ThemeToggle";
-import type { SectionId } from "../lib/sections";
+import { SECTION_LABELS, type SectionId } from "../lib/sections";
+import type { Chat } from "../lib/chatStore";
+
+/** Pages the quick-open can jump to, by the words people type for them. */
+const PAGES: { id: SectionId; words: string }[] = [
+  { id: "dashboard", words: "home dashboard" },
+  { id: "create", words: "studio new video chat make" },
+  { id: "your-videos", words: "your videos library downloads exports" },
+  { id: "templates", words: "templates reels starting points" },
+  { id: "product-launch", words: "product launch trailer website" },
+  { id: "brolls", words: "b-rolls broll cutaways loops" },
+  { id: "brandkit", words: "brand kit colours colors fonts logo" },
+  { id: "billing", words: "billing plan credits invoices upgrade" },
+  { id: "settings", words: "settings account profile password" },
+];
 
 interface DashboardHeaderProps {
   user: User;
@@ -17,6 +31,8 @@ interface DashboardHeaderProps {
   onNewLaunch?: () => void;
   onNavigate?: (section: SectionId) => void;
   title?: string;
+  chats?: Chat[];
+  onOpenChat?: (chatId: string) => void;
 }
 
 export default function DashboardHeader({
@@ -27,9 +43,37 @@ export default function DashboardHeader({
   searchQuery,
   onSearchChange,
   onNewLaunch,
+  onNavigate,
   title,
+  chats = [],
+  onOpenChat,
 }: DashboardHeaderProps) {
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const [focused, setFocused] = useState(false);
+  const [cursor, setCursor] = useState(0);
+
+  // Quick-open: chats whose title or prompts match, then pages. Enter opens the highlighted one.
+  const results = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return [];
+    const chatHits = chats
+      .filter((c) => c.title.toLowerCase().includes(q) || c.messages.some((m) => m.role === "user" && m.content.toLowerCase().includes(q)))
+      .slice(0, 6)
+      .map((c) => ({ key: `c:${c.id}`, label: c.title, hint: "Chat", open: () => onOpenChat?.(c.id) }));
+    const pageHits = PAGES.filter((p) => p.words.includes(q) || SECTION_LABELS[p.id].toLowerCase().includes(q))
+      .slice(0, 3)
+      .map((p) => ({ key: `p:${p.id}`, label: SECTION_LABELS[p.id], hint: "Page", open: () => onNavigate?.(p.id) }));
+    return [...chatHits, ...pageHits];
+  }, [searchQuery, chats, onOpenChat, onNavigate]);
+
+  const choose = (i: number) => {
+    const hit = results[i];
+    if (!hit) return;
+    hit.open();
+    onSearchChange("");
+    setFocused(false);
+    searchInputRef.current?.blur();
+  };
 
   // Command + K keyboard shortcut
   useEffect(() => {
@@ -57,13 +101,7 @@ export default function DashboardHeader({
           <FiSidebar size={16} />
         </button>
 
-        {title && (
-          <nav aria-label="Breadcrumb" className="hidden lg:flex items-center gap-1.5 text-[13px] whitespace-nowrap shrink-0 mr-2">
-            <span className="text-[#6b7488]">Studio</span>
-            <span className="text-[#c3c8d2]">/</span>
-            <span className="font-semibold text-[#07142e]">{title}</span>
-          </nav>
-        )}
+        {title && <h1 className="mr-2 hidden shrink-0 whitespace-nowrap text-[13.5px] font-semibold text-[#07142e] lg:block">{title}</h1>}
 
         {/* Global Search Bar with ⌘ K */}
         <div className="relative hidden w-full max-w-md sm:block">
@@ -74,8 +112,32 @@ export default function DashboardHeader({
             ref={searchInputRef}
             type="text"
             value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="Search templates, projects, prompts or assets..."
+            onChange={(e) => {
+              onSearchChange(e.target.value);
+              setCursor(0);
+            }}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setTimeout(() => setFocused(false), 120)}
+            onKeyDown={(e) => {
+              if (e.key === "ArrowDown") {
+                e.preventDefault();
+                setCursor((c) => Math.min(c + 1, results.length - 1));
+              } else if (e.key === "ArrowUp") {
+                e.preventDefault();
+                setCursor((c) => Math.max(c - 1, 0));
+              } else if (e.key === "Enter") {
+                e.preventDefault();
+                choose(cursor);
+              } else if (e.key === "Escape") {
+                onSearchChange("");
+                searchInputRef.current?.blur();
+              }
+            }}
+            role="combobox"
+            aria-expanded={focused && results.length > 0}
+            aria-controls="quick-open"
+            aria-label="Search chats and pages"
+            placeholder="Search chats and pages"
             className="h-9 w-full rounded-lg border border-[rgba(7,20,46,0.12)] bg-white pl-10 pr-14 text-[13px] text-[#07142e] placeholder-[rgba(7,20,46,0.48)] shadow-2xs transition focus:border-[rgba(7,20,46,0.32)] focus:bg-white focus:outline-none"
           />
           <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
@@ -83,6 +145,33 @@ export default function DashboardHeader({
               ⌘ K
             </kbd>
           </div>
+          {focused && searchQuery.trim() && (
+            <ul
+              id="quick-open"
+              role="listbox"
+              className="absolute left-0 right-0 top-11 z-30 overflow-hidden rounded-xl border border-[rgba(7,20,46,0.12)] bg-white py-1 shadow-lg"
+            >
+              {results.length === 0 ? (
+                <li className="px-3.5 py-2.5 text-[13px] text-[#6b7488]">No chats or pages match.</li>
+              ) : (
+                results.map((r, i) => (
+                  <li key={r.key} role="option" aria-selected={i === cursor}>
+                    <button
+                      type="button"
+                      onMouseDown={(e) => e.preventDefault()}
+                      onMouseEnter={() => setCursor(i)}
+                      onClick={() => choose(i)}
+                      className={`flex w-full items-center gap-2.5 px-3.5 py-2 text-left text-[13px] ${i === cursor ? "bg-[rgba(7,20,46,0.05)]" : ""}`}
+                    >
+                      {r.hint === "Chat" ? <FiMessageSquare size={14} className="shrink-0 text-[#6b7488]" /> : <FiArrowRight size={14} className="shrink-0 text-[#6b7488]" />}
+                      <span className="min-w-0 flex-1 truncate text-[#07142e]">{r.label}</span>
+                      <span className="text-[11.5px] text-[#6b7488]">{r.hint}</span>
+                    </button>
+                  </li>
+                ))
+              )}
+            </ul>
+          )}
         </div>
       </div>
 

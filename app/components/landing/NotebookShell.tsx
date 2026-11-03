@@ -163,6 +163,12 @@ export default function NotebookShell({
               <Link href="/register" className="lp-footer-link">
                 Register
               </Link>
+              <Link href="/about" className="lp-footer-link">
+                About
+              </Link>
+              <a href="mailto:support@byreel.in" className="lp-footer-link">
+                Contact
+              </a>
               <Link href="/privacy" className="lp-footer-link">
                 Privacy
               </Link>

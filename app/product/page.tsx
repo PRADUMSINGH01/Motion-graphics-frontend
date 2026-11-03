@@ -6,5 +6,5 @@ export const metadata = {
 };
 
 export default function ProductPage() {
-  redirect("/dashboard?section=product-launch");
+  redirect("/");
 }

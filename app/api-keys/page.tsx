@@ -17,7 +17,7 @@ import {
 } from "react-icons/fi";
 import { useAlert } from "../context/AlertContext";
 import { useAuth } from "../context/AuthContext";
-import { api, ApiKeyItem, ApiError } from "../lib/api";
+import { api, ApiKeyItem, ApiError, API_BASE_URL } from "../lib/api";
 import ThemeToggle from "../components/ThemeToggle";
 
 export default function ApiKeysPage() {
@@ -180,7 +180,7 @@ export default function ApiKeysPage() {
               API Keys &amp; Developer Tokens
             </h1>
             <p className="text-xs sm:text-sm text-fg-muted max-w-2xl font-poppins">
-              Programmatically generate 60FPS motion graphics, render physics loops, and extract SVG paths using the byreel REST API.
+              Make videos from your own code: send a prompt with a key, then fetch the finished MP4. Each video uses your account&apos;s credits.
             </p>
           </div>
 
@@ -353,11 +353,11 @@ export default function ApiKeysPage() {
               <div className="flex items-center gap-2">
                 <FiTerminal className="w-4 h-4 text-accent" />
                 <h3 className="text-base font-bold text-fg font-comic">
-                  Quickstart: Generate Animation via API
+                  Quickstart
                 </h3>
               </div>
               <p className="text-xs text-fg-muted font-poppins">
-                Send a prompt to the autonomous agent and receive a rendered WebM video URL and SVG path array.
+                Queue a video, then check on it until the MP4 link is ready.
               </p>
             </div>
 
@@ -384,52 +384,53 @@ export default function ApiKeysPage() {
           <div className="relative rounded-2xl bg-slate-950 dark:bg-black/60 border border-line-strong p-4 font-mono text-xs text-slate-200 overflow-x-auto leading-relaxed">
             {activeCodeTab === "curl" && (
               <pre>
-{`curl -X POST https://api.animagent.ai/v1/generate \\
-  -H "Authorization: Bearer ${firstActiveKeyPrefix}..." \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "prompt": "Kinetic cyber typographic logo reveal with spring-damper easing",
-    "format": "webm",
-    "fps": 60,
-    "resolution": "4K",
-    "duration_seconds": 4.5
-  }'`}
+{`# 1. Ask for a video. It is charged to your account's credits like any video.
+curl -X POST ${API_BASE_URL}/api/prompt -H "x-api-key: ${firstActiveKeyPrefix}..." -H "Content-Type: application/json" -d '{"prompt": "A 10-second kinetic quote: Make it simple, then make it move.", "ratio": "9:16", "length": 10}'
+
+# 2. Check on it (every 30 s or so) with the promptId from step 1.
+#    When "status" is "done", job.play[0] is the MP4 link; "failed" gives the credits back.
+curl ${API_BASE_URL}/api/prompt/PROMPT_ID -H "x-api-key: ${firstActiveKeyPrefix}..."`}
               </pre>
             )}
 
             {activeCodeTab === "node" && (
               <pre>
-{`import { AnimagentClient } from '@animagent/sdk';
+{`const API = "${API_BASE_URL}";
+const headers = { "x-api-key": process.env.BYREEL_API_KEY, "Content-Type": "application/json" };
 
-const client = new AnimagentClient({
-  apiKey: process.env.ANIMAGENT_API_KEY || "${firstActiveKeyPrefix}...",
-});
+const { job } = await fetch(\`\${API}/api/prompt\`, {
+  method: "POST",
+  headers,
+  body: JSON.stringify({ prompt: "A 10-second kinetic quote: Make it simple, then make it move.", ratio: "9:16", length: 10 }),
+}).then((r) => r.json());
 
-const render = await client.motion.generate({
-  prompt: "Kinetic cyber typographic logo reveal with spring-damper easing",
-  format: "webm",
-  fps: 60,
-  physics: { tension: 0.8, damping: 0.25 },
-});
-
-console.log('Video ready at:', render.videoUrl);`}
+let status = job;
+while (status.status !== "done" && status.status !== "failed") {
+  await new Promise((r) => setTimeout(r, 30_000));
+  ({ job: status } = await fetch(\`\${API}/api/prompt/\${job.promptId}\`, { headers }).then((r) => r.json()));
+}
+console.log(status.status === "done" ? status.play[0] : status.error);`}
               </pre>
             )}
 
             {activeCodeTab === "python" && (
               <pre>
-{`from animagent import Animagent
+{`import os, time, requests
 
-client = Animagent(api_key="${firstActiveKeyPrefix}...")
+API = "${API_BASE_URL}"
+headers = {"x-api-key": os.environ["BYREEL_API_KEY"]}
 
-animation = client.motion.generate(
-    prompt="Kinetic cyber typographic logo reveal with spring-damper easing",
-    format="webm",
-    fps=60,
-    resolution="4K"
-)
+job = requests.post(f"{API}/api/prompt", headers=headers, json={
+    "prompt": "A 10-second kinetic quote: Make it simple, then make it move.",
+    "ratio": "9:16",
+    "length": 10,
+}).json()["job"]
 
-print("Render output URL:", animation.url)`}
+while job["status"] not in ("done", "failed"):
+    time.sleep(30)
+    job = requests.get(f"{API}/api/prompt/{job['promptId']}", headers=headers).json()["job"]
+
+print(job["play"][0] if job["status"] == "done" else job["error"])`}
               </pre>
             )}
           </div>

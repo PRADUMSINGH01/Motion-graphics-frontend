@@ -96,7 +96,7 @@ export default function LoginPage() {
           <Link
             href="/dashboard"
             className="lp-badge-sticker lp-badge-left-top"
-            title="60 FPS Motion Studio"
+            title="byreel Motion Studio"
           >
             <svg viewBox="0 0 112 112" className="lp-seal-svg">
               <defs>
@@ -131,7 +131,7 @@ export default function LoginPage() {
                   fontFamily="monospace"
                 >
                   <textPath href="#loginSealPath">
-                    ★ 60 FPS STUDIO ★ MOTION · B-ROLLS · LAUNCH
+                    ★ MOTION STUDIO ★ MOTION · B-ROLLS · LAUNCH
                   </textPath>
                 </text>
               </g>
@@ -252,7 +252,7 @@ export default function LoginPage() {
                 fontWeight="900"
                 fontFamily="monospace"
               >
-                60 FPS
+                1080p
               </text>
             </svg>
           </Link>

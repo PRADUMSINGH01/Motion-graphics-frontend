@@ -18,6 +18,7 @@ import {
   themePending,
 } from "../lib/chatStore";
 import { api, ApiError, isPaywallError, type PromptJob } from "../../lib/api";
+import { brandGuide, loadBrandKit } from "../lib/brandKit";
 
 // A refused film says why and, for the paywall, which limit (the chat offers the way past it).
 const failureOf = (err: unknown, fallback: string) => ({
@@ -55,6 +56,19 @@ const byRecent = (a: Chat, b: Chat) => b.updatedAt.localeCompare(a.updatedAt);
  * The signed-in user's Studio chats. This browser keeps a copy for an instant start; the server keeps the
  * history, so a chat made here shows in any other browser, and a rename or delete there shows here.
  */
+/** A finished video while the person is in another tab: the tab's title says so until they come back. */
+function flagTab(text: string) {
+  if (typeof document === "undefined" || !document.hidden || document.title.startsWith("● ")) return;
+  const original = document.title;
+  document.title = `● ${text} · byreel`;
+  const back = () => {
+    if (document.hidden) return;
+    document.title = original;
+    document.removeEventListener("visibilitychange", back);
+  };
+  document.addEventListener("visibilitychange", back);
+}
+
 /** onCredits runs when the account's credits change: a video's estimate is held, settled or refunded. */
 export function useChats(userId: string, onCredits?: () => void) {
   // Only rendered client-side, after sign-in, so reading storage during the first render is safe.
@@ -125,7 +139,10 @@ export function useChats(userId: string, onCredits?: () => void) {
           if (job.theme && job.harnessJobId) {
             updateChat(chatId, (c) => (c.theme ? c : { ...c, theme: { jobId: job.harnessJobId!, name: job.theme! } }), false);
           }
-          if (job.status === "done" || job.status === "failed") creditsChanged.current?.();
+          if (job.status === "done" || job.status === "failed") {
+            creditsChanged.current?.();
+            flagTab(job.status === "done" ? "Your video is ready" : "A video failed");
+          }
           if (job.status === "done") {
             const url = job.play[0];
             if (url) {
@@ -390,6 +407,8 @@ export function useChats(userId: string, onCredits?: () => void) {
         messages: [...c.messages, { id: createId("m"), role: "user", content: prompt, createdAt: now }, assistant],
       }));
 
+      // While the brand kit is on, a new video follows it; an edit keeps the look of the video it changes.
+      const brand = editOf ? null : brandGuide(loadBrandKit(userId));
       try {
         await api.prompt.queue({
           prompt,
@@ -402,6 +421,7 @@ export function useChats(userId: string, onCredits?: () => void) {
           route,
           sound,
           ...(editOf ? { editOf } : chat.theme ? { themeFrom: chat.theme.jobId } : {}),
+          ...(brand ? { brand } : {}),
         });
         creditsChanged.current?.();
         track(chat.id, assistant.id, promptId, title);
@@ -418,7 +438,7 @@ export function useChats(userId: string, onCredits?: () => void) {
         );
       }
     },
-    [activeChat, updateChat, patchMessage, track]
+    [activeChat, updateChat, patchMessage, track, userId]
   );
 
   /**

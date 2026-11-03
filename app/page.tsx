@@ -38,12 +38,12 @@ const STEPS = [
     body: "One sentence is enough: what happens, the words on screen and the mood.",
   },
   {
-    title: "Check the storyboard",
-    body: "byreel splits it into timed scenes. Change any word, colour or cut; edits don't use credits.",
+    title: "Watch it come together",
+    body: "byreel plans timed scenes, animates each one and renders the video. The Studio shows every step.",
   },
   {
-    title: "Export and post",
-    body: "Drop it into Premiere, DaVinci or CapCut, or post it straight to YouTube and Reels.",
+    title: "Change it, then post it",
+    body: "Ask for changes in plain words, like a bigger title or other colours. Download the MP4 or share a link.",
   },
 ];
 
@@ -331,8 +331,8 @@ export default function Home() {
           <div className="hm-hero-copy">
             <p className="hm-story">
               byreel is a motion design studio you direct in plain language. Write what you can
-              see in your head; byreel storyboards it, animates it and renders the reel at up to
-              4K and 60 fps, ready for YouTube, Reels or launch day.
+              see in your head; byreel storyboards it, animates it and renders a 1080p video, ready for
+              YouTube, Reels or launch day.
             </p>
 
             <form onSubmit={handleSubmit} className="hm-prompt">
@@ -484,9 +484,9 @@ export default function Home() {
                   )}
                   {i === 2 && (
                     <ul className="hm-art-specs">
-                      <li>MP4 up to 4K at 60 fps</li>
-                      <li>WebM with a transparent background</li>
-                      <li>16:9, 9:16, 1:1 and 4:5</li>
+                      <li>MP4 in 1080p</li>
+                      <li>16:9, 9:16 and 1:1</li>
+                      <li>1 to 60 seconds long</li>
                     </ul>
                   )}
                 </div>
@@ -502,7 +502,7 @@ export default function Home() {
             <h2 id="hm-close-title" className="hm-close-title">
               Start with 15 free credits a month.
             </h2>
-            <p className="hm-close-body">No card needed. That&apos;s about three short videos.</p>
+            <p className="hm-close-body">No card needed. Enough for several short videos.</p>
           </div>
           <div className="hm-close-actions">
             <button type="button" className="hm-close-cta" onClick={() => fillPrompt(prompt)}>

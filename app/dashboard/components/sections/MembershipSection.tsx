@@ -21,7 +21,8 @@ function featuresOf(plan: BillingPlan, typical15: number): string[] {
     `${plan.credits.toLocaleString()} credits every month`,
     `Films up to ${plan.maxSeconds} seconds`,
     `About ${shortFilms.toLocaleString()} fifteen-second films`,
-    "Every model, 16:9, 9:16 and 1:1",
+    plan.tier === "free" ? "Fast models (top models on paid plans)" : "Every model, including Claude, GPT and Gemini",
+    "1080p MP4 in 16:9, 9:16 or 1:1",
     "Credits come back when a film fails",
   ];
 }
@@ -64,12 +65,10 @@ export default function MembershipSection({ user }: { user: User }) {
   return (
     <div className="mx-auto w-full max-w-6xl p-6 lg:p-8 space-y-8">
       <div className="text-center max-w-2xl mx-auto">
-        <span className="rounded-full bg-surf-f2fac2 px-2.5 py-0.5 font-mono text-[11px] font-semibold text-ink-658b02">
-          MEMBERSHIP & PLAN
-        </span>
-        <h1 className="mt-2 text-[32px] sm:text-[38px] font-bold text-ink-111110">Pick the plan that fits</h1>
+        <h1 className="text-[32px] sm:text-[38px] font-bold text-ink-111110">Pick the plan that fits</h1>
         <p className="mt-2 text-[14px] text-ink-717069">
-          Credits are spent when a film renders and renew every billing month. Change or cancel any time.
+          Each video uses credits for what it really used, and credits renew every billing month. Change or cancel any
+          time.
         </p>
 
         {annual && (

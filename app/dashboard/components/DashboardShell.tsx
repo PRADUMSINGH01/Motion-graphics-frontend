@@ -3,9 +3,8 @@
 import { useEffect, useState } from "react";
 import { useAuth, type User } from "../../context/AuthContext";
 import { useChats } from "../hooks/useChats";
-import { collectVideos, type ChatSettings } from "../lib/chatStore";
-import { loadAssets } from "../lib/assets";
-import { SECTION_LABELS, isSectionId, type SectionId } from "../lib/sections";
+import { type ChatSettings } from "../lib/chatStore";
+import { SECTION_LABELS, sectionFor, type SectionId } from "../lib/sections";
 import NavSidebar from "./NavSidebar";
 import DashboardHeader from "./DashboardHeader";
 import OverviewSection from "./sections/OverviewSection";
@@ -14,13 +13,8 @@ import ProductLaunchSection from "./sections/ProductLaunchSection";
 import BRollsSection from "./sections/BRollsSection";
 import YourVideosSection from "./sections/YourVideosSection";
 import TemplatesSection from "./sections/TemplatesSection";
-import ProjectsSection from "./sections/ProjectsSection";
-import MediaSection from "./sections/MediaSection";
-import AssetsSection from "./sections/AssetsSection";
-import ExportsSection from "./sections/ExportsSection";
 import AgentConsoleSection from "./sections/AgentConsoleSection";
 import BrandKitSection from "./sections/BrandKitSection";
-import IntegrationsSection from "./sections/IntegrationsSection";
 import MembershipSection from "./sections/MembershipSection";
 import BillingSection from "./sections/BillingSection";
 import AccountSection from "./sections/AccountSection";
@@ -38,7 +32,6 @@ export default function DashboardShell({ user }: { user: User & { id: string } }
     () => typeof window === "undefined" || window.matchMedia("(min-width: 768px)").matches
   );
   const [searchQuery, setSearchQuery] = useState("");
-  const [assetCount, setAssetCount] = useState(() => (typeof window !== "undefined" ? loadAssets(user.id).length : 0));
 
   // Deep-link / back-button support via URL hash and query params (?section=... & ?prompt=...)
   useEffect(() => {
@@ -57,16 +50,18 @@ export default function DashboardShell({ user }: { user: User & { id: string } }
       return;
     }
 
-    if (querySection && isSectionId(querySection)) {
-      setSectionState(querySection);
-      window.history.replaceState({}, "", `/dashboard#${querySection}`);
+    const fromQuery = sectionFor(querySection);
+    if (fromQuery) {
+      setSectionState(fromQuery);
+      window.history.replaceState({}, "", `/dashboard#${fromQuery}`);
     }
 
     const sync = () => {
       const hash = window.location.hash.slice(1);
-      if (isSectionId(hash)) {
-        setSectionState(hash);
-      }
+      const next = sectionFor(hash);
+      if (!next) return;
+      setSectionState(next);
+      if (next !== hash) window.history.replaceState({}, "", `/dashboard#${next}`);
     };
     sync();
     window.addEventListener("hashchange", sync);
@@ -75,7 +70,6 @@ export default function DashboardShell({ user }: { user: User & { id: string } }
   }, []);
 
   const navigate = (next: SectionId) => {
-    setAssetCount(loadAssets(user.id).length);
     setSectionState(next);
     if (typeof window !== "undefined") {
       window.location.hash = next;
@@ -103,10 +97,6 @@ export default function DashboardShell({ user }: { user: User & { id: string } }
   const planLabel = user.plan?.tier ? `${user.plan.tier[0].toUpperCase()}${user.plan.tier.slice(1)} plan` : "Free Plan";
   const counts: Partial<Record<SectionId, number>> = {
     create: chats.length,
-    projects: chats.length + 4,
-    media: collectVideos(chats).length,
-    assets: assetCount,
-    exports: 3,
   };
 
   return (
@@ -131,6 +121,10 @@ export default function DashboardShell({ user }: { user: User & { id: string } }
         userEmail={user.email}
         planLabel={planLabel}
         usage={user.usage}
+        chats={chats}
+        activeChatId={activeChat?.id ?? null}
+        onOpenChat={openLaunch}
+        onDeleteChat={deleteChat}
       />
 
       {/* Main Workspace Column with notebook ruled lines */}
@@ -143,9 +137,11 @@ export default function DashboardShell({ user }: { user: User & { id: string } }
           onLogout={logout}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
+          chats={chats}
+          onOpenChat={openLaunch}
           onNewLaunch={() => newLaunch()}
           onNavigate={navigate}
-          title={section === "dashboard" || section === "overview" ? "Home" : SECTION_LABELS[section]}
+          title={SECTION_LABELS[section]}
         />
         <VerifyEmailBanner />
 
@@ -155,7 +151,6 @@ export default function DashboardShell({ user }: { user: User & { id: string } }
             <OverviewSection
               user={user}
               chats={chats}
-              assetCount={assetCount}
               onNavigate={navigate}
               onOpenLaunch={openLaunch}
               onNewLaunch={newLaunch}
@@ -179,38 +174,23 @@ export default function DashboardShell({ user }: { user: User & { id: string } }
           )}
 
           {section === "product-launch" && (
-            <ProductLaunchSection onStartLaunch={(prompt) => newLaunch(prompt)} />
+            <ProductLaunchSection onStartLaunch={(prompt, settings) => newLaunch(prompt, settings)} />
           )}
 
           {section === "brolls" && (
-            <BRollsSection onUseClip={(prompt) => newLaunch(prompt)} />
+            <BRollsSection onMake={(prompt, settings) => newLaunch(prompt, settings)} />
           )}
 
           {section === "your-videos" && (
-            <YourVideosSection onOpenStudio={(title) => newLaunch(title)} />
+            <YourVideosSection chats={chats} onOpenChat={openLaunch} onNewVideo={() => newLaunch()} />
           )}
 
           {section === "templates" && (
             <TemplatesSection onSelectTemplate={(p) => newLaunch(p)} />
           )}
 
-          {section === "projects" && (
-            <ProjectsSection
-              chats={chats}
-              onOpenLaunch={openLaunch}
-              onNewLaunch={() => newLaunch()}
-              onDeleteChat={deleteChat}
-            />
-          )}
-
-          {(section === "media" || section === "assets") && (
-            <MediaSection chats={chats} onOpenLaunch={openLaunch} onNewLaunch={() => newLaunch()} />
-          )}
-
-          {section === "exports" && <ExportsSection />}
           {section === "agent-console" && <AgentConsoleSection />}
           {section === "brandkit" && <BrandKitSection userId={user.id} brandName={user.name} />}
-          {section === "integrations" && <IntegrationsSection />}
           {section === "membership" && <MembershipSection user={user} />}
           {section === "billing" && <BillingSection user={user} />}
           {(section === "settings" || section === "account") && (

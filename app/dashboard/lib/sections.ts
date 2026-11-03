@@ -7,43 +7,48 @@ export const SECTION_IDS = [
   "brolls",
   "your-videos",
   "templates",
-  "projects",
-  "media",
-  "exports",
   "agent-console",
   "brandkit",
-  "integrations",
   "settings",
   "account",
   "billing",
   "membership",
-  "assets",
 ] as const;
 
 export type SectionId = (typeof SECTION_IDS)[number];
 
 export const SECTION_LABELS: Record<SectionId, string> = {
-  dashboard: "Dashboard",
-  overview: "Dashboard",
-  create: "Create Video",
-  launches: "Create Video",
-  "product-launch": "Product Launch",
-  brolls: "B-Rolls",
-  "your-videos": "Your Videos",
+  dashboard: "Home",
+  overview: "Home",
+  create: "Studio",
+  launches: "Studio",
+  "product-launch": "Product launch",
+  brolls: "Animated B-rolls",
+  "your-videos": "Your videos",
   templates: "Templates",
-  projects: "Projects",
-  media: "Media Library",
-  exports: "Exports",
-  "agent-console": "Agent Console",
-  brandkit: "Brand Kit",
-  integrations: "Integrations",
+  "agent-console": "Agent console",
+  brandkit: "Brand kit",
   settings: "Settings",
-  account: "Account Settings",
+  account: "Settings",
   billing: "Billing",
-  membership: "Membership & Plan",
-  assets: "Assets",
+  membership: "Plan",
+};
+
+/** Pages that were removed; old links and bookmarks land on the page that replaced them. */
+const MOVED: Record<string, SectionId> = {
+  projects: "your-videos",
+  media: "your-videos",
+  assets: "your-videos",
+  exports: "your-videos",
+  integrations: "settings",
 };
 
 export function isSectionId(value: string | null | undefined): value is SectionId {
   return !!value && (SECTION_IDS as readonly string[]).includes(value);
+}
+
+/** The section a hash or ?section= names, following removed pages to their replacement. */
+export function sectionFor(value: string | null | undefined): SectionId | null {
+  if (isSectionId(value)) return value;
+  return (value && MOVED[value]) || null;
 }

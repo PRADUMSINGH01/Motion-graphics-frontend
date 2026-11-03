@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { FiChevronDown, FiSettings, FiCreditCard, FiKey, FiLogOut } from "react-icons/fi";
+import { FiChevronDown, FiSettings, FiCreditCard, FiFilm, FiLogOut } from "react-icons/fi";
 import type { User } from "../../context/AuthContext";
 
 interface AccountMenuProps {
@@ -34,8 +34,10 @@ export default function AccountMenu({ user, onOpenSettings, onLogout }: AccountM
   }, [open]);
 
   const tier = user.plan?.tier ?? "free";
-  const initial = user.name?.charAt(0).toUpperCase() || "P";
-  const displayName = user.name || "Pradum Singh";
+  const displayName = user.name || user.email || "Account";
+  const initial = displayName.charAt(0).toUpperCase();
+  // The person's own photo (Google's), never a stock one.
+  const avatar = user.raw?.profile?.avatarUrl && !user.raw.profile.avatarUrl.startsWith("/dashboard/") ? user.raw.profile.avatarUrl : null;
 
   return (
     <div ref={ref} className="relative">
@@ -48,9 +50,10 @@ export default function AccountMenu({ user, onOpenSettings, onLogout }: AccountM
         className="flex h-10 cursor-pointer items-center gap-2.5 rounded-full border border-transparent px-2 py-1 transition hover:bg-surf-eceae3 hover:border-surf-dedad0"
       >
         <span className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-surf-dedad0 bg-surf-111110 text-[13px] font-medium text-white shadow-2xs">
-          {!imgError ? (
+          {avatar && !imgError ? (
             <Image
-              src="/dashboard/user-avatar.jpg"
+              src={avatar}
+              unoptimized
               alt={displayName}
               width={32}
               height={32}
@@ -106,12 +109,12 @@ export default function AccountMenu({ user, onOpenSettings, onLogout }: AccountM
               <FiCreditCard size={15} className="text-ink-8c8980" /> Billing & plan
             </Link>
             <Link
-              href="#assets"
+              href="#your-videos"
               role="menuitem"
               onClick={() => setOpen(false)}
               className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-[13px] font-medium text-ink-2d2c28 transition hover:bg-surf-f7f6f0"
             >
-              <FiKey size={15} className="text-ink-8c8980" /> Brand Assets
+              <FiFilm size={15} className="text-ink-8c8980" /> Your videos
             </Link>
           </div>
 

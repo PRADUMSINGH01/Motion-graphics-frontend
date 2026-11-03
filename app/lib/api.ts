@@ -216,6 +216,10 @@ export interface PromptJob {
   theme?: string | null;
   /** Player URLs of the finished video(s). */
   play: string[];
+  /** A still from late in the finished video, for thumbnails. */
+  poster?: string | null;
+  /** The finished video this one changed, when it is an edit. */
+  editOf?: string | null;
   durationS?: number | null;
   error: string | null;
   /** Model tokens this video has used so far, every attempt included. */
@@ -469,6 +473,12 @@ export const api = {
         body: JSON.stringify(preferences),
       }),
 
+    /** Deletes the account and everything in it. Needs the password, or the email for an account without one. */
+    deleteAccount: (confirm: { password?: string; confirm?: string }) =>
+      request<{ success: boolean; message: string }>("/api/user/me", {
+        method: "DELETE",
+        body: JSON.stringify(confirm),
+      }),
   },
 
   // ==========================================================================
@@ -611,6 +621,8 @@ export const api = {
       editOf?: string;
       /** false: a silent video. */
       sound?: boolean;
+      /** The brand kit's guide (colours, fonts, feel) for a new video; ignored for edits. */
+      brand?: string;
     }) =>
       request<{ success: boolean; job: PromptJob }>("/api/prompt", {
         method: "POST",

@@ -14,6 +14,7 @@ import type { ChatSettings, Ratio } from "../lib/chatStore";
 import ModelSelectorModal, { findModel, useModels, type EffortLevel, type ModelOption } from "./ModelSelectorModal";
 import { useOpenRouterProviders } from "../lib/models";
 import { api } from "../../lib/api";
+import { loadBrandKit } from "../lib/brandKit";
 
 /**
  * The credits a film with these settings holds when it starts (the server's estimate for this model and
@@ -147,6 +148,8 @@ export default function StudioSettings({
   }, [sheetOpen, picking]);
 
   const cost = useEstimate(settings.provider, settings.model, settings.length) ?? creditCost(settings.length);
+  // Read on each render: the kit lives in this browser and changes on the Brand kit page.
+  const brandOn = Boolean(user?.id && typeof window !== "undefined" && loadBrandKit(user.id).enabled);
   const remaining = user?.usage?.credits?.remaining;
   const short = remaining != null && remaining < cost;
   const lockedTitle = maxSeconds ? `Your plan makes films up to ${maxSeconds} s. Upgrade in Billing for longer films.` : undefined;
@@ -315,6 +318,13 @@ export default function StudioSettings({
             className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow transition-all ${settings.sound !== false ? "left-6" : "left-1"}`}
           />
         </button>
+      </div>
+
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-[12px] font-medium text-[var(--db-muted)]">Brand kit</span>
+        <a href="#brandkit" className="text-[12px] font-medium text-[var(--db-ink)] underline underline-offset-2">
+          {brandOn ? "On" : "Off"}
+        </a>
       </div>
 
       <div className="border-t border-[var(--db-rule)] pt-4">
