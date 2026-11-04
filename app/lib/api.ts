@@ -220,6 +220,8 @@ export interface PromptJob {
   poster?: string | null;
   /** The finished video this one changed, when it is an edit. */
   editOf?: string | null;
+  /** What the edit changed, in plain words (says so when a size asked for didn't fit). */
+  editSummary?: string | null;
   durationS?: number | null;
   error: string | null;
   /** Model tokens this video has used so far, every attempt included. */

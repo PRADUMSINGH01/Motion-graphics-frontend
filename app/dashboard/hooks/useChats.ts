@@ -154,7 +154,7 @@ export function useChats(userId: string, onCredits?: () => void) {
                   stages: stagesFor("done"),
                   activity: undefined,
                   harnessJobId: job.harnessJobId ?? undefined,
-                  content: "Your video is ready.",
+                  content: job.editSummary ? `Done. ${job.editSummary}` : "Your video is ready.",
                   preview: { title, url },
                   notes: job.notes?.length ? job.notes : undefined,
                   credits: job.creditsSettled ? job.credits : undefined,
